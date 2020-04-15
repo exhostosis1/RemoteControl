@@ -14,7 +14,7 @@ namespace RemoteControlCore.Controllers
 {
     internal class ApiController : AbstractController, IObserver<DeviceChangedArgs>
     {
-        CoreAudioDevice _audioDevice;
+        IDevice _audioDevice;
         InputSimulator _inputsim;
 
         public ApiController()
@@ -163,7 +163,7 @@ namespace RemoteControlCore.Controllers
         {
             if(value.ChangedType == DeviceChangedType.DefaultChanged && value.Device.DeviceType == DeviceType.Playback)
             {
-                _audioDevice = (CoreAudioDevice)value.Device;
+                _audioDevice = value.Device;
             }
         }
 
