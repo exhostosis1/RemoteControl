@@ -12,16 +12,20 @@ using RemoteControlCore.Abstract;
 
 namespace RemoteControlCore.Controllers
 {
-    internal class ApiController : AbstractController
+    internal class ApiController : AbstractController, IObserver<DeviceChangedArgs>
     {
         CoreAudioDevice _audioDevice;
         InputSimulator _inputsim;
 
         public ApiController()
         {
-            _inputsim = new InputSimulator();
-            Task.Run(async () => _audioDevice = await new CoreAudioController().GetDefaultDeviceAsync(DeviceType.Playback, Role.Multimedia)).Wait();
+            _inputsim = new InputSimulator(); 
+            var audioController = new CoreAudioController();
+
+            Task.Run(async () => _audioDevice = await audioController.GetDefaultDeviceAsync(DeviceType.Playback, Role.Multimedia)).Wait();
+            audioController.AudioDeviceChanged.Subscribe(this);
         }
+        
         public override void ProcessRequest(IHttpRequestArgs args)
         {
             args.Response.StatusCode = 200;
@@ -153,6 +157,24 @@ namespace RemoteControlCore.Controllers
                     }
                     break;
             }
+        }
+
+        public void OnNext(DeviceChangedArgs value)
+        {
+            if(value.ChangedType == DeviceChangedType.DefaultChanged && value.Device.DeviceType == DeviceType.Playback)
+            {
+                _audioDevice = (CoreAudioDevice)value.Device;
+            }
+        }
+
+        public void OnError(Exception error)
+        {
+            throw error;
+        }
+
+        public void OnCompleted()
+        {
+            throw new NotImplementedException();
         }
     }
 }
