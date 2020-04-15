@@ -63,10 +63,6 @@
       <Project>{be1a0b5e-dcc8-41c3-a664-fefd5a5cceca}</Project>
       <Name>RemoteControlCore</Name>
     </ProjectReference>
-    <ProjectReference Include="..\WindowsFormsApp1\RemoteControlUI.csproj">
-      <Project>{9065823c-99f8-4d8e-8809-2438d414bafb}</Project>
-      <Name>RemoteControlUI</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

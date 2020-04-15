@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlUI", "WindowsFormsApp1\RemoteControlUI.csproj", "{9065823C-99F8-4D8E-8809-2438D414BAFB}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyFactory", "DependencyFactory\DependencyFactory.csproj", "{EE5B352D-05B6-48FE-8295-A5F57D4FCA6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlCore", "RemoteControlCore\RemoteControlCore.csproj", "{BE1A0B5E-DCC8-41C3-A664-FEFD5A5CCECA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlTests", "RemoteControlTests\RemoteControlTests.csproj", "{E57038C0-8A66-4DB5-AB09-248138782777}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlUI", "RemoteControlUI\RemoteControlUI.csproj", "{9065823C-99F8-4D8E-8809-2438D414BAFB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Release|Any CPU.Build.0 = Release|Any CPU
 		{EE5B352D-05B6-48FE-8295-A5F57D4FCA6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{EE5B352D-05B6-48FE-8295-A5F57D4FCA6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EE5B352D-05B6-48FE-8295-A5F57D4FCA6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +29,10 @@ Global
 		{E57038C0-8A66-4DB5-AB09-248138782777}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E57038C0-8A66-4DB5-AB09-248138782777}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E57038C0-8A66-4DB5-AB09-248138782777}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9065823C-99F8-4D8E-8809-2438D414BAFB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
