@@ -5,8 +5,8 @@
         Громкость
     </title>
     <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1"
-        charset="utf8" />
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1"
+          charset="utf8" />
 
     <script type="text/javascript">
         let Events = {
@@ -119,9 +119,9 @@
             }
 
             volumeBar.innerHTML = `
-        <div class="${COLOREDCLASS}"></div>
-        <div class="${HANDLECLASS}"></div>
-    `;
+            <div class="${COLOREDCLASS}"></div>
+            <div class="${HANDLECLASS}"></div>
+        `;
 
             volumeBarHandle = volumeBar.querySelector(`.${HANDLECLASS}`);
             volumeBarColored = volumeBar.querySelector(`.${COLOREDCLASS}`);
@@ -160,9 +160,9 @@
         function createKeys(buttons) {
 
             let [buttonBack, buttonPause, buttonForth] = new DOMParser().parseFromString(`
-        <button>&#60;&#60;</button>
-        <button>&#10074;&#10074;</button>
-        <button>&#62;&#62;</button>`, 'text/html').body.getElementsByTagName("button");
+            <button>&#60;&#60;</button>
+            <button>&#10074;&#10074;</button>
+            <button>&#62;&#62;</button>`, 'text/html').body.getElementsByTagName("button");
 
             buttons.append(buttonBack, buttonPause, buttonForth);
 
@@ -249,25 +249,25 @@
             margin-bottom: 10px;
         }
 
-        #volume-bar .volume-colored {
-            height: 60px;
-            position: absolute;
-            background: #2ecc71;
-            border: none;
-            border-radius: 15px;
-            outline: none;
-        }
+            #volume-bar .volume-colored {
+                height: 60px;
+                position: absolute;
+                background: #2ecc71;
+                border: none;
+                border-radius: 15px;
+                outline: none;
+            }
 
-        #volume-bar .volume-handle {
-            width: 70px;
-            height: 70px;
-            border-radius: 20px;
-            background: #FFF;
-            position: absolute;
-            margin-top: -5px;
-            cursor: pointer;
-            outline: none;
-        }
+            #volume-bar .volume-handle {
+                width: 70px;
+                height: 70px;
+                border-radius: 20px;
+                background: #FFF;
+                position: absolute;
+                margin-top: -5px;
+                cursor: pointer;
+                outline: none;
+            }
 
         button {
             cursor: pointer;
@@ -316,10 +316,8 @@
 
 <body>
     <div id="outer-container">
-        <div id="inner-container">
-            <div id="slider"></div>
-            <div id="buttons"></div>
-        </div>
+        <div id="slider"></div>
+        <div id="buttons"></div>
     </div>
 </body>
 
