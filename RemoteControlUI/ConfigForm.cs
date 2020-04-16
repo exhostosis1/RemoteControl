@@ -5,11 +5,11 @@ using System.Windows.Forms;
 
 namespace RemoteControlUI
 {
-    public partial class Form1 : Form
+    public partial class ConfigForm : Form
     {
         Core program = new Core();
 
-        public Form1()
+        public ConfigForm()
         {
             InitializeComponent();
 
