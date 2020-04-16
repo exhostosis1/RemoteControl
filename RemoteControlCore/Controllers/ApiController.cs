@@ -15,7 +15,7 @@ namespace RemoteControlCore.Controllers
     internal class ApiController : AbstractController, IObserver<DeviceChangedArgs>
     {
         IDevice _audioDevice;
-        InputSimulator _inputsim;
+        readonly InputSimulator _inputsim;
 
         public ApiController()
         {
@@ -37,17 +37,17 @@ namespace RemoteControlCore.Controllers
             switch (mode)
             {
                 case "audio":
-                    response = processAudio(value);
+                    response = ProcessAudio(value);
                     break;
                 case "mouse":
                 case "wheel":
-                    processMouse(value);
+                    ProcessMouse(value);
                     break;
                 case "keyboard":
-                    processKeyboard(value);
+                    ProcessKeyboard(value);
                     break;
                 case "text":
-                    if (tryGetString(value, args.Request.ContentEncoding, out var str))
+                    if (TryGetString(value, args.Request.ContentEncoding, out var str))
                     {
                         _inputsim.Keyboard.TextEntry(str);
                         _inputsim.Keyboard.KeyPress(VirtualKeyCode.Enter);
@@ -66,7 +66,7 @@ namespace RemoteControlCore.Controllers
             }
         }
 
-        private bool tryGetString(string input, Encoding encoding, out string output)
+        private bool TryGetString(string input, Encoding encoding, out string output)
         {
             output = "";
             if (string.IsNullOrWhiteSpace(input)) return false;
@@ -89,7 +89,7 @@ namespace RemoteControlCore.Controllers
             return true;
         }
 
-        private string processAudio(string value)
+        private string ProcessAudio(string value)
         {
             if (Int32.TryParse(value, out var result))
             {
@@ -102,7 +102,7 @@ namespace RemoteControlCore.Controllers
 
             return _audioDevice.Volume.ToString();
         }
-        private void processKeyboard(string value)
+        private void ProcessKeyboard(string value)
         {
             switch (value)
             {
@@ -120,7 +120,7 @@ namespace RemoteControlCore.Controllers
             }
         }
 
-        private void processMouse(string value)
+        private void ProcessMouse(string value)
         {
             switch (value)
             {

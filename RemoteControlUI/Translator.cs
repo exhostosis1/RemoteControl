@@ -8,9 +8,9 @@ namespace RemoteControlTranslator
         const string path = "www\\";
         const string resultfilename = "index-simple.html";
 
-        static string[] jsfiles = Directory.GetFiles(path, "*.js");
-        static string[] cssfiles = Directory.GetFiles(path, "*.css");
-        static string[] htmlfiles = Directory.GetFiles(path, "*.html");
+        static readonly string[] jsfiles = Directory.GetFiles(path, "*.js");
+        static readonly string[] cssfiles = Directory.GetFiles(path, "*.css");
+        static readonly string[] htmlfiles = Directory.GetFiles(path, "*.html");
 
         public static void Translate()
         {

@@ -22,7 +22,7 @@ namespace RemoteControlUI
         public static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
         public static int DefaultPort => 80;
 
-        private static Dictionary<string, string> config = new Dictionary<string, string>();
+        private static readonly Dictionary<string, string> config = new Dictionary<string, string>();
 
         static AppConfig()
         {
