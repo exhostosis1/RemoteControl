@@ -49,7 +49,7 @@ function toNumeric(value) {
 function checkSendRequest(value) {
     let newNumeric = toNumeric(setVolumeBar(value));
 
-    if (newNumeric != volumeNumericValue) {
+    if (newNumeric !== volumeNumericValue) {
         volumeNumericValue = newNumeric;
 
         changeEvent.value = newNumeric;
