@@ -1,29 +1,23 @@
-﻿using AudioSwitcher.AudioApi;
-using AudioSwitcher.AudioApi.CoreAudio;
+﻿using DependencyFactory;
+using RemoteControlCore.Abstract;
+using RemoteControlCore.Enums;
+using RemoteControlCore.Interfaces;
 using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using WindowsInputLib;
-using WindowsInputLib.Native;
-using RemoteControlCore.Interfaces;
-using RemoteControlCore.Utility;
-using RemoteControlCore.Abstract;
 
 namespace RemoteControlCore.Controllers
 {
-    internal class ApiController : AbstractController, IObserver<DeviceChangedArgs>
+    internal class ApiController : AbstractController
     {
-        IDevice _audioDevice;
-        readonly InputSimulator _inputsim;
+        readonly IAudioService _audioService;
+        readonly IInputService _inputService;
 
         public ApiController()
         {
-            _inputsim = new InputSimulator(); 
-            var audioController = new CoreAudioController();
-
-            Task.Run(async () => _audioDevice = await audioController.GetDefaultDeviceAsync(DeviceType.Playback, Role.Multimedia)).Wait();
-            audioController.AudioDeviceChanged.Subscribe(this);
+            _inputService = Factory.GetInstance<IInputService>();
+            _audioService = Factory.GetInstance<IAudioService>();
         }
         
         public override void ProcessRequest(IHttpRequestArgs args)
@@ -49,8 +43,7 @@ namespace RemoteControlCore.Controllers
                 case "text":
                     if (TryGetString(value, args.Request.ContentEncoding, out var str))
                     {
-                        _inputsim.Keyboard.TextEntry(str);
-                        _inputsim.Keyboard.KeyPress(VirtualKeyCode.Enter);
+                        ProcessText(str);
                     }
                     break;
                 default:
@@ -96,28 +89,34 @@ namespace RemoteControlCore.Controllers
                 result = result > 100 ? 100 : result;
                 result = result < 0 ? 0 : result;
 
-                _audioDevice.Volume = result;
-                _audioDevice.Mute(result == 0);
+                _audioService.SetVolume(result);
+                _audioService.Mute(result == 0);
             }
 
-            return _audioDevice.Volume.ToString();
+            return _audioService.GetVolume();
         }
         private void ProcessKeyboard(string value)
         {
             switch (value)
             {
                 case "back":
-                    _inputsim.Keyboard.KeyPress(VirtualKeyCode.Left);
+                    _inputService.KeyPress(KeysEnum.Back);
                     break;
                 case "forth":
-                    _inputsim.Keyboard.KeyPress(VirtualKeyCode.Right);
+                    _inputService.KeyPress(KeysEnum.Forth);
                     break;
                 case "pause":
-                    _inputsim.Keyboard.KeyPress(VirtualKeyCode.MediaPlayPause);
+                    _inputService.KeyPress(KeysEnum.Pause);
                     break;
                 default:
                     break;
             }
+        }
+
+        private void ProcessText(string text)
+        {
+            _inputService.TextInput(text);
+            _inputService.KeyPress(KeysEnum.Enter);
         }
 
         private void ProcessMouse(string value)
@@ -125,56 +124,39 @@ namespace RemoteControlCore.Controllers
             switch (value)
             {
                 case "1":
-                    _inputsim.Mouse.MouseButtonClick(MouseButton.LeftButton);
+                    _inputService.MouseKeyPress();
                     break;
                 case "2":
-                    _inputsim.Mouse.MouseButtonClick(MouseButton.RightButton);
+                    _inputService.MouseKeyPress(MouseKeysEnum.Right);
                     break;
                 case "3":
-                    _inputsim.Mouse.MouseButtonClick(MouseButton.MiddleButton);
+                    _inputService.MouseKeyPress(MouseKeysEnum.Middle);
                     break;
                 case "up":
-                    _inputsim.Mouse.VerticalScroll(1);
+                    _inputService.MouseWheel(true);
                     break;
                 case "down":
-                    _inputsim.Mouse.VerticalScroll(-1);
+                    _inputService.MouseWheel(false);
                     break;
                 case "dragstart":
-                    _inputsim.Mouse.MouseButtonDown(MouseButton.LeftButton);
+                    _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
                     Task.Run(async () =>
                     {
                         await Task.Delay(5_000);
-                        _inputsim.Mouse.MouseButtonUp(MouseButton.LeftButton);
+                        _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     });
                     break;
                 case "dragstop":
-                    _inputsim.Mouse.MouseButtonUp(MouseButton.LeftButton);
+                    _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
-                    if (Point.TryConvert(value.Replace("\"", ""), out var diff))
+                    var point = Factory.GetInstance<ICoordinates>();
+                    if (point.TrySetCoords(value.Replace("\"", "")))
                     {
-                        _inputsim.Mouse.MoveMouseBy(diff.X, diff.Y);
+                        _inputService.MouseMove(point);
                     }
                     break;
             }
-        }
-
-        public void OnNext(DeviceChangedArgs value)
-        {
-            if(value.ChangedType == DeviceChangedType.DefaultChanged && value.Device.DeviceType == DeviceType.Playback)
-            {
-                _audioDevice = value.Device;
-            }
-        }
-
-        public void OnError(Exception error)
-        {
-            throw error;
-        }
-
-        public void OnCompleted()
-        {
-            throw new NotImplementedException();
         }
     }
 }

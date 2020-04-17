@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using RemoteControlCore.Interfaces;
 
 namespace RemoteControlCore.Utility
 {
-    internal class Point
+    internal class Point : ICoordinates
     {
         public int X { get; set; }
         public int Y { get; set; }
@@ -14,10 +15,10 @@ namespace RemoteControlCore.Utility
             this.Y = y;
         }
 
-        public static bool TryConvert(string input, out Point result)
-        {
-            result = null;
+        public Point() { }
 
+        public bool TrySetCoords(string input)
+        {
             var reg = new Regex("(?<=[xyXY]:[ ]*)[-0-9]+(?=[,} ])");
             int x;
             int y;
@@ -33,7 +34,8 @@ namespace RemoteControlCore.Utility
                 return false;
             }
 
-            result = new Point(x, y);
+            this.X = x;
+            this.Y = y;
 
             return true;
         }

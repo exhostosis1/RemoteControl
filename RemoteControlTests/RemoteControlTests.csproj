@@ -44,6 +44,7 @@
   <ItemGroup>
     <Compile Include="CoreTests.cs" />
     <Compile Include="DependencyFactoryTests.cs" />
+    <Compile Include="HtmlParserTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -58,6 +59,10 @@
     <ProjectReference Include="..\DependencyFactory\DependencyFactory.csproj">
       <Project>{ee5b352d-05b6-48fe-8295-a5f57d4fca6c}</Project>
       <Name>DependencyFactory</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\HtmlParser\HtmlParser.csproj">
+      <Project>{3ed46b96-ffc3-464f-ae9e-ddfca4ed2b26}</Project>
+      <Name>HtmlParser</Name>
     </ProjectReference>
     <ProjectReference Include="..\RemoteControlCore\RemoteControlCore.csproj">
       <Project>{be1a0b5e-dcc8-41c3-a664-fefd5a5cceca}</Project>
