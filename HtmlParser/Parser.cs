@@ -1,83 +1,313 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace HtmlParser
 {
     public class Parser
     {
         private readonly string source;
-        private int index = 0;
 
-        public bool EoF = false;
+        const char doublePrtChar = '"';
+        const char singlePrtChar = '\'';
+        const char tagStartChar = '<';
+        const char tagEndChar = '>';
+        const char equalityChar = '=';
+        const char forwardSlashChar = '/';
+        const char backSlashChar = '\\';
+
+        private int _cursor = 0;
+
+        private bool EoF = false;
 
         public Parser(string input)
         {
-            source = input;
+            source = input ?? throw new ArgumentException("input");
         }
+
+        private enum Mode
+        { 
+            TagName,
+            AttributeName,
+            AttributeValue,
+            InnerHtml,
+            Init
+        }
+
+        private readonly Dictionary<string, int> depth = new Dictionary<string, int>();
 
         public void Reset()
         {
-            index = 0;
+            _cursor = 0;
+            EoF = false;
         }
         
-        public Node GetNextNode()
+        private Node GetNode()
         {
-            var start = source.IndexOf('<', index);
+            var sb = new StringBuilder();
+            var mode = Mode.Init;
 
-            if (start == -1)
+            char currentChar;
+            char prevChar;
+
+            Node currentNode = null;
+
+            var attributeName = "";
+
+            var str = false;
+            char strChar = default;
+
+            void SetStr()
             {
-                return null;
+                if (!str)
+                {
+                    str = true;
+                    strChar = currentChar;
+                }
+                else if (currentChar == strChar && prevChar != backSlashChar)
+                {
+                    str = false;
+                }
+                else
+                {
+                    sb.Append(currentChar);
+                }
             }
 
-            var end = source.IndexOf('>', start);
+            void AddOrIncrease(string tagname)
+            {
+                if (depth.ContainsKey(tagname))
+                    depth[tagname]++;
+                else
+                    depth.Add(tagname, 1);
+            }
 
-            index = end;
+            bool CheckCloseTag(string tagname, int index)
+            {
+                var tag = source.Substring(index, source.IndexOf(tagEndChar, index) - index + 1);
+                var builder = new StringBuilder();
 
-            if (source[start + 1] == '/') return GetNextNode();
+                var closeTag = false;
 
-            var tagString = source.Substring(start, end - start + 1);
+                for (int i = 1; i < tag.Length; i++)
+                {
+                    if (!Char.IsWhiteSpace(tag[i]))
+                    {
+                        if (tag[i] == forwardSlashChar)
+                        {
+                            closeTag = true;
+                            continue;
+                        }
+                        if (Char.IsLetterOrDigit(tag[i]))
+                            builder.Append(tag[i]);
+                    }
+                    else
+                    {
+                        if (builder.Length == 0)
+                            continue;
+                        else
+                            break;
+                    }
+                }
 
-            var tagEndIndex = tagString.IndexOf(' ');
-            if (tagEndIndex == -1) tagEndIndex = tagString.IndexOf('>');
+                var newName = builder.ToString();
 
-            var tagName = tagString.Substring(1, tagEndIndex - 1).Trim();
-            var attributes = ParseAttributes(tagString.Substring(tagEndIndex));
+                if (closeTag)
+                    depth[newName]--;
+                else
+                    AddOrIncrease(newName);
 
-            var blockEnd = source.IndexOf($"</{tagName}>");
+                return depth[tagname] == 0;
+            }
 
-            var innerHtml = blockEnd != -1 ? source.Substring(end + 1, blockEnd - end - 1) : string.Empty;
+            for (int cursor = _cursor; cursor < source.Length; cursor++)
+            {
+                if (cursor == source.Length - 1)
+                    EoF = true;
 
-            if (tagName.ToLower() == "script" || tagName.ToLower() == "style")
-                index = blockEnd + 1;
+                currentChar = source[cursor];
+                prevChar = cursor > 0 ? source[cursor - 1] : default;
 
-            if (source.IndexOf('<', index) == -1) EoF = true;
+                switch (mode)
+                {
+                    case Mode.Init:
+                        if (currentChar == tagStartChar)
+                        {
+                            mode = Mode.TagName;
+                        }
+                        continue;
 
-            return new Node(tagName, innerHtml, attributes);
+                    case Mode.TagName:
+                        if (currentChar == tagEndChar)
+                        {
+                            currentNode = new Node
+                            {
+                                Tag = sb.ToString()
+                            };
+                            AddOrIncrease(currentNode.Tag);
+                            sb.Clear();
+                            mode = Mode.InnerHtml;
+                            _cursor = cursor + 1;
+                        }
+                        else if(currentChar == forwardSlashChar)
+                        {
+                            if(sb.Length > 0)
+                            {
+                                currentNode = new Node
+                                {
+                                    Tag = sb.ToString()
+                                };
+                                _cursor = cursor + 1;
+                                return currentNode;
+                            }
+                            else
+                            {
+                                mode = Mode.Init;
+                                continue;
+                            }
+                        }
+                        else if (Char.IsWhiteSpace(currentChar))
+                        {
+                            if (sb.Length > 0)
+                            {
+                                currentNode = new Node
+                                {
+                                    Tag = sb.ToString()
+                                };
+                                AddOrIncrease(currentNode.Tag);
+                                sb.Clear();
+                                mode = Mode.AttributeName;
+                            }
+                            else
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            sb.Append(currentChar);
+                        }
+                        continue;
+
+                    case Mode.AttributeName:
+                        if (char.IsWhiteSpace(currentChar))
+                            continue;
+                        if(currentChar == tagEndChar || currentChar == forwardSlashChar)
+                        {
+                            if(sb.Length > 0)
+                            {
+                                currentNode.Attributes.Add(new Attribute(sb.ToString(), ""));
+                                sb.Clear();                                
+                            }
+
+                            if (currentChar == tagEndChar)
+                            {
+                                mode = Mode.InnerHtml;
+                                _cursor = cursor + 1;
+                                continue;
+                            }
+                            else
+                            {
+                                _cursor = cursor + 1;
+                                return currentNode;
+                            }
+                        }
+                        else if (currentChar == equalityChar)
+                        {
+                            attributeName = sb.ToString();
+                            sb.Clear();
+                            mode = Mode.AttributeValue;
+                            continue;
+                        }
+                        else
+                            sb.Append(currentChar);
+                        continue;
+
+                    case Mode.AttributeValue:
+                        if (!str && (char.IsWhiteSpace(currentChar) || currentChar == tagEndChar))
+                        {
+                            if (sb.Length > 0)
+                            {
+                                currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
+                                sb.Clear();
+                                mode = Mode.AttributeName;
+                            }
+                            if (currentChar == tagEndChar)
+                            {
+                                mode = Mode.InnerHtml;
+                                _cursor = cursor + 1;
+
+                                if (currentNode.Tag.ToLower() == "link" || currentNode.Tag.ToLower() == "meta")
+                                    return currentNode;
+                            }
+                        }
+                        else if(!str && currentChar == forwardSlashChar)
+                        {
+                            _cursor = cursor + 1;
+                            return currentNode;
+                        }
+                        else if (currentChar == singlePrtChar || currentChar == doublePrtChar)
+                        {
+                            SetStr();
+                        }
+                        else
+                        {
+                            sb.Append(currentChar);
+                        }
+                        continue;
+
+                    case Mode.InnerHtml:
+                        if (currentChar == singlePrtChar || currentChar == doublePrtChar)
+                        {
+                            SetStr();
+                        } 
+                        else if(!str && currentChar == tagStartChar)
+                        {
+                            if(CheckCloseTag(currentNode.Tag, cursor))
+                            {
+                                currentNode.InnerHtml = sb.ToString();
+                                sb.Clear();
+                                var s = currentNode.Tag.ToLower();
+                                if(s == "script" || s == "style")
+                                {
+                                    _cursor = cursor + 1;
+                                }
+                                return currentNode;
+                            }
+                            else
+                            {
+                                sb.Append(currentChar);
+                            }
+                        } 
+                        else
+                        {
+                            sb.Append(currentChar);
+                        }
+                        continue;
+                }
+            }
+
+            EoF = true;
+
+            return null;
         }
 
-        private ICollection<Attribute> ParseAttributes(string input)
+        public IReadOnlyCollection<Node> GetTree()
         {
-            var result = new List<Attribute>();
+            var result = new List<Node>();
 
-            var globalIndex = 0;
-            var spaceIndex = input.IndexOf(' ');
-
-            while (true)
+            while(!EoF)
             {
-                var equalIndex = input.IndexOf('=', globalIndex);
-
-                if (equalIndex == -1) break;
-
-                var name = input.Substring(spaceIndex, equalIndex - spaceIndex).Trim();
-
-                var valueStart = input.IndexOf('"', equalIndex);
-                var valueEnd = input.IndexOf('"', valueStart + 1);
-
-                globalIndex = valueEnd;
-                spaceIndex = input.IndexOf(' ', valueEnd);
-
-                var value = input.Substring(valueStart, valueEnd - valueStart + 1).Trim();
-
-                if (name != string.Empty) result.Add(new Attribute(name, value));
+                try
+                {
+                    var node = GetNode();
+                    if(node != null)
+                        result.Add(node);
+                }
+                catch
+                {
+                    throw new FormatException($"Wrong syntax at {_cursor}");
+                }
             }
 
             return result;
@@ -86,19 +316,59 @@ namespace HtmlParser
 
     public class Node
     {
-        public string Tag { get; }
-        public string InnerHtml { get; }
-        public IReadOnlyCollection<Attribute> Attributes { get; }
+        public string Tag { get; set; }
+        public string InnerHtml { get; set; }
 
-        public Node Parent { get; }
+        public int StartIndex { get; set; }
 
-        public IReadOnlyCollection<Node> Children { get; }
+        public int EndIndex { get; set; }
+        public ICollection<Attribute> Attributes { get; set; } = new List<Attribute>();
+
+        public Node Parent { get; private set; }
+
+        public IReadOnlyCollection<Node> Children => _children;
+
+        private readonly List<Node> _children = new List<Node>();
 
         public Node(string tag, string innerHtml, ICollection<Attribute> attributes)
         {
             Tag = tag;
             InnerHtml = innerHtml;
-            Attributes = (IReadOnlyCollection<Attribute>)attributes;
+            Attributes = attributes;
+        }
+
+        public Node(string tag)
+        {
+            Tag = tag;
+        }
+
+        public Node()
+        {
+
+        }
+
+        public void SetParent(Node parent)
+        {
+            this.Parent = parent;
+            parent._children.Add(this);
+        }
+
+        public void AddChild(Node child)
+        {
+            this._children.Add(child);
+            child.Parent = this;
+        }
+
+        public void RemoveParent()
+        {
+            this.Parent._children.Remove(this);
+            this.Parent = null;
+        }
+
+        public void RemoveChild(Node child)
+        {
+            this._children.Remove(child);
+            child.Parent = null;
         }
 
         public override string ToString()

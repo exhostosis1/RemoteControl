@@ -1,10 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HtmlParser;
+﻿using HtmlParser;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace RemoteControlTests
 {
@@ -365,16 +360,10 @@ display: block;
         {
             var parser = new Parser(input);
 
-            var a1 = parser.GetNextNode();
-            var a2 = parser.GetNextNode();
-            var a3 = parser.GetNextNode(); 
-            var a4 = parser.GetNextNode();
-            var a5 = parser.GetNextNode();
-            var a6 = parser.GetNextNode();
-            var a7 = parser.GetNextNode();
-            var a8 = parser.GetNextNode();
+            var a1 = parser.GetTree();
 
-            var a = 1;
+            Assert.IsNotNull(a1);
+            Assert.AreEqual(a1.Count, 11);
         }
     }
 }

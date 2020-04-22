@@ -13,11 +13,13 @@ namespace RemoteControlCore.Controllers
     {
         readonly IAudioService _audioService;
         readonly IInputService _inputService;
+        readonly ICoordinates _point;
 
         public ApiController()
         {
             _inputService = Factory.GetInstance<IInputService>();
             _audioService = Factory.GetInstance<IAudioService>();
+            _point = Factory.GetInstance<ICoordinates>();
         }
         
         public override void ProcessRequest(IHttpRequestArgs args)
@@ -150,10 +152,9 @@ namespace RemoteControlCore.Controllers
                     _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
-                    var point = Factory.GetInstance<ICoordinates>();
-                    if (point.TrySetCoords(value.Replace("\"", "")))
+                    if (_point.TrySetCoords(value.Replace("\"", "")))
                     {
-                        _inputService.MouseMove(point);
+                        _inputService.MouseMove(_point);
                     }
                     break;
             }

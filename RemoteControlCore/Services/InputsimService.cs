@@ -83,11 +83,6 @@ namespace RemoteControlCore.Services
                     break;
                 case KeyPressMode.Down:
                     _inputSim.Mouse.MouseButtonDown(inputKey);
-                    Task.Run(async () =>
-                    {
-                        await Task.Delay(5000);
-                        _inputSim.Mouse.MouseButtonUp(inputKey);
-                    });
                     break;
                 case KeyPressMode.Up:
                     _inputSim.Mouse.MouseButtonUp(inputKey);

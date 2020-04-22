@@ -30,12 +30,9 @@ namespace RemoteControlTranslator
         {
             var result = "";
 
-            var parser = new Parser(File.ReadAllText(htmlfiles.Single(x => x.Contains("index.html"))));
+            var parser = new Parser(File.ReadAllText(htmlfiles.Single(x => x.Contains(filename))));
 
-            while(!parser.EoF)
-            {
-                var node = parser.GetNextNode();
-            }
+            var tree = parser.GetTree();
 
             return result;
         }
