@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 
 using static HtmlParser.Constants;
@@ -15,6 +14,10 @@ namespace HtmlParser
             source = input ?? throw new ArgumentException("input");
         }
 
+        public Tree GetTree() => new Tree(GetNode());
+
+        private Node GetNode(int startIndex = 0) => GetNode(startIndex, out _);
+        
         private Node GetNode(int startIndex, out int currentIndex)
         {
             currentIndex = startIndex;
@@ -54,6 +57,12 @@ namespace HtmlParser
             bool CheckCloseTag(string tagname, int index)
             {
                 var tag = source.Substring(index, source.IndexOf(tagEndChar, index) - index + 1);
+
+                 if(!tag.Contains("/"))
+                {
+                    return false;
+                }
+
                 var builder = new StringBuilder();
 
                 var closeTag = false;
@@ -78,7 +87,7 @@ namespace HtmlParser
                             break;
                     }
                 }
-
+                
                 return closeTag && tagname == builder.ToString();
             }
 
@@ -113,10 +122,9 @@ namespace HtmlParser
                         {
                             if (sb.Length > 0)
                             {
-                                currentNode = new Node
-                                {
-                                    Tag = sb.ToString()
-                                };
+                                currentNode = new Node(sb.ToString());
+
+                                currentIndex = source.IndexOf(tagEndChar, cursor);
 
                                 return currentNode;
                             }
@@ -167,6 +175,8 @@ namespace HtmlParser
                             }
                             else
                             {
+                                currentIndex = source.IndexOf(tagEndChar, cursor);
+
                                 return currentNode;
                             }
                         }
@@ -200,6 +210,8 @@ namespace HtmlParser
                         }
                         else if (!str && currentChar == forwardSlashChar)
                         {
+                            currentIndex = source.IndexOf(tagEndChar, cursor);
+
                             return currentNode;
                         }
                         else if (currentChar == singlePrtChar || currentChar == doublePrtChar)
@@ -224,19 +236,18 @@ namespace HtmlParser
                                 currentNode.InnerHtml = sb.ToString();
                                 sb.Clear();
 
+                                currentIndex = source.IndexOf(tagEndChar, cursor);
+
                                 return currentNode;
                             }
                             else if (currentNode.Tag.ToLower() != "script" && currentNode.Tag.ToLower() != "style")
                             {
                                 var child = GetNode(cursor, out var newIndex);
-                                if (child != null)
-                                {
-                                    currentNode.AddChild(child);
-                                    sb.Append(childPlaceholder + childCount);
-                                    childCount++;
-                                }
+                                currentNode.AddChild(child);
+                                sb.Append($"{newLine}{childPlaceholder}{childCount}{newLine}");
+                                childCount++;
 
-                                cursor = newIndex + 1;
+                                cursor = newIndex;
                             }
                             else
                             {
@@ -251,17 +262,7 @@ namespace HtmlParser
                 }
             }
 
-            return null;
-        }
-
-        private Node GetNode(int startIndex = 0)
-        {
-            return GetNode(startIndex, out _);
-        }
-
-        public Tree GetTree()
-        {
-            return new Tree(GetNode());
+            throw new Exception("Cannot parse tree");
         }
     }
 }

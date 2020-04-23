@@ -1,15 +1,18 @@
-﻿namespace HtmlParser
+﻿using System.Collections.Generic;
+
+namespace HtmlParser
 {
     public class Tree
     {
         public Node Root { get; set; }
 
-        public int Count
+        public int Count => CountChildren(Root);
+
+        public IEnumerable<Node> FindNodesByTag(string Tag) => FindByTag(Tag.ToLower(), Root);
+
+        public Tree(Node node)
         {
-            get
-            {
-                return CountChildren(Root);
-            }
+            Root = node;
         }
 
         private int CountChildren(Node node)
@@ -27,9 +30,13 @@
             return result;
         }
 
-        public Tree(Node node)
+        private IEnumerable<Node> FindByTag(string tag, Node node)
         {
-            Root = node;
+            if (node.Tag == tag) yield return node;
+
+            foreach (var child in node.Children)
+                foreach (var childNode in FindByTag(tag, child))
+                    yield return childNode;
         }
     }
 }

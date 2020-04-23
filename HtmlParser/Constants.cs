@@ -11,6 +11,7 @@ namespace HtmlParser
         public const char equalityChar = '=';
         public const char forwardSlashChar = '/';
         public const char backSlashChar = '\\';
+        public const string newLine = "\r\n";
 
         public static readonly string childPlaceholder = new Random().Next(1000).ToString() + "_CHILD_";
 

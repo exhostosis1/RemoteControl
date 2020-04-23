@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using RemoteControlTranslator;
 
 namespace RemoteControlUI
 {
@@ -13,6 +14,9 @@ namespace RemoteControlUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            
+            Translator.Translate();
+            
             Application.Run(new ConfigForm());
         }
     }

@@ -14,7 +14,7 @@ namespace RemoteControlTranslator
         static readonly string[] cssfiles = Directory.GetFiles(path, "*.css");
         static readonly string[] htmlfiles = Directory.GetFiles(path, "*.html");
 
-        const string newLine = "\n";
+        const string newLine = "\r\n";
 
         public static void Translate()
         {

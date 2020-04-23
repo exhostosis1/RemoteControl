@@ -2,8 +2,21 @@
 {
     public class Attribute
     {
-        public string Name { get; set; }
+        private string _name;
+        public string Name {
+            get
+            {
+                return _name;
+            }
+            set 
+            {
+                _name = value?.ToLower() ?? "";
+            } 
+        }
+
         public string Value { get; set; }
+
+        public Attribute(): this("", "") { }
 
         public Attribute(string name, string value)
         {
@@ -11,14 +24,6 @@
             Value = value;
         }
 
-        public Attribute()
-        {
-
-        }
-
-        public override string ToString()
-        {
-            return $"{Name} = \"{Value}\"";
-        }
+        public override string ToString() => $"{Name}{(!string.IsNullOrEmpty(Value) ? $" = \"{Value}\"" : "")}";
     }
 }
