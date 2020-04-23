@@ -348,7 +348,7 @@ display: block;
 <body>
     <div id = ""outer-container"" >
         < div id=""slider""></div>
-        <div id = ""buttons"" ></div>
+        <div id = ""buttons"" >asdf</div>
     </div>
 </body>
 
