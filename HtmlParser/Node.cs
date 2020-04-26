@@ -24,28 +24,17 @@ namespace HtmlParser
         {
             get
             {
-                var result = _innerHtml.Split(newLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-                var childCount = 0;
-
-                for (int i = 0; i < result.Length; i++)
-                {
-                    if(result[i] == childPlaceholder + childCount)
-                    {
-                        result[i] = _children[childCount].ToString();
-                        childCount++;
-                    }
-                }
-
-                return String.Join(newLine, result);
-            }
-
-            set
-            {
-                _innerHtml = value ?? "";
+                return String.Join(newLine, _innerHtml);
             }
         }
 
-        private string _innerHtml;
+        private List<string> _innerHtml = new List<string>();
+
+        public void AddInnerNode(string node)
+        {
+            if(!string.IsNullOrEmpty(node))
+                _innerHtml.Add(node);
+        }
 
         public ICollection<Attribute> Attributes { get; set; } = new List<Attribute>();
 
@@ -55,14 +44,14 @@ namespace HtmlParser
 
         private readonly List<Node> _children = new List<Node>();
 
-        public Node() : this(null) { }
+        public string Before { get; set; } = "";
+        public string After { get; set; } = "";
 
-        public Node(string tag) : this(tag, null) { }
+        public Node() : this("") { }
 
-        public Node(string tag, string innerHtml)
+        public Node(string tag)
         {
             Tag = tag;
-            InnerHtml = innerHtml;
         }
 
         public void SetParent(Node parent)
@@ -89,6 +78,16 @@ namespace HtmlParser
             child.Parent = null;
         }
 
-        public override string ToString() => $"<{Tag} {String.Join(" ", Attributes)}>{InnerHtml ?? ""}</{Tag}>";
+        public override string ToString()
+        {
+            var bf = string.IsNullOrEmpty(Before) ? "" : Before + newLine;
+            var af = string.IsNullOrEmpty(After) ? "" : newLine + After;
+            var inn = string.IsNullOrEmpty(InnerHtml) ? "" : newLine + InnerHtml + newLine;
+            var att = Attributes.Count > 0 ? " " + string.Join(" ", Attributes) : "";
+            var ot = string.IsNullOrEmpty(Tag) ? "" : $"<{Tag}{att}>";
+            var ct = string.IsNullOrEmpty(Tag) ? "" : $"</{Tag}>";
+
+            return $"{bf}{ot}{inn}{ct}{af}";
+        }
     }
 }

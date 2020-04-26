@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
 
 using static HtmlParser.Constants;
 
@@ -8,13 +9,40 @@ namespace HtmlParser
     public class Parser
     {
         private readonly string source;
+        private bool next = false;
 
         public Parser(string input)
         {
-            source = input ?? throw new ArgumentException("input");
+            if (string.IsNullOrWhiteSpace(input))
+                throw new ArgumentException("input");
+
+            source = input;
         }
 
-        public Tree GetTree() => new Tree(GetNode());
+        public Tree GetTree()
+        {
+            var nodes = new List<Node>();
+            var index = 0;
+
+            do
+            {
+                nodes.Add(GetNode(index, out index));
+            }
+            while (next);
+
+            if(nodes.Count > 1)
+            {
+                var parentNode = new Node();
+                foreach (var node in nodes)
+                    parentNode.AddChild(node);
+
+                return new Tree(parentNode);
+            }
+            else
+            {
+                return new Tree(nodes[0]);
+            }
+        }
 
         private Node GetNode(int startIndex = 0) => GetNode(startIndex, out _);
         
@@ -23,19 +51,18 @@ namespace HtmlParser
             currentIndex = startIndex;
 
             var sb = new StringBuilder();
-            var mode = Mode.Init;
+            var mode = Mode.Before;
 
             char currentChar;
             char prevChar;
 
-            Node currentNode = null;
+            Node currentNode = new Node();
+            next = false;
 
             var attributeName = "";
 
             var str = false;
             char strChar = default;
-
-            var childCount = 0;
 
             void SetStr()
             {
@@ -100,20 +127,23 @@ namespace HtmlParser
 
                 switch (mode)
                 {
-                    case Mode.Init:
+                    case Mode.Before:
                         if (currentChar == tagStartChar)
                         {
+                            currentNode.Before = sb.ToString();
+                            sb.Clear();
                             mode = Mode.TagName;
+                        }
+                        else
+                        {
+                            sb.Append(currentChar);
                         }
                         continue;
 
                     case Mode.TagName:
                         if (currentChar == tagEndChar)
                         {
-                            currentNode = new Node
-                            {
-                                Tag = sb.ToString()
-                            };
+                            currentNode.Tag = sb.ToString();
                             
                             sb.Clear();
                             mode = Mode.InnerHtml;
@@ -122,7 +152,7 @@ namespace HtmlParser
                         {
                             if (sb.Length > 0)
                             {
-                                currentNode = new Node(sb.ToString());
+                                currentNode.Tag = sb.ToString();
 
                                 currentIndex = source.IndexOf(tagEndChar, cursor);
 
@@ -130,7 +160,8 @@ namespace HtmlParser
                             }
                             else
                             {
-                                mode = Mode.Init;
+                                cursor = source.IndexOf(tagEndChar, cursor);
+                                mode = Mode.Before;
                                 continue;
                             }
                         }
@@ -138,10 +169,7 @@ namespace HtmlParser
                         {
                             if (sb.Length > 0)
                             {
-                                currentNode = new Node
-                                {
-                                    Tag = sb.ToString()
-                                };
+                                currentNode.Tag = sb.ToString();
                                 
                                 sb.Clear();
                                 mode = Mode.AttributeName;
@@ -233,19 +261,22 @@ namespace HtmlParser
                         {
                             if (CheckCloseTag(currentNode.Tag, cursor))
                             {
-                                currentNode.InnerHtml = sb.ToString();
+                                currentNode.AddInnerNode(sb.ToString());
                                 sb.Clear();
 
-                                currentIndex = source.IndexOf(tagEndChar, cursor);
+                                cursor = source.IndexOf(tagEndChar, cursor);
+                                mode = Mode.After;
 
-                                return currentNode;
+                                continue;
                             }
                             else if (currentNode.Tag.ToLower() != "script" && currentNode.Tag.ToLower() != "style")
                             {
+                                currentNode.AddInnerNode(sb.ToString());
+                                sb.Clear();
+
                                 var child = GetNode(cursor, out var newIndex);
                                 currentNode.AddChild(child);
-                                sb.Append($"{newLine}{childPlaceholder}{childCount}{newLine}");
-                                childCount++;
+                                currentNode.AddInnerNode(child.ToString());
 
                                 cursor = newIndex;
                             }
@@ -259,10 +290,25 @@ namespace HtmlParser
                             sb.Append(currentChar);
                         }
                         continue;
+
+                    case Mode.After:
+                        if(currentChar == tagStartChar)
+                        {
+                            next = true;
+                            currentIndex = cursor;
+                            break;
+                        }
+                        else
+                        {
+                            sb.Append(currentChar);
+                        }
+                        continue;
                 }
             }
 
-            throw new Exception("Cannot parse tree");
+            currentNode.After = sb.ToString();
+
+            return currentNode;
         }
     }
 }

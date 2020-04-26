@@ -13,15 +13,14 @@ namespace HtmlParser
         public const char backSlashChar = '\\';
         public const string newLine = "\r\n";
 
-        public static readonly string childPlaceholder = new Random().Next(1000).ToString() + "_CHILD_";
-
         public enum Mode
         {
             TagName,
             AttributeName,
             AttributeValue,
             InnerHtml,
-            Init
+            Before,
+            After
         }
     }
 }
