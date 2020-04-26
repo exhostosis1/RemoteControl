@@ -20,21 +20,30 @@ namespace HtmlParser
         }
 
         private string _tag;
+        
         public string InnerHtml
         {
             get
             {
                 return String.Join(newLine, _innerHtml);
             }
+            set
+            {
+                _innerHtml.Add(value);
+            }
         }
 
-        private List<string> _innerHtml = new List<string>();
-
-        public void AddInnerNode(string node)
+        public void SetInnerHtml(string input)
         {
-            if(!string.IsNullOrEmpty(node))
-                _innerHtml.Add(node);
+            var node = Parser.GetTree(input).Root;
+
+            this._innerHtml.Clear();
+
+            foreach (var child in node.Children)
+                AddChild(child);
         }
+
+        private readonly List<object> _innerHtml = new List<object>();
 
         public ICollection<Attribute> Attributes { get; set; } = new List<Attribute>();
 
@@ -63,6 +72,11 @@ namespace HtmlParser
         public void AddChild(Node child)
         {
             this._children.Add(child);
+            if(!string.IsNullOrEmpty(child.Before))
+                this._innerHtml.Add(child.Before);
+            this._innerHtml.Add(child);
+            if(!string.IsNullOrEmpty(child.After))
+                this._innerHtml.Add(child.After);
             child.Parent = this;
         }
 
@@ -80,14 +94,14 @@ namespace HtmlParser
 
         public override string ToString()
         {
-            var bf = string.IsNullOrEmpty(Before) ? "" : Before + newLine;
-            var af = string.IsNullOrEmpty(After) ? "" : newLine + After;
+        //    var bf = string.IsNullOrEmpty(Before) ? "" : Before + newLine;
+        //    var af = string.IsNullOrEmpty(After) ? "" : newLine + After;
             var inn = string.IsNullOrEmpty(InnerHtml) ? "" : newLine + InnerHtml + newLine;
             var att = Attributes.Count > 0 ? " " + string.Join(" ", Attributes) : "";
             var ot = string.IsNullOrEmpty(Tag) ? "" : $"<{Tag}{att}>";
             var ct = string.IsNullOrEmpty(Tag) ? "" : $"</{Tag}>";
 
-            return $"{bf}{ot}{inn}{ct}{af}";
+            return $"{ot}{inn}{ct}";
         }
     }
 }

@@ -6,27 +6,21 @@ using static HtmlParser.Constants;
 
 namespace HtmlParser
 {
-    public class Parser
+    public static class Parser
     {
-        private readonly string source;
-        private bool next = false;
-
-        public Parser(string input)
+        public static Tree GetTree(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
                 throw new ArgumentException("input");
 
-            source = input;
-        }
-
-        public Tree GetTree()
-        {
             var nodes = new List<Node>();
             var index = 0;
 
+            bool next;
+
             do
             {
-                nodes.Add(GetNode(index, out index));
+                nodes.Add(GetNode(input, index, out index, out next));
             }
             while (next);
 
@@ -44,9 +38,9 @@ namespace HtmlParser
             }
         }
 
-        private Node GetNode(int startIndex = 0) => GetNode(startIndex, out _);
+        public static Node GetNode(string source, int startIndex = 0) => GetNode(source, startIndex, out _, out _);
         
-        private Node GetNode(int startIndex, out int currentIndex)
+        public static Node GetNode(string source, int startIndex, out int currentIndex, out bool next)
         {
             currentIndex = startIndex;
 
@@ -261,7 +255,7 @@ namespace HtmlParser
                         {
                             if (CheckCloseTag(currentNode.Tag, cursor))
                             {
-                                currentNode.AddInnerNode(sb.ToString());
+                                currentNode.InnerHtml = sb.ToString();
                                 sb.Clear();
 
                                 cursor = source.IndexOf(tagEndChar, cursor);
@@ -271,12 +265,11 @@ namespace HtmlParser
                             }
                             else if (currentNode.Tag.ToLower() != "script" && currentNode.Tag.ToLower() != "style")
                             {
-                                currentNode.AddInnerNode(sb.ToString());
+                                currentNode.InnerHtml = sb.ToString();
                                 sb.Clear();
 
-                                var child = GetNode(cursor, out var newIndex);
+                                var child = GetNode(source, cursor, out var newIndex, out _);
                                 currentNode.AddChild(child);
-                                currentNode.AddInnerNode(child.ToString());
 
                                 cursor = newIndex;
                             }

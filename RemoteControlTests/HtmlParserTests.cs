@@ -358,9 +358,7 @@ display: block;
         [TestMethod]
         public void PaserTest()
         {
-            var parser = new Parser(input);
-
-            var a1 = parser.GetTree();
+            var a1 = Parser.GetTree(input);
 
             Assert.IsNotNull(a1);
             Assert.AreEqual(a1.Count, 11);
