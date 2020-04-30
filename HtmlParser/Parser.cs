@@ -58,8 +58,6 @@ namespace HtmlParser
             var str = false;
             char strChar = default;
 
-            var scriptOrStyle = false;
-
             void SetStr()
             {
                 if (!str)
@@ -146,8 +144,6 @@ namespace HtmlParser
                                 currentNode.Tag = sb.ToString();
                                 sb.Clear();
 
-                                scriptOrStyle = currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style";
-
                                 cursor = source.IndexOf(tagEndChar, cursor);
                                 mode = Mode.InnerHtml;
 
@@ -177,7 +173,6 @@ namespace HtmlParser
                                     currentNode.Tag = sb.ToString();
                                     sb.Clear();
 
-                                    scriptOrStyle = currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style";
                                     mode = Mode.AttributeName;
 
                                     continue;
@@ -309,7 +304,7 @@ namespace HtmlParser
 
                                     return currentNode;
                                 }
-                                else if(!scriptOrStyle)
+                                else if(!(currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style"))
                                 {
                                     currentNode.AddInnerHtml(sb.ToString());
                                     sb.Clear();
