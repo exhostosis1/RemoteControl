@@ -39,13 +39,13 @@ namespace HtmlParser
         }
 
         public static Node GetNode(string source, int startIndex = 0) => GetNode(source, startIndex, out _, out _);
-        
-        public static Node GetNode(string source, int startIndex, out int currentIndex, out bool next)
+
+        internal static Node GetNode(string source, int startIndex, out int currentIndex, out bool next)
         {
             currentIndex = startIndex;
 
             var sb = new StringBuilder();
-            var mode = Mode.Before;
+            var mode = Mode.Init;
 
             char currentChar;
             char prevChar;
@@ -57,6 +57,8 @@ namespace HtmlParser
 
             var str = false;
             char strChar = default;
+
+            var scriptOrStyle = false;
 
             void SetStr()
             {
@@ -79,7 +81,7 @@ namespace HtmlParser
             {
                 var tag = source.Substring(index, source.IndexOf(tagEndChar, index) - index + 1);
 
-                 if(!tag.Contains("/"))
+                if (!tag.Contains("/"))
                 {
                     return false;
                 }
@@ -108,7 +110,7 @@ namespace HtmlParser
                             break;
                     }
                 }
-                
+
                 return closeTag && tagname == builder.ToString();
             }
 
@@ -121,185 +123,216 @@ namespace HtmlParser
 
                 switch (mode)
                 {
-                    case Mode.Before:
-                        if (currentChar == tagStartChar)
+                    case Mode.Init:
+                        switch(currentChar)
                         {
-                            currentNode.Before = sb.ToString();
-                            sb.Clear();
-                            mode = Mode.TagName;
+                            case tagStartChar:
+                                mode = Mode.TagName;
+                                continue;
+
+                            case var c when !char.IsWhiteSpace(c):
+                                mode = Mode.InnerHtml;
+                                cursor--;
+                                continue;
+                            
+                            default:
+                                continue;
                         }
-                        else
-                        {
-                            sb.Append(currentChar);
-                        }
-                        continue;
 
                     case Mode.TagName:
-                        if (currentChar == tagEndChar)
+                        switch (currentChar)
                         {
-                            currentNode.Tag = sb.ToString();
-                            
-                            sb.Clear();
-                            mode = Mode.InnerHtml;
-                        }
-                        else if (currentChar == forwardSlashChar)
-                        {
-                            if (sb.Length > 0)
-                            {
+                            case tagEndChar:
                                 currentNode.Tag = sb.ToString();
-
-                                currentIndex = source.IndexOf(tagEndChar, cursor);
-
-                                return currentNode;
-                            }
-                            else
-                            {
-                                cursor = source.IndexOf(tagEndChar, cursor);
-                                mode = Mode.Before;
-                                continue;
-                            }
-                        }
-                        else if (Char.IsWhiteSpace(currentChar))
-                        {
-                            if (sb.Length > 0)
-                            {
-                                currentNode.Tag = sb.ToString();
-                                
                                 sb.Clear();
-                                mode = Mode.AttributeName;
-                            }
-                            else
-                            {
+
+                                scriptOrStyle = currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style";
+
+                                cursor = source.IndexOf(tagEndChar, cursor);
+                                mode = Mode.InnerHtml;
+
                                 continue;
-                            }
+
+                            case forwardSlashChar:
+                                if (sb.Length > 0)
+                                {
+                                    currentNode.Tag = sb.ToString();
+                                    sb.Clear();
+
+                                    currentIndex = source.IndexOf(tagEndChar, cursor);
+                                    next = source.IndexOf(tagStartChar, currentIndex) > -1;
+
+                                    return currentNode;
+                                }
+                                else
+                                {
+                                    cursor = source.IndexOf(tagEndChar, cursor);
+                                    mode = Mode.Init;
+                                    continue;
+                                }
+
+                            case var c when char.IsWhiteSpace(c):
+                                if (sb.Length > 0)
+                                {
+                                    currentNode.Tag = sb.ToString();
+                                    sb.Clear();
+
+                                    scriptOrStyle = currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style";
+                                    mode = Mode.AttributeName;
+
+                                    continue;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+
+                            default:
+                                sb.Append(currentChar);
+
+                                continue;
                         }
-                        else
-                        {
-                            sb.Append(currentChar);
-                        }
-                        continue;
 
                     case Mode.AttributeName:
-                        if (char.IsWhiteSpace(currentChar))
-                            continue;
-                        if (currentChar == tagEndChar || currentChar == forwardSlashChar)
+                        switch (currentChar)
                         {
-                            if (sb.Length > 0)
-                            {
-                                currentNode.Attributes.Add(new Attribute(sb.ToString(), ""));
-                                sb.Clear();
-                            }
-
-                            if (currentChar == tagEndChar)
-                            {
-                                mode = Mode.InnerHtml;
+                            case var c when char.IsWhiteSpace(c):
                                 continue;
-                            }
-                            else
-                            {
+
+                            case equalityChar:
+                                attributeName = sb.ToString();
+                                sb.Clear();
+                                mode = Mode.AttributeValue;
+                                
+                                continue;
+
+                            case forwardSlashChar:
+                                if (sb.Length > 0)
+                                {
+                                    currentNode.Attributes.Add(new Attribute(sb.ToString()));
+                                    sb.Clear();
+                                }
+
                                 currentIndex = source.IndexOf(tagEndChar, cursor);
+                                next = source.IndexOf(tagStartChar, currentIndex) > -1;
 
                                 return currentNode;
-                            }
-                        }
-                        else if (currentChar == equalityChar)
-                        {
-                            attributeName = sb.ToString();
-                            sb.Clear();
-                            mode = Mode.AttributeValue;
-                            continue;
-                        }
-                        else
-                            sb.Append(currentChar);
-                        continue;
 
-                    case Mode.AttributeValue:
-                        if (!str && (char.IsWhiteSpace(currentChar) || currentChar == tagEndChar))
-                        {
-                            if (sb.Length > 0)
-                            {
-                                currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
-                                sb.Clear();
-                                mode = Mode.AttributeName;
-                            }
-                            if (currentChar == tagEndChar)
-                            {
-                                mode = Mode.InnerHtml;
+                            case tagEndChar:
+                                if (sb.Length > 0)
+                                {
+                                    currentNode.Attributes.Add(new Attribute(sb.ToString()));
+                                    sb.Clear();
+                                }
 
                                 if (currentNode.Tag.ToLower() == "link" || currentNode.Tag.ToLower() == "meta")
+                                {
+                                    next = source.IndexOf(tagStartChar, cursor) > -1;
+                                    currentIndex = cursor;
+
                                     return currentNode;
-                            }
-                        }
-                        else if (!str && currentChar == forwardSlashChar)
-                        {
-                            currentIndex = source.IndexOf(tagEndChar, cursor);
-
-                            return currentNode;
-                        }
-                        else if (currentChar == singlePrtChar || currentChar == doublePrtChar)
-                        {
-                            SetStr();
-                        }
-                        else
-                        {
-                            sb.Append(currentChar);
-                        }
-                        continue;
-
-                    case Mode.InnerHtml:
-                        if (currentChar == singlePrtChar || currentChar == doublePrtChar)
-                        {
-                            SetStr();
-                        }
-                        else if (!str && currentChar == tagStartChar)
-                        {
-                            if (CheckCloseTag(currentNode.Tag, cursor))
-                            {
-                                currentNode.InnerHtml = sb.ToString();
-                                sb.Clear();
+                                }
 
                                 cursor = source.IndexOf(tagEndChar, cursor);
-                                mode = Mode.After;
+                                mode = Mode.InnerHtml;
+
+                                continue;         
+
+                            default:
+                                sb.Append(currentChar);
+                                continue;
+                        }
+
+                    case Mode.AttributeValue:
+                        switch (currentChar)
+                        {
+                            case var c when c == singlePrtChar || c == doublePrtChar:
+                                SetStr();
+                                continue;
+
+                            case var c when !str && char.IsWhiteSpace(c):
+                                if(sb.Length > 0)
+                                {
+                                    currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
+                                    sb.Clear();
+
+                                    mode = Mode.AttributeName;
+                                }
 
                                 continue;
-                            }
-                            else if (currentNode.Tag.ToLower() != "script" && currentNode.Tag.ToLower() != "style")
-                            {
-                                currentNode.InnerHtml = sb.ToString();
+
+                            case var c when !str && c == forwardSlashChar:
+                                currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
                                 sb.Clear();
 
-                                var child = GetNode(source, cursor, out var newIndex, out _);
-                                currentNode.AddChild(child);
+                                currentIndex = source.IndexOf(tagEndChar, cursor);
+                                next = source.IndexOf(tagStartChar, currentIndex) > -1;
 
-                                cursor = newIndex;
-                            }
-                            else
-                            {
+                                return currentNode;
+
+                            case var c when !str && c == tagEndChar:
+                                currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
+                                sb.Clear();
+
+                                if (currentNode.Tag.ToLower() == "link" || currentNode.Tag.ToLower() == "meta")
+                                {
+                                    currentIndex = source.IndexOf(tagEndChar, cursor);
+                                    next = source.IndexOf(tagStartChar, currentIndex) > -1;
+
+                                    return currentNode;
+                                }
+
+                                mode = Mode.InnerHtml;                      
+
+                                continue;                                                       
+
+                            default:
                                 sb.Append(currentChar);
-                            }
+                                continue;
                         }
-                        else
-                        {
-                            sb.Append(currentChar);
-                        }
-                        continue;
 
-                    case Mode.After:
-                        if(currentChar == tagStartChar)
+                    case Mode.InnerHtml:
+                        switch (currentChar)
                         {
-                            next = true;
-                            currentIndex = cursor;
-                            break;
-                        }
-                        else
-                        {
-                            sb.Append(currentChar);
-                        }
-                        continue;
+                            case var c when c == singlePrtChar || c == doublePrtChar:
+                                SetStr();
+                                continue;
+
+                            case var c when !str && c == tagStartChar:                                                            
+                                if (CheckCloseTag(currentNode.Tag, cursor))
+                                {
+                                    currentNode.AddInnerHtml(sb.ToString());
+                                    sb.Clear();
+
+                                    currentIndex = source.IndexOf(tagEndChar, cursor);
+                                    next = source.IndexOf(tagStartChar, currentIndex) > -1;
+
+                                    return currentNode;
+                                }
+                                else if(!scriptOrStyle)
+                                {
+                                    currentNode.AddInnerHtml(sb.ToString());
+                                    sb.Clear();
+
+                                    var child = GetNode(source, cursor, out var newIndex, out _);
+                                    currentNode.AddChild(child);
+
+                                    cursor = newIndex;
+
+                                    continue;
+                                }
+                                else
+                                {
+                                    sb.Append(currentChar);
+                                    continue;
+                                }
+
+                            default:
+                                sb.Append(currentChar);
+                                continue;
+                        }  
                 }
             }
-
-            currentNode.After = sb.ToString();
 
             return currentNode;
         }

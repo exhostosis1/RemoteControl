@@ -16,7 +16,11 @@
 
         public string Value { get; set; }
 
+        public bool Directive => string.IsNullOrEmpty(Value);
+
         public Attribute(): this("", "") { }
+
+        public Attribute(string name) : this(name, "") { }
 
         public Attribute(string name, string value)
         {

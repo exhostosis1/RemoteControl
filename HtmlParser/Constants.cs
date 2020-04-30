@@ -19,8 +19,7 @@ namespace HtmlParser
             AttributeName,
             AttributeValue,
             InnerHtml,
-            Before,
-            After
+            Init
         }
     }
 }

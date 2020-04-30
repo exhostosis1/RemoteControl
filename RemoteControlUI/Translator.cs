@@ -24,6 +24,8 @@ namespace RemoteControlTranslator
             {
                 sr.Write(ParseHtml());
             }
+
+            
         }
 
         private static string ParseHtml()
@@ -31,8 +33,9 @@ namespace RemoteControlTranslator
             var result = "";
 
             var input = File.ReadAllText(htmlfiles.Single(x => x.Contains(filename)));
-
             var tree = Parser.GetTree(input);
+
+
 
             return result;
         }
