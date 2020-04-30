@@ -39,5 +39,15 @@ namespace HtmlParser
                 foreach (var childNode in FindByTag(tag, child))
                     yield return childNode;
         }
+
+        public void RemoveNode(Node node)
+        {
+            node.Parent.RemoveChild(node);
+        }
+
+        public override string ToString()
+        {
+            return Root.ToString();
+        }
     }
 }

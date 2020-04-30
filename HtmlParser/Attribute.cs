@@ -28,6 +28,11 @@
             Value = value;
         }
 
-        public override string ToString() => $"{Name}{(!string.IsNullOrEmpty(Value) ? $" = \"{Value}\"" : "")}";
+        public override string ToString() => $"{Name}{(!string.IsNullOrEmpty(Value) ? $"=\"{Value}\"" : "")}";
+
+        public override int GetHashCode()
+        {
+            return Name.GetHashCode();
+        }
     }
 }

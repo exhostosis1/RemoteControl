@@ -46,7 +46,7 @@ namespace HtmlParser
 
         private List<object> _innerHtml = new List<object>();
 
-        public ICollection<Attribute> Attributes { get; set; } = new List<Attribute>();
+        public Attributes Attributes { get; set; } = new Attributes();
 
         public Node Parent { get; private set; }
 

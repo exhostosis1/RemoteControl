@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Attribute.cs" />
+    <Compile Include="Attributes.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Parser.cs" />
