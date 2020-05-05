@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.Linq;
 using static HtmlParser.Constants;
 
 namespace HtmlParser
@@ -36,7 +36,6 @@ namespace HtmlParser
             this._innerHtml.Clear();
 
             this._innerHtml = node._innerHtml;
-            this._children = node._children;
         }
 
         public void AddInnerHtml(string value)
@@ -50,9 +49,7 @@ namespace HtmlParser
 
         public Node Parent { get; private set; }
 
-        public IReadOnlyCollection<Node> Children => _children;
-
-        private List<Node> _children = new List<Node>();
+        public IReadOnlyCollection<Node> Children => _innerHtml.Where(x => x.GetType() == typeof(Node)).Select(x => (Node)x).ToList();
 
         public Node() : this("") { }
 
@@ -64,27 +61,23 @@ namespace HtmlParser
         public void SetParent(Node parent)
         {
             this.Parent = parent;
-            parent._children.Add(this);
             parent._innerHtml.Add(this);
         }
 
         public void AddChild(Node child)
         {
-            this._children.Add(child);
             this._innerHtml.Add(child);
             child.Parent = this;
         }
 
         public void RemoveParent()
         {
-            this.Parent._children.Remove(this);
             this.Parent._innerHtml.Remove(this);
             this.Parent = null;
         }
 
         public void RemoveChild(Node child)
         {
-            this._children.Remove(child);
             this._innerHtml.Remove(child);
             child.Parent = null;
         }

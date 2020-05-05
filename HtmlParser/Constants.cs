@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace HtmlParser
+﻿namespace HtmlParser
 {
     internal static class Constants
     {

@@ -7,7 +7,7 @@ namespace HtmlParser
 {
     public class Attributes: IEnumerable<Attribute>
     {
-        private HashSet<Attribute> _attributes = new HashSet<Attribute>();
+        private readonly HashSet<Attribute> _attributes = new HashSet<Attribute>();
 
         public string this[string key] 
         {
@@ -25,13 +25,9 @@ namespace HtmlParser
 
         public Attribute GetAttribute(string key) => _attributes.FirstOrDefault(x => x.Name == key.ToLower());
 
-        public ICollection Keys => _attributes.Select(x => x.Name).ToList();
+        public ICollection<string> Keys => _attributes.Select(x => x.Name).ToList();
 
-        public ICollection Values => _attributes.Select(x => x.Value).ToList();
-
-        public bool IsReadOnly => false;
-
-        public bool IsFixedSize => false;
+        public ICollection<string> Values => _attributes.Select(x => x.Value).ToList();
 
         public int Count => _attributes.Count;
 
