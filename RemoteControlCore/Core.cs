@@ -8,11 +8,12 @@ namespace RemoteControlCore
 {
     public class Core
     {
-        IHttpListener _listener;
-        AbstractController _apiController;
-        AbstractController _httpController;
+        readonly IHttpListener _listener;
+        readonly AbstractController _apiController;
+        readonly AbstractController _httpController;
 
         UriBuilder _ub = new UriBuilder();
+        bool _simple = false;
 
         public Core()
         {
@@ -25,15 +26,16 @@ namespace RemoteControlCore
             _listener.OnHttpRequest += _httpController.ProcessRequest;
         }
 
-        public void Start((string, string, string) values)
+        public void Start(UriBuilder ub, bool simple)
         {
-            TrySetUrl(values);
+            _ub = ub;
+            _simple = simple;
             Start();
         }
 
         public void Start()
         {
-            _listener.StartListen(_ub.Uri.ToString());
+            _listener.StartListen(_ub.Uri.ToString(), _simple);
         }
 
         public void Stop()
@@ -41,34 +43,21 @@ namespace RemoteControlCore
             _listener.StopListen();
         }
 
-        public void Restart((string, string, string) values)
+        public void Restart(UriBuilder ub, bool simple)
         {
-            TrySetUrl(values);
+            _ub = ub;
+            _simple = simple;
             Restart();
         }
 
         public void Restart()
         {
-            _listener.RestartListen(_ub.Uri.ToString());
+            _listener.RestartListen(_ub.Uri.ToString(), _simple);
         }
 
-        public UriBuilder GetUriBuilder()
+        public (UriBuilder, bool) GetCurrentConfig()
         {
-            return _ub;
-        }
-
-        private void TrySetUrl((string, string, string) values)
-        {
-            try
-            {
-                _ub.Scheme = values.Item1;
-                _ub.Host = values.Item2;
-                _ub.Port = Convert.ToInt32(values.Item3);
-            }
-            catch
-            {
-                throw;
-            }
-        }       
+            return (_ub, _simple);
+        }   
     }
 }

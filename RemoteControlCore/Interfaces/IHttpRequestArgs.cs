@@ -6,5 +6,6 @@ namespace RemoteControlCore.Interfaces
     {
         HttpListenerRequest Request { get; }
         HttpListenerResponse Response { get; }
+        bool Simple { get; }
     }
 }

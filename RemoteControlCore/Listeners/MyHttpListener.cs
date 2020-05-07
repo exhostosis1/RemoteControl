@@ -10,10 +10,13 @@ namespace RemoteControlCore.Listeners
         public HttpListenerRequest Request { get; private set; }
         public HttpListenerResponse Response { get; private set; }
 
-        public MyHttpListenerRequestArgs(HttpListenerRequest request, HttpListenerResponse response)
+        public bool Simple { get; private set; }
+
+        public MyHttpListenerRequestArgs(HttpListenerRequest request, HttpListenerResponse response, bool simple)
         {
             Request = request;
             Response = response;
+            Simple = simple;
         }
     }
     internal class MyHttpListener : IHttpListener
@@ -24,6 +27,7 @@ namespace RemoteControlCore.Listeners
         public event HttpEventHandler OnHttpRequest;
 
         private string _url = "http://localhost/";
+        private bool _simple = false;
 
         public MyHttpListener(string url)
         {
@@ -35,14 +39,15 @@ namespace RemoteControlCore.Listeners
            
         }
 
-        public void StartListen(string url)
+        public void StartListen(string url, bool simple)
         {
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentException("Url must be set before start listening");
 
             if (_listener != null) return;
 
-            _url = url;            
+            _url = url;
+            _simple = simple;
 
             _listener = new HttpListener();            
 
@@ -59,7 +64,7 @@ namespace RemoteControlCore.Listeners
 
         public void StartListen()
         {
-            StartListen(_url);
+            StartListen(_url, _simple);
         }
 
         private Task Start()
@@ -79,7 +84,7 @@ namespace RemoteControlCore.Listeners
 
         private void ProcessRequest(HttpListenerContext context)
         {
-            var args = new MyHttpListenerRequestArgs(context.Request, context.Response);
+            var args = new MyHttpListenerRequestArgs(context.Request, context.Response, _simple);
 
             if (context.Request.Url.LocalPath == "/api" && context.Request.QueryString.Count > 0)
             {
@@ -103,15 +108,15 @@ namespace RemoteControlCore.Listeners
             }
         }
 
-        public void RestartListen(string url)
+        public void RestartListen(string url, bool simple)
         {
             StopListen();
-            StartListen(url);
+            StartListen(url, simple);
         }
 
         public void RestartListen()
         {
-            RestartListen(_url);
+            RestartListen(_url, _simple);
         }
     }
 }

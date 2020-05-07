@@ -44,6 +44,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonGet = new System.Windows.Forms.Button();
+            this.checkBoxSimple = new System.Windows.Forms.CheckBox();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,7 +54,7 @@
             this.taskbarNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("taskbarNotify.Icon")));
             this.taskbarNotify.Text = "Remote Control";
             this.taskbarNotify.Visible = true;
-            this.taskbarNotify.MouseClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseClick);
+            this.taskbarNotify.MouseClick += new System.Windows.Forms.MouseEventHandler(this.NotifyIcon1_MouseClick);
             // 
             // contextMenuStrip
             // 
@@ -70,21 +71,21 @@
             this.ipToolStripMenuItem.Name = "ipToolStripMenuItem";
             this.ipToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.ipToolStripMenuItem.Text = "Stopped";
-            this.ipToolStripMenuItem.Click += new System.EventHandler(this.ipToolStripMenuItem_Click);
+            this.ipToolStripMenuItem.Click += new System.EventHandler(this.IpToolStripMenuItem_Click);
             // 
             // restartToolStripMenuItem
             // 
             this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
             this.restartToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.restartToolStripMenuItem.Text = "Restart";
-            this.restartToolStripMenuItem.Click += new System.EventHandler(this.restartToolStripMenuItem_Click);
+            this.restartToolStripMenuItem.Click += new System.EventHandler(this.RestartToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
             this.closeToolStripMenuItem.Size = new System.Drawing.Size(118, 22);
             this.closeToolStripMenuItem.Text = "Close";
-            this.closeToolStripMenuItem.Click += new System.EventHandler(this.closeToolStripMenuItem_Click);
+            this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
             // 
             // buttonSave
             // 
@@ -94,7 +95,7 @@
             this.buttonSave.TabIndex = 1;
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
-            this.buttonSave.Click += new System.EventHandler(this.button1_Click);
+            this.buttonSave.Click += new System.EventHandler(this.Button1_Click);
             // 
             // textProtocol
             // 
@@ -156,7 +157,7 @@
             this.buttonCancel.TabIndex = 11;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.button2_Click);
+            this.buttonCancel.Click += new System.EventHandler(this.Button2_Click);
             // 
             // buttonGet
             // 
@@ -166,7 +167,17 @@
             this.buttonGet.TabIndex = 12;
             this.buttonGet.Text = "Get";
             this.buttonGet.UseVisualStyleBackColor = true;
-            this.buttonGet.Click += new System.EventHandler(this.button3_Click);
+            this.buttonGet.Click += new System.EventHandler(this.Button3_Click);
+            // 
+            // checkBoxSimple
+            // 
+            this.checkBoxSimple.AutoSize = true;
+            this.checkBoxSimple.Location = new System.Drawing.Point(241, 14);
+            this.checkBoxSimple.Name = "checkBoxSimple";
+            this.checkBoxSimple.Size = new System.Drawing.Size(57, 17);
+            this.checkBoxSimple.TabIndex = 13;
+            this.checkBoxSimple.Text = "Simple";
+            this.checkBoxSimple.UseVisualStyleBackColor = true;
             // 
             // ConfigForm
             // 
@@ -175,7 +186,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(240, 66);
+            this.ClientSize = new System.Drawing.Size(301, 66);
+            this.Controls.Add(this.checkBoxSimple);
             this.Controls.Add(this.buttonGet);
             this.Controls.Add(this.buttonCancel);
             this.Controls.Add(this.label3);
@@ -218,6 +230,7 @@
         private System.Windows.Forms.Button buttonCancel;
         private System.Windows.Forms.Button buttonGet;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
+        private System.Windows.Forms.CheckBox checkBoxSimple;
     }
 }
 

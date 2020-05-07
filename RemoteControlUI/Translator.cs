@@ -1,5 +1,4 @@
 ﻿using HtmlParser;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -11,7 +10,6 @@ namespace RemoteControlTranslator
         const string filename = "index.html";
         const string resultfilename = "index-simple.html";
 
-        static readonly string[] jsfiles = Directory.GetFiles(path, "*.js");
         static readonly string[] cssfiles = Directory.GetFiles(path, "*.css");
         static readonly string[] htmlfiles = Directory.GetFiles(path, "*.html");
 
@@ -26,25 +24,19 @@ namespace RemoteControlTranslator
 
             var head = tree.FindNodesByTag("head").First();
 
-            var scriptAndStyle = Enumerable.Concat(tree.FindNodesByTag("script"), tree.FindNodesByTag("style")).ToList();
+            var script = new Node("script");
+            script.Attributes.Add(new Attribute("type", "text/javascript"));
+
+            var oldScript = tree.FindNodesByTag("script").First();
+
+            script.AddInnerHtml(Parser.ConcatDependencies(oldScript.InnerHtml, path, new[] { "touch", "point" }));
+
+            var scriptAndStyle = Enumerable.Concat(tree.FindNodesByTag("link"), Enumerable.Concat(tree.FindNodesByTag("script"), tree.FindNodesByTag("style"))).ToList();
 
             foreach(var node in scriptAndStyle)
             {
                 head.RemoveChild(node);
-            }
-
-            var script = new Node("script");
-
-            var scriptLines = new List<string>();
-            scriptLines.AddRange(File.ReadAllLines(jsfiles.First(x => x.Contains("constants"))));
-            scriptLines.AddRange(File.ReadAllLines(jsfiles.First(x => x.Contains("slider"))));
-            scriptLines.AddRange(File.ReadAllLines(jsfiles.First(x => x.Contains("keys"))));
-            scriptLines.AddRange(File.ReadAllLines(jsfiles.First(x => x.Contains("touch"))));
-            scriptLines.AddRange(File.ReadAllLines(jsfiles.First(x => x.Contains("code"))));
-
-            scriptLines.RemoveAll(x => x.Trim().StartsWith("module") || x.Trim().StartsWith("import") || x.Trim().StartsWith("export"));
-
-            script.AddInnerHtml(string.Join(newLine, scriptLines));
+            }           
 
             var style = new Node("style");
 

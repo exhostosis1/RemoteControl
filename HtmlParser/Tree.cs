@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace HtmlParser
 {
@@ -8,7 +9,7 @@ namespace HtmlParser
 
         public int Count => CountChildren(Root);
 
-        public IEnumerable<Node> FindNodesByTag(string Tag) => FindByTag(Tag.ToLower(), Root);
+        public IReadOnlyCollection<Node> FindNodesByTag(string Tag) => FindByTag(Tag.ToLower(), Root).ToList();
 
         public Tree(Node node)
         {

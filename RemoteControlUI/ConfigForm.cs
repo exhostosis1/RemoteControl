@@ -7,7 +7,7 @@ namespace RemoteControlUI
 {
     public partial class ConfigForm : Form
     {
-        Core program = new Core();
+        readonly Core program = new Core();
 
         public ConfigForm()
         {
@@ -18,7 +18,7 @@ namespace RemoteControlUI
                 var conf = AppConfig.GetServerConfig();
 
                 SetConfigTextBoxes(conf);
-                program.Start(conf);
+                program.Start(new UriBuilder(conf.Scheme, conf.Host, conf.Port), conf.Simple);
 
                 EnableMenuItem();
             }
@@ -29,22 +29,22 @@ namespace RemoteControlUI
             }
         }
 
-        private void closeToolStripMenuItem_Click(object sender, EventArgs e)
+        private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
         {
             program.Stop();
             Application.Exit();
         }
 
-        private void ipToolStripMenuItem_Click(object sender, EventArgs e)
+        private void IpToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Process.Start(this.ipToolStripMenuItem.Text);
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void Button1_Click(object sender, EventArgs e)
         {
             try
             {
-                program.Restart((this.textProtocol.Text, this.textHost.Text, this.textPort.Text));
+                program.Restart(new UriBuilder(this.textProtocol.Text, this.textHost.Text, Convert.ToInt32(this.textPort.Text)), this.checkBoxSimple.Checked);
 
                 Minimize();
             }
@@ -57,22 +57,19 @@ namespace RemoteControlUI
 
             EnableMenuItem();
         }
-        private void SetConfigTextBoxes((string, string, string) values)
+        private void SetConfigTextBoxes(AppConfig config)
         {
-            this.textProtocol.Text = values.Item1;
-            this.textHost.Text = values.Item2;
-            this.textPort.Text = values.Item3;
-        }
+            this.textProtocol.Text = config.Scheme;
+            this.textHost.Text = config.Host;
+            this.textPort.Text = config.Port.ToString();
 
-        private void SetConfigTextBoxes(UriBuilder ub)
-        {
-            SetConfigTextBoxes((ub.Scheme, ub.Host, ub.Port.ToString()));
+            this.checkBoxSimple.Checked = config.Simple;
         }
 
         private void EnableMenuItem()
         {
             this.ipToolStripMenuItem.Enabled = true;
-            this.ipToolStripMenuItem.Text = program.GetUriBuilder().Uri.ToString();
+            this.ipToolStripMenuItem.Text = program.GetCurrentConfig().Item1.Uri.ToString();
         }
 
         private void DisableMenuItem()
@@ -81,13 +78,17 @@ namespace RemoteControlUI
             this.ipToolStripMenuItem.Text = "Stopped";
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Button2_Click(object sender, EventArgs e)
         {
             Minimize();
-            SetConfigTextBoxes(program.GetUriBuilder());
+            var config = program.GetCurrentConfig();
+            var ub = config.Item1;
+            var simple = config.Item2;
+
+            SetConfigTextBoxes(new AppConfig(ub.Scheme, ub.Host, ub.Port, simple));
         }
 
-        private void notifyIcon1_MouseClick(object sender, MouseEventArgs e)
+        private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -95,7 +96,7 @@ namespace RemoteControlUI
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private void Button3_Click(object sender, EventArgs e)
         {
             SetConfigTextBoxes(AppConfig.GetServerConfig());
         }
@@ -109,7 +110,7 @@ namespace RemoteControlUI
             }
         }
 
-        private void restartToolStripMenuItem_Click(object sender, EventArgs e)
+        private void RestartToolStripMenuItem_Click(object sender, EventArgs e)
         {
             try
             {
@@ -118,7 +119,7 @@ namespace RemoteControlUI
             catch
             {
                 var config = AppConfig.GetServerConfig();
-                program.Restart(config);
+                program.Restart(new UriBuilder(config.Scheme, config.Host, config.Port), config.Simple);
 
                 SetConfigTextBoxes(config);
                 EnableMenuItem();

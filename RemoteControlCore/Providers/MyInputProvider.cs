@@ -11,7 +11,7 @@ namespace RemoteControlCore.Providers
         public IKeyboard Keyboard { get; set; }
         public IMouse Mouse { get; set; }
 
-        private InputSimulator _inputSim;
+        private readonly InputSimulator _inputSim;
 
         public MyInputProvider()
         {
@@ -23,7 +23,7 @@ namespace RemoteControlCore.Providers
 
         internal class MyKeyboard : IKeyboard
         {
-            InputSimulator _inputSim;
+            readonly InputSimulator _inputSim;
 
             readonly Dictionary<KeysEnum, VirtualKeyCode> keyboardKeys = new Dictionary<KeysEnum, VirtualKeyCode>()
             {
@@ -73,7 +73,7 @@ namespace RemoteControlCore.Providers
 
         internal class MyMouse : IMouse
         {
-            InputSimulator _inputSim;
+            readonly InputSimulator _inputSim;
 
 
             readonly Dictionary<MouseKeysEnum, MouseButton> mouseKeys = new Dictionary<MouseKeysEnum, MouseButton>()

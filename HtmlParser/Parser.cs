@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Text;
 using System.Collections.Generic;
-
+using System.IO;
+using System.Linq;
+using System.Text;
 using static HtmlParser.Constants;
 
 namespace HtmlParser
@@ -24,7 +25,7 @@ namespace HtmlParser
             }
             while (next);
 
-            if(nodes.Count > 1)
+            if (nodes.Count > 1)
             {
                 var parentNode = new Node();
                 foreach (var node in nodes)
@@ -69,15 +70,11 @@ namespace HtmlParser
                 {
                     str = false;
                 }
-                else
-                {
-                    sb.Append(currentChar);
-                }
             }
 
             bool CheckCloseTag(string tagname, int index)
             {
-                var tag = source.Substring(index, source.IndexOf(tagEndChar, index) - index + 1);
+                var tag = source.MySubstring(index, source.IndexOf(tagEndChar, index), false);
 
                 if (!tag.Contains("/"))
                 {
@@ -88,7 +85,7 @@ namespace HtmlParser
 
                 var closeTag = false;
 
-                for (int i = 1; i < tag.Length; i++)
+                for (int i = 0; i < tag.Length; i++)
                 {
                     if (!Char.IsWhiteSpace(tag[i]))
                     {
@@ -109,7 +106,7 @@ namespace HtmlParser
                     }
                 }
 
-                return closeTag && tagname == builder.ToString();
+                return closeTag && tagname.ToLower() == builder.ToString().ToLower();
             }
 
             for (int cursor = startIndex; cursor < source.Length; cursor++)
@@ -122,7 +119,7 @@ namespace HtmlParser
                 switch (mode)
                 {
                     case Mode.Init:
-                        switch(currentChar)
+                        switch (currentChar)
                         {
                             case tagStartChar:
                                 mode = Mode.TagName;
@@ -132,7 +129,7 @@ namespace HtmlParser
                                 mode = Mode.InnerHtml;
                                 cursor--;
                                 continue;
-                            
+
                             default:
                                 continue;
                         }
@@ -198,7 +195,7 @@ namespace HtmlParser
                                 attributeName = sb.ToString();
                                 sb.Clear();
                                 mode = Mode.AttributeValue;
-                                
+
                                 continue;
 
                             case forwardSlashChar:
@@ -231,7 +228,7 @@ namespace HtmlParser
                                 cursor = source.IndexOf(tagEndChar, cursor);
                                 mode = Mode.InnerHtml;
 
-                                continue;         
+                                continue;
 
                             default:
                                 sb.Append(currentChar);
@@ -246,7 +243,7 @@ namespace HtmlParser
                                 continue;
 
                             case var c when !str && char.IsWhiteSpace(c):
-                                if(sb.Length > 0)
+                                if (sb.Length > 0)
                                 {
                                     currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
                                     sb.Clear();
@@ -277,9 +274,9 @@ namespace HtmlParser
                                     return currentNode;
                                 }
 
-                                mode = Mode.InnerHtml;                      
+                                mode = Mode.InnerHtml;
 
-                                continue;                                                       
+                                continue;
 
                             default:
                                 sb.Append(currentChar);
@@ -291,9 +288,10 @@ namespace HtmlParser
                         {
                             case var c when c == singlePrtChar || c == doublePrtChar:
                                 SetStr();
+                                sb.Append(currentChar);
                                 continue;
 
-                            case var c when !str && c == tagStartChar:                                                            
+                            case var c when !str && c == tagStartChar:
                                 if (CheckCloseTag(currentNode.Tag, cursor))
                                 {
                                     currentNode.AddInnerHtml(sb.ToString());
@@ -304,7 +302,7 @@ namespace HtmlParser
 
                                     return currentNode;
                                 }
-                                else if(!(currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style"))
+                                else if (!(currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style"))
                                 {
                                     currentNode.AddInnerHtml(sb.ToString());
                                     sb.Clear();
@@ -325,11 +323,70 @@ namespace HtmlParser
                             default:
                                 sb.Append(currentChar);
                                 continue;
-                        }  
+                        }
                 }
             }
 
             return currentNode;
         }
+
+        public static string ConcatDependencies(string Input, string Path, IEnumerable<string> Reject)
+        {
+            var deps = new List<string>();
+
+            return LocalConcat(Input, Path);
+
+            string GetPath(string input, string path)
+            {
+                var start = input.Contains(singlePrtChar) ? input.IndexOf(singlePrtChar) : input.IndexOf(doublePrtChar);
+                var end = input.Contains(singlePrtChar) ? input.LastIndexOf(singlePrtChar) : input.LastIndexOf(doublePrtChar);
+
+                var result = input.MySubstring(start, end);
+
+                foreach(var r in Reject)
+                {
+                    if (result.Contains(r))
+                        return null;
+                }
+
+                return path + (path.EndsWith("\\") ? "" : "\\") + result;
+            }
+
+            string LocalConcat(string input, string path)
+            {
+
+                var strings = input.Split(newLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                for (int i = 0; i < strings.Count; i++)
+                {
+                    var temp = strings[i].Trim();
+
+                    if (string.IsNullOrEmpty(temp) || temp.StartsWith("export"))
+                    {
+                        strings[i] = "";
+                    }
+
+                    if (temp.StartsWith("import"))
+                    {
+                        var p = GetPath(temp, path);
+
+                        if (p != null && !deps.Contains(p))
+                        {
+                            deps.Add(p);
+                            strings[i] = LocalConcat(File.ReadAllText(p), path);
+                        }
+                        else
+                        {
+                            strings[i] = "";
+                        }
+                    }
+                }
+
+                strings.RemoveAll(x => x == "");
+
+                return string.Join(newLine, strings);
+            }
+        }
     }
 }
+
