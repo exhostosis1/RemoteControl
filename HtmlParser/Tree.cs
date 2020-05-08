@@ -66,7 +66,7 @@ namespace HtmlParser
             switch(type)
             {
                 case SearchTypes.Tag:
-                    left = node.Tag.ToLower();
+                    left = node.Tag;
                     break;
                 case SearchTypes.Class:
                     left = node.Attributes["class"]?.ToLower();
@@ -75,7 +75,7 @@ namespace HtmlParser
                     left = node.Attributes[attribute]?.ToLower();
                     break;
                 case SearchTypes.Directive:
-                    return node.Attributes.Keys.Contains(attribute.ToLower());
+                    return node.Attributes.Keys.Contains(attribute);
                 default:
                     return false;
             }

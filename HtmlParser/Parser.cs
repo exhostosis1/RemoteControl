@@ -106,7 +106,7 @@ namespace HtmlParser
                     }
                 }
 
-                return closeTag && tagname.ToLower() == builder.ToString().ToLower();
+                return closeTag && tagname == builder.ToString().ToLower();
             }
 
             for (int cursor = startIndex; cursor < source.Length; cursor++)
@@ -217,7 +217,7 @@ namespace HtmlParser
                                     sb.Clear();
                                 }
 
-                                if (currentNode.Tag.ToLower() == "link" || currentNode.Tag.ToLower() == "meta")
+                                if (currentNode.Tag == "link" || currentNode.Tag == "meta")
                                 {
                                     next = source.IndexOf(tagStartChar, cursor) > -1;
                                     currentIndex = cursor;
@@ -266,7 +266,7 @@ namespace HtmlParser
                                 currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
                                 sb.Clear();
 
-                                if (currentNode.Tag.ToLower() == "link" || currentNode.Tag.ToLower() == "meta")
+                                if (currentNode.Tag == "link" || currentNode.Tag == "meta")
                                 {
                                     currentIndex = source.IndexOf(tagEndChar, cursor);
                                     next = source.IndexOf(tagStartChar, currentIndex) > -1;
@@ -302,7 +302,7 @@ namespace HtmlParser
 
                                     return currentNode;
                                 }
-                                else if (currentNode.Tag.ToLower() != "script" && currentNode.Tag.ToLower() != "style")
+                                else if (currentNode.Tag != "script" && currentNode.Tag != "style")
                                 {
                                     currentNode.AddInnerHtml(sb.ToString());
                                     sb.Clear();
