@@ -332,11 +332,14 @@ namespace HtmlParser
             return currentNode;
         }
 
-        public static string ConcatDependencies(string Input, string Path, IEnumerable<string> Reject)
+        public static Node ConcatDependencies(Node Input, string Path, IEnumerable<string> Reject)
         {
             var deps = new List<string>();
+            var script = new Node("script");
 
-            return LocalConcat(Input, Path);
+            script.AddInnerHtml(LocalConcat(Input.InnerHtml, Path));
+
+            return script;
 
             string GetPath(string input, string path)
             {

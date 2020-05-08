@@ -11,13 +11,12 @@ namespace RemoteControlTranslator
         const string resultfilename = "index-simple.html";
 
         static readonly string[] cssfiles = Directory.GetFiles(path, "*.css");
-        static readonly string[] htmlfiles = Directory.GetFiles(path, "*.html");
 
         const string newLine = "\r\n";
 
         public static void Translate()
         {
-            var input = File.ReadAllText(htmlfiles.Single(x => x.Contains(filename)));
+            var input = File.ReadAllText(path + filename);
             var tree = Parser.GetTree(input);
 
             var title = tree.FindNodesByTag("title").FirstOrDefault();
@@ -37,20 +36,15 @@ namespace RemoteControlTranslator
 
             head.AddChild(style);
 
-            var script = new Node("script");
-            script.AddInnerHtml(Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault().InnerHtml, path, new[] { "point", "touch" }));
+            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), path, new[] { "point", "touch" });
 
             head.AddChild(script);
 
             var body = tree.FindNodesByTag("body").FirstOrDefault();
 
-            var loader = tree.FindNodeById("loader", body);
-            var touch = tree.FindNodeById("touch", body);
-            var inp = tree.FindNodesByTag("input", body).FirstOrDefault();
-
-            tree.RemoveNode(loader);
-            tree.RemoveNode(touch);
-            tree.RemoveNode(inp);
+            tree.RemoveNode(tree.FindNodeById("loader", body));
+            tree.RemoveNode(tree.FindNodeById("touch", body));
+            tree.RemoveNode(tree.FindNodesByTag("input", body).FirstOrDefault());
 
             newTree.Root.AddChild(body);
 

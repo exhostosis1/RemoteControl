@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using static HtmlParser.Constants;
 
@@ -31,13 +30,18 @@ namespace HtmlParser
             }
         }
 
-        public void SetInnerHtml(string input)
+        public void ParseInnerHtml(string input)
         {
             var node = Parser.GetTree(input).Root;
 
             this._innerHtml.Clear();
 
             this._innerHtml = node._innerHtml;
+
+            foreach(var child in Children)
+            {
+                child.Parent = this;
+            }
         }
 
         public void AddInnerHtml(string value)
