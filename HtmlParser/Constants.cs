@@ -20,6 +20,14 @@
             Init
         }
 
+        public enum SearchTypes
+        {
+            Tag,
+            Class,
+            Directive,
+            Attribute
+        }
+
         public static string MySubstring(this string input, int startIndex, int endIndex, bool include = false)
         {
             return input.Substring(startIndex + (include ? 0 : 1), endIndex - startIndex + 1 - (include ? 0 : 2));

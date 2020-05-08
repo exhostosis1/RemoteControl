@@ -20,50 +20,44 @@ namespace RemoteControlTranslator
             var input = File.ReadAllText(htmlfiles.Single(x => x.Contains(filename)));
             var tree = Parser.GetTree(input);
 
+            var title = tree.FindNodesByTag("title").FirstOrDefault();
+            var meta = tree.FindNodesByTag("meta").FirstOrDefault();
+
+            var head = new Node("head");
+
+            head.AddChild(title);
+            head.AddChild(meta);
+
             var newTree = new Tree(new Node("html"));
-
-            var head = tree.FindNodesByTag("head").First();
-
-            var script = new Node("script");
-            script.Attributes.Add(new Attribute("type", "text/javascript"));
-
-            var oldScript = tree.FindNodesByTag("script").First();
-
-            script.AddInnerHtml(Parser.ConcatDependencies(oldScript.InnerHtml, path, new[] { "touch", "point" }));
-
-            var scriptAndStyle = Enumerable.Concat(tree.FindNodesByTag("link"), Enumerable.Concat(tree.FindNodesByTag("script"), tree.FindNodesByTag("style"))).ToList();
-
-            foreach(var node in scriptAndStyle)
-            {
-                head.RemoveChild(node);
-            }           
-
-            var style = new Node("style");
-
-            style.AddInnerHtml(File.ReadAllText(cssfiles.First()));
-
-            head.AddChild(style);
-            head.AddChild(script);
 
             newTree.Root.AddChild(head);
 
-            var body = tree.FindNodesByTag("body").First();
+            var style = new Node("style");
+            style.AddInnerHtml(string.Join(newLine, cssfiles.ToList().Select(x => File.ReadAllText(x))));
 
-            var divs = tree.FindNodesByTag("div").Where(x => x.Attributes["id"] == "loader" || x.Attributes["id"] == "touch").ToList();
+            head.AddChild(style);
 
-            foreach(var div in divs)
-            {
-                tree.RemoveNode(div);
-            }
+            var script = new Node("script");
+            script.AddInnerHtml(Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault().InnerHtml, path, new[] { "point", "touch" }));
 
-            var inputNode = tree.FindNodesByTag("input").First();
-            tree.RemoveNode(inputNode);
+            head.AddChild(script);
+
+            var body = tree.FindNodesByTag("body").FirstOrDefault();
+
+            var loader = tree.FindNodeById("loader", body);
+            var touch = tree.FindNodeById("touch", body);
+            var inp = tree.FindNodesByTag("input", body).FirstOrDefault();
+
+            tree.RemoveNode(loader);
+            tree.RemoveNode(touch);
+            tree.RemoveNode(inp);
 
             newTree.Root.AddChild(body);
 
-            var result = string.Join(newLine, newTree.ToString().Split(newLine.ToCharArray(), System.StringSplitOptions.RemoveEmptyEntries).Where(x => !string.IsNullOrWhiteSpace(x)));
+            var result = newTree.ToString().Split(newLine.ToCharArray()).ToList();
+            result.RemoveAll(x => string.IsNullOrWhiteSpace(x));
 
-            File.WriteAllText(path + resultfilename, result);
+            File.WriteAllText(path + resultfilename, string.Join(newLine, result));
         }
     }
 }

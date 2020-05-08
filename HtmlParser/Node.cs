@@ -70,6 +70,15 @@ namespace HtmlParser
             child.Parent = this;
         }
 
+        public void AddChildren(ICollection<Node> nodes)
+        {
+            this._innerHtml.AddRange(nodes);
+            foreach(var node in nodes)
+            {
+                node.Parent = this;
+            }
+        }
+
         public void RemoveParent()
         {
             this.Parent._innerHtml.Remove(this);
@@ -80,6 +89,11 @@ namespace HtmlParser
         {
             this._innerHtml.Remove(child);
             child.Parent = null;
+        }
+
+        public void RemoveChildren()
+        {
+            this._innerHtml.RemoveAll(x => x.GetType() == typeof(Node));
         }
 
         public override string ToString()
