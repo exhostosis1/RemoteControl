@@ -7,12 +7,13 @@ namespace HtmlParser
 {
     public class Node
     {
-        public string Tag { 
+        public string Tag
+        {
             get
             {
                 return _tag;
             }
-            
+
             set
             {
                 _tag = value?.ToLower() ?? "";
@@ -20,12 +21,13 @@ namespace HtmlParser
         }
 
         private string _tag;
-        
+
         public string InnerHtml
         {
             get
             {
-                return String.Join(newLine, _innerHtml);
+                var result = string.Join(newLine, _innerHtml.Where(x => !string.IsNullOrWhiteSpace(x.ToString())));
+                return result.Trim();
             }
         }
 
@@ -40,7 +42,8 @@ namespace HtmlParser
 
         public void AddInnerHtml(string value)
         {
-            _innerHtml.Add(value);
+            if (!string.IsNullOrWhiteSpace(value))
+                _innerHtml.Add(value);
         }
 
         private List<object> _innerHtml = new List<object>();
@@ -73,7 +76,7 @@ namespace HtmlParser
         public void AddChildren(ICollection<Node> nodes)
         {
             this._innerHtml.AddRange(nodes);
-            foreach(var node in nodes)
+            foreach (var node in nodes)
             {
                 node.Parent = this;
             }
@@ -96,12 +99,32 @@ namespace HtmlParser
             this._innerHtml.RemoveAll(x => x.GetType() == typeof(Node));
         }
 
+        private string FormatInnerHtml()
+        {
+            var result = new List<string>();
+
+            foreach (var entry in _innerHtml)
+            {
+                var temp = entry.ToString().Split(newLine.ToCharArray()).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => tab + x);
+
+                if (temp.Any())
+                {
+                    result.Add(string.Join(newLine, temp));
+                }
+            }
+
+            return newLine + string.Join(newLine, result) + newLine;
+        }
+
         public override string ToString()
         {
-            var inn = string.IsNullOrEmpty(InnerHtml) ? "" : newLine + InnerHtml + newLine;
-            var att = Attributes.Count > 0 ? " " + string.Join(" ", Attributes) : "";
-            var ot = string.IsNullOrEmpty(Tag) ? "" : $"<{Tag}{att}>";
-            var ct = string.IsNullOrEmpty(Tag) ? "" : $"</{Tag}>";
+            var inner = FormatInnerHtml();
+            var t = !string.IsNullOrWhiteSpace(Tag);
+
+            var att = Attributes.Count > 0 ? space + string.Join(space, Attributes) : string.Empty;
+            var ot = t ? $"<{Tag}{att}>" : string.Empty;
+            var ct = t ? $"</{Tag}>" : string.Empty;
+            var inn = string.IsNullOrWhiteSpace(inner) ? "" : inner;
 
             return $"{ot}{inn}{ct}";
         }

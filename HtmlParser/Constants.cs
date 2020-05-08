@@ -10,6 +10,8 @@
         public const char forwardSlashChar = '/';
         public const char backSlashChar = '\\';
         public const string newLine = "\r\n";
+        public const string tab = "\t";
+        public const string space = " ";
 
         public enum Mode
         {

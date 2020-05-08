@@ -302,7 +302,7 @@ namespace HtmlParser
 
                                     return currentNode;
                                 }
-                                else if (!(currentNode.Tag.ToLower() == "script" || currentNode.Tag.ToLower() == "style"))
+                                else if (currentNode.Tag.ToLower() != "script" && currentNode.Tag.ToLower() != "style")
                                 {
                                     currentNode.AddInnerHtml(sb.ToString());
                                     sb.Clear();
@@ -320,6 +320,8 @@ namespace HtmlParser
                                     continue;
                                 }
 
+                            case var c when !str && char.IsWhiteSpace(c):
+                                continue;
                             default:
                                 sb.Append(currentChar);
                                 continue;

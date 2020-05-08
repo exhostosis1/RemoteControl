@@ -54,10 +54,7 @@ namespace RemoteControlTranslator
 
             newTree.Root.AddChild(body);
 
-            var result = newTree.ToString().Split(newLine.ToCharArray()).ToList();
-            result.RemoveAll(x => string.IsNullOrWhiteSpace(x));
-
-            File.WriteAllText(path + resultfilename, string.Join(newLine, result));
+            File.WriteAllText(path + resultfilename, newTree.ToString());
         }
     }
 }
