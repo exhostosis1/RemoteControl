@@ -23,7 +23,7 @@ namespace RemoteControlTests
                 Assert.Fail(e.Message);
             }
 
-            var ub = core.GetUriBuilder();
+            var ub = core.GetCurrentConfig().Item1;
 
             Assert.AreEqual(ub.Uri.ToString(), "http://localhost/");
 
@@ -33,21 +33,21 @@ namespace RemoteControlTests
             
             try
             {
-                core.Restart((scheme, host, port.ToString()));
+                core.Restart(new UriBuilder(scheme, host, port), false);
             }
             catch (Exception e)
             {
                 Assert.Fail(e.Message);
             }
 
-            ub = core.GetUriBuilder();
+            ub = core.GetCurrentConfig().Item1;
 
             Assert.AreEqual(ub.Scheme, scheme);
             Assert.AreEqual(ub.Host, host);
             Assert.AreEqual(ub.Port, port);
 
-            Assert.ThrowsException<FormatException>(() => core.Start(("http123", "localhost", "123fasdf")), "");
-            Assert.ThrowsException<FormatException>(() => core.Restart(("http123", "localhost", "123fasdf")), "");
+            Assert.ThrowsException<FormatException>(() => core.Start(new UriBuilder("http123", "localhost", 123), false), "");
+            Assert.ThrowsException<FormatException>(() => core.Restart(new UriBuilder("http123", "localhost", 123), false), "");
         }
 
         [TestMethod]
