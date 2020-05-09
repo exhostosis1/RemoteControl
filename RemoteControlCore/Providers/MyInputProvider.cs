@@ -42,6 +42,14 @@ namespace RemoteControlCore.Providers
                 {
                     KeysEnum.Pause,
                     VirtualKeyCode.MediaPlayPause
+                },
+                {
+                    KeysEnum.MediaBack,
+                    VirtualKeyCode.MediaPrevTrack
+                },
+                {
+                    KeysEnum.MediaForth,
+                    VirtualKeyCode.MediaNextTrack
                 }
             };
 

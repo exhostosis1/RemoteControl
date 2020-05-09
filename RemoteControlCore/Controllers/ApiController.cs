@@ -110,6 +110,12 @@ namespace RemoteControlCore.Controllers
                 case "pause":
                     _inputService.KeyPress(KeysEnum.Pause);
                     break;
+                case "mediaback":
+                    _inputService.KeyPress(KeysEnum.MediaBack);
+                    break;
+                case "mediaforth":
+                    _inputService.KeyPress(KeysEnum.MediaForth);
+                    break;
                 default:
                     break;
             }

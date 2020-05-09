@@ -5,6 +5,8 @@
         Enter,
         Back,
         Forth,
-        Pause
+        Pause,
+        MediaForth,
+        MediaBack
     }
 }
