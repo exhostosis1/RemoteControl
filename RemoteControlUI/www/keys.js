@@ -7,8 +7,6 @@ let keyRepeatTimerId;
 
 let double = false;
 
-let buttonBack, buttonForth, buttonPause, buttonMediaBack, buttonMediaForth;
-
 let clickEvent = new Event(Events.Click);
 
 function start(value) {
@@ -26,46 +24,37 @@ function end() {
     clearTimeout(keyRepeadIntervalId);
 }
 
-function toggleDisplay() {
-    if(buttonBack.style.display == "none") {
-        buttonBack.style.display = "block";
-    } else {
-        buttonBack.style.display = "none";
-    }
-
-    if(buttonForth.style.display == "none") {
-        buttonForth.style.display = "block";
-     } else {
-        buttonForth.style.display = "none";
-     }
-
-     if(buttonMediaBack.style.display == "none") {
-        buttonMediaBack.style.display = "block";
-     } else {
-        buttonMediaBack.style.display = "none";
-     }
-
-     if(buttonMediaForth.style.display == "none") {
-        buttonMediaForth.style.display = "block";
-     } else {
-        buttonMediaForth.style.display = "none";
-     }
+function toggleDisplay(buttonsArray) {
+    buttonsArray.forEach(x => {
+        x.style.display = x.style.display === "none" ? "block" : "none";
+    });
 }  
 
 
 function createKeys(buttons) {
 
-    [buttonBack, buttonPause, buttonForth, buttonMediaForth, buttonMediaBack] = new DOMParser().parseFromString(`
-        <button>&#60;&#60;</button>
-        <button>&#10074;&#10074;</button>
-        <button>&#62;&#62;</button>
-        <button>&#45;&#62;</button>
-        <button>&#60;&#45;</button>`, 'text/html').body.getElementsByTagName("button");
+    let buttonBack = document.createElement("button");
+    buttonBack.innerHTML = "&#60;&#60;"; 
+    let buttonPause = document.createElement("button");
+    buttonPause.innerHTML = "&#10074;&#10074;"; 
+    let buttonForth = document.createElement("button");
+    buttonForth.innerHTML = "&#62;&#62;"; 
+    let buttonMediaForth = document.createElement("button");
+    buttonMediaForth.innerHTML = "&#45;&#62;"; 
+    let buttonMediaBack = document.createElement("button");
+    buttonMediaBack.innerHTML = "&#60;&#45;"; 
+
+    let fillers = [document.createElement("span"), document.createElement("span")];
+    fillers.forEach(e => {
+        e.style.float = "left";
+        e.style.height = "1px";
+        e.style.width = "0.5%";
+    });
 
     buttonMediaBack.style.display = "none";
     buttonMediaForth.style.display = "none";    
         
-    buttons.append(buttonMediaBack, buttonBack, buttonPause, buttonForth, buttonMediaForth);
+    buttons.append(buttonMediaBack, buttonBack, fillers[0], buttonPause, fillers[1], buttonForth, buttonMediaForth);
 
     buttonBack.addEventListener("touchstart", () => start("back"));
     buttonBack.addEventListener("touchend", end);
@@ -80,9 +69,11 @@ function createKeys(buttons) {
     buttonMediaBack.addEventListener("click", () => {clickEvent.value = "mediaback"; buttons.dispatchEvent(clickEvent)});
     buttonMediaForth.addEventListener("click", () => {clickEvent.value = "mediaforth"; buttons.dispatchEvent(clickEvent)});
 
+    let buttonsArray = [buttonBack, buttonForth, buttonMediaBack, buttonMediaForth];
+
     buttonPause.addEventListener("click", e => {
         if(double) {
-            toggleDisplay();
+            toggleDisplay(buttonsArray);
         }
 
         double = true;
