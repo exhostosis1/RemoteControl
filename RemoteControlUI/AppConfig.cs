@@ -64,19 +64,12 @@ namespace RemoteControlUI
         }
 
         internal static AppConfig GetServerConfig()
-        {
-            if (!Int32.TryParse(GetAppConfig(PortConfigName), out var port))
-            {
-                port = DefaultPort;
-            }
-
+        {            
             var scheme = GetAppConfig(SchemeConfigName) ?? DefaultScheme;
             var host = GetAppConfig(IPConfigName) ?? DefaultHost;
-            
-            if(!Boolean.TryParse(GetAppConfig(SimpleConfigName), out var simple))
-            {
-                simple = DefaultSimple;
-            }
+
+            if (!Boolean.TryParse(GetAppConfig(SimpleConfigName), out var simple)) simple = DefaultSimple;
+            if (!Int32.TryParse(GetAppConfig(PortConfigName), out var port)) port = DefaultPort;         
 
             return new AppConfig(scheme, host, port, simple);
         }
@@ -85,10 +78,7 @@ namespace RemoteControlUI
         {
             name = name.ToLower();
 
-            if (config.ContainsKey(name))
-                return config[name];
-            else
-                return null;
+            return config.ContainsKey(name) ? config[name] : null;
         }
     }
 }
