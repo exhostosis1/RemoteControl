@@ -1,4 +1,4 @@
-import { Events } from './constants.js';
+import { Events, EventValues } from './constants.js';
 
 const CLICKINTERVAL = 1000;
 
@@ -30,7 +30,6 @@ function toggleDisplay(buttonsArray) {
     });
 }  
 
-
 function createKeys(buttons) {
 
     let buttonBack = document.createElement("button");
@@ -42,7 +41,7 @@ function createKeys(buttons) {
     let buttonMediaForth = document.createElement("button");
     buttonMediaForth.innerHTML = "&#45;&#62;"; 
     let buttonMediaBack = document.createElement("button");
-    buttonMediaBack.innerHTML = "&#60;&#45;"; 
+    buttonMediaBack.innerHTML = "&#60;&#45;";
 
     let fillers = [document.createElement("span"), document.createElement("span")];
     fillers.forEach(e => {
@@ -56,18 +55,18 @@ function createKeys(buttons) {
         
     buttons.append(buttonMediaBack, buttonBack, fillers[0], buttonPause, fillers[1], buttonForth, buttonMediaForth);
 
-    buttonBack.addEventListener("touchstart", () => start("back"));
+    buttonBack.addEventListener("touchstart", () => start(EventValues.Back));
     buttonBack.addEventListener("touchend", end);
-    buttonBack.addEventListener("click", () => {clickEvent.value = "back"; buttons.dispatchEvent(clickEvent); });
+    buttonBack.addEventListener("click", () => { clickEvent.value = EventValues.Back; buttons.dispatchEvent(clickEvent); });
     buttonBack.addEventListener("touchcancel", end);
 
-    buttonForth.addEventListener("touchstart", () => start("forth"));
+    buttonForth.addEventListener("touchstart", () => start(EventValues.Forth));
     buttonForth.addEventListener("touchend", end);
-    buttonForth.addEventListener("click", () => {clickEvent.value = "forth"; buttons.dispatchEvent(clickEvent); });
+    buttonForth.addEventListener("click", () => { clickEvent.value = EventValues.Forth; buttons.dispatchEvent(clickEvent); });
     buttonForth.addEventListener("touchcancel", end);
 
-    buttonMediaBack.addEventListener("click", () => {clickEvent.value = "mediaback"; buttons.dispatchEvent(clickEvent)});
-    buttonMediaForth.addEventListener("click", () => {clickEvent.value = "mediaforth"; buttons.dispatchEvent(clickEvent)});
+    buttonMediaBack.addEventListener("click", () => { clickEvent.value = EventValues.MediaBack; buttons.dispatchEvent(clickEvent) });
+    buttonMediaForth.addEventListener("click", () => { clickEvent.value = EventValues.MediaForth; buttons.dispatchEvent(clickEvent) });
 
     let buttonsArray = [buttonBack, buttonForth, buttonMediaBack, buttonMediaForth];
 
@@ -81,7 +80,7 @@ function createKeys(buttons) {
             double = false;
         }, CLICKINTERVAL);
 
-        clickEvent.value = "pause"; 
+        clickEvent.value = EventValues.Pause; 
         buttons.dispatchEvent(clickEvent); 
     });
 }

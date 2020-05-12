@@ -1,5 +1,5 @@
 import { Point } from './point.js';
-import { Events } from './constants.js';
+import { Events, EventValues } from './constants.js';
 
 let lastMovePosition;
 
@@ -47,7 +47,7 @@ function processTouchMove(e) {
             touchElement.dispatchEvent(moveEvent);
         }
         if (e.targetTouches.length === 2 && Math.abs(diff.y) > 10) {
-            scrollEvent.direction = diff.y > 0 ? "up" : "down";
+            scrollEvent.direction = diff.y > 0 ? EventValues.Up : EventValues.Down;
             touchElement.dispatchEvent(scrollEvent);
         }
     }

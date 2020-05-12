@@ -6,6 +6,15 @@ let Events = {
     Scroll: "touchscroll",
     ValueChanged: "slidervaluechanged"
 }
+let EventValues = {
+    Back: "back",
+    Forth: "forth",
+    MediaBack: "mediaback",
+    MediaForth: "mediaforth",
+    Pause: "pause",
+    Up: "up",
+    Down: "down"
+}
 let Modes = {
     Audio: "audio",
     Mouse: "mouse",
@@ -14,4 +23,4 @@ let Modes = {
     Wheel: "wheel"
 }
 
-export { Events, Modes }
+export { Events, Modes, EventValues }
