@@ -31,7 +31,7 @@ namespace DependencyFactory.Config
             
         internal static IReadOnlyList<DependencyFactoryConfigItem> GetConfig()
         {
-            return Items as IReadOnlyList<DependencyFactoryConfigItem>;
+            return Items;
         }
 
         internal static void ResetConfig()

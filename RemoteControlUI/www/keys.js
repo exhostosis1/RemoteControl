@@ -5,8 +5,6 @@ const CLICKINTERVAL = 1000;
 let keyRepeadIntervalId;
 let keyRepeatTimerId;
 
-let double = false;
-
 let clickEvent = new Event(Events.Click);
 
 function start(value) {
@@ -70,18 +68,19 @@ function createKeys(buttons) {
 
     let buttonsArray = [buttonBack, buttonForth, buttonMediaBack, buttonMediaForth];
 
+
+    let timeout;
+
     buttonPause.addEventListener("click", e => {
-        if(double) {
-            toggleDisplay(buttonsArray);
-        }
-
-        double = true;
-        setTimeout(() => {
-            double = false;
-        }, CLICKINTERVAL);
-
         clickEvent.value = EventValues.Pause; 
         buttons.dispatchEvent(clickEvent); 
+    });
+    
+    buttonPause.addEventListener("touchstart", e => {
+        timeout = setTimeout(() => toggleDisplay(buttonsArray), CLICKINTERVAL);
+    });
+    buttonPause.addEventListener("touchend", e => {
+        clearTimeout(timeout);
     });
 }
 
