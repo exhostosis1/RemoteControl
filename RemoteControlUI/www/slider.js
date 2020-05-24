@@ -1,4 +1,4 @@
-import { Events } from './constants.js';
+import { Events } from "./constants.js";
 
 let SLIDERSCALE = 0;
 const HANDLECLASS = "volume-handle";
@@ -103,7 +103,7 @@ function createVolumeBar(slider, scale, initValue = 0, numeric = false) {
 
     volumeBarHandle.addEventListener("touchmove", e => { e.preventDefault(); checkSendRequest(e.targetTouches[0].clientX); });
     volumeBar.addEventListener("click", e => { e.preventDefault(); checkSendRequest(e.clientX); });
-    volumeBar.addEventListener("wheel", e => { e.preventDefault(); wheel(e.wheelDeltaY) });
+    volumeBar.addEventListener("wheel", e => { e.preventDefault(); wheel(e.wheelDeltaY); });
 
     volumeBarHandle.addEventListener("mousedown", () => drag = true);
     volumeBarHandle.addEventListener("mouseup", () => drag = false);

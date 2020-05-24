@@ -1,5 +1,5 @@
-import { Point } from './point.js';
-import { Events, EventValues } from './constants.js';
+import { Point } from "./point.js";
+import { Events, EventValues } from "./constants.js";
 
 let lastMovePosition;
 
@@ -35,7 +35,7 @@ function processTouchMove(e) {
 
         let pos = new Point(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
         if (!lastMovePosition) {
-            lastMovePosition = new Point(touchesCache[0].x, touchesCache[0].y)
+            lastMovePosition = new Point(touchesCache[0].x, touchesCache[0].y);
         }
 
         let diff = new Point(pos.x - lastMovePosition.x, pos.y - lastMovePosition.y);
@@ -139,7 +139,7 @@ function hidePointer() {
 function createTouch(element) {
     touchElement = element;
 
-    touchPointer = new DOMParser().parseFromString('<div id="touch-pointer" style="display: none"></div>', 'text/html').body.firstChild;
+    touchPointer = new DOMParser().parseFromString("<div id='touch-pointer' style='display: none'></div>", "text/html").body.firstChild;
     touchElement.append(touchPointer);
 
     touchElement.addEventListener("touchmove", processTouchMove);

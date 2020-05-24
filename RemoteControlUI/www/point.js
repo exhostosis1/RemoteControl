@@ -7,14 +7,14 @@ class Point {
         this.y = Math.round(y);
         this.id = id;
         this.start = new Date();
-    }    
+    }
 
-    checkRange = function (that) {
+    checkRange(that) {
         return  Math.abs(this.x - that.x) <= CLICKRANGE &&
                 Math.abs(this.y - that.y) <= CLICKRANGE;
     }
 
-    checkTime = function (that) {
+    checkTime(that) {
         return that.start - this.start <= CLICKINTERVAL;
     }
 }
