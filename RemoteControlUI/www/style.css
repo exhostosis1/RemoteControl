@@ -9,19 +9,19 @@ body {
 
 #volume-bar {
     display: block;
-	margin: 0 auto;
-	height: 60px;
-	width: 100%;
-	background: #555;
-	border-radius: 15px;
+	  margin: 0 auto;
+	  height: 60px;
+	  width: 100%;
+	  background: #555;
+  	border-radius: 15px;
     margin-bottom: 10px;
 }
 
 #text-input {
     display: block;
-	height: 50px;
-	width: 100%;
-	background: #555;
+  	height: 50px;
+  	width: 100%;
+  	background: #555;
     border-radius: 15px;
     border: 0;
     color:white;
@@ -30,23 +30,23 @@ body {
 }
 
 #volume-bar .volume-colored {
-	height: 60px;
-	position: absolute;
-	background: #2ecc71;
-	border: none;
-        border-radius: 15px;
-  	outline: none;
+	  height: 60px;
+	  position: absolute;
+	  background: #2ecc71;
+	  border: none;
+    border-radius: 15px;
+    outline: none;
 }
     
 #volume-bar .volume-handle {
-	width: 70px;
-  	height: 70px;
-	border-radius: 20px;
-  	background: #FFF;
-  	position: absolute;
-  	margin-top: -5px;
-  	cursor: pointer;
-  	outline: none;
+  	width: 70px;
+    height: 70px;
+  	border-radius: 20px;
+    background: #FFF;
+    position: absolute;
+    margin-top: -5px;
+    cursor: pointer;
+    outline: none;
 }
 
 button {

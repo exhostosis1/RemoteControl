@@ -1,10 +1,10 @@
-import { Events } from "./constants.js";
+import { Events } from './constants.js';
 
 let SLIDERSCALE = 0;
-const HANDLECLASS = "volume-handle";
-const COLOREDCLASS = "volume-colored";
-const BARID = "volume-bar";
-const NUMERICID = "volume-numeric";
+const HANDLECLASS = 'volume-handle';
+const COLOREDCLASS = 'volume-colored';
+const BARID = 'volume-bar';
+const NUMERICID = 'volume-numeric';
 
 let volumeBar;
 let volumeBarColored;
@@ -19,10 +19,10 @@ let numericEnabled = false;
 
 let drag = false;
 
-let changeEvent = new Event(Events.ValueChanged);
+const changeEvent = new Event(Events.ValueChanged);
 
 function setVolumeBar(value) {
-    let correction = volumeBarHandle.offsetWidth / 2;
+    const correction = volumeBarHandle.offsetWidth / 2;
 
     let pixelValue = value - volumeBar.offsetLeft;
     pixelValue = pixelValue <= volumeBar.offsetWidth - correction ? pixelValue : volumeBar.offsetWidth - correction;
@@ -39,22 +39,22 @@ function setVolumeBarNumeric(value) {
 }
 
 function toPixels(value) {
-    return (volumeBar.offsetWidth - volumeBarHandle.offsetWidth) / SLIDERSCALE * value + (volumeBarHandle.offsetWidth / 2) + volumeBar.offsetLeft;
+    return ((volumeBar.offsetWidth - volumeBarHandle.offsetWidth) / SLIDERSCALE) * value + (volumeBarHandle.offsetWidth / 2) + volumeBar.offsetLeft;
 }
 
 function toNumeric(value) {
-    return Math.round((value - volumeBarHandle.offsetWidth / 2) * SLIDERSCALE / (volumeBar.offsetWidth - volumeBarHandle.offsetWidth));
+    return (Math.round((value - volumeBarHandle.offsetWidth / 2) * SLIDERSCALE) / (volumeBar.offsetWidth - volumeBarHandle.offsetWidth));
 }
 
 function checkSendRequest(value) {
-    let newNumeric = toNumeric(setVolumeBar(value));
+    const newNumeric = toNumeric(setVolumeBar(value));
 
     if (newNumeric !== volumeNumericValue) {
         volumeNumericValue = newNumeric;
 
         changeEvent.value = newNumeric;
         sliderElement.dispatchEvent(changeEvent);
-        if(numericEnabled) {
+        if (numericEnabled) {
             setVolumeBarNumeric(newNumeric);
         }
     }
@@ -64,13 +64,13 @@ function wheel(e) {
     checkSendRequest(toPixels(e > 0 ? volumeNumericValue + 2 : volumeNumericValue - 2));
 }
 
-function init(initialValue) {  
+function init(initialValue) {
     volumeNumericValue = Number(initialValue);
-    
-    if(!Number.isNaN(volumeNumericValue)) {
-        setVolumeBar(toPixels(initialValue));  
 
-        if(numericEnabled) {
+    if (!Number.isNaN(volumeNumericValue)) {
+        setVolumeBar(toPixels(initialValue));
+
+        if (numericEnabled) {
             setVolumeBarNumeric(initialValue);
         }
     }
@@ -82,34 +82,34 @@ function createVolumeBar(slider, scale, initValue = 0, numeric = false) {
 
     sliderElement = slider;
 
-    var html = `<div id='${BARID}'></div>`;
-    html = numericEnabled ? `<div id='${NUMERICID}'>0</div>\n` + html : html;
+    let html = `<div id='${BARID}'></div>`;
+    html = numericEnabled ? `<div id='${NUMERICID}'>0</div>\n${html}` : html;
 
     sliderElement.innerHTML = html;
 
     volumeBar = sliderElement.querySelector(`#${BARID}`);
 
-    if(numeric) {
+    if (numeric) {
         volumeBarNumericElement = sliderElement.querySelector(`#${NUMERICID}`);
     }
 
     volumeBar.innerHTML = `
-        <div class="${COLOREDCLASS}"></div>
-        <div class="${HANDLECLASS}"></div>
+        <div class='${COLOREDCLASS}'></div>
+        <div class='${HANDLECLASS}'></div>
     `;
 
     volumeBarHandle = volumeBar.querySelector(`.${HANDLECLASS}`);
     volumeBarColored = volumeBar.querySelector(`.${COLOREDCLASS}`);
 
-    volumeBarHandle.addEventListener("touchmove", e => { e.preventDefault(); checkSendRequest(e.targetTouches[0].clientX); });
-    volumeBar.addEventListener("click", e => { e.preventDefault(); checkSendRequest(e.clientX); });
-    volumeBar.addEventListener("wheel", e => { e.preventDefault(); wheel(e.wheelDeltaY); });
+    volumeBarHandle.addEventListener('touchmove', e => { e.preventDefault(); checkSendRequest(e.targetTouches[0].clientX); });
+    volumeBar.addEventListener('click', e => { e.preventDefault(); checkSendRequest(e.clientX); });
+    volumeBar.addEventListener('wheel', e => { e.preventDefault(); wheel(e.wheelDeltaY); });
 
-    volumeBarHandle.addEventListener("mousedown", () => drag = true);
-    volumeBarHandle.addEventListener("mouseup", () => drag = false);
-    volumeBarHandle.addEventListener("mousemove", e => { e.preventDefault(); if(drag) checkSendRequest(e.clientX); });
+    volumeBarHandle.addEventListener('mousedown', () => { drag = true; });
+    volumeBarHandle.addEventListener('mouseup', () => { drag = false; });
+    volumeBarHandle.addEventListener('mousemove', e => { e.preventDefault(); if (drag) checkSendRequest(e.clientX); });
 
     init(initValue);
 }
 
-export { createVolumeBar };
+export { createVolumeBar as default };

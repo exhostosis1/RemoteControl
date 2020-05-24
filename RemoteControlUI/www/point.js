@@ -10,8 +10,8 @@ class Point {
     }
 
     checkRange(that) {
-        return  Math.abs(this.x - that.x) <= CLICKRANGE &&
-                Math.abs(this.y - that.y) <= CLICKRANGE;
+        return Math.abs(this.x - that.x) <= CLICKRANGE
+            && Math.abs(this.y - that.y) <= CLICKRANGE;
     }
 
     checkTime(that) {
@@ -19,4 +19,4 @@ class Point {
     }
 }
 
-export { Point };
+export { Point as default };
