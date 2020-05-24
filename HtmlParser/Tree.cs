@@ -6,51 +6,48 @@ namespace HtmlParser
 {
     public class Tree
     {
-        public Node Root { get; set; }
+        public Node Root { get; }
 
         public int Count => CountChildren(Root);
 
-        public IReadOnlyCollection<Node> FindNodesByTag(string Tag) => FindNodesByTag(Tag, Root);
+        public IEnumerable<Node> FindNodesByTag(string tag) => FindNodesByTag(tag, Root);
 
-        public IReadOnlyCollection<Node> FindNodesByTag(string Tag, Node parent) => Find(SearchTypes.Tag, parent, Tag, null).ToList();
+        public IEnumerable<Node> FindNodesByTag(string tag, Node parent) => Find(SearchTypes.Tag, parent, tag, null).ToList();
 
         public Node FindNodeById(string id) => FindNodeById(id, Root);
 
-        public Node FindNodeById(string id, Node parent) => Find(SearchTypes.Attribute, parent, id, "id").FirstOrDefault();
+        public static Node FindNodeById(string id, Node parent) => Find(SearchTypes.Attribute, parent, id, "id").FirstOrDefault();
 
         public IReadOnlyCollection<Node> FindNodesByAttribute(string attribute, string value) => FindNodesByAttribute(attribute, value, Root);
 
-        public IReadOnlyCollection<Node> FindNodesByAttribute(string attribute, string value, Node parent) => Find(SearchTypes.Attribute, parent, value, attribute).ToList();
+        public static IReadOnlyCollection<Node> FindNodesByAttribute(string attribute, string value, Node parent) => Find(SearchTypes.Attribute, parent, value, attribute).ToList();
 
         public IReadOnlyCollection<Node> FindNodesByDirective(string value) => FindNodesByDirective(value, Root);
 
-        public IReadOnlyCollection<Node> FindNodesByDirective(string value, Node parent) => Find(SearchTypes.Directive, parent, null, value).ToList();
+        public static IReadOnlyCollection<Node> FindNodesByDirective(string value, Node parent) => Find(SearchTypes.Directive, parent, null, value).ToList();
 
         public IReadOnlyCollection<Node> FindNodesByClassName(string value) => FindNodesByClassName(value, Root);
 
-        public IReadOnlyCollection<Node> FindNodesByClassName(string value, Node parent) => Find(SearchTypes.Class, parent, value, null).ToList();
+        public static IReadOnlyCollection<Node> FindNodesByClassName(string value, Node parent) => Find(SearchTypes.Class, parent, value, null).ToList();
 
         public Tree(Node node)
         {
             Root = node;
         }
 
-        private int CountChildren(Node node)
+        private static int CountChildren(Node node)
         {
             var result = 1;
 
             if (node.Children.Count == 0)
                 return result;
 
-            foreach (var child in node.Children)
-            {
-                result += CountChildren(child);
-            }
+            result += node.Children.Sum(CountChildren);
 
             return result;
         }
 
-        private IEnumerable<Node> Find(SearchTypes type, Node node, string value, string attribute)
+        private static IEnumerable<Node> Find(SearchTypes type, Node node, string value, string attribute)
         {
             if (Predicate(type, node, value, attribute)) yield return node;
 
@@ -59,7 +56,7 @@ namespace HtmlParser
                     yield return childNode;
         }
 
-        private bool Predicate(SearchTypes type, Node node, string value, string attribute)
+        private static bool Predicate(SearchTypes type, Node node, string value, string attribute)
         {
             string left;
 
@@ -83,7 +80,7 @@ namespace HtmlParser
             return left == value.ToLower();
         }
 
-        public void RemoveNode(Node node)
+        public static void RemoveNode(Node node)
         {
             node.Parent.RemoveChild(node);
         }

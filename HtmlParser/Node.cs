@@ -109,9 +109,9 @@ namespace HtmlParser
 
             foreach (var entry in _innerHtml)
             {
-                var temp = entry.ToString().Split(newLine.ToCharArray()).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => tab + x);
+                var temp = entry.ToString().Split(newLine.ToCharArray()).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => tab + x).ToArray();
 
-                if (temp.Any())
+                if (temp.Length > 0)
                 {
                     result.Add(string.Join(newLine, temp));
                 }

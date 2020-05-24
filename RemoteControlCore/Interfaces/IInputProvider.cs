@@ -4,8 +4,8 @@ namespace RemoteControlCore.Interfaces
 {
     internal interface IInputProvider
     {
-        IKeyboard Keyboard { get; set; }
-        IMouse Mouse { get; set; }
+        IKeyboard Keyboard { get; }
+        IMouse Mouse { get; }
     }
 
     internal interface IKeyboard
@@ -21,7 +21,7 @@ namespace RemoteControlCore.Interfaces
         void MouseButtonUp(MouseKeysEnum key);
         void MouseButtonDown(MouseKeysEnum key);
         void MouseButtonClick(MouseKeysEnum key);
-        void MoveMouseBy(int X, int Y);
-        void VerticalScroll(int Y);
+        void MoveMouseBy(int x, int y);
+        void VerticalScroll(int y);
     }
 }

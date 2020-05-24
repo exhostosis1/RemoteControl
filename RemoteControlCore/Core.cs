@@ -8,22 +8,20 @@ namespace RemoteControlCore
 {
     public class Core
     {
-        readonly IHttpListener _listener;
-        readonly AbstractController _apiController;
-        readonly AbstractController _httpController;
+        private readonly IHttpListener _listener;
 
-        UriBuilder _ub = new UriBuilder();
-        bool _simple = false;
+        private UriBuilder _ub = new UriBuilder();
+        private bool _simple;
 
         public Core()
         {
-            _apiController = Factory.GetInstance<AbstractController>(MyDependencyFactoryConfig.ApiNavigationOption);
-            _httpController = Factory.GetInstance<AbstractController>(MyDependencyFactoryConfig.HttpNavigationOption);
+            var apiController = Factory.GetInstance<AbstractController>(MyDependencyFactoryConfig.ApiNavigationOption);
+            var httpController = Factory.GetInstance<AbstractController>(MyDependencyFactoryConfig.HttpNavigationOption);
 
             _listener = Factory.GetInstance<IHttpListener>();
 
-            _listener.OnApiRequest += _apiController.ProcessRequest;
-            _listener.OnHttpRequest += _httpController.ProcessRequest;
+            _listener.OnApiRequest += apiController.ProcessRequest;
+            _listener.OnHttpRequest += httpController.ProcessRequest;
         }
 
         public void Start(UriBuilder ub, bool simple)

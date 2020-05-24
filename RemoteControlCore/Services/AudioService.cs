@@ -8,7 +8,7 @@ namespace RemoteControlCore.Services
 {
     internal class AudioService : IAudioService, IObserver<DeviceChangedArgs>
     {
-        IDevice _audioDevice;
+        private IDevice _audioDevice;
 
         public AudioService()
         {
@@ -20,7 +20,7 @@ namespace RemoteControlCore.Services
 
         public string GetVolume()
         {
-            return _audioDevice.Volume.ToString();
+            return Convert.ToInt32(_audioDevice.Volume).ToString();
         }
 
         public void Mute(bool mute)

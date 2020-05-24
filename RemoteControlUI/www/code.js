@@ -1,7 +1,7 @@
-import { createVolumeBar } from './slider.js';
-import { createTouch } from './touch.js';
-import { createKeys } from './keys.js';
-import { Events, Modes } from './constants.js';
+import { createVolumeBar } from './slider.js'
+import { createTouch } from './touch.js'
+import { createKeys } from './keys.js'
+import { Events, Modes } from './constants.js'
 
 async function sendRequest(mode, value) {
     return (await fetch(`/api?mode=${mode}&value=${value}`)).text();

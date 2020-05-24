@@ -1,13 +1,13 @@
-﻿using RemoteControlCore;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
+using RemoteControlCore;
 
-namespace RemoteControlUI
+namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
-        readonly Core program = new Core();
+        readonly Core _program = new Core();
 
         public ConfigForm()
         {
@@ -18,20 +18,20 @@ namespace RemoteControlUI
                 var conf = AppConfig.GetServerConfig();
 
                 SetConfigTextBoxes(conf);
-                program.Start(new UriBuilder(conf.Scheme, conf.Host, conf.Port), conf.Simple);
+                _program.Start(new UriBuilder(conf.Scheme, conf.Host, conf.Port), conf.Simple);
 
                 EnableMenuItem();
             }
             catch(Exception e)
             {
                 DisableMenuItem();
-                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                MessageBox.Show(e.Message, @"Error", MessageBoxButtons.OK);
             }
         }
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            program.Stop();
+            _program.Stop();
             Application.Exit();
         }
 
@@ -44,14 +44,14 @@ namespace RemoteControlUI
         {
             try
             {
-                program.Restart(new UriBuilder(this.textProtocol.Text, this.textHost.Text, Convert.ToInt32(this.textPort.Text)), this.checkBoxSimple.Checked);
+                _program.Restart(new UriBuilder(this.textProtocol.Text, this.textHost.Text, Convert.ToInt32(this.textPort.Text)), this.checkBoxSimple.Checked);
 
                 Minimize();
             }
             catch (Exception ex)
             {
                 DisableMenuItem();
-                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK);
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
                 return;
             }
 
@@ -69,19 +69,19 @@ namespace RemoteControlUI
         private void EnableMenuItem()
         {
             this.ipToolStripMenuItem.Enabled = true;
-            this.ipToolStripMenuItem.Text = program.GetCurrentConfig().Item1.Uri.ToString();
+            this.ipToolStripMenuItem.Text = _program.GetCurrentConfig().Item1.Uri.ToString();
         }
 
         private void DisableMenuItem()
         {
             this.ipToolStripMenuItem.Enabled = false;
-            this.ipToolStripMenuItem.Text = "Stopped";
+            this.ipToolStripMenuItem.Text = @"Stopped";
         }
 
         private void Button2_Click(object sender, EventArgs e)
         {
             Minimize();
-            var config = program.GetCurrentConfig();
+            var config = _program.GetCurrentConfig();
             var ub = config.Item1;
             var simple = config.Item2;
 
@@ -114,12 +114,12 @@ namespace RemoteControlUI
         {
             try
             {
-                program.Restart();
+                _program.Restart();
             }
             catch
             {
                 var config = AppConfig.GetServerConfig();
-                program.Restart(new UriBuilder(config.Scheme, config.Host, config.Port), config.Simple);
+                _program.Restart(new UriBuilder(config.Scheme, config.Host, config.Port), config.Simple);
 
                 SetConfigTextBoxes(config);
                 EnableMenuItem();

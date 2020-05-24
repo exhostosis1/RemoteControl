@@ -1,22 +1,22 @@
-﻿using HtmlParser;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
+using HtmlParser;
 
-namespace RemoteControlTranslator
+namespace RemoteControl
 {
     public static class Translator
     {
-        const string path = "www\\";
-        const string filename = "index.html";
-        const string resultfilename = "index-simple.html";
+        private const string Path = "www\\";
+        private const string Filename = "index.html";
+        private const string Resultfilename = "index-simple.html";
 
-        static readonly string[] cssfiles = Directory.GetFiles(path, "*.css");
+        private static readonly string[] Cssfiles = Directory.GetFiles(Path, "*.css");
 
-        const string newLine = "\r\n";
+        private const string NewLine = "\r\n";
 
         public static void Translate()
         {
-            var input = File.ReadAllText(path + filename);
+            var input = File.ReadAllText(Path + Filename);
             var tree = Parser.GetTree(input);
 
             var title = tree.FindNodesByTag("title").FirstOrDefault();
@@ -32,23 +32,23 @@ namespace RemoteControlTranslator
             newTree.Root.AddChild(head);
 
             var style = new Node("style");
-            style.AddInnerHtml(string.Join(newLine, cssfiles.ToList().Select(x => File.ReadAllText(x))));
+            style.AddInnerHtml(string.Join(NewLine, Cssfiles.ToList().Select(File.ReadAllText)));
 
             head.AddChild(style);
 
-            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), path, new[] { "point", "touch" });
+            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), Path, new[] { "point", "touch" });
 
             head.AddChild(script);
 
             var body = tree.FindNodesByTag("body").FirstOrDefault();
 
-            tree.RemoveNode(tree.FindNodeById("loader", body));
-            tree.RemoveNode(tree.FindNodeById("touch", body));
-            tree.RemoveNode(tree.FindNodesByTag("input", body).FirstOrDefault());
+            Tree.RemoveNode(Tree.FindNodeById("loader", body));
+            Tree.RemoveNode(Tree.FindNodeById("touch", body));
+            Tree.RemoveNode(tree.FindNodesByTag("input", body).FirstOrDefault());
 
             newTree.Root.AddChild(body);
 
-            File.WriteAllText(path + resultfilename, newTree.ToString());
+            File.WriteAllText(Path + Resultfilename, newTree.ToString());
         }
     }
 }

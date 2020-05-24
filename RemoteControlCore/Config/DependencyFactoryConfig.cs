@@ -23,7 +23,7 @@ namespace RemoteControlCore.Config
             Factory.AddConfig<AbstractController, HttpController>(HttpNavigationOption, DependencyBehavior.Singleton);
             Factory.AddConfig<IInputService, InputsimService>();
             Factory.AddConfig<IAudioService, AudioService>();
-            Factory.AddConfig<ICoordinates, Point>(DependencyBehavior.NewInstance);
+            Factory.AddConfig<ICoordinates, Point>();
             Factory.AddConfig<IInputProvider, MyInputProvider>(DependencyBehavior.Singleton);
         }        
     }

@@ -25,8 +25,6 @@ namespace RemoteControlCore.Services
                 case KeyPressMode.Down:
                     _inputSim.Keyboard.KeyDown(key);
                     break;
-                default:
-                    break;
             }
         }
 

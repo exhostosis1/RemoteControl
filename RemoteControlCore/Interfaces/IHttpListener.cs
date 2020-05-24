@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RemoteControlCore.Interfaces
+﻿namespace RemoteControlCore.Interfaces
 {
     internal interface IHttpListener
     {

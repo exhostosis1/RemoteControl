@@ -1,4 +1,4 @@
-﻿namespace RemoteControlUI
+﻿namespace RemoteControl
 {
     partial class ConfigForm
     {

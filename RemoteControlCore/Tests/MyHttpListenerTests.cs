@@ -1,33 +1,27 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RemoteControlCore.Listeners;
-using RemoteControlCore.Interfaces;
 
 namespace RemoteControlCore.Tests
 {
     [TestClass]
     public class MyHttpListenerTests
     {
-        MyHttpListener listener = new MyHttpListener();
+        readonly MyHttpListener _listener = new MyHttpListener();
 
         [TestMethod]
         public void StartListenTest()
         {
             try
             {
-                listener.StopListen();
-                listener.StartListen();
+                _listener.StopListen();
+                _listener.StartListen();
             }
             catch
             {
                 Assert.Fail();
             }
 
-            listener.StopListen();
+            _listener.StopListen();
         }
 
         [TestMethod]
@@ -35,7 +29,7 @@ namespace RemoteControlCore.Tests
         {
             try
             {
-                listener.RestartListen();
+                _listener.RestartListen();
             }
             catch
             {
@@ -48,7 +42,7 @@ namespace RemoteControlCore.Tests
         {
             try
             {
-                listener.StopListen();
+                _listener.StopListen();
             }
             catch
             {

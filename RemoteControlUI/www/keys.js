@@ -1,4 +1,4 @@
-import { Events, EventValues } from './constants.js';
+import { Events, EventValues } from "./constants.js";
 
 const CLICKINTERVAL = 1000;
 
@@ -7,13 +7,15 @@ let keyRepeatTimerId;
 
 let clickEvent = new Event(Events.Click);
 
+let buttonsGlobal;
+
 function start(value) {
     clickEvent.value = value;
 
     keyRepeatTimerId = setTimeout(() => {
         keyRepeadIntervalId = setInterval(() => {
-            buttons.dispatchEvent(clickEvent);
-        }, 100)
+            buttonsGlobal.dispatchEvent(clickEvent);
+        }, 100);
     }, 1000);
 }
 
@@ -29,6 +31,7 @@ function toggleDisplay(buttonsArray) {
 }  
 
 function createKeys(buttons) {
+    buttonsGlobal = buttons;
 
     let buttonBack = document.createElement("button");
     buttonBack.innerHTML = "&#60;&#60;"; 
@@ -63,23 +66,23 @@ function createKeys(buttons) {
     buttonForth.addEventListener("click", () => { clickEvent.value = EventValues.Forth; buttons.dispatchEvent(clickEvent); });
     buttonForth.addEventListener("touchcancel", end);
 
-    buttonMediaBack.addEventListener("click", () => { clickEvent.value = EventValues.MediaBack; buttons.dispatchEvent(clickEvent) });
-    buttonMediaForth.addEventListener("click", () => { clickEvent.value = EventValues.MediaForth; buttons.dispatchEvent(clickEvent) });
+    buttonMediaBack.addEventListener("click", () => { clickEvent.value = EventValues.MediaBack; buttons.dispatchEvent(clickEvent); });
+    buttonMediaForth.addEventListener("click", () => { clickEvent.value = EventValues.MediaForth; buttons.dispatchEvent(clickEvent); });
 
     let buttonsArray = [buttonBack, buttonForth, buttonMediaBack, buttonMediaForth];
 
 
     let timeout;
 
-    buttonPause.addEventListener("click", e => {
+    buttonPause.addEventListener("click", () => {
         clickEvent.value = EventValues.Pause; 
         buttons.dispatchEvent(clickEvent); 
     });
     
-    buttonPause.addEventListener("touchstart", e => {
+    buttonPause.addEventListener("touchstart", () => {
         timeout = setTimeout(() => toggleDisplay(buttonsArray), CLICKINTERVAL);
     });
-    buttonPause.addEventListener("touchend", e => {
+    buttonPause.addEventListener("touchend", () => {
         clearTimeout(timeout);
     });
 }

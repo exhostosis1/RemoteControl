@@ -8,24 +8,22 @@ namespace RemoteControlCore.Providers
 {
     internal class MyInputProvider : IInputProvider
     {
-        public IKeyboard Keyboard { get; set; }
-        public IMouse Mouse { get; set; }
-
-        private readonly InputSimulator _inputSim;
+        public IKeyboard Keyboard { get; }
+        public IMouse Mouse { get; }
 
         public MyInputProvider()
         {
-            _inputSim = new InputSimulator();
+            var inputSim = new InputSimulator();
 
-            Keyboard = new MyKeyboard(_inputSim);
-            Mouse = new MyMouse(_inputSim);
+            Keyboard = new MyKeyboard(inputSim);
+            Mouse = new MyMouse(inputSim);
         }
 
-        internal class MyKeyboard : IKeyboard
+        private class MyKeyboard : IKeyboard
         {
-            readonly InputSimulator _inputSim;
+            private readonly InputSimulator _inputSim;
 
-            readonly Dictionary<KeysEnum, VirtualKeyCode> keyboardKeys = new Dictionary<KeysEnum, VirtualKeyCode>()
+            private readonly Dictionary<KeysEnum, VirtualKeyCode> _keyboardKeys = new Dictionary<KeysEnum, VirtualKeyCode>()
             {
                 {
                     KeysEnum.Back,
@@ -60,17 +58,17 @@ namespace RemoteControlCore.Providers
 
             public void KeyDown(KeysEnum key)
             {
-                _inputSim.Keyboard.KeyDown(keyboardKeys[key]);
+                _inputSim.Keyboard.KeyDown(_keyboardKeys[key]);
             }
 
             public void KeyPress(KeysEnum key)
             {
-                _inputSim.Keyboard.KeyPress(keyboardKeys[key]);
+                _inputSim.Keyboard.KeyPress(_keyboardKeys[key]);
             }
 
             public void KeyUp(KeysEnum key)
             {
-                _inputSim.Keyboard.KeyUp(keyboardKeys[key]);
+                _inputSim.Keyboard.KeyUp(_keyboardKeys[key]);
             }
 
             public void TextEntry(string text)
@@ -79,12 +77,12 @@ namespace RemoteControlCore.Providers
             }
         }
 
-        internal class MyMouse : IMouse
+        private class MyMouse : IMouse
         {
-            readonly InputSimulator _inputSim;
+            private readonly InputSimulator _inputSim;
 
 
-            readonly Dictionary<MouseKeysEnum, MouseButton> mouseKeys = new Dictionary<MouseKeysEnum, MouseButton>()
+            private readonly Dictionary<MouseKeysEnum, MouseButton> _mouseKeys = new Dictionary<MouseKeysEnum, MouseButton>()
             {
                 {
                     MouseKeysEnum.Left,
@@ -107,27 +105,27 @@ namespace RemoteControlCore.Providers
 
             public void MouseButtonClick(MouseKeysEnum key)
             {
-                _inputSim.Mouse.MouseButtonClick(mouseKeys[key]);
+                _inputSim.Mouse.MouseButtonClick(_mouseKeys[key]);
             }
 
             public void MouseButtonDown(MouseKeysEnum key)
             {
-                _inputSim.Mouse.MouseButtonDown(mouseKeys[key]);
+                _inputSim.Mouse.MouseButtonDown(_mouseKeys[key]);
             }
 
             public void MouseButtonUp(MouseKeysEnum key)
             {
-                _inputSim.Mouse.MouseButtonUp(mouseKeys[key]);
+                _inputSim.Mouse.MouseButtonUp(_mouseKeys[key]);
             }
 
-            public void MoveMouseBy(int X, int Y)
+            public void MoveMouseBy(int x, int y)
             {
-                _inputSim.Mouse.MoveMouseBy(X, Y);
+                _inputSim.Mouse.MoveMouseBy(x, y);
             }
 
-            public void VerticalScroll(int Y)
+            public void VerticalScroll(int y)
             {
-                _inputSim.Mouse.VerticalScroll(Y);
+                _inputSim.Mouse.VerticalScroll(y);
             }
         }
     }

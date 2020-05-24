@@ -62,8 +62,6 @@
     <Compile Include="Providers\MyInputProvider.cs" />
     <Compile Include="Services\AudioService.cs" />
     <Compile Include="Services\InputsimService.cs" />
-    <Compile Include="Tests\ApiControllerTests.cs" />
-    <Compile Include="Tests\HttpControllerTests.cs" />
     <Compile Include="Tests\MyHttpListenerTests.cs" />
     <Compile Include="Utility\Point.cs" />
   </ItemGroup>

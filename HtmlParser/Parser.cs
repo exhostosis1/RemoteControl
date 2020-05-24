@@ -41,7 +41,7 @@ namespace HtmlParser
 
         public static Node GetNode(string source, int startIndex = 0) => GetNode(source, startIndex, out _, out _);
 
-        internal static Node GetNode(string source, int startIndex, out int currentIndex, out bool next)
+        private static Node GetNode(string source, int startIndex, out int currentIndex, out bool next)
         {
             currentIndex = startIndex;
 
@@ -51,7 +51,7 @@ namespace HtmlParser
             char currentChar;
             char prevChar;
 
-            Node currentNode = new Node();
+            var currentNode = new Node();
             next = false;
 
             var attributeName = "";
@@ -74,7 +74,7 @@ namespace HtmlParser
 
             bool CheckCloseTag(string tagname, int index)
             {
-                var tag = source.MySubstring(index, source.IndexOf(tagEndChar, index), false);
+                var tag = source.MySubstring(index, source.IndexOf(tagEndChar, index));
 
                 if (!tag.Contains("/"))
                 {
@@ -85,23 +85,21 @@ namespace HtmlParser
 
                 var closeTag = false;
 
-                for (int i = 0; i < tag.Length; i++)
+                foreach (var t in tag)
                 {
-                    if (!Char.IsWhiteSpace(tag[i]))
+                    if (!char.IsWhiteSpace(t))
                     {
-                        if (tag[i] == forwardSlashChar)
+                        if (t == forwardSlashChar)
                         {
                             closeTag = true;
                             continue;
                         }
-                        if (Char.IsLetterOrDigit(tag[i]))
-                            builder.Append(tag[i]);
+                        if (char.IsLetterOrDigit(t))
+                            builder.Append(t);
                     }
                     else
                     {
-                        if (builder.Length == 0)
-                            continue;
-                        else
+                        if (builder.Length != 0)
                             break;
                     }
                 }
@@ -109,7 +107,7 @@ namespace HtmlParser
                 return closeTag && tagname == builder.ToString().ToLower();
             }
 
-            for (int cursor = startIndex; cursor < source.Length; cursor++)
+            for (var cursor = startIndex; cursor < source.Length; cursor++)
             {
                 currentIndex = cursor;
 
@@ -332,37 +330,37 @@ namespace HtmlParser
             return currentNode;
         }
 
-        public static Node ConcatDependencies(Node Input, string Path, IEnumerable<string> Reject)
+        public static Node ConcatDependencies(Node input, string path, ICollection<string> reject)
         {
             var deps = new List<string>();
             var script = new Node("script");
 
-            script.AddInnerHtml(LocalConcat(Input.InnerHtml, Path));
+            script.AddInnerHtml(LocalConcat(input.InnerHtml, path));
 
             return script;
 
-            string GetPath(string input, string path)
+            string GetPath(string localInput, string localPath)
             {
-                var start = input.Contains(singlePrtChar) ? input.IndexOf(singlePrtChar) : input.IndexOf(doublePrtChar);
-                var end = input.Contains(singlePrtChar) ? input.LastIndexOf(singlePrtChar) : input.LastIndexOf(doublePrtChar);
+                var start = localInput.Contains(singlePrtChar) ? localInput.IndexOf(singlePrtChar) : localInput.IndexOf(doublePrtChar);
+                var end = localInput.Contains(singlePrtChar) ? localInput.LastIndexOf(singlePrtChar) : localInput.LastIndexOf(doublePrtChar);
 
-                var result = input.MySubstring(start, end);
+                var result = localInput.MySubstring(start, end);
 
-                foreach(var r in Reject)
+                foreach(var r in reject)
                 {
                     if (result.Contains(r))
                         return null;
                 }
 
-                return path + (path.EndsWith("\\") ? "" : "\\") + result;
+                return localPath + (localPath.EndsWith("\\") ? "" : "\\") + result;
             }
 
-            string LocalConcat(string input, string path)
+            string LocalConcat(string localInput, string localPath)
             {
 
-                var strings = input.Split(newLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
+                var strings = localInput.Split(newLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                for (int i = 0; i < strings.Count; i++)
+                for (var i = 0; i < strings.Count; i++)
                 {
                     var temp = strings[i].Trim();
 
@@ -371,19 +369,18 @@ namespace HtmlParser
                         strings[i] = "";
                     }
 
-                    if (temp.StartsWith("import"))
-                    {
-                        var p = GetPath(temp, path);
+                    if (!temp.StartsWith("import")) continue;
 
-                        if (p != null && !deps.Contains(p))
-                        {
-                            deps.Add(p);
-                            strings[i] = LocalConcat(File.ReadAllText(p), path);
-                        }
-                        else
-                        {
-                            strings[i] = "";
-                        }
+                    var p = GetPath(temp, localPath);
+
+                    if (p != null && !deps.Contains(p))
+                    {
+                        deps.Add(p);
+                        strings[i] = LocalConcat(File.ReadAllText(p), localPath);
+                    }
+                    else
+                    {
+                        strings[i] = "";
                     }
                 }
 

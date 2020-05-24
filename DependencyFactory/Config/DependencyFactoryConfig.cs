@@ -5,11 +5,11 @@ namespace DependencyFactory.Config
 {
     internal class DependencyFactoryConfigItem
     {
-        internal Type InterfaceType { get; private set; }
-        internal Type ObjectType { get; private set; }
-        internal DependencyBehavior Behavior { get; private set; }
+        internal Type InterfaceType { get; }
+        internal Type ObjectType { get; }
+        internal DependencyBehavior Behavior { get; }
 
-        internal NavigationOption NavigationOption;        
+        internal readonly NavigationOption NavigationOption;        
 
         internal DependencyFactoryConfigItem(Type interfaceType, Type objectType, DependencyBehavior behavior, NavigationOption navigationOption)
         {

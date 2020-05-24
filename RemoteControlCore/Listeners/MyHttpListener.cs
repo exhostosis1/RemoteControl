@@ -27,7 +27,7 @@ namespace RemoteControlCore.Listeners
         public event HttpEventHandler OnHttpRequest;
 
         private string _url = "http://localhost/";
-        private bool _simple = false;
+        private bool _simple;
 
         public MyHttpListener(string url)
         {
@@ -49,15 +49,11 @@ namespace RemoteControlCore.Listeners
             _url = url;
             _simple = simple;
 
-            _listener = new HttpListener();            
+            _listener = new HttpListener();
 
-            try
-            {
-                _listener.Prefixes.Add(url);
+            _listener.Prefixes.Add(url);
                 
-                _listener.Start();
-            }
-            catch { throw; }
+            _listener.Start();
 
             Task.Run(Start);
         }
@@ -88,11 +84,11 @@ namespace RemoteControlCore.Listeners
 
             if (context.Request.Url.LocalPath == "/api" && context.Request.QueryString.Count > 0)
             {
-                OnApiRequest(args);
+                OnApiRequest?.Invoke(args);
             }
             else
             {
-                OnHttpRequest(args);
+                OnHttpRequest?.Invoke(args);
             }
 
             context.Response.Close();

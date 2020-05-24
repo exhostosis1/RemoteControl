@@ -2,7 +2,6 @@
 using RemoteControlCore.Abstract;
 using RemoteControlCore.Enums;
 using RemoteControlCore.Interfaces;
-using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,9 +10,9 @@ namespace RemoteControlCore.Controllers
 {
     internal class ApiController : AbstractController
     {
-        readonly IAudioService _audioService;
-        readonly IInputService _inputService;
-        readonly ICoordinates _point;
+        private readonly IAudioService _audioService;
+        private readonly IInputService _inputService;
+        private readonly ICoordinates _point;
 
         public ApiController()
         {
@@ -49,24 +48,24 @@ namespace RemoteControlCore.Controllers
                     }
                     break;
                 default:
-                    break;
+                    args.Response.StatusCode = 403;
+                    return;
             }
 
-            if(value == "init")
+            if (value != "init") return;
+
+            using (var sw = new StreamWriter(args.Response.OutputStream))
             {
-                using (var sw = new StreamWriter(args.Response.OutputStream))
-                {
-                    sw.Write(response);
-                }
+                sw.Write(response);
             }
         }
 
-        private bool TryGetString(string input, Encoding encoding, out string output)
+        private static bool TryGetString(string input, Encoding encoding, out string output)
         {
             output = "";
             if (string.IsNullOrWhiteSpace(input)) return false;
 
-            if(encoding == Encoding.UTF8)
+            if(encoding.Equals(Encoding.UTF8))
             {
                 output = input;
                 return true;
@@ -86,14 +85,13 @@ namespace RemoteControlCore.Controllers
 
         private string ProcessAudio(string value)
         {
-            if (Int32.TryParse(value, out var result))
-            {
-                result = result > 100 ? 100 : result;
-                result = result < 0 ? 0 : result;
+            if (!int.TryParse(value, out var result)) return _audioService.GetVolume();
 
-                _audioService.SetVolume(result);
-                _audioService.Mute(result == 0);
-            }
+            result = result > 100 ? 100 : result;
+            result = result < 0 ? 0 : result;
+
+            _audioService.SetVolume(result);
+            _audioService.Mute(result == 0);
 
             return _audioService.GetVolume();
         }
@@ -115,8 +113,6 @@ namespace RemoteControlCore.Controllers
                     break;
                 case "mediaforth":
                     _inputService.KeyPress(KeysEnum.MediaForth);
-                    break;
-                default:
                     break;
             }
         }

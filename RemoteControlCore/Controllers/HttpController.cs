@@ -7,9 +7,9 @@ namespace RemoteControlCore.Controllers
 {
     internal class HttpController : AbstractController
     {
-        private readonly string _ContentFolder = "www";
+        private const string ContentFolder = "www";
 
-        private readonly Dictionary<string, string> ContentTypes = new Dictionary<string, string>()
+        private readonly Dictionary<string, string> _contentTypes = new Dictionary<string, string>()
         {
             { ".html", "text/html" },
             { ".htm", "text/html" },
@@ -21,16 +21,16 @@ namespace RemoteControlCore.Controllers
 
         public override void ProcessRequest(IHttpRequestArgs context)
         {
-            var path = _ContentFolder + context.Request.Url.LocalPath;
+            var path = ContentFolder + context.Request.Url.LocalPath;
 
             if (context.Request.Url.LocalPath == "/")
             {
-                path += context.Request.UserAgent.Contains("SM-R800") || context.Simple ? "index-simple.html" : "index.html";
+                path += (context.Request.UserAgent?.Contains("SM-R800") ?? false) || context.Simple ? "index-simple.html" : "index.html";
             }
 
             var extension = Path.GetExtension(path);
 
-            context.Response.ContentType = ContentTypes.ContainsKey(extension) ? ContentTypes[extension] : "text/plain";
+            context.Response.ContentType = _contentTypes.ContainsKey(extension) ? _contentTypes[extension] : "text/plain";
 
             if (File.Exists(path))
             {

@@ -1,18 +1,18 @@
-﻿using System;
-using System.Linq;
+﻿using DependencyFactory.Config;
+using System;
 using System.Collections.Generic;
-using DependencyFactory.Config;
+using System.Linq;
 
 namespace DependencyFactory
 {
     public static class Factory
     {
-        private static readonly Guid uniqueKey = new Guid();
+        private static readonly Guid UniqueKey = Guid.NewGuid();
 
         private static readonly Dictionary<Type, object> ObjectCache = new Dictionary<Type, object>();
-        private static readonly Dictionary<object, NavigationOption> navigationOptionsCache = new Dictionary<object, NavigationOption>()
+        private static readonly Dictionary<object, NavigationOption> NavigationOptionsCache = new Dictionary<object, NavigationOption>()
         {
-            { uniqueKey, new NavigationOption(uniqueKey) }
+            { UniqueKey, new NavigationOption() }
         };
 
         public static T GetInstance<T>(NavigationOption navigationOption, params object[] prms) where T: class
@@ -24,7 +24,7 @@ namespace DependencyFactory
                 throw new ArgumentException("No such interface in config");
             }
 
-            object result = null;
+            object result;
 
             switch(objectConfig.Behavior)
             {
@@ -35,7 +35,7 @@ namespace DependencyFactory
                     result = GetFromCacheOrCreateNew(objectConfig.ObjectType, prms);
                     break;
                 default:
-                    break;
+                    throw new ArgumentOutOfRangeException();
             }
 
             return (T)result;
@@ -43,12 +43,14 @@ namespace DependencyFactory
 
         public static T GetInstance<T>(params object[] prms) where T: class
         {
-            return GetInstance<T>(navigationOptionsCache[uniqueKey], prms);
+            return GetInstance<T>(NavigationOptionsCache[UniqueKey], prms);
         }
 
         private static object CreateNew(Type type, object[] prms)
         {
-            return type.GetConstructor(prms.Select(x => x.GetType()).ToArray()).Invoke(prms);
+            if (type == null) throw new ArgumentException("Type is null", nameof(type));
+
+            return type.GetConstructor(prms.Select(x => x.GetType()).ToArray())?.Invoke(prms);
         }
 
         private static object GetFromCacheOrCreateNew(Type type, object[] prms)
@@ -58,19 +60,19 @@ namespace DependencyFactory
 
             return ObjectCache[type];
         }
-        public static void AddConfig<From, To>(NavigationOption navigationOption, DependencyBehavior behavior = DependencyBehavior.NewInstance)
+        public static void AddConfig<TFrom, TTo>(NavigationOption navigationOption, DependencyBehavior behavior = DependencyBehavior.NewInstance)
         {
-            if (DependencyFactoryConfig.GetConfig().Any(x => x.InterfaceType == typeof(From) && x.NavigationOption == navigationOption))
+            if (DependencyFactoryConfig.GetConfig().Any(x => x.InterfaceType == typeof(TFrom) && x.NavigationOption == navigationOption))
                 throw new Exception("Duplicate entries in factory config");
 
-            if (!typeof(From).IsAssignableFrom(typeof(To)))
+            if (!typeof(TFrom).IsAssignableFrom(typeof(TTo)))
                 throw new ArgumentException("Target class does not deride from parent class");
 
-            DependencyFactoryConfig.AddConfig(new DependencyFactoryConfigItem(typeof(From), typeof(To), behavior, navigationOption));
+            DependencyFactoryConfig.AddConfig(new DependencyFactoryConfigItem(typeof(TFrom), typeof(TTo), behavior, navigationOption));
         }
-        public static void AddConfig<From, To>(DependencyBehavior behavior = DependencyBehavior.NewInstance)
+        public static void AddConfig<TFrom, TTo>(DependencyBehavior behavior = DependencyBehavior.NewInstance)
         {
-            AddConfig<From, To>(navigationOptionsCache[uniqueKey], behavior);
+            AddConfig<TFrom, TTo>(NavigationOptionsCache[UniqueKey], behavior);
         }
 
         public static NavigationOption GetNavigationOption(object id)
@@ -78,10 +80,10 @@ namespace DependencyFactory
             if (id == null)
                 throw new ArgumentNullException();
 
-            if (!navigationOptionsCache.ContainsKey(id))
-                navigationOptionsCache.Add(id, new NavigationOption(id));
+            if (!NavigationOptionsCache.ContainsKey(id))
+                NavigationOptionsCache.Add(id, new NavigationOption());
 
-            return navigationOptionsCache[id];
+            return NavigationOptionsCache[id];
         }
 
         public static void ResetConfig()

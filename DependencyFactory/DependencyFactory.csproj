@@ -41,11 +41,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NavigationOptions.cs" />
-    <Compile Include="DependencyBehavior.cs" />
+    <Compile Include="Config\NavigationOptions.cs" />
+    <Compile Include="Config\DependencyBehavior.cs" />
     <Compile Include="DependencyFactory.cs" />
-    <Compile Include="DependencyFactoryConfig.cs" />
+    <Compile Include="Config\DependencyFactoryConfig.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
