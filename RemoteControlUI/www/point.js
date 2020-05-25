@@ -19,4 +19,4 @@ class Point {
     }
 }
 
-export { Point as default };
+export default Point;

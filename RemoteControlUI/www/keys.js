@@ -87,4 +87,4 @@ function createKeys(buttons) {
     });
 }
 
-export { createKeys as default };
+export default createKeys;

@@ -1,4 +1,4 @@
-import * as Point from './point.js';
+import Point from './point.js';
 import { Events, EventValues } from './constants.js';
 
 let lastMovePosition;
@@ -150,4 +150,4 @@ function createTouch(element) {
     touchElement.addEventListener('touchcancel', endTouch);
 }
 
-export { createTouch as default };
+export default createTouch;

@@ -43,7 +43,7 @@ function toPixels(value) {
 }
 
 function toNumeric(value) {
-    return (Math.round((value - volumeBarHandle.offsetWidth / 2) * SLIDERSCALE) / (volumeBar.offsetWidth - volumeBarHandle.offsetWidth));
+    return Math.round(((value - (volumeBarHandle.offsetWidth / 2)) * SLIDERSCALE) / (volumeBar.offsetWidth - volumeBarHandle.offsetWidth));
 }
 
 function checkSendRequest(value) {
@@ -112,4 +112,4 @@ function createVolumeBar(slider, scale, initValue = 0, numeric = false) {
     init(initValue);
 }
 
-export { createVolumeBar as default };
+export default createVolumeBar;
