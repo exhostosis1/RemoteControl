@@ -18,8 +18,6 @@ const dragEvent = new Event(Events.Drag);
 const MODIFIER = 3;
 
 function movePointer(x, y) {
-    touchPointer.style.display = 'block';
-
     touchPointer.style.left = x - touchPointer.offsetWidth / 2;
     touchPointer.style.top = y - touchPointer.offsetHeight / 2;
 }
@@ -91,8 +89,13 @@ function addTouch(t) {
     }
 }
 
+function showPointer() {
+    touchPointer.style.display = 'block';
+}
+
 function startTouch(e) {
     if (e.targetTouches.length === 1) {
+        showPointer();
         movePointer(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
     }
 

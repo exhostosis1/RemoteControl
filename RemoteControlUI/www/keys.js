@@ -27,7 +27,9 @@ function end() {
 function toggleDisplay(buttonsArray) {
     buttonsArray.forEach(x => {
         // eslint-disable-next-line no-param-reassign
-        x.style.display = x.style.display === 'none' ? 'block' : 'none';
+        x.style.display = x.hidden ? 'block' : 'none';
+        // eslint-disable-next-line no-param-reassign
+        x.hidden = !x.hidden;
     });
 }
 
@@ -36,14 +38,25 @@ function createKeys(buttons) {
 
     const buttonBack = document.createElement('button');
     buttonBack.innerHTML = '&#60;&#60;';
+    buttonBack.hidden = false;
+
     const buttonPause = document.createElement('button');
     buttonPause.innerHTML = '&#10074;&#10074;';
+    buttonPause.hidden = false;
+
     const buttonForth = document.createElement('button');
     buttonForth.innerHTML = '&#62;&#62;';
+    buttonPause.hidden = false;
+
     const buttonMediaForth = document.createElement('button');
     buttonMediaForth.innerHTML = '&#45;&#62;';
+    buttonMediaForth.hidden = true;
+    buttonMediaForth.style.display = 'none';
+
     const buttonMediaBack = document.createElement('button');
     buttonMediaBack.innerHTML = '&#60;&#45;';
+    buttonMediaBack.hidden = true;
+    buttonMediaBack.style.display = 'none';
 
     const fillers = [document.createElement('span'), document.createElement('span')];
     fillers.forEach(e => {
@@ -51,9 +64,6 @@ function createKeys(buttons) {
         e.style.height = '1px';
         e.style.width = '0.5%';
     });
-
-    buttonMediaBack.style.display = 'none';
-    buttonMediaForth.style.display = 'none';
 
     buttons.append(buttonMediaBack, buttonBack, fillers[0], buttonPause, fillers[1], buttonForth, buttonMediaForth);
 
