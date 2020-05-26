@@ -82,7 +82,7 @@ namespace RemoteControlCore.Listeners
         {
             var args = new MyHttpListenerRequestArgs(context.Request, context.Response, _simple);
 
-            if (context.Request.Url.LocalPath == "/api" && context.Request.QueryString.Count > 0)
+            if (context.Request.Url.LocalPath.StartsWith("/api/"))
             {
                 OnApiRequest?.Invoke(args);
             }

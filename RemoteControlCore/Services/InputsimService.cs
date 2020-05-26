@@ -1,4 +1,5 @@
-﻿using RemoteControlCore.Enums;
+﻿using System;
+using RemoteControlCore.Enums;
 using RemoteControlCore.Interfaces;
 
 namespace RemoteControlCore.Services
@@ -25,6 +26,8 @@ namespace RemoteControlCore.Services
                 case KeyPressMode.Down:
                     _inputSim.Keyboard.KeyDown(key);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
 
@@ -41,6 +44,8 @@ namespace RemoteControlCore.Services
                 case KeyPressMode.Up:
                     _inputSim.Mouse.MouseButtonUp(key);
                     break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
 

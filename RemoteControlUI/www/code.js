@@ -1,10 +1,10 @@
 import createVolumeBar from './slider.js';
 import createTouch from './touch.js';
 import createKeys from './keys.js';
-import { Events, Modes } from './constants.js';
+import { Events, Modes, EventValues } from './constants.js';
 
-async function sendRequest(mode, value) {
-    return (await fetch(`/api?mode=${mode}&value=${value}`)).text();
+async function sendRequest(method, param) {
+    return (await fetch(`/api/${method}/${param}`)).text();
 }
 
 function processText(e) {
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const slider = document.getElementById('slider');
 
     if (slider) {
-        createVolumeBar(slider, 100, await sendRequest(Modes.Audio, 'init'), true);
+        createVolumeBar(slider, 100, await sendRequest(Modes.Audio, EventValues.Init), true);
         slider.addEventListener(Events.ValueChanged, e => sendRequest(Modes.Audio, e.value));
     }
 
@@ -28,10 +28,26 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     if (touch) {
         createTouch(touch);
-        touch.addEventListener(Events.Touch, e => sendRequest(Modes.Mouse, e.touches));
+        touch.addEventListener(Events.Touch, e => {
+            let event;
+            switch (e.touches) {
+            case 1:
+                event = EventValues.LeftButton;
+                break;
+            case 2:
+                event = EventValues.RightButton;
+                break;
+            case 3:
+                event = EventValues.MiddleButton;
+                break;
+            default:
+                break;
+            }
+            sendRequest(Modes.Mouse, event);
+        });
         touch.addEventListener(Events.Move, e => sendRequest(Modes.Mouse, e.position));
         touch.addEventListener(Events.Scroll, e => sendRequest(Modes.Wheel, e.direction));
-        touch.addEventListener(Events.Drag, e => sendRequest(Modes.Mouse, `drag${e.start ? 'start' : 'stop'}`));
+        touch.addEventListener(Events.Drag, e => sendRequest(Modes.Mouse, e.start ? EventValues.DragStart : EventValues.DragStop));
     }
 
     const buttons = document.getElementById('buttons');

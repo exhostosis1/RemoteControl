@@ -43,8 +43,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstract\AbstractController.cs" />
+    <Compile Include="Attributes\RouteAttribute.cs" />
     <Compile Include="Config\DependencyFactoryConfig.cs" />
     <Compile Include="Controllers\ApiController.cs" />
+    <Compile Include="Controllers\ApiControllerMethods.cs" />
     <Compile Include="Controllers\HttpController.cs" />
     <Compile Include="Enums\KeyPressMode.cs" />
     <Compile Include="Enums\KeysEnum.cs" />
@@ -64,6 +66,7 @@
     <Compile Include="Services\InputsimService.cs" />
     <Compile Include="Tests\MyHttpListenerTests.cs" />
     <Compile Include="Utility\Point.cs" />
+    <Compile Include="Utility\Strings.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AudioSwitcher.AudioApi.CoreAudio">
@@ -88,5 +91,6 @@
       <Name>DependencyFactory</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

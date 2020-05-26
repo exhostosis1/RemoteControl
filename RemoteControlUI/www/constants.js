@@ -14,6 +14,12 @@ const EventValues = {
     Pause: 'pause',
     Up: 'up',
     Down: 'down',
+    DragStart: 'dragstart',
+    DragStop: 'dragsopt',
+    LeftButton: 'left',
+    RightButton: 'right',
+    MiddleButton: 'middle',
+    Init: 'init',
 };
 const Modes = {
     Audio: 'audio',

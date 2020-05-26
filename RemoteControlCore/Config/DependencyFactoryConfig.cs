@@ -13,8 +13,8 @@ namespace RemoteControlCore.Config
 {
     internal static class MyDependencyFactoryConfig
     {
-        public static NavigationOption ApiNavigationOption = Factory.GetNavigationOption(NavigationOptions.Api);
-        public static NavigationOption HttpNavigationOption = Factory.GetNavigationOption(NavigationOptions.Http);
+        public static readonly NavigationOption ApiNavigationOption = Factory.GetNavigationOption(NavigationOptions.Api);
+        public static readonly NavigationOption HttpNavigationOption = Factory.GetNavigationOption(NavigationOptions.Http);
 
         static MyDependencyFactoryConfig()
         {
