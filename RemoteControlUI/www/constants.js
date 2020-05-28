@@ -26,7 +26,6 @@ const Modes = {
     Mouse: 'mouse',
     Keyboard: 'keyboard',
     Text: 'text',
-    Wheel: 'wheel',
 };
 
 export { Events, Modes, EventValues };

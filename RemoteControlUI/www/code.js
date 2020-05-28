@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 event = EventValues.MiddleButton;
                 break;
             default:
-                break;
+                return;
             }
             sendRequest(Modes.Mouse, event);
         });
-        touch.addEventListener(Events.Move, e => sendRequest(Modes.Mouse, e.position));
-        touch.addEventListener(Events.Scroll, e => sendRequest(Modes.Wheel, e.direction));
-        touch.addEventListener(Events.Drag, e => sendRequest(Modes.Mouse, e.start ? EventValues.DragStart : EventValues.DragStop));
+        touch.addEventListener(Events.Move, e => { if (e.position) sendRequest(Modes.Mouse, e.position); });
+        touch.addEventListener(Events.Scroll, e => { sendRequest(Modes.Mouse, e.direction); });
+        touch.addEventListener(Events.Drag, e => { sendRequest(Modes.Mouse, e.start ? EventValues.DragStart : EventValues.DragStop); });
     }
 
     const buttons = document.getElementById('buttons');

@@ -45,8 +45,8 @@
     <Compile Include="Abstract\AbstractController.cs" />
     <Compile Include="Attributes\RouteAttribute.cs" />
     <Compile Include="Config\DependencyFactoryConfig.cs" />
-    <Compile Include="Controllers\ApiController.cs" />
-    <Compile Include="Controllers\ApiControllerMethods.cs" />
+    <Compile Include="Controllers\ApiController.ProcessRequest.cs" />
+    <Compile Include="Controllers\ApiController.Methods.cs" />
     <Compile Include="Controllers\HttpController.cs" />
     <Compile Include="Enums\KeyPressMode.cs" />
     <Compile Include="Enums\KeysEnum.cs" />
