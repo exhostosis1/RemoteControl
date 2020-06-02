@@ -113,6 +113,8 @@ function startTouch(e) {
     }
 }
 
+const mouseButtons = ['', 'left', 'right', 'middle'];
+
 function endTouch(e) {
     hidePointer();
 
@@ -129,25 +131,10 @@ function endTouch(e) {
     }
 
     if (e.targetTouches.length === 0) {
-        if (touchesCache.length >= 1 && touchesCache.length <= 3) {
-            let event;
-            switch (touchesCache.length) {
-            case 1:
-                event = 'left';
-                break;
-            case 2:
-                event = 'right';
-                break;
-            case 3:
-                event = 'middle';
-                break;
-            default:
-                break;
-            }
-            if (event) {
-                touchEvent.touches = event;
-                touchElement.dispatchEvent(touchEvent);
-            }
+        const { length } = touchesCache;
+        if (length >= 1 && length <= 3) {
+            touchEvent.touches = mouseButtons[length];
+            touchElement.dispatchEvent(touchEvent);
         }
 
         touchesCache = [];
