@@ -1,5 +1,3 @@
-import { Events } from './constants.js';
-
 let SLIDERSCALE = 0;
 const HANDLECLASS = 'volume-handle';
 const COLOREDCLASS = 'volume-colored';
@@ -19,7 +17,7 @@ let numericEnabled = false;
 
 let drag = false;
 
-const changeEvent = new Event(Events.ValueChanged);
+const changeEvent = new Event('volumechanged');
 
 function setVolumeBar(value) {
     const correction = volumeBarHandle.offsetWidth / 2;

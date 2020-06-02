@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlUI", "RemoteCo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HtmlParser", "HtmlParser\HtmlParser.csproj", "{3ED46B96-FFC3-464F-AE9E-DDFCA4ED2B26}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLogger", "MyLogger\MyLogger.csproj", "{C8016B16-0498-48C2-9FD1-45EF5601FD2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{3ED46B96-FFC3-464F-AE9E-DDFCA4ED2B26}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3ED46B96-FFC3-464F-AE9E-DDFCA4ED2B26}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3ED46B96-FFC3-464F-AE9E-DDFCA4ED2B26}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C8016B16-0498-48C2-9FD1-45EF5601FD2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C8016B16-0498-48C2-9FD1-45EF5601FD2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C8016B16-0498-48C2-9FD1-45EF5601FD2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C8016B16-0498-48C2-9FD1-45EF5601FD2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

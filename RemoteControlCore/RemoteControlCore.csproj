@@ -90,6 +90,10 @@
       <Project>{ee5b352d-05b6-48fe-8295-a5f57d4fca6c}</Project>
       <Name>DependencyFactory</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyLogger\MyLogger.csproj">
+      <Project>{c8016b16-0498-48c2-9fd1-45ef5601fd2c}</Project>
+      <Name>MyLogger</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

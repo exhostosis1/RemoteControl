@@ -2,6 +2,7 @@
 using System;
 using System.Net;
 using System.Threading.Tasks;
+using MyLogger;
 
 namespace RemoteControlCore.Listeners
 {
@@ -22,6 +23,7 @@ namespace RemoteControlCore.Listeners
     internal class MyHttpListener : IHttpListener
     {
         private HttpListener _listener;
+        private Logger log;
 
         public event HttpEventHandler OnApiRequest;
         public event HttpEventHandler OnHttpRequest;
@@ -29,14 +31,14 @@ namespace RemoteControlCore.Listeners
         private string _url = "http://localhost/";
         private bool _simple;
 
-        public MyHttpListener(string url)
+        public MyHttpListener(string url) : this()
         {
             _url = url;
         }
 
         public MyHttpListener()
         {
-           
+           log = new Logger(this.GetType());
         }
 
         public void StartListen(string url, bool simple)
@@ -80,6 +82,8 @@ namespace RemoteControlCore.Listeners
 
         private void ProcessRequest(HttpListenerContext context)
         {
+            log.Log(context.Request.Url.LocalPath);
+
             var args = new MyHttpListenerRequestArgs(context.Request, context.Response, _simple);
 
             if (context.Request.Url.LocalPath.StartsWith("/api/"))

@@ -1,11 +1,9 @@
-import { Events, EventValues } from './constants.js';
-
 const CLICKINTERVAL = 1000;
 
 let keyRepeadIntervalId;
 let keyRepeatTimerId;
 
-const clickEvent = new Event(Events.Click);
+const clickEvent = new Event('keyclick');
 
 let buttonsGlobal;
 
@@ -67,25 +65,25 @@ function createKeys(buttons) {
 
     buttons.append(buttonMediaBack, buttonBack, fillers[0], buttonPause, fillers[1], buttonForth, buttonMediaForth);
 
-    buttonBack.addEventListener('touchstart', () => start(EventValues.Back));
+    buttonBack.addEventListener('touchstart', () => start('back'));
     buttonBack.addEventListener('touchend', end);
-    buttonBack.addEventListener('click', () => { clickEvent.value = EventValues.Back; buttons.dispatchEvent(clickEvent); });
+    buttonBack.addEventListener('click', () => { clickEvent.value = 'back'; buttons.dispatchEvent(clickEvent); });
     buttonBack.addEventListener('touchcancel', end);
 
-    buttonForth.addEventListener('touchstart', () => start(EventValues.Forth));
+    buttonForth.addEventListener('touchstart', () => start('forth'));
     buttonForth.addEventListener('touchend', end);
-    buttonForth.addEventListener('click', () => { clickEvent.value = EventValues.Forth; buttons.dispatchEvent(clickEvent); });
+    buttonForth.addEventListener('click', () => { clickEvent.value = 'forth'; buttons.dispatchEvent(clickEvent); });
     buttonForth.addEventListener('touchcancel', end);
 
-    buttonMediaBack.addEventListener('click', () => { clickEvent.value = EventValues.MediaBack; buttons.dispatchEvent(clickEvent); });
-    buttonMediaForth.addEventListener('click', () => { clickEvent.value = EventValues.MediaForth; buttons.dispatchEvent(clickEvent); });
+    buttonMediaBack.addEventListener('click', () => { clickEvent.value = 'mediaback'; buttons.dispatchEvent(clickEvent); });
+    buttonMediaForth.addEventListener('click', () => { clickEvent.value = 'mediaforth'; buttons.dispatchEvent(clickEvent); });
 
     const buttonsArray = [buttonBack, buttonForth, buttonMediaBack, buttonMediaForth];
 
     let timeout;
 
     buttonPause.addEventListener('click', () => {
-        clickEvent.value = EventValues.Pause;
+        clickEvent.value = 'pause';
         buttons.dispatchEvent(clickEvent);
     });
 

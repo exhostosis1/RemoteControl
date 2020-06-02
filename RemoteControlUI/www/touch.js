@@ -1,5 +1,4 @@
 import Point from './point.js';
-import { Events, EventValues } from './constants.js';
 
 let lastMovePosition;
 
@@ -10,10 +9,10 @@ let touchesCache = [];
 
 let dragStartTimer;
 
-const touchEvent = new Event(Events.Touch);
-const moveEvent = new Event(Events.Move);
-const scrollEvent = new Event(Events.Scroll);
-const dragEvent = new Event(Events.Drag);
+const touchEvent = new Event('touchpanelclick');
+const moveEvent = new Event('touchpanelmove');
+const scrollEvent = new Event('touchpanelscroll');
+const dragEvent = new Event('touchpaneldrag');
 
 const MODIFIER = 3;
 
@@ -67,7 +66,7 @@ function processTouchMove(e) {
             touchElement.dispatchEvent(moveEvent);
         }
         if (e.targetTouches.length === 2 && Math.abs(diff.y) > 10) {
-            scrollEvent.direction = diff.y > 0 ? EventValues.Up : EventValues.Down;
+            scrollEvent.direction = diff.y > 0 ? 'up' : 'down';
             touchElement.dispatchEvent(scrollEvent);
         }
     }
@@ -131,8 +130,24 @@ function endTouch(e) {
 
     if (e.targetTouches.length === 0) {
         if (touchesCache.length >= 1 && touchesCache.length <= 3) {
-            touchEvent.touches = touchesCache.length;
-            touchElement.dispatchEvent(touchEvent);
+            let event;
+            switch (touchesCache.length) {
+            case 1:
+                event = 'left';
+                break;
+            case 2:
+                event = 'right';
+                break;
+            case 3:
+                event = 'middle';
+                break;
+            default:
+                break;
+            }
+            if (event) {
+                touchEvent.touches = event;
+                touchElement.dispatchEvent(touchEvent);
+            }
         }
 
         touchesCache = [];

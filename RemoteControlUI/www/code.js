@@ -1,7 +1,13 @@
 import createVolumeBar from './slider.js';
 import createTouch from './touch.js';
 import createKeys from './keys.js';
-import { Events, Modes, EventValues } from './constants.js';
+
+const Modes = {
+    Audio: 'audio',
+    Mouse: 'mouse',
+    Keyboard: 'keyboard',
+    Text: 'text',
+};
 
 async function sendRequest(method, param) {
     return (await fetch(`/api/${method}/${param}`)).text();
@@ -20,41 +26,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     const slider = document.getElementById('slider');
 
     if (slider) {
-        createVolumeBar(slider, 100, await sendRequest(Modes.Audio, EventValues.Init), true);
-        slider.addEventListener(Events.ValueChanged, e => sendRequest(Modes.Audio, e.value));
+        createVolumeBar(slider, 100, await sendRequest(Modes.Audio, 'init'), true);
+        slider.addEventListener('volumechanged', e => sendRequest(Modes.Audio, e.value));
     }
 
     const touch = document.getElementById('touch');
 
     if (touch) {
         createTouch(touch);
-        touch.addEventListener(Events.Touch, e => {
-            let event;
-            switch (e.touches) {
-            case 1:
-                event = EventValues.LeftButton;
-                break;
-            case 2:
-                event = EventValues.RightButton;
-                break;
-            case 3:
-                event = EventValues.MiddleButton;
-                break;
-            default:
-                return;
-            }
-            sendRequest(Modes.Mouse, event);
-        });
-        touch.addEventListener(Events.Move, e => { if (e.position) sendRequest(Modes.Mouse, e.position); });
-        touch.addEventListener(Events.Scroll, e => { sendRequest(Modes.Mouse, e.direction); });
-        touch.addEventListener(Events.Drag, e => { sendRequest(Modes.Mouse, e.start ? EventValues.DragStart : EventValues.DragStop); });
+        touch.addEventListener('touchpanelclick', e => sendRequest(Modes.Mouse, e.touches));
+        touch.addEventListener('touchpanelmove', e => { if (e.position) sendRequest(Modes.Mouse, e.position); });
+        touch.addEventListener('touchpanelscroll', e => { sendRequest(Modes.Mouse, e.direction); });
+        touch.addEventListener('touchpaneldrag', e => { sendRequest(Modes.Mouse, e.start ? 'dragstart' : 'dragstop'); });
     }
 
     const buttons = document.getElementById('buttons');
 
     if (buttons) {
         createKeys(buttons);
-        buttons.addEventListener(Events.Click, e => sendRequest(Modes.Keyboard, e.value));
+        buttons.addEventListener('keyclick', e => sendRequest(Modes.Keyboard, e.value));
     }
 
     const textInput = document.getElementById('text-input');
