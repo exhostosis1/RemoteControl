@@ -8,10 +8,10 @@ namespace RemoteControlCore.Listeners
 {
     internal class MyHttpListenerRequestArgs : IHttpRequestArgs
     {
-        public HttpListenerRequest Request { get; private set; }
-        public HttpListenerResponse Response { get; private set; }
+        public HttpListenerRequest Request { get; }
+        public HttpListenerResponse Response { get; }
 
-        public bool Simple { get; private set; }
+        public bool Simple { get; }
 
         public MyHttpListenerRequestArgs(HttpListenerRequest request, HttpListenerResponse response, bool simple)
         {
@@ -23,7 +23,7 @@ namespace RemoteControlCore.Listeners
     internal class MyHttpListener : IHttpListener
     {
         private HttpListener _listener;
-        private Logger log;
+        private readonly FileLogger _logger;
 
         public event HttpEventHandler OnApiRequest;
         public event HttpEventHandler OnHttpRequest;
@@ -38,7 +38,8 @@ namespace RemoteControlCore.Listeners
 
         public MyHttpListener()
         {
-           log = new Logger(this.GetType());
+            _logger = new FileLogger("log.txt", this.GetType());
+            LogScheduler.RegisterProvider(_logger);
         }
 
         public void StartListen(string url, bool simple)
@@ -82,7 +83,7 @@ namespace RemoteControlCore.Listeners
 
         private void ProcessRequest(HttpListenerContext context)
         {
-            log.Log(context.Request.Url.LocalPath);
+            _logger.Log(context.Request.Url.LocalPath);
 
             var args = new MyHttpListenerRequestArgs(context.Request, context.Response, _simple);
 
