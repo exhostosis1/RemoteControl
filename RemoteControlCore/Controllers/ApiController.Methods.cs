@@ -2,6 +2,9 @@
 using RemoteControlCore.Attributes;
 using RemoteControlCore.Enums;
 using RemoteControlCore.Interfaces;
+using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Threading.Tasks;
 // ReSharper disable UnusedMember.Local
 
@@ -18,6 +21,10 @@ namespace RemoteControlCore.Controllers
             _inputService = Factory.GetInstance<IInputService>();
             _audioService = Factory.GetInstance<IAudioService>();
             _point = Factory.GetInstance<ICoordinates>();
+
+            _methods = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
+                .Where(x => x.GetCustomAttribute<RouteAttribute>() != null)
+                .ToDictionary(x => x.GetCustomAttribute<RouteAttribute>().MethodName);
         }
 
         [Route("audio")]
@@ -29,6 +36,7 @@ namespace RemoteControlCore.Controllers
             result = result < 0 ? 0 : result;
 
             _audioService.SetVolume(result);
+
             _audioService.Mute(result == 0);
 
             return _audioService.GetVolume();
@@ -60,7 +68,7 @@ namespace RemoteControlCore.Controllers
         [Route("text")]
         private void ProcessText(string text)
         {
-            _inputService.TextInput(text);
+            _inputService.TextInput(WebUtility.UrlDecode(text));
             _inputService.KeyPress(KeysEnum.Enter);
         }
 

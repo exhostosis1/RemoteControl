@@ -83,11 +83,11 @@ namespace RemoteControlCore.Listeners
 
         private void ProcessRequest(HttpListenerContext context)
         {
-            _logger.Log(context.Request.Url.LocalPath);
+            _logger.Log(context.Request.RawUrl);
 
             var args = new MyHttpListenerRequestArgs(context.Request, context.Response, _simple);
 
-            if (context.Request.Url.LocalPath.StartsWith("/api/"))
+            if (context.Request.RawUrl.StartsWith("/api/"))
             {
                 OnApiRequest?.Invoke(args);
             }

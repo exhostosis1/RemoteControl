@@ -3,7 +3,7 @@ using System.Text;
 
 namespace RemoteControlCore.Utility
 {
-    class Strings
+    internal static class Strings
     {
         internal static bool TryGetString(string input, Encoding encoding, out string output)
         {

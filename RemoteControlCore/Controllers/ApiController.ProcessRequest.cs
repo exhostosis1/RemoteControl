@@ -1,27 +1,25 @@
-﻿using System.IO;
-using RemoteControlCore.Abstract;
-using RemoteControlCore.Attributes;
+﻿using RemoteControlCore.Abstract;
 using RemoteControlCore.Interfaces;
 using RemoteControlCore.Utility;
-using System.Linq;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 
 namespace RemoteControlCore.Controllers
 {
     internal partial class ApiController : AbstractController
     {
+        private readonly Dictionary<string, MethodInfo> _methods;
+
         public override void ProcessRequest(IHttpRequestArgs args)
         {
-            var (methodName, param) = Strings.ParseAddresString(args.Request.Url.LocalPath);
+            var (methodName, param) = Strings.ParseAddresString(args.Request.RawUrl);
 
             if (string.IsNullOrWhiteSpace(methodName)) return;
 
-            var method = this.GetType().GetMethods(BindingFlags.Instance | BindingFlags.NonPublic)
-                .FirstOrDefault(x => (x.GetCustomAttribute(typeof(RouteAttribute)) as RouteAttribute)?.MethodName == methodName);
+            if (!_methods.ContainsKey(methodName)) return;
 
-            if (method == null) return;
-
-            var result = method.Invoke(this, new object[]{param});
+            var result = _methods[methodName].Invoke(this, new object[]{param});
 
             if (param == "init")
             {
