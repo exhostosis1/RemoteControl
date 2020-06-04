@@ -24,5 +24,10 @@ namespace MyLogger
             Data.Clear();
             LogScheduler.UnregisterProvider(this);
         }
+
+        ~AbstractLogProvider()
+        {
+            Dispose();
+        }
     }
 }

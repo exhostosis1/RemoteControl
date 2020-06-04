@@ -12,7 +12,7 @@ namespace MyLogger
         {
             Interval = 60_000,
             AutoReset = true,
-            Enabled = true
+            Enabled = false
         };
 
         private static void DoJob(object sender, EventArgs args)
@@ -29,11 +29,13 @@ namespace MyLogger
         public static void RegisterProvider(AbstractLogProvider provider)
         {
             Providers.Add(provider);
+            Timer.Start();
         }
 
         public static void UnregisterProvider(AbstractLogProvider provider)
         {
             Providers.Remove(provider);
+            if(Providers.Count == 0) Timer.Stop();
         }
     }
 }
