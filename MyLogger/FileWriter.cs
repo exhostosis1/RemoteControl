@@ -1,11 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
 namespace MyLogger
 {
-    internal class FileWriter : AbstractLogWriter
+    internal class FileWriter : ILogWriter
     {
         private readonly string _fileName;
         private const long MaxLength = 100 * 1024 * 1024;
@@ -25,7 +24,7 @@ namespace MyLogger
             }
         }
 
-        internal static AbstractLogWriter GetLogger(string fileName)
+        internal static ILogWriter GetFileWriter(string fileName)
         {
             var key = fileName.ToLower();
 
@@ -36,12 +35,12 @@ namespace MyLogger
             return result;
         }
 
-        internal override void WriteData(IEnumerable<string> data)
+        public void WriteData(IEnumerable<string> data)
         {
             File.AppendAllLines(_fileName, data);
         }
 
-        internal override async void WriteDataAsync(IEnumerable<string> data)
+        public async void WriteDataAsync(IEnumerable<string> data)
         {
             await Task.Run(() => WriteData(data));
         }

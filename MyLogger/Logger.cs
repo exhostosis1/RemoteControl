@@ -1,82 +1,34 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Linq;
-using System.Timers;
 
 namespace MyLogger
 {
     public class Logger : ILogger
     {
-        #region LogData
+        internal static ConcurrentQueue<LogData> Data = new ConcurrentQueue<LogData>();
+        
+        private readonly ILogWriter _writer;
 
-        private class LogData
+        private readonly Type _type;
+
+        public Logger(ILogWriter writer, Type type)
         {
-            public AbstractLogWriter Writer { get; set; }
-            public string Message { get; set; }
-            public Type Type { get; set; }
-            public DateTime Time { get; set; }
-
-            public override string ToString() => $"{Time:R} - {Type.FullName} - {Message}";
+            _writer = writer;
+            _type = type;
         }
 
-        #endregion
+        public void Log(string message) => Data.Enqueue(new LogData
+            {Message = message, Type = _type, Writer = _writer, Time = DateTime.Now});
 
-        #region Statics
 
-        private static readonly Timer Timer = new Timer
+        public static ILogger GetFileLogger(string fileName, Type type)
         {
-            Interval = 30_000,
-            AutoReset = true,
-            Enabled = true
-        };
-
-        private static ConcurrentQueue<LogData> _data = new ConcurrentQueue<LogData>();
-
-        static Logger()
-        {
-            Timer.Elapsed += DoJob;
-            Timer.Disposed += DoJob;
-        }
-
-        private static void DoJob(object sender, EventArgs args)
-        {
-            if (_data.Count == 0) return;
-
-            var groupedWriters = _data.GroupBy(x => x.Writer).ToList();
-            _data = new ConcurrentQueue<LogData>();
-
-            foreach (var group in groupedWriters)
-            {
-                group.Key.WriteDataAsync(group.Select(x => x.ToString()));
-            }
+            return new Logger(FileWriter.GetFileWriter(fileName), type);
         }
 
         public static void Flush(object sender, EventArgs args)
         {
-            DoJob(null, null);
-        }
-
-        public static ILogger GetFileLogger(string fileName, Type type)
-        {
-            return new Logger(FileWriter.GetLogger(fileName), type);
-        }
-
-        #endregion
-
-        private readonly AbstractLogWriter _writer;
-
-        
-        private readonly Type _type;
-
-        public void Log(string message) => _data.Enqueue(new LogData
-            {Message = message, Type = _type, Writer = _writer, Time = DateTime.Now});
-
-       
-
-        private Logger(AbstractLogWriter writer, Type type)
-        {
-            _writer = writer;
-            _type = type;
+            LogScheduler.Flush();
         }
     }
 }
