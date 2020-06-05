@@ -162,6 +162,10 @@
       <Project>{3ed46b96-ffc3-464f-ae9e-ddfca4ed2b26}</Project>
       <Name>HtmlParser</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyLogger\MyLogger.csproj">
+      <Project>{c8016b16-0498-48c2-9fd1-45ef5601fd2c}</Project>
+      <Name>MyLogger</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RemoteControlCore\RemoteControlCore.csproj">
       <Project>{be1a0b5e-dcc8-41c3-a664-fefd5a5cceca}</Project>
       <Name>RemoteControlCore</Name>

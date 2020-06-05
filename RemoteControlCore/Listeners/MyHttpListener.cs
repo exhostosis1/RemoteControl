@@ -23,7 +23,7 @@ namespace RemoteControlCore.Listeners
     internal class MyHttpListener : IHttpListener
     {
         private HttpListener _listener;
-        private readonly FileLogger _logger;
+        private readonly ILogger _logger;
 
         public event HttpEventHandler OnApiRequest;
         public event HttpEventHandler OnHttpRequest;
@@ -38,8 +38,7 @@ namespace RemoteControlCore.Listeners
 
         public MyHttpListener()
         {
-            _logger = new FileLogger("log.txt", this.GetType());
-            LogScheduler.RegisterProvider(_logger);
+            _logger = Logger.GetFileLogger("log.txt", this.GetType());
         }
 
         public void StartListen(string url, bool simple)

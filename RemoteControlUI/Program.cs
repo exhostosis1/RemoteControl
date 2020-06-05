@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using MyLogger;
 
 namespace RemoteControl
 {
@@ -15,6 +16,9 @@ namespace RemoteControl
             Application.SetCompatibleTextRenderingDefault(false);
             
             Translator.Translate();
+
+            Application.ApplicationExit += Logger.Flush;
+            Application.ThreadException += Logger.Flush;
             
             Application.Run(new ConfigForm());
         }
