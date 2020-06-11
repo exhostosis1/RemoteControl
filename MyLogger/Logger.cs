@@ -15,10 +15,12 @@ namespace MyLogger
         {
             _writer = writer;
             _type = type;
+
+            LogScheduler.Start(30_000);
         }
 
         public void Log(string message) => Data.Enqueue(new LogData
-            {Message = message, Type = _type, Writer = _writer, Time = DateTime.Now});
+            {Message = message, Type = _type, Writer = _writer, Time = DateTime.UtcNow});
 
 
         public static ILogger GetFileLogger(string fileName, Type type)

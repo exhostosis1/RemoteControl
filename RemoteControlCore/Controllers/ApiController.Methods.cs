@@ -104,7 +104,7 @@ namespace RemoteControlCore.Controllers
                     _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
-                    if (_point.TrySetCoords(value.Replace("\"", "")))
+                    if (_point.TrySetCoords(WebUtility.UrlDecode(value).Replace("\"", "")))
                     {
                         _inputService.MouseMove(_point);
                     }

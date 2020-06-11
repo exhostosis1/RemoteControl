@@ -9,10 +9,21 @@ namespace MyLogger
     {
         private static readonly Timer Timer = new Timer
         {
-            Interval = 30_000,
-            AutoReset = true,
-            Enabled = true
+            Enabled = false,
+            AutoReset = true
+
         };
+
+        public static void Start(int interval)
+        {
+            Timer.Interval = interval;
+            Timer.Start();
+        }
+
+        public static void Stop()
+        {
+            Timer.Stop();
+        }
 
         static LogScheduler()
         {
