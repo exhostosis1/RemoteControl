@@ -155,4 +155,21 @@ function createTouch(element) {
     touchElement.addEventListener('touchcancel', endTouch);
 }
 
+
+let prev = '';
+let prevBorder = '';
+
+function touchHide() {
+    prev = touchElement.style.display;
+    prevBorder = touchElement.style.border;
+    touchElement.style.border = 'none';
+    touchElement.style.display = 'none';
+}
+
+function touchShow() {
+    touchElement.style.display = prev;
+    setTimeout(() => { touchElement.style.border = prevBorder; }, 200);
+}
+
+export { createTouch, touchHide, touchShow };
 export default createTouch;

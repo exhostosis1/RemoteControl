@@ -15,7 +15,10 @@ namespace MyLogger
         {
             _writer = writer;
             _type = type;
+        }
 
+        static Logger()
+        {
             LogScheduler.Start(30_000);
         }
 

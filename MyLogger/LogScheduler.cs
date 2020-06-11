@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Timers;
 
@@ -16,6 +17,9 @@ namespace MyLogger
 
         public static void Start(int interval)
         {
+            if (Timer.Enabled)
+                Timer.Stop();
+
             Timer.Interval = interval;
             Timer.Start();
         }
@@ -27,16 +31,23 @@ namespace MyLogger
 
         static LogScheduler()
         {
-            Timer.Elapsed += DoJob;
-            Timer.Disposed += DoJob;
+            Timer.Elapsed += HandleEvent;
+            Timer.Disposed += HandleEvent;
         }
 
-        private static void DoJob(object sender, EventArgs args)
+        private static void HandleEvent(object sender, EventArgs args) => DoJob();
+
+        private static void DoJob()
         {
             if (Logger.Data.Count == 0) return;
 
-            var groupedWriters = Logger.Data.GroupBy(x => x.Writer).ToList();
-            Logger.Data = new ConcurrentQueue<LogData>();
+            List<IGrouping<ILogWriter, LogData>> groupedWriters;
+
+            lock (Logger.Data)
+            {
+                groupedWriters = Logger.Data.GroupBy(x => x.Writer).ToList();
+                Logger.Data = new ConcurrentQueue<LogData>();
+            }
 
             foreach (var group in groupedWriters)
             {
@@ -46,7 +57,7 @@ namespace MyLogger
 
         public static void Flush()
         {
-            DoJob(null, null);
+            DoJob();
         }
     }
 }

@@ -1,6 +1,7 @@
 import createVolumeBar from './slider.js';
-import createTouch from './touch.js';
+import { createTouch, touchHide, touchShow } from './touch.js';
 import createKeys from './keys.js';
+import createTextInput from './text.js';
 
 const Modes = {
     Audio: 'audio',
@@ -11,15 +12,6 @@ const Modes = {
 
 async function sendRequest(method, param) {
     return (await fetch(`/api/${method}/${param}`)).text();
-}
-
-function processText(e) {
-    if (e.key === 'Enter') {
-        if (e.target.value) {
-            sendRequest(Modes.Text, encodeURIComponent(e.target.value));
-        }
-        e.target.blur();
-    }
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -50,20 +42,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const textInput = document.getElementById('text-input');
 
     if (textInput) {
-        let prev = '';
-        let prevBorder = '';
-
-        textInput.addEventListener('keyup', processText);
-        textInput.addEventListener('focus', () => {
-            prev = touch.style.display;
-            prevBorder = touch.style.border;
-            touch.style.border = 'none';
-            touch.style.display = 'none';
-        });
+        createTextInput(textInput);
+        textInput.addEventListener('textinput', e => sendRequest(Modes.Text, e.text));
+        textInput.addEventListener('focus', () => touchHide());
         textInput.addEventListener('blur', e => {
             e.target.value = '';
-            touch.style.display = prev;
-            setTimeout(() => { touch.style.border = prevBorder; }, 200);
+            touchShow();
         });
     }
 
