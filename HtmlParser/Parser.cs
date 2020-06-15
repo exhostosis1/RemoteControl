@@ -33,10 +33,8 @@ namespace HtmlParser
 
                 return new Tree(parentNode);
             }
-            else
-            {
-                return new Tree(nodes[0]);
-            }
+            
+            return new Tree(nodes[0]);
         }
 
         public static Node GetNode(string source, int startIndex = 0) => GetNode(source, startIndex, out _, out _);

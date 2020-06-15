@@ -36,7 +36,7 @@ namespace RemoteControl
 
             head.AddChild(style);
 
-            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), Path, new[] { "point", "touch" });
+            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), Path, new[] { "point", "touch", "text" });
 
             head.AddChild(script);
 
@@ -44,7 +44,7 @@ namespace RemoteControl
 
             Tree.RemoveNode(Tree.FindNodeById("loader", body));
             Tree.RemoveNode(Tree.FindNodeById("touch", body));
-            Tree.RemoveNode(tree.FindNodesByTag("input", body).FirstOrDefault());
+            Tree.RemoveNode(Tree.FindNodesByTag("input", body).FirstOrDefault());
 
             newTree.Root.AddChild(body);
 

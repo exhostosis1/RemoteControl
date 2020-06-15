@@ -4,25 +4,15 @@
     {
         private string _name;
         public string Name {
-            get
-            {
-                return _name;
-            }
-            set 
-            {
-                _name = value?.ToLower() ?? "";
-            } 
+            get => _name;
+            private set => _name = value?.ToLower() ?? "";
         }
 
         public string Value { get; set; }
 
         public bool Directive => string.IsNullOrEmpty(Value);
 
-        public Attribute(): this("", "") { }
-
-        public Attribute(string name) : this(name, "") { }
-
-        public Attribute(string name, string value)
+        public Attribute(string name = "", string value = "")
         {
             Name = name;
             Value = value;

@@ -8,15 +8,8 @@ namespace HtmlParser
     {
         public string Tag
         {
-            get
-            {
-                return _tag;
-            }
-
-            set
-            {
-                _tag = value?.ToLower() ?? "";
-            }
+            get => _tag;
+            set => _tag = value?.ToLower() ?? "";
         }
 
         private string _tag;

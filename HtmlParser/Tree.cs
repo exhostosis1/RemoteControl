@@ -12,7 +12,7 @@ namespace HtmlParser
 
         public IEnumerable<Node> FindNodesByTag(string tag) => FindNodesByTag(tag, Root);
 
-        public IEnumerable<Node> FindNodesByTag(string tag, Node parent) => Find(SearchTypes.Tag, parent, tag, null).ToList();
+        public static IEnumerable<Node> FindNodesByTag(string tag, Node parent) => Find(SearchTypes.Tag, parent, tag, null).ToList();
 
         public Node FindNodeById(string id) => FindNodeById(id, Root);
 
