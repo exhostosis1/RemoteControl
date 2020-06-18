@@ -70,17 +70,17 @@ namespace RemoteControlCore.Listeners
             StartListen(_url, _simple);
         }
 
-        private Task Start()
+        private async void Start()
         {
             while (true)
             {
                 try
                 {
-                    ProcessRequest(_listener.GetContext());
+                    ProcessRequest(await _listener.GetContextAsync());
                 }
                 catch
                 {
-                    return Task.CompletedTask;
+                    return;
                 }
             }
         }
