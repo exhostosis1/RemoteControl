@@ -10,7 +10,7 @@ namespace RemoteControlTests
         [TestMethod]
         public void StartRestartAndGetUriTest()
         {
-            var core = new Core();
+            var core = new Core(false);
 
             core.Stop();
 
@@ -53,7 +53,7 @@ namespace RemoteControlTests
         [TestMethod]
         public void StopListenTest()
         {
-            var core = new Core();
+            var core = new Core(false);
 
             core.Start();
 

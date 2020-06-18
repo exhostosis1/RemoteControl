@@ -10,15 +10,17 @@ const Modes = {
     Text: 'text',
 };
 
-async function sendRequest(method, param) {
-    return (await fetch(`/api/${method}/${param}`)).text();
+let socket;
+
+function sendRequest(method, param) {
+    socket.send(`/${method}/${param}`);
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+function initElements(volume) {
     const slider = document.getElementById('slider');
 
     if (slider) {
-        createVolumeBar(slider, 100, await sendRequest(Modes.Audio, 'init'), true);
+        createVolumeBar(slider, 100, volume, true);
         slider.addEventListener('volumechanged', e => sendRequest(Modes.Audio, e.value));
     }
 
@@ -56,4 +58,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loader) {
         document.getElementById('loader').style.display = 'none';
     }
+}
+
+function messageReceived(e) {
+    initElements(e.data);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    socket = new WebSocket(`ws://${window.location.hostname}:${(Number)(window.location.port) + 1}`);
+    socket.onmessage = messageReceived;
+    socket.onopen = () => {
+        sendRequest(Modes.Audio, 'init');
+    };
+});
+
+document.addEventListener('beforeunload', () => {
+    socket.Close();
 });

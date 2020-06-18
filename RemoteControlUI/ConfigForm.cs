@@ -7,7 +7,7 @@ namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
-        readonly Core _program = new Core();
+        private readonly Core _program;
 
         public ConfigForm()
         {
@@ -18,6 +18,7 @@ namespace RemoteControl
                 var conf = AppConfig.GetServerConfig();
 
                 SetConfigTextBoxes(conf);
+                _program = new Core(conf.Socket);
                 _program.Start(new UriBuilder(conf.Scheme, conf.Host, conf.Port), conf.Simple);
 
                 EnableMenuItem();
@@ -85,7 +86,7 @@ namespace RemoteControl
             var ub = config.Item1;
             var simple = config.Item2;
 
-            SetConfigTextBoxes(new AppConfig(ub.Scheme, ub.Host, ub.Port, simple));
+            SetConfigTextBoxes(new AppConfig(ub.Scheme, ub.Host, ub.Port, simple, false));
         }
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)

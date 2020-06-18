@@ -1,9 +1,16 @@
-﻿using RemoteControlCore.Interfaces;
+﻿using System.IO;
+using RemoteControlCore.Interfaces;
 
 namespace RemoteControlCore.Abstract
 {
     internal abstract class AbstractController
     {
-        public abstract void ProcessRequest(IHttpRequestArgs context);
+        public virtual void ProcessRequest(IHttpRequestArgs context)
+        {
+        }
+
+        public virtual void ProcessApiRequest(string message, Stream stream)
+        {
+        }
     }
 }

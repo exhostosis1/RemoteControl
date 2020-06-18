@@ -1,15 +1,10 @@
 ﻿namespace RemoteControlCore.Interfaces
 {
-    internal interface IHttpListener
+    internal interface IHttpListener: IListener
     {
-        event HttpEventHandler OnApiRequest;
-        event HttpEventHandler OnHttpRequest;
-        void StartListen();
-        void StartListen(string url, bool simple);
-        void StopListen();
         void RestartListen(string url, bool simple);
-        void RestartListen();
-    }
+        void StartListen(string url, bool simple);
 
-    internal delegate void HttpEventHandler(IHttpRequestArgs args);
+        event HttpEventHandler OnHttpRequest;
+    }
 }

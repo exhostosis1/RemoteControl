@@ -14,6 +14,7 @@ namespace RemoteControl
         private const string IpConfigName = "host";
         private const string SchemeConfigName = "scheme";
         private const string SimpleConfigName = "simple";
+        private const string SocketConfigName = "socket";
 
         private const char EqualityChar = '=';
 
@@ -21,6 +22,7 @@ namespace RemoteControl
         public static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
         public static int DefaultPort => 80;
         public static bool DefaultSimple => false;
+        public static bool DefaultSocket => false;
 
         private static readonly Dictionary<string, string> Config = new Dictionary<string, string>();
 
@@ -28,6 +30,7 @@ namespace RemoteControl
         public string Host;
         public string Scheme;
         public bool Simple;
+        public bool Socket;
 
         static AppConfig()
         {
@@ -50,12 +53,13 @@ namespace RemoteControl
             }
         }
 
-        public AppConfig(string scheme, string host, int port, bool simple)
+        public AppConfig(string scheme, string host, int port, bool simple, bool socket)
         {
             Port = port;
             Host = host;
             Simple = simple;
             Scheme = scheme;
+            Socket = socket;
         }
 
         internal static AppConfig GetServerConfig()
@@ -64,9 +68,10 @@ namespace RemoteControl
             var host = GetAppConfig(IpConfigName) ?? DefaultHost;
 
             if (!bool.TryParse(GetAppConfig(SimpleConfigName), out var simple)) simple = DefaultSimple;
+            if (!bool.TryParse(GetAppConfig(SocketConfigName), out var socket)) socket = DefaultSocket;
             if (!int.TryParse(GetAppConfig(PortConfigName), out var port)) port = DefaultPort;         
 
-            return new AppConfig(scheme, host, port, simple);
+            return new AppConfig(scheme, host, port, simple, socket);
         }
 
         private static string GetAppConfig(string name)

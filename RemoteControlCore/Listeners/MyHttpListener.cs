@@ -20,16 +20,19 @@ namespace RemoteControlCore.Listeners
             Simple = simple;
         }
     }
-    internal class MyHttpListener : IHttpListener
+    internal class MyHttpListener : IHttpListener, IApiListener
     {
         private HttpListener _listener;
         private readonly ILogger _logger;
 
-        public event HttpEventHandler OnApiRequest;
+        public event ApiEventHandler OnApiRequest;
+
         public event HttpEventHandler OnHttpRequest;
 
         private string _url = "http://localhost/";
         private bool _simple;
+
+        public bool Listening { get; private set; }
 
         public MyHttpListener(string url) : this()
         {
@@ -58,6 +61,8 @@ namespace RemoteControlCore.Listeners
             _listener.Start();
 
             Task.Run(Start);
+
+            Listening = true;
         }
 
         public void StartListen()
@@ -84,15 +89,13 @@ namespace RemoteControlCore.Listeners
         {
             _logger.Log(context.Request.RawUrl);
 
-            var args = new MyHttpListenerRequestArgs(context.Request, context.Response, _simple);
-
             if (context.Request.RawUrl.StartsWith("/api/"))
             {
-                OnApiRequest?.Invoke(args);
+                OnApiRequest?.Invoke(context.Request.RawUrl, context.Response.OutputStream);
             }
             else
             {
-                OnHttpRequest?.Invoke(args);
+                OnHttpRequest?.Invoke(new MyHttpListenerRequestArgs(context.Request, context.Response, _simple));
             }
 
             context.Response.Close();
@@ -105,6 +108,7 @@ namespace RemoteControlCore.Listeners
                 _listener.Abort();
                 _listener.Close();
                 _listener = null;
+                Listening = false;
             }
         }
 
@@ -117,6 +121,16 @@ namespace RemoteControlCore.Listeners
         public void RestartListen()
         {
             RestartListen(_url, _simple);
+        }
+
+        public void StartListen(UriBuilder ub)
+        {
+            StartListen(ub.Uri.ToString(), false);
+        }
+
+        public void RestartListen(UriBuilder ub)
+        {
+            RestartListen(ub.Uri.ToString(), false);
         }
     }
 }

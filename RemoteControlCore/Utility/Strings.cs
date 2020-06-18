@@ -31,7 +31,7 @@ namespace RemoteControlCore.Utility
         internal static (string method, string methodParams) ParseAddresString(string input)
         {
             var str = input.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
-            return str.Length <= 2 ? (null, null) : (str[1], str[2]);
+            return str.Length < 2 ? (null, null) : (str[str.Length - 2], str[str.Length - 1]);
         }
     }
 }
