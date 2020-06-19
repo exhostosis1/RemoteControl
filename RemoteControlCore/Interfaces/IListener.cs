@@ -1,10 +1,12 @@
-﻿namespace RemoteControlCore.Interfaces
+﻿using System;
+
+namespace RemoteControlCore.Interfaces
 {
     internal interface IListener
     {
-        void StartListen();
+        void StartListen(UriBuilder ub);
         void StopListen();
-        void RestartListen();
+        void RestartListen(UriBuilder ub);
 
         bool Listening { get; }
     }

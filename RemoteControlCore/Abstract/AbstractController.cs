@@ -1,5 +1,4 @@
-﻿using System.IO;
-using RemoteControlCore.Interfaces;
+﻿using RemoteControlCore.Interfaces;
 
 namespace RemoteControlCore.Abstract
 {
@@ -9,8 +8,13 @@ namespace RemoteControlCore.Abstract
         {
         }
 
-        public virtual void ProcessApiRequest(string message, Stream stream)
+        public virtual void ProcessSimpleRequest(IHttpRequestArgs context)
         {
+        }
+
+        public virtual string ProcessApiRequest(string message)
+        {
+            return null;
         }
     }
 }

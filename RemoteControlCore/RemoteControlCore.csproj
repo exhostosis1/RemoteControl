@@ -51,7 +51,6 @@
     <Compile Include="Enums\KeyPressMode.cs" />
     <Compile Include="Enums\KeysEnum.cs" />
     <Compile Include="Enums\MouseKeysEnum.cs" />
-    <Compile Include="Enums\NavigationOptionsEnum.cs" />
     <Compile Include="Interfaces\ApiEventHandler.cs" />
     <Compile Include="Interfaces\HttpEventHandler.cs" />
     <Compile Include="Interfaces\IHttpListener.cs" />
@@ -62,6 +61,7 @@
     <Compile Include="Interfaces\IInputService.cs" />
     <Compile Include="Interfaces\ICoordinates.cs" />
     <Compile Include="Interfaces\IInputProvider.cs" />
+    <Compile Include="Listeners\MyHttpApiListener.cs" />
     <Compile Include="Listeners\MyHttpListener.cs" />
     <Compile Include="Core.cs" />
     <Compile Include="Listeners\WebSocketListener.cs" />
@@ -69,7 +69,6 @@
     <Compile Include="Providers\MyInputProvider.cs" />
     <Compile Include="Services\AudioService.cs" />
     <Compile Include="Services\InputsimService.cs" />
-    <Compile Include="Tests\MyHttpListenerTests.cs" />
     <Compile Include="Utility\Point.cs" />
     <Compile Include="Utility\Strings.cs" />
   </ItemGroup>

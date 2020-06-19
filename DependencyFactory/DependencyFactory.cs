@@ -7,17 +7,13 @@ namespace DependencyFactory
 {
     public static class Factory
     {
-        private static readonly Guid UniqueKey = Guid.NewGuid();
-
         private static readonly Dictionary<Type, object> ObjectCache = new Dictionary<Type, object>();
-        private static readonly Dictionary<object, NavigationOption> NavigationOptionsCache = new Dictionary<object, NavigationOption>()
-        {
-            { UniqueKey, new NavigationOption() }
-        };
+
+        private static readonly NavigationOption GeneralNavOption = new NavigationOption();
 
         public static T GetInstance<T>(NavigationOption navigationOption, params object[] prms) where T: class
         {            
-            var objectConfig = DependencyFactoryConfig.GetConfig().FirstOrDefault(x => x.InterfaceType == typeof(T) && x.NavigationOption == navigationOption);
+            var objectConfig = DependencyFactoryConfig.GetConfig().FirstOrDefault(x => x.InterfaceType == typeof(T) && x.Id == navigationOption.Value);
 
             if (objectConfig == null)
             {
@@ -43,7 +39,7 @@ namespace DependencyFactory
 
         public static T GetInstance<T>(params object[] prms) where T: class
         {
-            return GetInstance<T>(NavigationOptionsCache[UniqueKey], prms);
+            return GetInstance<T>(GeneralNavOption, prms);
         }
 
         private static object CreateNew(Type type, object[] prms)
@@ -62,28 +58,17 @@ namespace DependencyFactory
         }
         public static void AddConfig<TFrom, TTo>(NavigationOption navigationOption, DependencyBehavior behavior = DependencyBehavior.NewInstance)
         {
-            if (DependencyFactoryConfig.GetConfig().Any(x => x.InterfaceType == typeof(TFrom) && x.NavigationOption == navigationOption))
+            if (DependencyFactoryConfig.GetConfig().Any(x => x.InterfaceType == typeof(TFrom) && x.Id == navigationOption.Value))
                 throw new Exception("Duplicate entries in factory config");
 
             if (!typeof(TFrom).IsAssignableFrom(typeof(TTo)))
                 throw new ArgumentException("Target class does not deride from parent class");
 
-            DependencyFactoryConfig.AddConfig(new DependencyFactoryConfigItem(typeof(TFrom), typeof(TTo), behavior, navigationOption));
+            DependencyFactoryConfig.AddConfig(new DependencyFactoryConfigItem(typeof(TFrom), typeof(TTo), behavior, navigationOption.Value));
         }
         public static void AddConfig<TFrom, TTo>(DependencyBehavior behavior = DependencyBehavior.NewInstance)
         {
-            AddConfig<TFrom, TTo>(NavigationOptionsCache[UniqueKey], behavior);
-        }
-
-        public static NavigationOption GetNavigationOption(object id)
-        {
-            if (id == null)
-                throw new ArgumentNullException();
-
-            if (!NavigationOptionsCache.ContainsKey(id))
-                NavigationOptionsCache.Add(id, new NavigationOption());
-
-            return NavigationOptionsCache[id];
+            AddConfig<TFrom, TTo>(GeneralNavOption, behavior);
         }
 
         public static void ResetConfig()

@@ -7,7 +7,10 @@ namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
-        private readonly Core _program;
+        private Core _program;
+        private UriBuilder _httpHost;
+        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
+        private UriBuilder _apiHost;
 
         public ConfigForm()
         {
@@ -15,12 +18,8 @@ namespace RemoteControl
 
             try
             {
-                var conf = AppConfig.GetServerConfig();
-
-                SetConfigTextBoxes(conf);
-                _program = new Core(conf.Socket);
-                _program.Start(new UriBuilder(conf.Scheme, conf.Host, conf.Port), conf.Simple);
-
+                SetConfigTextBoxes();
+                SetProgram();
                 EnableMenuItem();
             }
             catch(Exception e)
@@ -28,6 +27,15 @@ namespace RemoteControl
                 DisableMenuItem();
                 MessageBox.Show(e.Message, @"Error", MessageBoxButtons.OK);
             }
+        }
+
+        private void SetProgram()
+        {
+            _httpHost = new UriBuilder(AppConfig.Scheme, AppConfig.Host, AppConfig.Port);
+            _apiHost = new UriBuilder(AppConfig.ApiScheme, AppConfig.ApiHost, AppConfig.ApiPort);
+
+            _program = new Core(_httpHost, _apiHost, AppConfig.Simple, AppConfig.Socket);
+            _program.Start();
         }
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -41,12 +49,25 @@ namespace RemoteControl
             Process.Start(this.ipToolStripMenuItem.Text);
         }
 
-        private void Button1_Click(object sender, EventArgs e)
+        private void ButtonSave_Click(object sender, EventArgs e)
         {
             try
             {
-                _program.Restart(new UriBuilder(this.textProtocol.Text, this.textHost.Text, Convert.ToInt32(this.textPort.Text)), this.checkBoxSimple.Checked);
+                _program.Stop();
 
+                AppConfig.Host = textHost.Text;
+                AppConfig.Scheme = textScheme.Text;
+                AppConfig.Port = Convert.ToInt32(textPort.Text);
+
+                AppConfig.ApiScheme = textApiScheme.Text;
+                AppConfig.ApiHost = textApiHost.Text;
+                AppConfig.ApiPort = Convert.ToInt32(textApiPort.Text);
+
+                AppConfig.Simple = checkBoxSimple.Checked;
+                AppConfig.Socket = checkBoxSocket.Checked;
+
+                SetProgram();
+                Translator.Translate();
                 Minimize();
             }
             catch (Exception ex)
@@ -58,19 +79,24 @@ namespace RemoteControl
 
             EnableMenuItem();
         }
-        private void SetConfigTextBoxes(AppConfig config)
+        private void SetConfigTextBoxes()
         {
-            this.textProtocol.Text = config.Scheme;
-            this.textHost.Text = config.Host;
-            this.textPort.Text = config.Port.ToString();
+            this.textScheme.Text = AppConfig.Scheme;
+            this.textHost.Text = AppConfig.Host;
+            this.textPort.Text = AppConfig.Port.ToString();
 
-            this.checkBoxSimple.Checked = config.Simple;
+            this.checkBoxSimple.Checked = AppConfig.Simple;
+            this.checkBoxSocket.Checked = AppConfig.Socket;
+
+            this.textApiScheme.Text = AppConfig.ApiScheme;
+            this.textApiHost.Text = AppConfig.ApiHost;
+            this.textApiPort.Text = AppConfig.ApiPort.ToString();
         }
 
         private void EnableMenuItem()
         {
             this.ipToolStripMenuItem.Enabled = true;
-            this.ipToolStripMenuItem.Text = _program.GetCurrentConfig().Item1.Uri.ToString();
+            this.ipToolStripMenuItem.Text = _httpHost.Uri.ToString();
         }
 
         private void DisableMenuItem()
@@ -79,14 +105,11 @@ namespace RemoteControl
             this.ipToolStripMenuItem.Text = @"Stopped";
         }
 
-        private void Button2_Click(object sender, EventArgs e)
+        private void ButtonCancel_Click(object sender, EventArgs e)
         {
             Minimize();
-            var config = _program.GetCurrentConfig();
-            var ub = config.Item1;
-            var simple = config.Item2;
 
-            SetConfigTextBoxes(new AppConfig(ub.Scheme, ub.Host, ub.Port, simple, false));
+            SetConfigTextBoxes();
         }
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
@@ -97,9 +120,9 @@ namespace RemoteControl
             }
         }
 
-        private void Button3_Click(object sender, EventArgs e)
+        private void ButtonGet_Click(object sender, EventArgs e)
         {
-            SetConfigTextBoxes(AppConfig.GetServerConfig());
+            SetConfigTextBoxes();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -119,10 +142,7 @@ namespace RemoteControl
             }
             catch
             {
-                var config = AppConfig.GetServerConfig();
-                _program.Restart(new UriBuilder(config.Scheme, config.Host, config.Port), config.Simple);
-
-                SetConfigTextBoxes(config);
+                SetConfigTextBoxes();
                 EnableMenuItem();
             }
         }
@@ -144,6 +164,11 @@ namespace RemoteControl
             Show();
             this.WindowState = FormWindowState.Normal;
             this.ShowInTaskbar = true;
+        }
+
+        private void textApiPort_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!char.IsDigit(e.KeyChar)) e.Handled = true;
         }
     }
 }

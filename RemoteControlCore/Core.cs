@@ -8,20 +8,30 @@ namespace RemoteControlCore
 {
     public class Core
     {
-        private readonly IHttpListener _listener;
+        private readonly IHttpListener _httplistener;
         private readonly IApiListener _apiListener;
 
-        private UriBuilder _ub = new UriBuilder();
-        private bool _simple;
+        public UriBuilder HttpHost { get; set; }
+        public UriBuilder ApiHost { get; set; }
 
-        public Core(bool socket)
+        public Core(UriBuilder http, UriBuilder api, bool simple, bool socket)
         {
+            HttpHost = http;
+            ApiHost = api;
+
             var apiController = Factory.GetInstance<AbstractController>(MyDependencyFactoryConfig.ApiNavigationOption);
             var httpController = Factory.GetInstance<AbstractController>(MyDependencyFactoryConfig.WebNavigationOption);
 
-            _listener = Factory.GetInstance<IHttpListener>();
+            _httplistener = Factory.GetInstance<IHttpListener>();
 
-            _listener.OnHttpRequest += httpController.ProcessRequest;
+            if (simple)
+            {
+                _httplistener.OnHttpRequest += httpController.ProcessSimpleRequest;
+            }
+            else
+            {
+                _httplistener.OnHttpRequest += httpController.ProcessRequest;
+            }
 
             _apiListener = Factory.GetInstance<IApiListener>(socket
                 ? MyDependencyFactoryConfig.SocketNavigationOption
@@ -30,41 +40,22 @@ namespace RemoteControlCore
             _apiListener.OnApiRequest += apiController.ProcessApiRequest;
         }
 
-        public void Start(UriBuilder ub, bool simple)
-        {
-            _ub = ub;
-            _simple = simple;
-            Start();
-        }
-
         public void Start()
         {
-            _listener.StartListen(_ub.Uri.ToString(), _simple);
-            if (!_apiListener.Listening) _apiListener.StartListen(_ub);
+            _httplistener.StartListen(HttpHost);
+            if (!_apiListener.Listening) _apiListener.StartListen(ApiHost);
         }
 
         public void Stop()
         {
-            _listener.StopListen();
+            _httplistener.StopListen();
             if (_apiListener.Listening) _apiListener.StopListen();
-        }
-
-        public void Restart(UriBuilder ub, bool simple)
-        {
-            _ub = ub;
-            _simple = simple;
-            Restart();
         }
 
         public void Restart()
         {
-            _listener.RestartListen(_ub.Uri.ToString(), _simple);
-            _apiListener.RestartListen(_ub);
-        }
-
-        public (UriBuilder, bool) GetCurrentConfig()
-        {
-            return (_ub, _simple);
-        }   
+            _httplistener.RestartListen(HttpHost);
+            _apiListener.RestartListen(ApiHost);
+        } 
     }
 }

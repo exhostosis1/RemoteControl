@@ -19,13 +19,23 @@ namespace RemoteControlCore.Controllers
             { ".css", "text/css" }
         };
 
+        public override void ProcessSimpleRequest(IHttpRequestArgs context)
+        {
+            DoJob(context, true);
+        }
+
         public override void ProcessRequest(IHttpRequestArgs context)
+        {
+            DoJob(context, false);
+        }
+
+        public void DoJob(IHttpRequestArgs context, bool simple)
         {
             var path = ContentFolder + context.Request.Url.LocalPath;
 
             if (context.Request.Url.LocalPath == "/")
             {
-                path += (context.Request.UserAgent?.Contains("SM-R800") ?? false) || context.Simple ? "index-simple.html" : "index.html";
+                path += (context.Request.UserAgent?.Contains("SM-R800") ?? false) || simple ? "index-simple.html" : "index.html";
             }
 
             var extension = Path.GetExtension(path);

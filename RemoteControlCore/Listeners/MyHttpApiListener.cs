@@ -1,48 +1,34 @@
-﻿using MyLogger;
-using RemoteControlCore.Interfaces;
+﻿using RemoteControlCore.Interfaces;
 using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using MyLogger;
 
 namespace RemoteControlCore.Listeners
 {
-    internal class MyHttpListenerRequestArgs : IHttpRequestArgs
-    {
-        public HttpListenerRequest Request { get; }
-        public HttpListenerResponse Response { get; }
-
-        public bool Simple { get; }
-
-        public MyHttpListenerRequestArgs(HttpListenerRequest request, HttpListenerResponse response, bool simple)
-        {
-            Request = request;
-            Response = response;
-            Simple = simple;
-        }
-    }
-    internal class MyHttpListener : IHttpListener
+    internal class MyHttpApiListener : IApiListener
     {
         private HttpListener _listener;
         private readonly ILogger _logger;
 
-        public event HttpEventHandler OnHttpRequest;
+        public event ApiEventHandler OnApiRequest;
 
         private string _url = "http://localhost/";
-        private bool _simple;
 
         public bool Listening { get; private set; }
 
-        public MyHttpListener(string url) : this()
+        public MyHttpApiListener(string url) : this()
         {
             _url = url;
         }
 
-        public MyHttpListener()
+        public MyHttpApiListener()
         {
             _logger = Logger.GetFileLogger("log.txt", this.GetType());
         }
 
-        public void StartListen(string url, bool simple)
+        public void StartListen(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentException("Url must be set before start listening");
@@ -50,7 +36,6 @@ namespace RemoteControlCore.Listeners
             if (_listener != null) return;
 
             _url = url;
-            _simple = simple;
 
             _listener = new HttpListener();
 
@@ -65,7 +50,7 @@ namespace RemoteControlCore.Listeners
 
         public void StartListen()
         {
-            StartListen(_url, _simple);
+            StartListen(_url);
         }
 
         private async void Start()
@@ -86,9 +71,19 @@ namespace RemoteControlCore.Listeners
         private void ProcessRequest(HttpListenerContext context)
         {
             _logger.Log(context.Request.RawUrl);
-            context.Response.StatusCode = 200;
 
-            OnHttpRequest?.Invoke(new MyHttpListenerRequestArgs(context.Request, context.Response, _simple));
+            context.Response.StatusCode = 200;
+            context.Response.AddHeader("Access-Control-Allow-Origin", "*");
+
+            var result = OnApiRequest?.Invoke(context.Request.RawUrl);
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                using (var sw = new StreamWriter(context.Response.OutputStream))
+                {
+                    sw.Write(result);
+                }
+            }
 
             context.Response.Close();
         }
@@ -104,25 +99,25 @@ namespace RemoteControlCore.Listeners
             }
         }
 
-        public void RestartListen(string url, bool simple)
+        public void RestartListen(string url)
         {
             StopListen();
-            StartListen(url, simple);
+            StartListen(url);
         }
 
         public void RestartListen()
         {
-            RestartListen(_url, _simple);
+            RestartListen(_url);
         }
 
         public void StartListen(UriBuilder ub)
         {
-            StartListen(ub.Uri.ToString(), false);
+            StartListen(ub.Uri.ToString());
         }
 
         public void RestartListen(UriBuilder ub)
         {
-            RestartListen(ub.Uri.ToString(), false);
+            RestartListen(ub.Uri.ToString());
         }
     }
 }

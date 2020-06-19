@@ -9,14 +9,14 @@ namespace DependencyFactory.Config
         internal Type ObjectType { get; }
         internal DependencyBehavior Behavior { get; }
 
-        internal readonly NavigationOption NavigationOption;        
+        internal readonly Guid Id;        
 
-        internal DependencyFactoryConfigItem(Type interfaceType, Type objectType, DependencyBehavior behavior, NavigationOption navigationOption)
+        internal DependencyFactoryConfigItem(Type interfaceType, Type objectType, DependencyBehavior behavior, Guid navigationOption)
         {
             InterfaceType = interfaceType;
             ObjectType = objectType;
             Behavior = behavior;
-            NavigationOption = navigationOption;
+            Id = navigationOption;
         }
     }
 

@@ -36,7 +36,7 @@
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buttonSave = new System.Windows.Forms.Button();
-            this.textProtocol = new System.Windows.Forms.TextBox();
+            this.textScheme = new System.Windows.Forms.TextBox();
             this.textHost = new System.Windows.Forms.TextBox();
             this.textPort = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
@@ -45,6 +45,13 @@
             this.buttonCancel = new System.Windows.Forms.Button();
             this.buttonGet = new System.Windows.Forms.Button();
             this.checkBoxSimple = new System.Windows.Forms.CheckBox();
+            this.checkBoxSocket = new System.Windows.Forms.CheckBox();
+            this.textApiScheme = new System.Windows.Forms.TextBox();
+            this.textApiHost = new System.Windows.Forms.TextBox();
+            this.textApiPort = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -89,21 +96,21 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(74, 38);
+            this.buttonSave.Location = new System.Drawing.Point(74, 64);
             this.buttonSave.Name = "buttonSave";
             this.buttonSave.Size = new System.Drawing.Size(80, 23);
             this.buttonSave.TabIndex = 1;
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
-            this.buttonSave.Click += new System.EventHandler(this.Button1_Click);
+            this.buttonSave.Click += new System.EventHandler(this.ButtonSave_Click);
             // 
-            // textProtocol
+            // textScheme
             // 
-            this.textProtocol.Location = new System.Drawing.Point(12, 12);
-            this.textProtocol.MaxLength = 5;
-            this.textProtocol.Name = "textProtocol";
-            this.textProtocol.Size = new System.Drawing.Size(30, 20);
-            this.textProtocol.TabIndex = 5;
+            this.textScheme.Location = new System.Drawing.Point(12, 12);
+            this.textScheme.MaxLength = 5;
+            this.textScheme.Name = "textScheme";
+            this.textScheme.Size = new System.Drawing.Size(30, 20);
+            this.textScheme.TabIndex = 5;
             // 
             // textHost
             // 
@@ -120,6 +127,7 @@
             this.textPort.Name = "textPort";
             this.textPort.Size = new System.Drawing.Size(40, 20);
             this.textPort.TabIndex = 7;
+            this.textPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textApiPort_KeyPress);
             // 
             // label1
             // 
@@ -151,23 +159,23 @@
             // buttonCancel
             // 
             this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(160, 38);
+            this.buttonCancel.Location = new System.Drawing.Point(160, 64);
             this.buttonCancel.Name = "buttonCancel";
             this.buttonCancel.Size = new System.Drawing.Size(68, 23);
             this.buttonCancel.TabIndex = 11;
             this.buttonCancel.Text = "Cancel";
             this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.Button2_Click);
+            this.buttonCancel.Click += new System.EventHandler(this.ButtonCancel_Click);
             // 
             // buttonGet
             // 
-            this.buttonGet.Location = new System.Drawing.Point(12, 38);
+            this.buttonGet.Location = new System.Drawing.Point(12, 64);
             this.buttonGet.Name = "buttonGet";
             this.buttonGet.Size = new System.Drawing.Size(56, 23);
             this.buttonGet.TabIndex = 12;
             this.buttonGet.Text = "Get";
             this.buttonGet.UseVisualStyleBackColor = true;
-            this.buttonGet.Click += new System.EventHandler(this.Button3_Click);
+            this.buttonGet.Click += new System.EventHandler(this.ButtonGet_Click);
             // 
             // checkBoxSimple
             // 
@@ -179,6 +187,66 @@
             this.checkBoxSimple.Text = "Simple";
             this.checkBoxSimple.UseVisualStyleBackColor = true;
             // 
+            // checkBoxSocket
+            // 
+            this.checkBoxSocket.AutoSize = true;
+            this.checkBoxSocket.BackColor = System.Drawing.SystemColors.ControlLightLight;
+            this.checkBoxSocket.Location = new System.Drawing.Point(241, 43);
+            this.checkBoxSocket.Name = "checkBoxSocket";
+            this.checkBoxSocket.Size = new System.Drawing.Size(60, 17);
+            this.checkBoxSocket.TabIndex = 14;
+            this.checkBoxSocket.Text = "Socket";
+            this.checkBoxSocket.UseVisualStyleBackColor = false;
+            // 
+            // textApiScheme
+            // 
+            this.textApiScheme.Location = new System.Drawing.Point(12, 38);
+            this.textApiScheme.Name = "textApiScheme";
+            this.textApiScheme.Size = new System.Drawing.Size(30, 20);
+            this.textApiScheme.TabIndex = 15;
+            // 
+            // textApiHost
+            // 
+            this.textApiHost.Location = new System.Drawing.Point(74, 38);
+            this.textApiHost.Name = "textApiHost";
+            this.textApiHost.Size = new System.Drawing.Size(80, 20);
+            this.textApiHost.TabIndex = 16;
+            // 
+            // textApiPort
+            // 
+            this.textApiPort.Location = new System.Drawing.Point(176, 39);
+            this.textApiPort.Name = "textApiPort";
+            this.textApiPort.Size = new System.Drawing.Size(40, 20);
+            this.textApiPort.TabIndex = 17;
+            this.textApiPort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textApiPort_KeyPress);
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(48, 41);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(20, 13);
+            this.label4.TabIndex = 18;
+            this.label4.Text = "://";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(160, 43);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(10, 13);
+            this.label5.TabIndex = 19;
+            this.label5.Text = ":";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(222, 41);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(12, 13);
+            this.label6.TabIndex = 20;
+            this.label6.Text = "/";
+            // 
             // ConfigForm
             // 
             this.AcceptButton = this.buttonSave;
@@ -186,7 +254,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.CancelButton = this.buttonCancel;
-            this.ClientSize = new System.Drawing.Size(301, 66);
+            this.ClientSize = new System.Drawing.Size(301, 93);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.textApiPort);
+            this.Controls.Add(this.textApiHost);
+            this.Controls.Add(this.textApiScheme);
+            this.Controls.Add(this.checkBoxSocket);
             this.Controls.Add(this.checkBoxSimple);
             this.Controls.Add(this.buttonGet);
             this.Controls.Add(this.buttonCancel);
@@ -195,7 +270,7 @@
             this.Controls.Add(this.label1);
             this.Controls.Add(this.textPort);
             this.Controls.Add(this.textHost);
-            this.Controls.Add(this.textProtocol);
+            this.Controls.Add(this.textScheme);
             this.Controls.Add(this.buttonSave);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -221,7 +296,7 @@
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ipToolStripMenuItem;
         private System.Windows.Forms.Button buttonSave;
-        private System.Windows.Forms.TextBox textProtocol;
+        private System.Windows.Forms.TextBox textScheme;
         private System.Windows.Forms.TextBox textHost;
         private System.Windows.Forms.TextBox textPort;
         private System.Windows.Forms.Label label1;
@@ -231,6 +306,13 @@
         private System.Windows.Forms.Button buttonGet;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
         private System.Windows.Forms.CheckBox checkBoxSimple;
+        private System.Windows.Forms.CheckBox checkBoxSocket;
+        private System.Windows.Forms.TextBox textApiScheme;
+        private System.Windows.Forms.TextBox textApiHost;
+        private System.Windows.Forms.TextBox textApiPort;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label6;
     }
 }
 

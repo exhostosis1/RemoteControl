@@ -6,7 +6,7 @@ using System.Net.Sockets;
 
 namespace RemoteControl
 {
-    internal class AppConfig
+    internal static class AppConfig
     {
         private const string FileName = "config.ini";
 
@@ -15,22 +15,87 @@ namespace RemoteControl
         private const string SchemeConfigName = "scheme";
         private const string SimpleConfigName = "simple";
         private const string SocketConfigName = "socket";
+        private const string ApiHostName = "apihost";
+        private const string ApiPortName = "apiport";
+        private const string ApiSchemeName = "apischeme";
 
         private const char EqualityChar = '=';
 
         public static string DefaultScheme => "http";
-        public static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList.First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
+        public static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList
+            .First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
         public static int DefaultPort => 80;
+        public static int DefaultApiPort => Port + 1;
+        public static string DefaultApiHost => Host;
         public static bool DefaultSimple => false;
         public static bool DefaultSocket => false;
+        public static string DefaultApiScheme => "ws";
 
         private static readonly Dictionary<string, string> Config = new Dictionary<string, string>();
 
-        public int Port;
-        public string Host;
-        public string Scheme;
-        public bool Simple;
-        public bool Socket;
+        public static int Port
+        {
+            get
+            {
+                if (!int.TryParse(GetAppConfig(PortConfigName), out var port)) port = DefaultPort;
+                return port;
+            }
+            set => SetAppConfig(PortConfigName, value.ToString());
+        }
+
+        public static string Host
+        {
+            get => GetAppConfig(IpConfigName) ?? DefaultHost;
+            set => SetAppConfig(IpConfigName, value);
+        }
+
+        public static string Scheme
+        {
+            get => GetAppConfig(SchemeConfigName) ?? DefaultScheme;
+            set => SetAppConfig(SchemeConfigName, value);
+        }
+
+        public static bool Simple
+        {
+            get
+            {
+                if (!bool.TryParse(GetAppConfig(SimpleConfigName), out var simple)) simple = DefaultSimple;
+                return simple;
+            }
+            set => SetAppConfig(SimpleConfigName, value.ToString());
+        }
+
+        public static bool Socket
+        {
+            get
+            {
+                if (!bool.TryParse(GetAppConfig(SocketConfigName), out var socket)) socket = DefaultSocket;
+                return socket;
+            }
+            set => SetAppConfig(SocketConfigName, value.ToString());
+        }
+
+        public static int ApiPort
+        {
+            get
+            {
+                if (!int.TryParse(GetAppConfig(ApiPortName), out var apiport)) apiport = DefaultApiPort;
+                return apiport;
+            }
+            set => SetAppConfig(ApiPortName, value.ToString());
+        }
+
+        public static string ApiHost
+        {
+            get => GetAppConfig(ApiHostName) ?? DefaultApiHost;
+            set => SetAppConfig(ApiHostName, value);
+        }
+
+        public static string ApiScheme
+        {
+            get => GetAppConfig(ApiSchemeName) ?? DefaultApiScheme;
+            set => SetAppConfig(ApiSchemeName, value);
+        }
 
         static AppConfig()
         {
@@ -39,7 +104,7 @@ namespace RemoteControl
 
             var lines = File.ReadAllLines(FileName).Where(x => x.Trim() != string.Empty);
 
-            foreach(var line in lines)
+            foreach (var line in lines)
             {
                 var index = line.IndexOf(EqualityChar);
                 if (index == -1)
@@ -53,32 +118,31 @@ namespace RemoteControl
             }
         }
 
-        public AppConfig(string scheme, string host, int port, bool simple, bool socket)
-        {
-            Port = port;
-            Host = host;
-            Simple = simple;
-            Scheme = scheme;
-            Socket = socket;
-        }
-
-        internal static AppConfig GetServerConfig()
-        {            
-            var scheme = GetAppConfig(SchemeConfigName) ?? DefaultScheme;
-            var host = GetAppConfig(IpConfigName) ?? DefaultHost;
-
-            if (!bool.TryParse(GetAppConfig(SimpleConfigName), out var simple)) simple = DefaultSimple;
-            if (!bool.TryParse(GetAppConfig(SocketConfigName), out var socket)) socket = DefaultSocket;
-            if (!int.TryParse(GetAppConfig(PortConfigName), out var port)) port = DefaultPort;         
-
-            return new AppConfig(scheme, host, port, simple, socket);
-        }
-
-        private static string GetAppConfig(string name)
+        internal static string GetAppConfig(string name)
         {
             name = name.ToLower();
 
             return Config.ContainsKey(name) ? Config[name] : null;
+        }
+
+        internal static void SetAppConfig(string name, string value)
+        {
+            name = name.ToLower();
+
+            if (Config.ContainsKey(name))
+            {
+                Config[name] = value;
+            }
+            else
+            {
+                Config.Add(name, value);
+            }
+
+        }
+
+        internal static void WriteConfigToFile()
+        {
+            File.WriteAllLines(FileName, Config.Select(x => $"{x.Key} {EqualityChar} {x.Value}"));
         }
     }
 }

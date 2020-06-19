@@ -30,7 +30,9 @@ namespace RemoteControlCore.Controllers
         [Route("audio")]
         private string ProcessAudio(string value)
         {
-            if (!int.TryParse(value, out var result)) return _audioService.GetVolume();
+            if (value == "init") return _audioService.GetVolume();
+
+            if (!int.TryParse(value, out var result)) return null;
 
             result = result > 100 ? 100 : result;
             result = result < 0 ? 0 : result;
@@ -39,7 +41,7 @@ namespace RemoteControlCore.Controllers
 
             _audioService.Mute(result == 0);
 
-            return _audioService.GetVolume();
+            return null;
         }
 
         [Route("keyboard")]

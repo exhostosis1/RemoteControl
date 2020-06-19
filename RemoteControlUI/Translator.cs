@@ -1,6 +1,6 @@
-﻿using System.IO;
+﻿using HtmlParser;
+using System.IO;
 using System.Linq;
-using HtmlParser;
 
 namespace RemoteControl
 {
@@ -17,6 +17,21 @@ namespace RemoteControl
         public static void Translate()
         {
             var input = File.ReadAllText(Path + Filename);
+
+            var code = File.ReadAllLines(Path + "code.js");
+
+            for (int i = 0; i < code.Length; i++)
+            {
+                if (code[i].Trim().StartsWith("let socketEnabled"))
+                    code[i] = $"let socketEnabled = {AppConfig.Socket.ToString().ToLower()};";
+                if (code[i].Trim().StartsWith("let host"))
+                    code[i] = $"let host = '{AppConfig.ApiHost}';";
+                if (code[i].Trim().StartsWith("let port"))
+                    code[i] = $"let port = '{AppConfig.ApiPort}';";
+            }
+
+            File.WriteAllLines(Path + "code.js", code);
+
             var tree = Parser.GetTree(input);
 
             var title = tree.FindNodesByTag("title").FirstOrDefault();
