@@ -341,9 +341,7 @@
 
         function toggleDisplay(buttonsArray) {
             buttonsArray.forEach(x => {
-                // eslint-disable-next-line no-param-reassign
                 x.style.display = x.hidden ? 'block' : 'none';
-                // eslint-disable-next-line no-param-reassign
                 x.hidden = !x.hidden;
             });
         }
@@ -513,7 +511,7 @@
         }
 
         #text-input {
-            display: block;
+            display: none;
             height: 50px;
             width: 100%;
             background: #555;
@@ -582,7 +580,7 @@
         }
 
         #touch {
-            display: block;
+            display: none;
             width: 100%;
             border: 1px solid rgba(135, 206, 250, 0.541);
             border-radius: 15px;
@@ -700,9 +698,16 @@
             100% {
                 opacity: 0;
             }
-        }
+        }        
+            
+        @media only screen and (min-width: 400px) {
+            #text-input {
+                display: block;
+            }
+            #touch {
+                display: block;
+            }
 
-        @media only screen and (min-width: 300px) {
             #outer-container {
                 display: block;
             }
