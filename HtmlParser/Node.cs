@@ -18,7 +18,7 @@ namespace HtmlParser
         {
             get
             {
-                var result = string.Join(newLine, _innerHtml.Where(x => !string.IsNullOrWhiteSpace(x.ToString())));
+                var result = string.Join(NewLine, _innerHtml.Where(x => !string.IsNullOrWhiteSpace(x.ToString())));
                 return result.Trim();
             }
         }
@@ -102,15 +102,15 @@ namespace HtmlParser
 
             foreach (var entry in _innerHtml)
             {
-                var temp = entry.ToString().Split(newLine.ToCharArray()).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => tab + x).ToArray();
+                var temp = entry.ToString().Split(NewLine.ToCharArray()).Where(x => !string.IsNullOrWhiteSpace(x)).Select(x => Tab + x).ToArray();
 
                 if (temp.Length > 0)
                 {
-                    result.Add(string.Join(newLine, temp));
+                    result.Add(string.Join(NewLine, temp));
                 }
             }
 
-            return newLine + string.Join(newLine, result) + newLine;
+            return NewLine + string.Join(NewLine, result) + NewLine;
         }
 
         public override string ToString()
@@ -118,7 +118,7 @@ namespace HtmlParser
             var inner = FormatInnerHtml();
             var t = !string.IsNullOrWhiteSpace(Tag);
 
-            var att = Attributes.Count > 0 ? space + string.Join(space, Attributes) : string.Empty;
+            var att = Attributes.Count > 0 ? Space + string.Join(Space, Attributes) : string.Empty;
             var ot = t ? $"<{Tag}{att}>" : string.Empty;
             var ct = t ? $"</{Tag}>" : string.Empty;
             var inn = string.IsNullOrWhiteSpace(inner) ? "" : inner;
