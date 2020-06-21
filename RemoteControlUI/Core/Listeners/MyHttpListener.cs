@@ -24,7 +24,6 @@ namespace RemoteControl.Core.Listeners
         public event HttpEventHandler OnApiRequest;
 
         private string _url = "http://localhost/";
-        private bool _simple;
 
         public bool Listening { get; private set; }
 
@@ -38,7 +37,7 @@ namespace RemoteControl.Core.Listeners
             
         }
 
-        public void StartListen(string url, bool simple)
+        public void StartListen(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
                 throw new ArgumentException("Url must be set before start listening");
@@ -46,7 +45,6 @@ namespace RemoteControl.Core.Listeners
             if (_listener != null) return;
 
             _url = url;
-            _simple = simple;
 
             _listener = new HttpListener();
 
@@ -61,7 +59,7 @@ namespace RemoteControl.Core.Listeners
 
         public void StartListen()
         {
-            StartListen(_url, _simple);
+            StartListen(_url);
         }
 
         private async void Start()
@@ -108,25 +106,25 @@ namespace RemoteControl.Core.Listeners
             }
         }
 
-        public void RestartListen(string url, bool simple)
+        public void RestartListen(string url)
         {
             StopListen();
-            StartListen(url, simple);
+            StartListen(url);
         }
 
         public void RestartListen()
         {
-            RestartListen(_url, _simple);
+            RestartListen(_url);
         }
 
         public void StartListen(UriBuilder ub)
         {
-            StartListen(ub.Uri.ToString(), false);
+            StartListen(ub.Uri.ToString());
         }
 
         public void RestartListen(UriBuilder ub)
         {
-            RestartListen(ub.Uri.ToString(), false);
+            RestartListen(ub.Uri.ToString());
         }
     }
 }
