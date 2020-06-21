@@ -25,7 +25,7 @@ namespace RemoteControl.Core.Controllers
 
             if (context.Request.Url.LocalPath == "/")
             {
-                path += context.Request.UserAgent?.Contains("SM-R800") ?? false ? "index-simple.html" : "index.html";
+                path += "index.html";
             }
 
             var extension = Path.GetExtension(path);
