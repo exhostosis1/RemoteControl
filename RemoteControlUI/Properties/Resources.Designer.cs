@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace RemoteControlCore.Properties {
+namespace RemoteControl.Core.Properties {
     using System;
     
     

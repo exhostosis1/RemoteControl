@@ -10,20 +10,8 @@ const Modes = {
     Text: 'text',
 };
 
-let socket;
-
-let socketEnabled;
-let host;
-let port;
-
-let sendRequest;
-
-function srSocket(method, param) {
-    socket.send(`${method}/${param}`);
-}
-
-async function srFetch(method, param) {
-    return (await fetch(`http://${host}:${port}/api/${method}/${param}`)).text();
+async function sendRequest(method, param) {
+    return (await fetch(`/api/${method}/${param}`)).text();
 }
 
 function initElements(volume) {
@@ -70,24 +58,6 @@ function initElements(volume) {
     }
 }
 
-function messageReceived(e) {
-    initElements(e.data);
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-    if (socketEnabled === true) {
-        sendRequest = srSocket;
-        socket = new WebSocket(`ws://${host}:${port}`);
-        socket.onmessage = messageReceived;
-        socket.onopen = () => {
-            sendRequest(Modes.Audio, 'init');
-        };
-    } else {
-        sendRequest = srFetch;
-        initElements(await sendRequest(Modes.Audio, 'init'));
-    }
-});
-
-document.addEventListener('beforeunload', () => {
-    socket.Close();
+    initElements(await sendRequest(Modes.Audio, 'init'));
 });

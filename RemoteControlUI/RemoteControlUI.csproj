@@ -40,13 +40,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Device.theme-dark.ico</ApplicationIcon>
@@ -87,9 +88,29 @@
     <Compile Include="ConfigForm.Designer.cs">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Core\Abstract\AbstractController.cs" />
+    <Compile Include="Core\Controllers\ApiController.Methods.cs" />
+    <Compile Include="Core\Controllers\ApiController.ProcessRequest.cs" />
+    <Compile Include="Core\Controllers\HttpController.cs" />
+    <Compile Include="Core\Core.cs" />
+    <Compile Include="Core\Enums\KeyPressMode.cs" />
+    <Compile Include="Core\Enums\KeysEnum.cs" />
+    <Compile Include="Core\Enums\MouseKeysEnum.cs" />
+    <Compile Include="Core\Interfaces\HttpEventHandler.cs" />
+    <Compile Include="Core\Interfaces\IAudioService.cs" />
+    <Compile Include="Core\Interfaces\ICoordinates.cs" />
+    <Compile Include="Core\Interfaces\IHttpRequestArgs.cs" />
+    <Compile Include="Core\Interfaces\IInputProvider.cs" />
+    <Compile Include="Core\Interfaces\IInputService.cs" />
+    <Compile Include="Core\Interfaces\IListener.cs" />
+    <Compile Include="Core\Listeners\MyHttpListener.cs" />
+    <Compile Include="Core\Providers\MyInputProvider.cs" />
+    <Compile Include="Core\Services\AudioService.cs" />
+    <Compile Include="Core\Services\InputsimService.cs" />
+    <Compile Include="Core\Utility\Point.cs" />
+    <Compile Include="Core\Utility\Strings.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Translator.cs" />
     <EmbeddedResource Include="ConfigForm.resx">
       <DependentUpon>ConfigForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -118,7 +139,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include=".nuget\mouse-keyboard-hook-logo.png" />
     <Content Include="Device.theme-dark.ico" />
     <Content Include="www\code.js">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -160,19 +180,6 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\HtmlParser\HtmlParser.csproj">
-      <Project>{3ed46b96-ffc3-464f-ae9e-ddfca4ed2b26}</Project>
-      <Name>HtmlParser</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\MyLogger\MyLogger.csproj">
-      <Project>{c8016b16-0498-48c2-9fd1-45ef5601fd2c}</Project>
-      <Name>MyLogger</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\RemoteControlCore\RemoteControlCore.csproj">
-      <Project>{be1a0b5e-dcc8-41c3-a664-fefd5a5cceca}</Project>
-      <Name>RemoteControlCore</Name>
-    </ProjectReference>
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

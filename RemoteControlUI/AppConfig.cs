@@ -21,15 +21,17 @@ namespace RemoteControl
 
         private const char EqualityChar = '=';
 
-        public static string DefaultScheme => "http";
-        public static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList
+        private static string DefaultScheme => "http";
+
+        private static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList
             .First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
-        public static int DefaultPort => 80;
-        public static int DefaultApiPort => Port + 1;
-        public static string DefaultApiHost => Host;
-        public static bool DefaultSimple => false;
-        public static bool DefaultSocket => false;
-        public static string DefaultApiScheme => "ws";
+
+        private static int DefaultPort => 80;
+        private static int DefaultApiPort => Port + 1;
+        private static string DefaultApiHost => Host;
+        private static bool DefaultSimple => false;
+        private static bool DefaultSocket => false;
+        private static string DefaultApiScheme => "ws";
 
         private static readonly Dictionary<string, string> Config = new Dictionary<string, string>();
 
@@ -118,14 +120,14 @@ namespace RemoteControl
             }
         }
 
-        internal static string GetAppConfig(string name)
+        private static string GetAppConfig(string name)
         {
             name = name.ToLower();
 
             return Config.ContainsKey(name) ? Config[name] : null;
         }
 
-        internal static void SetAppConfig(string name, string value)
+        private static void SetAppConfig(string name, string value)
         {
             name = name.ToLower();
 

@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Windows.Forms;
-using RemoteControlCore;
+using RemoteControl.Core;
 
 namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
-        private Core _program;
+        private Main _program;
         private UriBuilder _httpHost;
-        // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
-        private UriBuilder _apiHost;
 
         public ConfigForm()
         {
@@ -32,9 +30,8 @@ namespace RemoteControl
         private void SetProgram()
         {
             _httpHost = new UriBuilder(AppConfig.Scheme, AppConfig.Host, AppConfig.Port);
-            _apiHost = new UriBuilder(AppConfig.ApiScheme, AppConfig.ApiHost, AppConfig.ApiPort);
 
-            _program = new Core(_httpHost, _apiHost, AppConfig.Simple, AppConfig.Socket);
+            _program = new Main(_httpHost);
             _program.Start();
         }
 
@@ -59,15 +56,7 @@ namespace RemoteControl
                 AppConfig.Scheme = textScheme.Text;
                 AppConfig.Port = Convert.ToInt32(textPort.Text);
 
-                AppConfig.ApiScheme = textApiScheme.Text;
-                AppConfig.ApiHost = textApiHost.Text;
-                AppConfig.ApiPort = Convert.ToInt32(textApiPort.Text);
-
-                AppConfig.Simple = checkBoxSimple.Checked;
-                AppConfig.Socket = checkBoxSocket.Checked;
-
                 SetProgram();
-                Translator.Translate();
                 Minimize();
             }
             catch (Exception ex)
@@ -84,13 +73,6 @@ namespace RemoteControl
             this.textScheme.Text = AppConfig.Scheme;
             this.textHost.Text = AppConfig.Host;
             this.textPort.Text = AppConfig.Port.ToString();
-
-            this.checkBoxSimple.Checked = AppConfig.Simple;
-            this.checkBoxSocket.Checked = AppConfig.Socket;
-
-            this.textApiScheme.Text = AppConfig.ApiScheme;
-            this.textApiHost.Text = AppConfig.ApiHost;
-            this.textApiPort.Text = AppConfig.ApiPort.ToString();
         }
 
         private void EnableMenuItem()
