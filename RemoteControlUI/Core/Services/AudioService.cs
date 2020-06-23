@@ -18,14 +18,14 @@ namespace RemoteControl.Core.Services
             audioController.AudioDeviceChanged.Subscribe(this);
         }
 
-        public string GetVolume()
+        public int GetVolume()
         {
-            return Convert.ToInt32(_audioDevice.Volume).ToString();
+            return (int) _audioDevice.Volume;
         }
 
         public void Mute(bool mute)
         {
-            _audioDevice.Mute(mute);
+            _audioDevice.SetMuteAsync(mute);
         }
 
         public void OnCompleted()
@@ -48,7 +48,7 @@ namespace RemoteControl.Core.Services
 
         public void SetVolume(int volume)
         {
-            _audioDevice.Volume = volume;
+            _audioDevice.SetVolumeAsync(volume);
         }
     }
 }

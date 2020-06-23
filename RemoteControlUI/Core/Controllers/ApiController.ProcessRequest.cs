@@ -16,7 +16,7 @@ namespace RemoteControl.Core.Controllers
                 case "audio":
                     var result = ProcessAudio(param);
 
-                    if (param == "init" && result != null)
+                    if (param == "init")
                     {
                         using (var sw = new StreamWriter(context.Response.OutputStream))
                         {

@@ -20,11 +20,11 @@ namespace RemoteControl.Core.Controllers
             _point = new Point();
         }
 
-        private string ProcessAudio(string value)
+        private int ProcessAudio(string value)
         {
             if (value == "init") return _audioService.GetVolume();
 
-            if (!int.TryParse(value, out var result)) return null;
+            if (!int.TryParse(value, out var result)) return 0;
 
             result = result > 100 ? 100 : result;
             result = result < 0 ? 0 : result;
@@ -33,7 +33,7 @@ namespace RemoteControl.Core.Controllers
 
             _audioService.Mute(result == 0);
 
-            return null;
+            return 0;
         }
 
         private void ProcessKeyboard(string value)

@@ -3,7 +3,7 @@
     internal interface IAudioService
     {
         void SetVolume(int volume);
-        string GetVolume();
+        int GetVolume();
         void Mute(bool mute);
     }
 }
