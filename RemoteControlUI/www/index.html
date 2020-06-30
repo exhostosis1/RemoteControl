@@ -205,11 +205,11 @@
 
                 lastMovePosition = pos;
 
-                if (e.targetTouches.length === 1) {
+                if (e.targetTouches.length === 1 && Math.abs(diff.x) < 20 && Math.abs(diff.y) < 20) {
                     moveEvent.position = JSON.stringify({ x: diff.x * MODIFIER, y: diff.y * MODIFIER });
                     touchElement.dispatchEvent(moveEvent);
                 }
-                if (e.targetTouches.length === 2 && Math.abs(diff.y) > 10) {
+                if (e.targetTouches.length === 2 && Math.abs(diff.y) > 5) {
                     scrollEvent.direction = diff.y > 0 ? 'up' : 'down';
                     touchElement.dispatchEvent(scrollEvent);
                 }
@@ -700,7 +700,7 @@
             }
         }        
             
-        @media only screen and (min-width: 400px) {
+        @media only screen and (min-width: 350px) {
             #text-input {
                 display: block;
             }

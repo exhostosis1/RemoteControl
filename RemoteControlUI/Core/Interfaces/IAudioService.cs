@@ -2,8 +2,7 @@
 {
     internal interface IAudioService
     {
-        void SetVolume(int volume);
-        int GetVolume();
+        int Volume { get; set; }
         void Mute(bool mute);
     }
 }

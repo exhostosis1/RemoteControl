@@ -27,7 +27,7 @@ namespace RemoteControl.Core.Listeners
 
         public bool Listening { get; private set; }
 
-        public MyHttpListener(string url) : this()
+        public MyHttpListener(string url)
         {
             _url = url;
         }

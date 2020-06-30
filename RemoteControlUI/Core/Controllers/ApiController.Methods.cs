@@ -22,14 +22,14 @@ namespace RemoteControl.Core.Controllers
 
         private int ProcessAudio(string value)
         {
-            if (value == "init") return _audioService.GetVolume();
+            if (value == "init") return _audioService.Volume;
 
             if (!int.TryParse(value, out var result)) return 0;
 
             result = result > 100 ? 100 : result;
             result = result < 0 ? 0 : result;
 
-            _audioService.SetVolume(result);
+            _audioService.Volume = result;
 
             _audioService.Mute(result == 0);
 
@@ -60,7 +60,7 @@ namespace RemoteControl.Core.Controllers
 
         private void ProcessText(string text)
         {
-            _inputService.TextInput(WebUtility.UrlDecode(text));
+            _inputService.TextInput(text);
             _inputService.KeyPress(KeysEnum.Enter);
         }
 
