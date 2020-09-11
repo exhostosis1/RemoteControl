@@ -6,19 +6,19 @@ namespace RemoteControl
 {
     public static class Translator
     {
-        private const string Path = "www\\";
-        private const string Filename = "index.html";
-        private const string Resultfilename = "index-simple.html";
+        private const string path = "www\\";
+        private const string filename = "index.html";
+        private const string resultfilename = "index-simple.html";
 
-        private static readonly string[] Cssfiles = Directory.GetFiles(Path, "*.css");
+        private static readonly string[] Cssfiles = Directory.GetFiles(path, "*.css");
 
-        private const string NewLine = "\r\n";
+        private const string newLine = "\r\n";
 
         public static void Translate()
         {
-            var input = File.ReadAllText(Path + Filename);
+            var input = File.ReadAllText(path + filename);
 
-            var code = File.ReadAllLines(Path + "code.js");
+            var code = File.ReadAllLines(path + "code.js");
 
             for (var i = 0; i < code.Length; i++)
             {
@@ -30,7 +30,7 @@ namespace RemoteControl
                     code[i] = $"let port = '{AppConfig.ApiPort}';";
             }
 
-            File.WriteAllLines(Path + "code.js", code);
+            File.WriteAllLines(path + "code.js", code);
 
             var tree = Parser.GetTree(input);
 
@@ -47,11 +47,11 @@ namespace RemoteControl
             newTree.Root.AddChild(head);
 
             var style = new Node("style");
-            style.AddInnerHtml(string.Join(NewLine, Cssfiles.ToList().Select(File.ReadAllText)));
+            style.AddInnerHtml(string.Join(newLine, Cssfiles.ToList().Select(File.ReadAllText)));
 
             head.AddChild(style);
 
-            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), Path, new[] { "point", "touch", "text" });
+            var script = Parser.ConcatDependencies(tree.FindNodesByTag("script").FirstOrDefault(), path, new[] { "point", "touch", "text" });
 
             head.AddChild(script);
 
@@ -63,7 +63,7 @@ namespace RemoteControl
 
             newTree.Root.AddChild(body);
 
-            File.WriteAllText(Path + Resultfilename, newTree.ToString());
+            File.WriteAllText(path + resultfilename, newTree.ToString());
         }
     }
 }

@@ -2,16 +2,16 @@
 {
     internal static class Constants
     {
-        public const char doublePrtChar = '"';
-        public const char singlePrtChar = '\'';
-        public const char tagStartChar = '<';
-        public const char tagEndChar = '>';
-        public const char equalityChar = '=';
-        public const char forwardSlashChar = '/';
-        public const char backSlashChar = '\\';
-        public const string newLine = "\r\n";
-        public const string tab = "\t";
-        public const string space = " ";
+        public const char DoublePrtChar = '"';
+        public const char SinglePrtChar = '\'';
+        public const char TagStartChar = '<';
+        public const char TagEndChar = '>';
+        public const char EqualityChar = '=';
+        public const char ForwardSlashChar = '/';
+        public const char BackSlashChar = '\\';
+        public const string NewLine = "\r\n";
+        public const string Tab = "\t";
+        public const string Space = " ";
 
         public enum Mode
         {

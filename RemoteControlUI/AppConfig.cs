@@ -8,18 +8,18 @@ namespace RemoteControl
 {
     internal static class AppConfig
     {
-        private const string FileName = "config.ini";
+        private const string fileName = "config.ini";
 
-        private const string PortConfigName = "port";
-        private const string IpConfigName = "host";
-        private const string SchemeConfigName = "scheme";
-        private const string SimpleConfigName = "simple";
-        private const string SocketConfigName = "socket";
-        private const string ApiHostName = "apihost";
-        private const string ApiPortName = "apiport";
-        private const string ApiSchemeName = "apischeme";
+        private const string portConfigName = "port";
+        private const string ipConfigName = "host";
+        private const string schemeConfigName = "scheme";
+        private const string simpleConfigName = "simple";
+        private const string socketConfigName = "socket";
+        private const string apiHostName = "apihost";
+        private const string apiPortName = "apiport";
+        private const string apiSchemeName = "apischeme";
 
-        private const char EqualityChar = '=';
+        private const char equalityChar = '=';
 
         private static string DefaultScheme => "http";
 
@@ -39,76 +39,76 @@ namespace RemoteControl
         {
             get
             {
-                if (!int.TryParse(GetAppConfig(PortConfigName), out var port)) port = DefaultPort;
+                if (!int.TryParse(GetAppConfig(portConfigName), out var port)) port = DefaultPort;
                 return port;
             }
-            set => SetAppConfig(PortConfigName, value.ToString());
+            set => SetAppConfig(portConfigName, value.ToString());
         }
 
         public static string Host
         {
-            get => GetAppConfig(IpConfigName) ?? DefaultHost;
-            set => SetAppConfig(IpConfigName, value);
+            get => GetAppConfig(ipConfigName) ?? DefaultHost;
+            set => SetAppConfig(ipConfigName, value);
         }
 
         public static string Scheme
         {
-            get => GetAppConfig(SchemeConfigName) ?? DefaultScheme;
-            set => SetAppConfig(SchemeConfigName, value);
+            get => GetAppConfig(schemeConfigName) ?? DefaultScheme;
+            set => SetAppConfig(schemeConfigName, value);
         }
 
         public static bool Simple
         {
             get
             {
-                if (!bool.TryParse(GetAppConfig(SimpleConfigName), out var simple)) simple = DefaultSimple;
+                if (!bool.TryParse(GetAppConfig(simpleConfigName), out var simple)) simple = DefaultSimple;
                 return simple;
             }
-            set => SetAppConfig(SimpleConfigName, value.ToString());
+            set => SetAppConfig(simpleConfigName, value.ToString());
         }
 
         public static bool Socket
         {
             get
             {
-                if (!bool.TryParse(GetAppConfig(SocketConfigName), out var socket)) socket = DefaultSocket;
+                if (!bool.TryParse(GetAppConfig(socketConfigName), out var socket)) socket = DefaultSocket;
                 return socket;
             }
-            set => SetAppConfig(SocketConfigName, value.ToString());
+            set => SetAppConfig(socketConfigName, value.ToString());
         }
 
         public static int ApiPort
         {
             get
             {
-                if (!int.TryParse(GetAppConfig(ApiPortName), out var apiport)) apiport = DefaultApiPort;
+                if (!int.TryParse(GetAppConfig(apiPortName), out var apiport)) apiport = DefaultApiPort;
                 return apiport;
             }
-            set => SetAppConfig(ApiPortName, value.ToString());
+            set => SetAppConfig(apiPortName, value.ToString());
         }
 
         public static string ApiHost
         {
-            get => GetAppConfig(ApiHostName) ?? DefaultApiHost;
-            set => SetAppConfig(ApiHostName, value);
+            get => GetAppConfig(apiHostName) ?? DefaultApiHost;
+            set => SetAppConfig(apiHostName, value);
         }
 
         public static string ApiScheme
         {
-            get => GetAppConfig(ApiSchemeName) ?? DefaultApiScheme;
-            set => SetAppConfig(ApiSchemeName, value);
+            get => GetAppConfig(apiSchemeName) ?? DefaultApiScheme;
+            set => SetAppConfig(apiSchemeName, value);
         }
 
         static AppConfig()
         {
-            if (!File.Exists(FileName))
+            if (!File.Exists(fileName))
                 return;
 
-            var lines = File.ReadAllLines(FileName).Where(x => x.Trim() != string.Empty);
+            var lines = File.ReadAllLines(fileName).Where(x => x.Trim() != string.Empty);
 
             foreach (var line in lines)
             {
-                var index = line.IndexOf(EqualityChar);
+                var index = line.IndexOf(equalityChar);
                 if (index == -1)
                     continue;
 
@@ -144,7 +144,7 @@ namespace RemoteControl
 
         internal static void WriteConfigToFile()
         {
-            File.WriteAllLines(FileName, Config.Select(x => $"{x.Key} {EqualityChar} {x.Value}"));
+            File.WriteAllLines(fileName, Config.Select(x => $"{x.Key} {equalityChar} {x.Value}"));
         }
     }
 }

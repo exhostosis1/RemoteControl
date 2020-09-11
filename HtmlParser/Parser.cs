@@ -64,7 +64,7 @@ namespace HtmlParser
                     str = true;
                     strChar = currentChar;
                 }
-                else if (currentChar == strChar && prevChar != backSlashChar)
+                else if (currentChar == strChar && prevChar != BackSlashChar)
                 {
                     str = false;
                 }
@@ -72,7 +72,7 @@ namespace HtmlParser
 
             bool CheckCloseTag(string tagname, int index)
             {
-                var tag = source.MySubstring(index, source.IndexOf(tagEndChar, index));
+                var tag = source.MySubstring(index, source.IndexOf(TagEndChar, index));
 
                 if (!tag.Contains("/"))
                 {
@@ -87,7 +87,7 @@ namespace HtmlParser
                 {
                     if (!char.IsWhiteSpace(t))
                     {
-                        if (t == forwardSlashChar)
+                        if (t == ForwardSlashChar)
                         {
                             closeTag = true;
                             continue;
@@ -117,7 +117,7 @@ namespace HtmlParser
                     case Mode.Init:
                         switch (currentChar)
                         {
-                            case tagStartChar:
+                            case TagStartChar:
                                 mode = Mode.TagName;
                                 continue;
 
@@ -133,29 +133,29 @@ namespace HtmlParser
                     case Mode.TagName:
                         switch (currentChar)
                         {
-                            case tagEndChar:
+                            case TagEndChar:
                                 currentNode.Tag = sb.ToString();
                                 sb.Clear();
 
-                                cursor = source.IndexOf(tagEndChar, cursor);
+                                cursor = source.IndexOf(TagEndChar, cursor);
                                 mode = Mode.InnerHtml;
 
                                 continue;
 
-                            case forwardSlashChar:
+                            case ForwardSlashChar:
                                 if (sb.Length > 0)
                                 {
                                     currentNode.Tag = sb.ToString();
                                     sb.Clear();
 
-                                    currentIndex = source.IndexOf(tagEndChar, cursor);
-                                    next = source.IndexOf(tagStartChar, currentIndex) > -1;
+                                    currentIndex = source.IndexOf(TagEndChar, cursor);
+                                    next = source.IndexOf(TagStartChar, currentIndex) > -1;
 
                                     return currentNode;
                                 }
                                 else
                                 {
-                                    cursor = source.IndexOf(tagEndChar, cursor);
+                                    cursor = source.IndexOf(TagEndChar, cursor);
                                     mode = Mode.Init;
                                     continue;
                                 }
@@ -187,26 +187,26 @@ namespace HtmlParser
                             case var c when char.IsWhiteSpace(c):
                                 continue;
 
-                            case equalityChar:
+                            case EqualityChar:
                                 attributeName = sb.ToString();
                                 sb.Clear();
                                 mode = Mode.AttributeValue;
 
                                 continue;
 
-                            case forwardSlashChar:
+                            case ForwardSlashChar:
                                 if (sb.Length > 0)
                                 {
                                     currentNode.Attributes.Add(new Attribute(sb.ToString()));
                                     sb.Clear();
                                 }
 
-                                currentIndex = source.IndexOf(tagEndChar, cursor);
-                                next = source.IndexOf(tagStartChar, currentIndex) > -1;
+                                currentIndex = source.IndexOf(TagEndChar, cursor);
+                                next = source.IndexOf(TagStartChar, currentIndex) > -1;
 
                                 return currentNode;
 
-                            case tagEndChar:
+                            case TagEndChar:
                                 if (sb.Length > 0)
                                 {
                                     currentNode.Attributes.Add(new Attribute(sb.ToString()));
@@ -215,13 +215,13 @@ namespace HtmlParser
 
                                 if (currentNode.Tag == "link" || currentNode.Tag == "meta")
                                 {
-                                    next = source.IndexOf(tagStartChar, cursor) > -1;
+                                    next = source.IndexOf(TagStartChar, cursor) > -1;
                                     currentIndex = cursor;
 
                                     return currentNode;
                                 }
 
-                                cursor = source.IndexOf(tagEndChar, cursor);
+                                cursor = source.IndexOf(TagEndChar, cursor);
                                 mode = Mode.InnerHtml;
 
                                 continue;
@@ -234,7 +234,7 @@ namespace HtmlParser
                     case Mode.AttributeValue:
                         switch (currentChar)
                         {
-                            case var c when c == singlePrtChar || c == doublePrtChar:
+                            case var c when c == SinglePrtChar || c == DoublePrtChar:
                                 SetStr();
                                 continue;
 
@@ -249,23 +249,23 @@ namespace HtmlParser
 
                                 continue;
 
-                            case var c when !str && c == forwardSlashChar:
+                            case var c when !str && c == ForwardSlashChar:
                                 currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
                                 sb.Clear();
 
-                                currentIndex = source.IndexOf(tagEndChar, cursor);
-                                next = source.IndexOf(tagStartChar, currentIndex) > -1;
+                                currentIndex = source.IndexOf(TagEndChar, cursor);
+                                next = source.IndexOf(TagStartChar, currentIndex) > -1;
 
                                 return currentNode;
 
-                            case var c when !str && c == tagEndChar:
+                            case var c when !str && c == TagEndChar:
                                 currentNode.Attributes.Add(new Attribute(attributeName, sb.ToString()));
                                 sb.Clear();
 
                                 if (currentNode.Tag == "link" || currentNode.Tag == "meta")
                                 {
-                                    currentIndex = source.IndexOf(tagEndChar, cursor);
-                                    next = source.IndexOf(tagStartChar, currentIndex) > -1;
+                                    currentIndex = source.IndexOf(TagEndChar, cursor);
+                                    next = source.IndexOf(TagStartChar, currentIndex) > -1;
 
                                     return currentNode;
                                 }
@@ -282,19 +282,19 @@ namespace HtmlParser
                     case Mode.InnerHtml:
                         switch (currentChar)
                         {
-                            case var c when c == singlePrtChar || c == doublePrtChar:
+                            case var c when c == SinglePrtChar || c == DoublePrtChar:
                                 SetStr();
                                 sb.Append(currentChar);
                                 continue;
 
-                            case var c when !str && c == tagStartChar:
+                            case var c when !str && c == TagStartChar:
                                 if (CheckCloseTag(currentNode.Tag, cursor))
                                 {
                                     currentNode.AddInnerHtml(sb.ToString());
                                     sb.Clear();
 
-                                    currentIndex = source.IndexOf(tagEndChar, cursor);
-                                    next = source.IndexOf(tagStartChar, currentIndex) > -1;
+                                    currentIndex = source.IndexOf(TagEndChar, cursor);
+                                    next = source.IndexOf(TagStartChar, currentIndex) > -1;
 
                                     return currentNode;
                                 }
@@ -339,8 +339,8 @@ namespace HtmlParser
 
             string GetPath(string localInput, string localPath)
             {
-                var start = localInput.Contains(singlePrtChar) ? localInput.IndexOf(singlePrtChar) : localInput.IndexOf(doublePrtChar);
-                var end = localInput.Contains(singlePrtChar) ? localInput.LastIndexOf(singlePrtChar) : localInput.LastIndexOf(doublePrtChar);
+                var start = localInput.Contains(SinglePrtChar) ? localInput.IndexOf(SinglePrtChar) : localInput.IndexOf(DoublePrtChar);
+                var end = localInput.Contains(SinglePrtChar) ? localInput.LastIndexOf(SinglePrtChar) : localInput.LastIndexOf(DoublePrtChar);
 
                 var result = localInput.MySubstring(start, end);
 
@@ -356,7 +356,7 @@ namespace HtmlParser
             string LocalConcat(string localInput, string localPath)
             {
 
-                var strings = localInput.Split(newLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
+                var strings = localInput.Split(NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
 
                 for (var i = 0; i < strings.Count; i++)
                 {
@@ -384,7 +384,7 @@ namespace HtmlParser
 
                 strings.RemoveAll(x => x == "");
 
-                return string.Join(newLine, strings);
+                return string.Join(NewLine, strings);
             }
         }
     }

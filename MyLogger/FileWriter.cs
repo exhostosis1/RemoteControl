@@ -7,7 +7,7 @@ namespace MyLogger
     internal class FileWriter : ILogWriter
     {
         private readonly string _fileName;
-        private const long MaxLength = 100 * 1024 * 1024;
+        private const long maxLength = 100 * 1024 * 1024;
 
         private static readonly Dictionary<string, FileWriter> Cache = new Dictionary<string, FileWriter>();
 
@@ -17,7 +17,7 @@ namespace MyLogger
 
             var file = new FileInfo(fileName);
 
-            if (file.Exists && file.Length >= MaxLength)
+            if (file.Exists && file.Length >= maxLength)
             {
                 file.Delete();
                 file.Create();
