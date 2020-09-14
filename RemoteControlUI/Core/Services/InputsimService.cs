@@ -2,6 +2,7 @@
 using RemoteControl.Core.Enums;
 using RemoteControl.Core.Interfaces;
 using RemoteControl.Core.Providers;
+using RemoteControl.Core.Utility;
 
 namespace RemoteControl.Core.Services
 {
@@ -50,7 +51,7 @@ namespace RemoteControl.Core.Services
             }
         }
 
-        public void MouseMove(ICoordinates coords)
+        public void MouseMove(Point coords)
         {
             _inputSim.Mouse.MoveMouseBy(coords.X, coords.Y);
         }

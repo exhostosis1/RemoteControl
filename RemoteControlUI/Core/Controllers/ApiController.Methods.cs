@@ -11,7 +11,7 @@ namespace RemoteControl.Core.Controllers
     {
         private readonly IAudioService _audioService;
         private readonly IInputService _inputService;
-        private readonly ICoordinates _point;
+        private readonly Point _point;
 
         public ApiController()
         {

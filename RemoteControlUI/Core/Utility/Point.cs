@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using RemoteControl.Core.Interfaces;
 
 namespace RemoteControl.Core.Utility
 {
-    internal class Point : ICoordinates
+    internal class Point
     {
         public int X { get; private set; }
         public int Y { get; private set; }

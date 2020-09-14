@@ -1,4 +1,5 @@
 ﻿using RemoteControl.Core.Enums;
+using RemoteControl.Core.Utility;
 
 namespace RemoteControl.Core.Interfaces
 {
@@ -6,7 +7,7 @@ namespace RemoteControl.Core.Interfaces
     {
         void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click);
         void TextInput(string text);
-        void MouseMove(ICoordinates coords);
+        void MouseMove(Point coords);
         void MouseKeyPress(MouseKeysEnum key = MouseKeysEnum.Left, KeyPressMode mode = KeyPressMode.Click);
         void MouseWheel(bool up);
     }
