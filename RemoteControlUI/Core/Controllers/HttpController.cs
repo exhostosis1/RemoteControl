@@ -7,7 +7,7 @@ namespace RemoteControl.Core.Controllers
 {
     internal class HttpController : AbstractController
     {
-        private const string contentFolder = "www";
+        private const string ContentFolder = "www";
 
         private readonly Dictionary<string, string> _contentTypes = new Dictionary<string, string>()
         {
@@ -21,7 +21,7 @@ namespace RemoteControl.Core.Controllers
 
         public override void ProcessRequest(IHttpRequestArgs context)
         {
-            var path = contentFolder + context.Request.Url.LocalPath;
+            var path = ContentFolder + context.Request.Url.LocalPath;
 
             if (context.Request.Url.LocalPath == "/")
             {
