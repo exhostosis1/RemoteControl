@@ -1,8 +1,8 @@
-﻿using System;
-using RemoteControl.Core.Abstract;
+﻿using RemoteControl.Core.Abstract;
 using RemoteControl.Core.Controllers;
 using RemoteControl.Core.Interfaces;
 using RemoteControl.Core.Listeners;
+using System;
 
 namespace RemoteControl.Core
 {
@@ -36,6 +36,6 @@ namespace RemoteControl.Core
         public void Restart()
         {
             _httplistener.RestartListen(HttpHost);
-        } 
+        }
     }
 }
