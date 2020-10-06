@@ -7,7 +7,7 @@ namespace RemoteControlCore.Controllers
 {
     internal class HttpController : AbstractController
     {
-        private const string contentFolder = "www";
+        private const string ContentFolder = "www";
 
         private readonly Dictionary<string, string> _contentTypes = new Dictionary<string, string>()
         {
@@ -31,7 +31,7 @@ namespace RemoteControlCore.Controllers
 
         private void DoJob(IHttpRequestArgs context, bool simple)
         {
-            var path = contentFolder + context.Request.Url.LocalPath;
+            var path = ContentFolder + context.Request.Url.LocalPath;
 
             if (context.Request.Url.LocalPath == "/")
             {
