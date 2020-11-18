@@ -3,18 +3,17 @@ using RemoteControl.Core.Controllers;
 using RemoteControl.Core.Interfaces;
 using RemoteControl.Core.Listeners;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace RemoteControl.Core
 {
     public class Main
     {
         private readonly IListener _httplistener;
-        private UriBuilder HttpHost { get; }
 
-        public Main(UriBuilder http)
+        public Main()
         {
-            HttpHost = http;
-
             AbstractController apiController = new ApiController();
             AbstractController httpController = new HttpController();
 
@@ -23,19 +22,17 @@ namespace RemoteControl.Core
             _httplistener.OnApiRequest += apiController.ProcessRequest;
         }
 
-        public void Start()
+        public void Start(string scheme, IEnumerable<string> hosts, int port)
         {
-            _httplistener.StartListen(HttpHost);
+            string[] uris;
+            uris = hosts.Select(x => new UriBuilder(scheme, x, port).ToString()).ToArray();
+
+            _httplistener.StartListen(uris);
         }
 
         public void Stop()
         {
             _httplistener.StopListen();
-        }
-
-        public void Restart()
-        {
-            _httplistener.RestartListen(HttpHost);
         }
     }
 }

@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace RemoteControl.Core.Interfaces
+﻿namespace RemoteControl.Core.Interfaces
 {
     internal interface IListener
     {
-        void StartListen(UriBuilder ub);
+        void StartListen(string[] urls);
         void StopListen();
-        void RestartListen(UriBuilder ub);
+        void RestartListen(string[] urls);
 
         event HttpEventHandler OnHttpRequest;
         event HttpEventHandler OnApiRequest;

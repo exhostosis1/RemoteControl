@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Windows.Forms;
 using RemoteControl.Core;
 
@@ -8,11 +11,22 @@ namespace RemoteControl
     public partial class ConfigForm : Form
     {
         private Main _program;
-        private UriBuilder _httpHost;
+        private string[] _httpHosts;
+
+        private readonly Timer _ipLookupTimer = new Timer();
 
         public ConfigForm()
         {
             InitializeComponent();
+
+            _ipLookupTimer.Enabled = false;
+            _ipLookupTimer.Interval = 1000;
+            _ipLookupTimer.Tick += IpLookupTimerTick;
+
+            if (AppConfig.Hosts.Length == 0)
+            {
+                _ipLookupTimer.Start();
+            }
 
             try
             {
@@ -27,12 +41,17 @@ namespace RemoteControl
             }
         }
 
+        private void IpLookupTimerTick(object sender, EventArgs args)
+        {
+            
+        }
+
         private void SetProgram()
         {
-            _httpHost = new UriBuilder(AppConfig.Scheme, AppConfig.Host, AppConfig.Port);
+            _httpHosts = AppConfig.Hosts;
 
-            _program = new Main(_httpHost);
-            _program.Start();
+            _program = new Main();
+            _program.Start(AppConfig.Scheme, AppConfig.Hosts, AppConfig.Port);
         }
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -52,7 +71,7 @@ namespace RemoteControl
             {
                 _program.Stop();
 
-                AppConfig.Host = textHost.Text;
+                AppConfig.Hosts = new []{textHost.Text};
                 AppConfig.Scheme = textScheme.Text;
                 AppConfig.Port = Convert.ToInt32(textPort.Text);
 
@@ -71,14 +90,14 @@ namespace RemoteControl
         private void SetConfigTextBoxes()
         {
             this.textScheme.Text = AppConfig.Scheme;
-            this.textHost.Text = AppConfig.Host;
+            this.textHost.Text = AppConfig.Hosts.First();
             this.textPort.Text = AppConfig.Port.ToString();
         }
 
         private void EnableMenuItem()
         {
             this.ipToolStripMenuItem.Enabled = true;
-            this.ipToolStripMenuItem.Text = _httpHost.Uri.ToString();
+            this.ipToolStripMenuItem.Text = _httpHosts.First();
         }
 
         private void DisableMenuItem()
@@ -120,7 +139,7 @@ namespace RemoteControl
         {
             try
             {
-                _program.Restart();
+                _program.Start(AppConfig.Scheme, AppConfig.Hosts, AppConfig.Port);
             }
             catch
             {

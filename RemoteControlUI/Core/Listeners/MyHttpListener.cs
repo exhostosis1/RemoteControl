@@ -23,13 +23,13 @@ namespace RemoteControl.Core.Listeners
         public event HttpEventHandler OnHttpRequest;
         public event HttpEventHandler OnApiRequest;
 
-        private string _url = "http://localhost/";
+        private string[] _urls = { "http://localhost/" };
 
         public bool Listening { get; private set; }
 
-        public MyHttpListener(string url)
+        public MyHttpListener(string[] urls)
         {
-            _url = url;
+            _urls = urls;
         }
 
         public MyHttpListener()
@@ -37,19 +37,22 @@ namespace RemoteControl.Core.Listeners
             
         }
 
-        public void StartListen(string url)
+        public void StartListen(string[] urls)
         {
-            if (string.IsNullOrWhiteSpace(url))
+            if (urls.Length == 0)
                 throw new ArgumentException("Url must be set before start listening");
 
             if (_listener != null) return;
 
-            _url = url;
+            _urls = urls;
 
             _listener = new HttpListener();
 
-            _listener.Prefixes.Add(url);
-                
+            foreach (var url in _urls)
+            {
+                _listener.Prefixes.Add(url);
+            }
+
             _listener.Start();
 
             Task.Run(Start);
@@ -59,7 +62,7 @@ namespace RemoteControl.Core.Listeners
 
         public void StartListen()
         {
-            StartListen(_url);
+            StartListen(_urls);
         }
 
         private async void Start()
@@ -106,25 +109,15 @@ namespace RemoteControl.Core.Listeners
             }
         }
 
-        public void RestartListen(string url)
+        public void RestartListen(string[] urls)
         {
             StopListen();
-            StartListen(url);
+            StartListen(urls);
         }
 
         public void RestartListen()
         {
-            RestartListen(_url);
-        }
-
-        public void StartListen(UriBuilder ub)
-        {
-            StartListen(ub.Uri.ToString());
-        }
-
-        public void RestartListen(UriBuilder ub)
-        {
-            RestartListen(ub.Uri.ToString());
+            RestartListen(_urls);
         }
     }
 }

@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Sockets;
 
 namespace RemoteControl
 {
@@ -20,20 +19,18 @@ namespace RemoteControl
         private const string ApiSchemeName = "apischeme";
 
         private const char EqualityChar = '=';
+        private static readonly char[] HostSeparators = { ',', ' ' };
 
         private static string DefaultScheme => "http";
-
-        private static string DefaultHost => Dns.GetHostEntry(Dns.GetHostName()).AddressList
-            .First(x => x.AddressFamily == AddressFamily.InterNetwork).ToString();
-
         private static int DefaultPort => 80;
         private static int DefaultApiPort => Port + 1;
-        private static string DefaultApiHost => Host;
         private static bool DefaultSimple => false;
         private static bool DefaultSocket => false;
         private static string DefaultApiScheme => "ws";
 
         private static readonly Dictionary<string, string> Config = new Dictionary<string, string>();
+
+        public static bool IpLookup => Hosts.Length == 0;
 
         public static int Port
         {
@@ -45,9 +42,13 @@ namespace RemoteControl
             set => SetAppConfig(PortConfigName, value.ToString());
         }
 
-        public static string Host
+        public static string[] Hosts
         {
-            get => GetAppConfig(IpConfigName) ?? DefaultHost;
+            get
+            {
+                var conf = GetAppConfig(IpConfigName);
+                return !string.IsNullOrWhiteSpace(conf) ? conf.Split(HostSeparators, StringSplitOptions.RemoveEmptyEntries) : new string[0];
+            }
             set => SetAppConfig(IpConfigName, value);
         }
 
@@ -87,9 +88,13 @@ namespace RemoteControl
             set => SetAppConfig(ApiPortName, value.ToString());
         }
 
-        public static string ApiHost
+        public static string[] ApiHosts
         {
-            get => GetAppConfig(ApiHostName) ?? DefaultApiHost;
+            get
+            {
+                var conf = GetAppConfig(ApiHostName);
+                return !string.IsNullOrWhiteSpace(conf) ? conf.Split(HostSeparators, StringSplitOptions.RemoveEmptyEntries) : new string[0];
+            }
             set => SetAppConfig(ApiHostName, value);
         }
 
@@ -139,8 +144,9 @@ namespace RemoteControl
             {
                 Config.Add(name, value);
             }
-
         }
+
+        private static void SetAppConfig(string name, string[] value) => SetAppConfig(name, string.Join(",", value));
 
         internal static void WriteConfigToFile()
         {
