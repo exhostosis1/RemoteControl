@@ -2,15 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using System.Windows.Forms;
 
 namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
-        private Main _program;
-        private readonly SynchronizationContext _context;
+        private readonly Main _program;
         private readonly List<ToolStripMenuItem> _ipMenuItems = new List<ToolStripMenuItem>();
         private readonly ToolStripMenuItem _stoppedMenuItem = new ToolStripMenuItem
         {
@@ -18,46 +16,51 @@ namespace RemoteControl
             Enabled = false,
         };
 
+        private readonly char[] _uriSeparators = {'\r', '\n', ' '};
+
         public ConfigForm()
         {
             InitializeComponent();
 
-            _context = SynchronizationContext.Current;
-
             try
             {
-                SetConfigTextBoxes();
+                this.textBoxUris.Text = string.Join("\n", AppConfig.Uris);
 
-                _program = new Main(AppConfig.Scheme, AppConfig.Port, AppConfig.Host is null);
+                _program = new Main(AppConfig.Uris.Length == 0);
                 _program.IpChanged += IpChanged;
-                _program.Start(AppConfig.Host);
+                _program.Start(AppConfig.Uris);
             }
             catch(Exception e)
             {
                 MessageBox.Show(e.Message, @"Error", MessageBoxButtons.OK);
+                SetStopped();
             }
         }
 
-        private void IpChanged(object sender, string[] uris)
+        private void SetStopped()
         {
-            _context.Send(o =>
+            _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
+            _ipMenuItems.Add(_stoppedMenuItem);
+            this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
+        }
+
+        private void IpChanged(object sender, IEnumerable<string> uris)
+        {
+            _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
+            _ipMenuItems.Clear();
+
+            foreach (var uri in uris)
             {
-                _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
-                _ipMenuItems.Clear();
+                var item = (new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
+                _ipMenuItems.Add(item);
+                this.contextMenuStrip.Items.Insert(0, item);
+            }
 
-                foreach (var uri in uris)
-                {
-                    var item = (new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
-                    _ipMenuItems.Add(item);
-                    this.contextMenuStrip.Items.Insert(0, item);
-                }
-
-                if (_ipMenuItems.Count == 0)
-                {
-                    _ipMenuItems.Add(_stoppedMenuItem);
-                    this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
-                }
-            }, null);
+            if (_ipMenuItems.Count == 0)
+            {
+                _ipMenuItems.Add(_stoppedMenuItem);
+                this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
+            }
         }
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -77,32 +80,24 @@ namespace RemoteControl
             {
                 _program.Stop();
 
-                AppConfig.Host = textHost.Text;
-                AppConfig.Scheme = _program.Schema = textScheme.Text;
-                AppConfig.Port = _program.Port = Convert.ToInt32(textPort.Text);
+                AppConfig.ReadConfig(textBoxUris.Text.Split(_uriSeparators, StringSplitOptions.RemoveEmptyEntries));
 
-                _program.IpLookup = string.IsNullOrWhiteSpace(AppConfig.Host);
-
-                _program.Start(AppConfig.Host);
+                _program.IpLookup = AppConfig.Uris.Length == 0;
+                _program.Start(AppConfig.Uris);
                 Minimize();
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
+                SetStopped();
             }
-        }
-        private void SetConfigTextBoxes()
-        {
-            this.textScheme.Text = AppConfig.Scheme;
-            this.textHost.Text = AppConfig.Host;
-            this.textPort.Text = AppConfig.Port.ToString();
         }
 
         private void ButtonCancel_Click(object sender, EventArgs e)
         {
             Minimize();
 
-            SetConfigTextBoxes();
+            textBoxUris.Text = string.Join("\n", AppConfig.Uris);
         }
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
@@ -115,7 +110,7 @@ namespace RemoteControl
 
         private void ButtonGet_Click(object sender, EventArgs e)
         {
-            SetConfigTextBoxes();
+            textBoxUris.Text = AppConfig.GetFileConfig();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -131,11 +126,14 @@ namespace RemoteControl
         {
             try
             {
-                _program.Start(AppConfig.Scheme, AppConfig.Port, AppConfig.Host);
+                _program.Stop();
+                _program.Start(AppConfig.Uris);
             }
-            catch
+            catch (Exception ex)
             {
-                SetConfigTextBoxes();
+                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
+                textBoxUris.Text = AppConfig.GetFileConfig();
+                SetStopped();
             }
         }
 
@@ -156,11 +154,6 @@ namespace RemoteControl
             Show();
             this.WindowState = FormWindowState.Normal;
             this.ShowInTaskbar = true;
-        }
-
-        private void textApiPort_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (!char.IsDigit(e.KeyChar)) e.Handled = true;
         }
     }
 }

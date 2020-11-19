@@ -1,7 +1,9 @@
-﻿using System;
+﻿using RemoteControl.Core.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using RemoteControl.Core.Interfaces;
 
 namespace RemoteControl.Core.Listeners
 {
@@ -37,14 +39,14 @@ namespace RemoteControl.Core.Listeners
             
         }
 
-        public void StartListen(string[] urls)
+        public void StartListen(IReadOnlyCollection<string> urls)
         {
-            if (urls.Length == 0)
+            if (urls == null || urls.Count == 0)
                 throw new ArgumentException("Url must be set before start listening");
 
             if (_listener != null) return;
 
-            _urls = urls;
+            _urls = urls.ToArray();
 
             _listener = new HttpListener();
 
@@ -109,7 +111,7 @@ namespace RemoteControl.Core.Listeners
             }
         }
 
-        public void RestartListen(string[] urls)
+        public void RestartListen(IReadOnlyCollection<string> urls)
         {
             StopListen();
             StartListen(urls);

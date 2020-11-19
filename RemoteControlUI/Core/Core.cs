@@ -3,6 +3,7 @@ using RemoteControl.Core.Controllers;
 using RemoteControl.Core.Interfaces;
 using RemoteControl.Core.Listeners;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -13,19 +14,18 @@ namespace RemoteControl.Core
     public class Main
     {
         private readonly IListener _httplistener;
-        public string Schema { get; set; }
-        public int Port { get; set; }
 
         public bool IpLookup;
-
-        private string[] _uris;
         
-        public event EventHandler<string[]> IpChanged;
+        public event EventHandler<IEnumerable<string>> IpChanged;
 
-        public Main(string schema, int port, bool ipLookup)
+        private const string DefaultScheme = "http";
+        private const int DefaultPort = 1488;
+
+        private readonly string _defaultUri = $"{DefaultScheme}://localhost:{DefaultPort}/";
+
+        public Main(bool ipLookup)
         {
-            Schema = schema;
-            Port = port;
             IpLookup = ipLookup;
 
             AbstractController apiController = new ApiController();
@@ -42,36 +42,30 @@ namespace RemoteControl.Core
         {
             if (IpLookup)
             {
-                var hosts = GetCurrentIps();
-
                 Stop();
-                Start(hosts);
+
+                var uris = GetCurrentUris();
+                if (uris.Length > 0)
+                    uris = new[] {_defaultUri};
+
+                Start(uris);
             }
         }
 
-        private string[] GetCurrentIps() => Dns.GetHostAddresses(Dns.GetHostName())
-                .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString()).ToArray();
+        public IEnumerable<string> GetCurrentIps() => Dns.GetHostAddresses(Dns.GetHostName())
+                .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
 
-        public void Start(params string[] hosts)
+        public string[] GetCurrentUris() => GetCurrentIps()
+            .Select(x => new UriBuilder(DefaultScheme, x, DefaultPort).ToString()).ToArray();
+
+        public void Start(IReadOnlyCollection<string> uris)
         {
-            Start(Schema, Port, hosts);
-        }
+            if (uris == null || uris.Count == 0)
+                uris = GetCurrentUris();
 
-        public void Start(string schema, int port, params string[] hosts)
-        {
-            Schema = schema;
-            Port = port;
+            _httplistener.StartListen(uris);
 
-            if (IpLookup)
-            {
-                hosts = GetCurrentIps();
-            }
-
-            _uris = hosts.Select(x => new UriBuilder(Schema, x, Port).ToString()).ToArray();
-
-            _httplistener.StartListen(_uris);
-
-            IpChanged?.Invoke(this, _uris);
+            IpChanged?.Invoke(this, uris);
         }
 
         public void Stop()
