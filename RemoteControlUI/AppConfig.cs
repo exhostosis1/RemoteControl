@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -19,7 +18,6 @@ namespace RemoteControl
         private const string ApiSchemeName = "apischeme";
 
         private const char EqualityChar = '=';
-        private static readonly char[] HostSeparators = { ',', ' ' };
 
         private static string DefaultScheme => "http";
         private static int DefaultPort => 80;
@@ -29,8 +27,6 @@ namespace RemoteControl
         private static string DefaultApiScheme => "ws";
 
         private static readonly Dictionary<string, string> Config = new Dictionary<string, string>();
-
-        public static bool IpLookup => Hosts.Length == 0;
 
         public static int Port
         {
@@ -42,13 +38,9 @@ namespace RemoteControl
             set => SetAppConfig(PortConfigName, value.ToString());
         }
 
-        public static string[] Hosts
+        public static string Host
         {
-            get
-            {
-                var conf = GetAppConfig(IpConfigName);
-                return !string.IsNullOrWhiteSpace(conf) ? conf.Split(HostSeparators, StringSplitOptions.RemoveEmptyEntries) : new string[0];
-            }
+            get => GetAppConfig(IpConfigName);
             set => SetAppConfig(IpConfigName, value);
         }
 
@@ -88,13 +80,9 @@ namespace RemoteControl
             set => SetAppConfig(ApiPortName, value.ToString());
         }
 
-        public static string[] ApiHosts
+        public static string ApiHost
         {
-            get
-            {
-                var conf = GetAppConfig(ApiHostName);
-                return !string.IsNullOrWhiteSpace(conf) ? conf.Split(HostSeparators, StringSplitOptions.RemoveEmptyEntries) : new string[0];
-            }
+            get => GetAppConfig(ApiHostName);
             set => SetAppConfig(ApiHostName, value);
         }
 
@@ -145,8 +133,6 @@ namespace RemoteControl
                 Config.Add(name, value);
             }
         }
-
-        private static void SetAppConfig(string name, string[] value) => SetAppConfig(name, string.Join(",", value));
 
         internal static void WriteConfigToFile()
         {

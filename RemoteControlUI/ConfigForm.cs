@@ -1,57 +1,63 @@
-﻿using System;
+﻿using RemoteControl.Core;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Sockets;
+using System.Threading;
 using System.Windows.Forms;
-using RemoteControl.Core;
 
 namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
         private Main _program;
-        private string[] _httpHosts;
-
-        private readonly Timer _ipLookupTimer = new Timer();
+        private readonly SynchronizationContext _context;
+        private readonly List<ToolStripMenuItem> _ipMenuItems = new List<ToolStripMenuItem>();
+        private readonly ToolStripMenuItem _stoppedMenuItem = new ToolStripMenuItem
+        {
+            Text = @"Stopped",
+            Enabled = false,
+        };
 
         public ConfigForm()
         {
             InitializeComponent();
 
-            _ipLookupTimer.Enabled = false;
-            _ipLookupTimer.Interval = 1000;
-            _ipLookupTimer.Tick += IpLookupTimerTick;
-
-            if (AppConfig.Hosts.Length == 0)
-            {
-                _ipLookupTimer.Start();
-            }
+            _context = SynchronizationContext.Current;
 
             try
             {
                 SetConfigTextBoxes();
-                SetProgram();
-                EnableMenuItem();
+
+                _program = new Main(AppConfig.Scheme, AppConfig.Port, AppConfig.Host is null);
+                _program.IpChanged += IpChanged;
+                _program.Start(AppConfig.Host);
             }
             catch(Exception e)
             {
-                DisableMenuItem();
                 MessageBox.Show(e.Message, @"Error", MessageBoxButtons.OK);
             }
         }
 
-        private void IpLookupTimerTick(object sender, EventArgs args)
+        private void IpChanged(object sender, string[] uris)
         {
-            
-        }
+            _context.Send(o =>
+            {
+                _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
+                _ipMenuItems.Clear();
 
-        private void SetProgram()
-        {
-            _httpHosts = AppConfig.Hosts;
+                foreach (var uri in uris)
+                {
+                    var item = (new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
+                    _ipMenuItems.Add(item);
+                    this.contextMenuStrip.Items.Insert(0, item);
+                }
 
-            _program = new Main();
-            _program.Start(AppConfig.Scheme, AppConfig.Hosts, AppConfig.Port);
+                if (_ipMenuItems.Count == 0)
+                {
+                    _ipMenuItems.Add(_stoppedMenuItem);
+                    this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
+                }
+            }, null);
         }
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -62,7 +68,7 @@ namespace RemoteControl
 
         private void IpToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Process.Start(this.ipToolStripMenuItem.Text);
+            Process.Start((sender as ToolStripMenuItem)?.Text ?? "");
         }
 
         private void ButtonSave_Click(object sender, EventArgs e)
@@ -71,39 +77,25 @@ namespace RemoteControl
             {
                 _program.Stop();
 
-                AppConfig.Hosts = new []{textHost.Text};
-                AppConfig.Scheme = textScheme.Text;
-                AppConfig.Port = Convert.ToInt32(textPort.Text);
+                AppConfig.Host = textHost.Text;
+                AppConfig.Scheme = _program.Schema = textScheme.Text;
+                AppConfig.Port = _program.Port = Convert.ToInt32(textPort.Text);
 
-                SetProgram();
+                _program.IpLookup = string.IsNullOrWhiteSpace(AppConfig.Host);
+
+                _program.Start(AppConfig.Host);
                 Minimize();
             }
             catch (Exception ex)
             {
-                DisableMenuItem();
                 MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
-                return;
             }
-
-            EnableMenuItem();
         }
         private void SetConfigTextBoxes()
         {
             this.textScheme.Text = AppConfig.Scheme;
-            this.textHost.Text = AppConfig.Hosts.First();
+            this.textHost.Text = AppConfig.Host;
             this.textPort.Text = AppConfig.Port.ToString();
-        }
-
-        private void EnableMenuItem()
-        {
-            this.ipToolStripMenuItem.Enabled = true;
-            this.ipToolStripMenuItem.Text = _httpHosts.First();
-        }
-
-        private void DisableMenuItem()
-        {
-            this.ipToolStripMenuItem.Enabled = false;
-            this.ipToolStripMenuItem.Text = @"Stopped";
         }
 
         private void ButtonCancel_Click(object sender, EventArgs e)
@@ -139,12 +131,11 @@ namespace RemoteControl
         {
             try
             {
-                _program.Start(AppConfig.Scheme, AppConfig.Hosts, AppConfig.Port);
+                _program.Start(AppConfig.Scheme, AppConfig.Port, AppConfig.Host);
             }
             catch
             {
                 SetConfigTextBoxes();
-                EnableMenuItem();
             }
         }
 
