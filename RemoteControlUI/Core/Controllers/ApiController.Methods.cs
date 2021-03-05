@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 using RemoteControl.Core.Enums;
 using RemoteControl.Core.Interfaces;
@@ -26,8 +27,7 @@ namespace RemoteControl.Core.Controllers
 
             if (!int.TryParse(value, out var result)) return 0;
 
-            result = result > 100 ? 100 : result;
-            result = result < 0 ? 0 : result;
+            result = Math.Abs(result % 100);
 
             _audioService.Volume = result;
 
@@ -50,7 +50,7 @@ namespace RemoteControl.Core.Controllers
                     _inputService.KeyPress(KeysEnum.Pause);
                     break;
                 case "mediaback":
-                    _inputService.KeyPress(KeysEnum.MediaBack);
+                    _inputService.KeyPress(KeysEnum.MediaBack); 
                     break;
                 case "mediaforth":
                     _inputService.KeyPress(KeysEnum.MediaForth);

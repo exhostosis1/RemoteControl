@@ -50,6 +50,7 @@ namespace RemoteControl.Core.Services
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
             }
         }
+        
 
         public void MouseMove(Point coords)
         {

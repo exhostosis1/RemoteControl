@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RemoteControl.Core;
+using System;
 using System.Windows.Forms;
 
 namespace RemoteControl
@@ -13,8 +14,18 @@ namespace RemoteControl
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
-            Application.Run(new ConfigForm());
+
+
+            var program = new Main(AppConfig.Uris.Length == 0);
+
+            try
+            {
+                Application.Run(new ConfigForm(program));
+            }
+            catch
+            {
+                Application.Run(new ConfigForm(program));
+            }
         }
     }
 }

@@ -21,7 +21,7 @@ namespace RemoteControl.Core.Utility
             var reg = new Regex("(?<=[xyXY]:[ ]*)[-0-9]+(?=[,} ])");
             int x;
             int y;
-
+                
             try
             {
                 var match = reg.Match(input);

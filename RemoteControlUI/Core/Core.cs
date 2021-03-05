@@ -37,7 +37,7 @@ namespace RemoteControl.Core
 
             NetworkChange.NetworkAddressChanged += IpsChanged;
         }
-
+    
         private void IpsChanged(object sender, EventArgs args)
         {
             if (IpLookup)
@@ -46,7 +46,7 @@ namespace RemoteControl.Core
 
                 var uris = GetCurrentUris();
                 if (uris.Length > 0)
-                    uris = new[] {_defaultUri};
+                    uris = new[] { _defaultUri };
 
                 Start(uris);
             }

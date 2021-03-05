@@ -18,17 +18,18 @@ namespace RemoteControl
 
         private readonly char[] _uriSeparators = {'\r', '\n', ' '};
 
-        public ConfigForm()
+        public ConfigForm(Main program)
         {
             InitializeComponent();
+
+            _program = program;
 
             try
             {
                 this.textBoxUris.Text = string.Join("\n", AppConfig.Uris);
 
-                _program = new Main(AppConfig.Uris.Length == 0);
                 _program.IpChanged += IpChanged;
-                _program.Start(AppConfig.Uris);
+                _program.Start(AppConfig.Uris); 
             }
             catch(Exception e)
             {
@@ -44,7 +45,7 @@ namespace RemoteControl
             this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
         }
 
-        private void IpChanged(object sender, IEnumerable<string> uris)
+        private void IpChanged(object sender, IEnumerable<string> uris) 
         {
             _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
             _ipMenuItems.Clear();
