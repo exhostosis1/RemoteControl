@@ -17,15 +17,8 @@ namespace RemoteControl
 
 
             var program = new Main(AppConfig.Uris.Length == 0);
-
-            try
-            {
-                Application.Run(new ConfigForm(program));
-            }
-            catch
-            {
-                Application.Run(new ConfigForm(program));
-            }
+            
+            Application.Run(new ConfigForm(program));
         }
     }
 }

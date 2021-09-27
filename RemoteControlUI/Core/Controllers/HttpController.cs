@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using RemoteControl.Core.Abstract;
 using RemoteControl.Core.Interfaces;
@@ -7,7 +8,7 @@ namespace RemoteControl.Core.Controllers
 {
     internal class HttpController : AbstractController
     {
-        private const string ContentFolder = "www";
+        private readonly string ContentFolder = AppContext.BaseDirectory + "www";
 
         private readonly Dictionary<string, string> _contentTypes = new Dictionary<string, string>()
         {

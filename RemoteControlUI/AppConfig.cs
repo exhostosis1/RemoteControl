@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -6,16 +7,16 @@ namespace RemoteControl
 {
     public static class AppConfig
     {
-        private const string ConfigPath = "config.ini";
+        private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
     
-        public static string[] Uris { get; private set; } = new string[0];
+        public static string[] Uris { get; private set; } = Array.Empty<string>();
 
         static AppConfig()
         {
             ReadFile();
         }
 
-        public static void ReadConfig(string[] input)
+        public static void ReadConfig(IEnumerable<string> input)
         {
             Uris = input.Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).ToArray();
         }
