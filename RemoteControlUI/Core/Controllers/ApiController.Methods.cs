@@ -27,8 +27,7 @@ namespace RemoteControl.Core.Controllers
 
             if (!int.TryParse(value, out var result)) return 0;
 
-            if (result > 100) result = 100;
-            if (result < 0) result = 0;
+            result = result > 100 ? 100 : result < 0 ? 0 : result;
 
             _audioService.Volume = result;
 
