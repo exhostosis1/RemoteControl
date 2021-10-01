@@ -15,10 +15,7 @@ namespace RemoteControl
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-
-            var program = new Main(AppConfig.Uris.Length == 0);
-            
-            Application.Run(new ConfigForm(program));
+            Application.Run(new ConfigForm());
         }
     }
 }

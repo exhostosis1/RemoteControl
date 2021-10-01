@@ -35,9 +35,7 @@
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buttonSave = new System.Windows.Forms.Button();
-            this.buttonCancel = new System.Windows.Forms.Button();
-            this.buttonGet = new System.Windows.Forms.Button();
-            this.textBoxUris = new System.Windows.Forms.TextBox();
+            this.comboBoxUris = new System.Windows.Forms.ComboBox();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -73,42 +71,21 @@
             // 
             // buttonSave
             // 
-            this.buttonSave.Location = new System.Drawing.Point(74, 38);
+            this.buttonSave.Location = new System.Drawing.Point(73, 40);
             this.buttonSave.Name = "buttonSave";
-            this.buttonSave.Size = new System.Drawing.Size(80, 23);
+            this.buttonSave.Size = new System.Drawing.Size(80, 25);
             this.buttonSave.TabIndex = 1;
             this.buttonSave.Text = "Save";
             this.buttonSave.UseVisualStyleBackColor = true;
             this.buttonSave.Click += new System.EventHandler(this.ButtonSave_Click);
             // 
-            // buttonCancel
+            // comboBoxUris
             // 
-            this.buttonCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.buttonCancel.Location = new System.Drawing.Point(160, 38);
-            this.buttonCancel.Name = "buttonCancel";
-            this.buttonCancel.Size = new System.Drawing.Size(68, 23);
-            this.buttonCancel.TabIndex = 11;
-            this.buttonCancel.Text = "Cancel";
-            this.buttonCancel.UseVisualStyleBackColor = true;
-            this.buttonCancel.Click += new System.EventHandler(this.ButtonCancel_Click);
-            // 
-            // buttonGet
-            // 
-            this.buttonGet.Location = new System.Drawing.Point(12, 38);
-            this.buttonGet.Name = "buttonGet";
-            this.buttonGet.Size = new System.Drawing.Size(56, 23);
-            this.buttonGet.TabIndex = 12;
-            this.buttonGet.Text = "Get";
-            this.buttonGet.UseVisualStyleBackColor = true;
-            this.buttonGet.Click += new System.EventHandler(this.ButtonGet_Click);
-            // 
-            // textBoxUris
-            // 
-            this.textBoxUris.Location = new System.Drawing.Point(13, 13);
-            this.textBoxUris.Multiline = true;
-            this.textBoxUris.Name = "textBoxUris";
-            this.textBoxUris.Size = new System.Drawing.Size(215, 20);
-            this.textBoxUris.TabIndex = 13;
+            this.comboBoxUris.FormattingEnabled = true;
+            this.comboBoxUris.Location = new System.Drawing.Point(12, 13);
+            this.comboBoxUris.Name = "comboBoxUris";
+            this.comboBoxUris.Size = new System.Drawing.Size(216, 21);
+            this.comboBoxUris.TabIndex = 13;
             // 
             // ConfigForm
             // 
@@ -116,11 +93,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.CancelButton = this.buttonCancel;
             this.ClientSize = new System.Drawing.Size(242, 69);
-            this.Controls.Add(this.textBoxUris);
-            this.Controls.Add(this.buttonGet);
-            this.Controls.Add(this.buttonCancel);
+            this.Controls.Add(this.comboBoxUris);
             this.Controls.Add(this.buttonSave);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -136,7 +110,6 @@
             this.Shown += new System.EventHandler(this.Form1_Shown);
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -145,10 +118,8 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
         private System.Windows.Forms.Button buttonSave;
-        private System.Windows.Forms.Button buttonCancel;
-        private System.Windows.Forms.Button buttonGet;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
-        private System.Windows.Forms.TextBox textBoxUris;
+        private System.Windows.Forms.ComboBox comboBoxUris;
     }
 }
 

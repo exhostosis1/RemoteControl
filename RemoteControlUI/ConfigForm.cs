@@ -2,6 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace RemoteControl
@@ -16,25 +21,66 @@ namespace RemoteControl
             Enabled = false,
         };
 
-        private readonly char[] _uriSeparators = {'\r', '\n', ' '};
+        private readonly SynchronizationContext _context;
 
-        public ConfigForm(Main program)
+        public ConfigForm()
         {
             InitializeComponent();
 
-            _program = program;
+            _context = SynchronizationContext.Current;
+
+            _program = new Main();
+
+            NetworkChange.NetworkAddressChanged += UpdateUris;
 
             try
             {
-                this.textBoxUris.Text = string.Join("\n", AppConfig.Uris);
-
-                _program.IpChanged += IpChanged;
-                _program.Start(AppConfig.Uris); 
+                UpdateUris(null, null);
             }
             catch(Exception e)
             {
-                MessageBox.Show(e.Message, @"Error", MessageBoxButtons.OK);
                 SetStopped();
+            }
+        }
+
+        private static IEnumerable<string> GetCurrentIPs => Dns.GetHostAddresses(Dns.GetHostName())
+            .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
+
+        private static IEnumerable<Uri> GetCurrentUris(int port) =>
+            GetCurrentIPs.Select(x => new UriBuilder(AppConfig.Scheme, x, port).Uri);
+
+        private void UpdateUris(object sender, EventArgs e)
+        {
+            try
+            {
+                _program.Stop();
+
+                var uris = GetCurrentUris(AppConfig.Port).ToList();
+                if (uris.Count == 0) return;
+
+                _context.Send(_ =>
+                {
+                    comboBoxUris.DataSource = uris.Select(x => x.ToString()).ToList();
+                }, null);
+
+                var uri = new UriBuilder(AppConfig.Scheme, AppConfig.Host, AppConfig.Port).Uri;
+
+                if (uris.All(x => x.Host != uri.Host))
+                {
+                    uri = uris.First();
+                    AppConfig.Host = uri.Host;
+                    AppConfig.Port = uri.Port;
+                }
+
+                _program.Start(uri);
+                IpChanged(AppConfig.Uri.ToString());
+            }
+            catch (Exception ex)
+            {
+                _context.Send(_ =>
+                {
+                    SetStopped();
+                }, null);
             }
         }
 
@@ -45,17 +91,14 @@ namespace RemoteControl
             this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
         }
 
-        private void IpChanged(object sender, IEnumerable<string> uris) 
+        private void IpChanged(string uri) 
         {
             _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
             _ipMenuItems.Clear();
 
-            foreach (var uri in uris)
-            {
-                var item = (new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
-                _ipMenuItems.Add(item);
-                this.contextMenuStrip.Items.Insert(0, item);
-            }
+            var item = (new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
+            _ipMenuItems.Add(item);
+            this.contextMenuStrip.Items.Insert(0, item);
 
             if (_ipMenuItems.Count == 0)
             {
@@ -81,24 +124,16 @@ namespace RemoteControl
             {
                 _program.Stop();
 
-                AppConfig.ReadConfig(textBoxUris.Text.Split(_uriSeparators, StringSplitOptions.RemoveEmptyEntries));
+                AppConfig.SetFromString(comboBoxUris.Text);
 
-                _program.IpLookup = AppConfig.Uris.Length == 0;
-                _program.Start(AppConfig.Uris);
+                _program.Start(AppConfig.Uri);
+                IpChanged(AppConfig.Uri.ToString());
                 Minimize();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
                 SetStopped();
             }
-        }
-
-        private void ButtonCancel_Click(object sender, EventArgs e)
-        {
-            Minimize();
-
-            textBoxUris.Text = string.Join("\n", AppConfig.Uris);
         }
 
         private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
@@ -107,11 +142,6 @@ namespace RemoteControl
             {
                 if (this.Visible) Minimize(); else Maximize();
             }
-        }
-
-        private void ButtonGet_Click(object sender, EventArgs e)
-        {
-            textBoxUris.Text = AppConfig.GetFileConfig();
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -127,13 +157,11 @@ namespace RemoteControl
         {
             try
             {
-                _program.Stop();
-                _program.Start(AppConfig.Uris);
+                _program.Restart(AppConfig.Uri);
+                IpChanged(AppConfig.Uri.ToString());
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, @"Error", MessageBoxButtons.OK);
-                textBoxUris.Text = AppConfig.GetFileConfig();
                 SetStopped();
             }
         }

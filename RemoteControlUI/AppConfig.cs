@@ -1,45 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace RemoteControl
 {
     public static class AppConfig
     {
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
-    
-        public static string[] Uris { get; private set; } = Array.Empty<string>();
+
+        public static string Scheme = "http";
+        public static string Host = "localhost";
+        public static int Port = 1488;
+
+        public static Uri Uri => new UriBuilder(Scheme, Host, Port).Uri;
 
         static AppConfig()
         {
             ReadFile();
         }
 
-        public static void ReadConfig(IEnumerable<string> input)
+        public static void SetFromString(string input)
         {
-            Uris = input.Where(x => Uri.TryCreate(x, UriKind.Absolute, out _)).ToArray();
+            var uri = new Uri(input);
+
+            Host = uri.Host;
+            Scheme = uri.Scheme;
+            Port = uri.Port;
         }
 
-        public static void WriteFile()
-        {
-            File.WriteAllLines(ConfigPath, Uris);
-        }
-
-        public static void ReadFile()
+        private static void ReadFile()
         {
             if (!File.Exists(ConfigPath))
                 return;
 
-            ReadConfig(File.ReadAllLines(ConfigPath));
-        }
+            var lines = File.ReadAllLines(ConfigPath);
 
-        public static string GetFileConfig()
-        {
-            if (!File.Exists(ConfigPath))
-                return "";
+            foreach (var line in lines)
+            {
+                string param, value;
 
-            return File.ReadAllText(ConfigPath);
+                try
+                {
+                    var split = line.Split(':');
+                    param = split[0].Trim();
+                    value = split[1].Trim();
+                }
+                catch
+                {
+                    continue;
+                }
+
+                switch (param)
+                {
+                    case "host":
+                        Host = value;
+                        break;
+                    case "port":
+                        int.TryParse(value, out Port);
+                        break;
+                    default:
+                        break;
+                }
+            }
         }
     }
 }

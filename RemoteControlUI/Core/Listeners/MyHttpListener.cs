@@ -1,7 +1,4 @@
 ﻿using RemoteControl.Core.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -25,35 +22,15 @@ namespace RemoteControl.Core.Listeners
         public event HttpEventHandler OnHttpRequest;
         public event HttpEventHandler OnApiRequest;
 
-        private string[] _urls = { "http://localhost/" };
-
         public bool Listening { get; private set; }
 
-        public MyHttpListener(string[] urls)
+        public void StartListen(string url)
         {
-            _urls = urls;
-        }
-
-        public MyHttpListener()
-        {
-            
-        }
-
-        public void StartListen(IReadOnlyCollection<string> urls)
-        {
-            if (urls == null || urls.Count == 0)
-                throw new ArgumentException("Url must be set before start listening");
-
             if (_listener != null) return;
 
-            _urls = urls.ToArray();
-
             _listener = new HttpListener();
-
-            foreach (var url in _urls)
-            {
-                _listener.Prefixes.Add(url);
-            }
+            
+            _listener.Prefixes.Add(url);
 
             _listener.Start();
 
@@ -62,21 +39,17 @@ namespace RemoteControl.Core.Listeners
             Listening = true;
         }
 
-        public void StartListen()
-        {
-            StartListen(_urls);
-        }
-
-        private async void Start()
+        private void Start()
         {
             while (true)
             {
                 try
                 {
-                    ProcessRequest(await _listener.GetContextAsync());
+                    ProcessRequest(_listener.GetContext());
                 }
                 catch
                 {
+                    StopListen();
                     return;
                 }
             }
@@ -111,15 +84,10 @@ namespace RemoteControl.Core.Listeners
             }
         }
 
-        public void RestartListen(IReadOnlyCollection<string> urls)
+        public void RestartListen(string url)
         {
             StopListen();
-            StartListen(urls);
-        }
-
-        public void RestartListen()
-        {
-            RestartListen(_urls);
+            StartListen(url);
         }
     }
 }

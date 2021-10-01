@@ -4,11 +4,9 @@ namespace RemoteControl.Core.Interfaces
 {
     internal interface IListener
     {
-        void StartListen(IReadOnlyCollection<string> urls);
+        void StartListen(string url);
         void StopListen();
-        void RestartListen(IReadOnlyCollection<string> urls);
-        void StartListen();
-        void RestartListen();
+        void RestartListen(string url);
 
         event HttpEventHandler OnHttpRequest;
         event HttpEventHandler OnApiRequest;
