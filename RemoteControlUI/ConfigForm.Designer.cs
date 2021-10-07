@@ -36,6 +36,7 @@
             this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.buttonSave = new System.Windows.Forms.Button();
             this.comboBoxUris = new System.Windows.Forms.ComboBox();
+            this.placeholderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -50,22 +51,23 @@
             // contextMenuStrip
             // 
             this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.placeholderToolStripMenuItem,
             this.restartToolStripMenuItem,
             this.closeToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip1";
-            this.contextMenuStrip.Size = new System.Drawing.Size(111, 48);
+            this.contextMenuStrip.Size = new System.Drawing.Size(181, 92);
             // 
             // restartToolStripMenuItem
             // 
             this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.restartToolStripMenuItem.Text = "Restart";
             this.restartToolStripMenuItem.Click += new System.EventHandler(this.RestartToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(110, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
             // 
@@ -86,6 +88,12 @@
             this.comboBoxUris.Name = "comboBoxUris";
             this.comboBoxUris.Size = new System.Drawing.Size(216, 21);
             this.comboBoxUris.TabIndex = 13;
+            // 
+            // placeholderToolStripMenuItem
+            // 
+            this.placeholderToolStripMenuItem.Name = "placeholderToolStripMenuItem";
+            this.placeholderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.placeholderToolStripMenuItem.Text = "placeholder";
             // 
             // ConfigForm
             // 
@@ -120,6 +128,7 @@
         private System.Windows.Forms.Button buttonSave;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
         private System.Windows.Forms.ComboBox comboBoxUris;
+        private System.Windows.Forms.ToolStripMenuItem placeholderToolStripMenuItem;
     }
 }
 

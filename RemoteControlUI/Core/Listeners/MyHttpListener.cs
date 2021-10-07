@@ -1,4 +1,5 @@
-﻿using RemoteControl.Core.Interfaces;
+﻿using System.Linq;
+using RemoteControl.Core.Interfaces;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -17,39 +18,46 @@ namespace RemoteControl.Core.Listeners
     }
     internal class MyHttpListener : IListener
     {
-        private HttpListener _listener;
+        private readonly HttpListener _listener = new HttpListener();
+
+        public void RestartListen()
+        {
+            StopListen();
+            StartListen();
+        }
 
         public event HttpEventHandler OnHttpRequest;
         public event HttpEventHandler OnApiRequest;
 
-        public bool Listening { get; private set; }
-
         public void StartListen(string url)
         {
-            if (_listener != null) return;
+            if (_listener.IsListening) return;
 
-            _listener = new HttpListener();
-            
-            _listener.Prefixes.Add(url);
+            if (!string.IsNullOrEmpty(url))
+            {
+                _listener.Prefixes.Clear();
+                _listener.Prefixes.Add(url);
+            }
+
+            if (_listener.Prefixes.Count == 0) return;
 
             _listener.Start();
 
-            Task.Run(Start);
-
-            Listening = true;
+            Task.Factory.StartNew(Start, TaskCreationOptions.LongRunning);
         }
 
-        private void Start()
+        public void StartListen() => StartListen(null);
+
+        private async void Start()
         {
             while (true)
             {
                 try
                 {
-                    ProcessRequest(_listener.GetContext());
+                    ProcessRequest(await _listener.GetContextAsync());
                 }
                 catch
                 {
-                    StopListen();
                     return;
                 }
             }
@@ -75,12 +83,9 @@ namespace RemoteControl.Core.Listeners
 
         public void StopListen()
         {
-            if (_listener != null)
+            if (_listener.IsListening)
             {
-                _listener.Abort();
-                _listener.Close();
-                _listener = null;
-                Listening = false;
+                _listener.Stop();
             }
         }
 

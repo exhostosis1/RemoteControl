@@ -7,24 +7,16 @@ namespace RemoteControl
     {
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
 
-        public static string Scheme = "http";
-        public static string Host = "localhost";
-        public static int Port = 1488;
+        public const string DefaultScheme = "http";
+        public const string DefaultHost = "localhost";
+        public const int DefaultPort = 1488;
 
-        public static Uri Uri => new UriBuilder(Scheme, Host, Port).Uri;
+        public static Uri CurrentUri { get; set; }
+        public static Uri PrefUri { get; set; }
 
         static AppConfig()
         {
             ReadFile();
-        }
-
-        public static void SetFromString(string input)
-        {
-            var uri = new Uri(input);
-
-            Host = uri.Host;
-            Scheme = uri.Scheme;
-            Port = uri.Port;
         }
 
         private static void ReadFile()
@@ -33,6 +25,9 @@ namespace RemoteControl
                 return;
 
             var lines = File.ReadAllLines(ConfigPath);
+
+            var host = string.Empty;
+            var port = 0;
 
             foreach (var line in lines)
             {
@@ -52,15 +47,18 @@ namespace RemoteControl
                 switch (param)
                 {
                     case "host":
-                        Host = value;
+                        host = value;
                         break;
                     case "port":
-                        int.TryParse(value, out Port);
+                        int.TryParse(value, out port);
                         break;
                     default:
                         break;
                 }
             }
+
+            PrefUri = new UriBuilder(DefaultScheme, string.IsNullOrEmpty(host) ? DefaultHost : host,
+                port == 0 ? DefaultPort : port).Uri;
         }
     }
 }

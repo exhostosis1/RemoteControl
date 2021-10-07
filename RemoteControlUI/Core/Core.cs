@@ -28,8 +28,12 @@ namespace RemoteControl.Core
 
         public void Restart(Uri url)
         {
-            Stop();
-            Start(url);
+            _httplistener.RestartListen(url.ToString());
+        }
+
+        public void Restart()
+        {
+            _httplistener.RestartListen();
         }
     }
 }

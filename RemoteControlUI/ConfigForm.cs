@@ -14,7 +14,6 @@ namespace RemoteControl
     public partial class ConfigForm : Form
     {
         private readonly Main _program;
-        private readonly List<ToolStripMenuItem> _ipMenuItems = new List<ToolStripMenuItem>();
         private readonly ToolStripMenuItem _stoppedMenuItem = new ToolStripMenuItem
         {
             Text = @"Stopped",
@@ -37,7 +36,7 @@ namespace RemoteControl
             {
                 UpdateUris(null, null);
             }
-            catch(Exception e)
+            catch
             {
                 SetStopped();
             }
@@ -47,7 +46,7 @@ namespace RemoteControl
             .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
 
         private static IEnumerable<Uri> GetCurrentUris(int port) =>
-            GetCurrentIPs.Select(x => new UriBuilder(AppConfig.Scheme, x, port).Uri);
+            GetCurrentIPs.Select(x => new UriBuilder(AppConfig.DefaultScheme, x, port).Uri);
 
         private void UpdateUris(object sender, EventArgs e)
         {
@@ -55,28 +54,25 @@ namespace RemoteControl
             {
                 _program.Stop();
 
-                var uris = GetCurrentUris(AppConfig.Port).ToList();
+                var uris = GetCurrentUris(AppConfig.DefaultPort).ToList();
                 if (uris.Count == 0) return;
+                
+                AppConfig.CurrentUri = uris.All(x => x.Host != AppConfig.PrefUri.Host) ? uris.First() : AppConfig.PrefUri;
+
+                _program.Start(AppConfig.CurrentUri);
 
                 _context.Send(_ =>
                 {
                     comboBoxUris.DataSource = uris.Select(x => x.ToString()).ToList();
+                    comboBoxUris.Text = AppConfig.CurrentUri.ToString();
+
+                    IpChanged(AppConfig.CurrentUri.ToString());
                 }, null);
-
-                var uri = new UriBuilder(AppConfig.Scheme, AppConfig.Host, AppConfig.Port).Uri;
-
-                if (uris.All(x => x.Host != uri.Host))
-                {
-                    uri = uris.First();
-                    AppConfig.Host = uri.Host;
-                    AppConfig.Port = uri.Port;
-                }
-
-                _program.Start(uri);
-                IpChanged(AppConfig.Uri.ToString());
             }
-            catch (Exception ex)
+            catch
             {
+                _program.Stop();
+
                 _context.Send(_ =>
                 {
                     SetStopped();
@@ -86,25 +82,14 @@ namespace RemoteControl
 
         private void SetStopped()
         {
-            _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
-            _ipMenuItems.Add(_stoppedMenuItem);
+            this.contextMenuStrip.Items.RemoveAt(0);
             this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
         }
 
         private void IpChanged(string uri) 
         {
-            _ipMenuItems.ForEach(x => this.contextMenuStrip.Items.Remove(x));
-            _ipMenuItems.Clear();
-
-            var item = (new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
-            _ipMenuItems.Add(item);
-            this.contextMenuStrip.Items.Insert(0, item);
-
-            if (_ipMenuItems.Count == 0)
-            {
-                _ipMenuItems.Add(_stoppedMenuItem);
-                this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
-            }
+            this.contextMenuStrip.Items.RemoveAt(0);
+            this.contextMenuStrip.Items.Insert(0, new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
         }
 
         private void CloseToolStripMenuItem_Click(object sender, EventArgs e)
@@ -124,13 +109,15 @@ namespace RemoteControl
             {
                 _program.Stop();
 
-                AppConfig.SetFromString(comboBoxUris.Text);
+                AppConfig.PrefUri = new Uri(comboBoxUris.Text);
+                
+                _program.Start(AppConfig.PrefUri);
+                AppConfig.CurrentUri = AppConfig.PrefUri;
 
-                _program.Start(AppConfig.Uri);
-                IpChanged(AppConfig.Uri.ToString());
+                IpChanged(AppConfig.CurrentUri.ToString());
                 Minimize();
             }
-            catch (Exception ex)
+            catch
             {
                 SetStopped();
             }
@@ -157,10 +144,9 @@ namespace RemoteControl
         {
             try
             {
-                _program.Restart(AppConfig.Uri);
-                IpChanged(AppConfig.Uri.ToString());
+                _program.Restart();
             }
-            catch (Exception ex)
+            catch
             {
                 SetStopped();
             }
