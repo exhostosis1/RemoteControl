@@ -48,13 +48,13 @@ namespace RemoteControl.Core.Listeners
 
         public void StartListen() => StartListen(null);
 
-        private async void Start()
+        private void Start()
         {
             while (true)
             {
                 try
                 {
-                    ProcessRequest(await _listener.GetContextAsync());
+                    ProcessRequest(_listener.GetContext());
                 }
                 catch
                 {
