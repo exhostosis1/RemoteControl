@@ -4,13 +4,161 @@
     <title>
         Громкость
     </title>
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1"
-        charset="utf8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimum-scale=1" charset="utf8" />
 
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
     <script>
+        class Point {
+            constructor(x, y, id = 0) {
+                this.x = Math.round(x);
+                this.y = Math.round(y);
+                this.id = id;
+                this.start = new Date();
+            }
+
+            checkRange(that) {
+                return Math.abs(this.x - that.x) <= CLICKRANGE &&
+                    Math.abs(this.y - that.y) <= CLICKRANGE;
+            }
+
+            checkTime(that) {
+                return that.start - this.start <= CLICKINTERVAL;
+            }
+        }
+
+        class GestureDetector {
+            constructor(element) {
+                element.addEventListener('touchmove', this.processTouchMove.bind(this));
+                element.addEventListener('touchstart', this.startTouch.bind(this));
+                element.addEventListener('touchend', this.endTouch.bind(this));
+                element.addEventListener('touchcancel', this.endTouch.bind(this));
+
+                this.dragStartTimer = undefined;
+                this.lastMovePosition = undefined;
+                this.touchesCache = [];
+                this.MODIFIER = 3;
+                this.dragging = false;
+            }
+
+            tryStopDrag() {
+                if (this.dragStartTimer !== undefined) {
+                    clearTimeout(this.dragStartTimer);
+                    this.dragStartTimer = undefined;
+                }
+                if (this.dragging) {
+                    this.dragging = false;
+                    this.oneFingerDrag(false);
+                }
+            }
+
+            processTouchMove(e) {
+                if (e.targetTouches.length <= 2) {
+                    if (e.targetTouches.length === 1 && this.dragStartTimer !== undefined) {
+                        if (!(this.touchesCache[0].checkRange(new Point(e.targetTouches[0].clientX, e.targetTouches[0].clientY)))) {
+                            this.tryStopDrag();
+                        }
+                    }
+
+                    const pos = new Point(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
+                    if (!this.lastMovePosition) {
+                        this.lastMovePosition = new Point(this.touchesCache[0].x, this.touchesCache[0].y);
+                    }
+
+                    const diff = new Point(pos.x - this.lastMovePosition.x, pos.y - this.lastMovePosition.y);
+
+                    this.lastMovePosition = pos;
+
+                    if (e.targetTouches.length === 1) {
+                        this.oneFingerMove(JSON.stringify({
+                            x: diff.x * this.MODIFIER,
+                            y: diff.y * this.MODIFIER
+                        }));
+                    }
+                    if (e.targetTouches.length === 2 && Math.abs(diff.y) > 10) {
+                        this.twoFingersMove(diff.y > 0 ? 'up' : 'down');
+                    }
+                }
+            }
+
+            getTouchIndex(identifier) {
+                for (let i = 0; i < this.touchesCache.length; i += 1) {
+                    if (this.touchesCache[i].id === identifier) {
+                        return i;
+                    }
+                }
+
+                return -1;
+            }
+
+            addTouch(t) {
+                if (this.getTouchIndex(t.identifier) === -1) {
+                    this.touchesCache.push(new Point(t.clientX, t.clientY, t.identifier));
+                }
+            }
+
+            startTouch(e) {
+                for (let i = 0; i < e.changedTouches.length; i += 1) {
+                    this.addTouch(e.changedTouches[i]);
+                }
+
+                if (this.touchesCache.length === 1) {
+                    this.dragStartTimer = setTimeout(() => {
+                        this.oneFingerDrag(true);
+                        this.dragStartTimer = undefined;
+                        this.dragging = true;
+                    }, 1000);
+                } else {
+                    this.tryStopDrag();
+                }
+            }
+
+            endTouch(e) {
+                for (let i = 0; i < e.changedTouches.length; i += 1) {
+                    const id = this.getTouchIndex(e.changedTouches[i].identifier);
+
+                    if (id !== -1) {
+                        const temp = new Point(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+
+                        if (!(this.touchesCache[id].checkTime(temp)) || !(this.touchesCache[id].checkRange(temp))) {
+                            this.touchesCache.splice(id, 1);
+                        }
+                    }
+                }
+
+                if (e.targetTouches.length === 0) {
+                    const {
+                        length
+                    } = this.touchesCache;
+                    if (length >= 1 && length <= 3) {
+                        switch (length) {
+                            case 1:
+                                this.oneFingerClick();
+                                break;
+                            case 2:
+                                this.twoFingersClick();
+                                break;
+                            case 3:
+                                this.threeFingersClick();
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    this.touchesCache = [];
+                    this.lastMovePosition = undefined;
+                    this.tryStopDrag();
+                }
+            }
+        }
+
+        function sendRequest(method, param) {
+            return fetch(`/api/${method}/${param}`);
+        }
+
+        //volume slider
+
         let SLIDERSCALE = 0;
         const HANDLECLASS = 'volume-handle';
         const COLOREDCLASS = 'volume-colored';
@@ -112,37 +260,33 @@
             volumeBarHandle = volumeBar.querySelector(`.${HANDLECLASS}`);
             volumeBarColored = volumeBar.querySelector(`.${COLOREDCLASS}`);
 
-            volumeBarHandle.addEventListener('touchmove', e => { e.preventDefault(); checkSendRequest(e.targetTouches[0].clientX); });
-            volumeBar.addEventListener('click', e => { e.preventDefault(); checkSendRequest(e.clientX); });
-            volumeBar.addEventListener('wheel', e => { e.preventDefault(); wheel(e.wheelDeltaY); });
+            volumeBarHandle.addEventListener('touchmove', e => {
+                checkSendRequest(e.targetTouches[0].clientX);
+            });
+            volumeBar.addEventListener('click', e => {
+                checkSendRequest(e.clientX);
+            });
+            volumeBar.addEventListener('wheel', e => {
+                wheel(e.wheelDeltaY);
+            });
 
-            volumeBarHandle.addEventListener('mousedown', () => { drag = true; });
-            volumeBarHandle.addEventListener('mouseup', () => { drag = false; });
-            volumeBarHandle.addEventListener('mousemove', e => { e.preventDefault(); if (drag) checkSendRequest(e.clientX); });
+            volumeBarHandle.addEventListener('mousedown', () => {
+                drag = true;
+            });
+            volumeBarHandle.addEventListener('mouseup', () => {
+                drag = false;
+            });
+            volumeBarHandle.addEventListener('mousemove', e => {
+                if (drag) checkSendRequest(e.clientX);
+            });
 
             init(initValue);
         }
 
+        //touch
+
         const CLICKINTERVAL = 200;
         const CLICKRANGE = 10;
-
-        class Point {
-            constructor(x, y, id = 0) {
-                this.x = Math.round(x);
-                this.y = Math.round(y);
-                this.id = id;
-                this.start = new Date();
-            }
-
-            checkRange(that) {
-                return Math.abs(this.x - that.x) <= CLICKRANGE
-                    && Math.abs(this.y - that.y) <= CLICKRANGE;
-            }
-
-            checkTime(that) {
-                return that.start - this.start <= CLICKINTERVAL;
-            }
-        }
 
         let touchElement;
         let touchPointers;
@@ -151,127 +295,6 @@
         const moveEvent = new Event('touchpanelmove');
         const scrollEvent = new Event('touchpanelscroll');
         const dragEvent = new Event('touchpaneldrag');
-
-        class GestureDetector {
-            constructor(element) {
-                element.addEventListener('touchmove', this.processTouchMove.bind(this));
-                element.addEventListener('touchstart', this.startTouch.bind(this));
-                element.addEventListener('touchend', this.endTouch.bind(this));
-                element.addEventListener('touchcancel', this.endTouch.bind(this));
-
-                this.dragStartTimer = undefined;
-                this.lastMovePosition = undefined;
-                this.touchesCache = [];
-                this.MODIFIER = 3;
-                this.dragging = false;
-            }
-
-            tryStopDrag() {
-                if (this.dragStartTimer !== undefined) {
-                    clearTimeout(this.dragStartTimer);
-                    this.dragStartTimer = undefined;
-                }
-                if (this.dragging) {
-                    this.dragging = false;
-                    this.oneFingerDrag(false);
-                }
-            }
-
-            processTouchMove(e) {
-                if (e.targetTouches.length <= 2) {
-                    if (e.targetTouches.length === 1 && this.dragStartTimer !== undefined) {
-                        if (!(this.touchesCache[0].checkRange(new Point(e.targetTouches[0].clientX, e.targetTouches[0].clientY)))) {
-                            this.tryStopDrag();
-                        }
-                    }
-
-                    const pos = new Point(e.targetTouches[0].clientX, e.targetTouches[0].clientY);
-                    if (!this.lastMovePosition) {
-                        this.lastMovePosition = new Point(this.touchesCache[0].x, this.touchesCache[0].y);
-                    }
-
-                    const diff = new Point(pos.x - this.lastMovePosition.x, pos.y - this.lastMovePosition.y);
-
-                    this.lastMovePosition = pos;
-
-                    if (e.targetTouches.length === 1) {
-                        this.oneFingerMove(JSON.stringify({ x: diff.x * this.MODIFIER, y: diff.y * this.MODIFIER }));
-                    }
-                    if (e.targetTouches.length === 2 && Math.abs(diff.y) > 10) {
-                        this.twoFingersMove(diff.y > 0 ? 'up' : 'down');
-                    }
-                }
-            }
-
-            getTouchIndex(identifier) {
-                for (let i = 0; i < this.touchesCache.length; i += 1) {
-                    if (this.touchesCache[i].id === identifier) {
-                        return i;
-                    }
-                }
-
-                return -1;
-            }
-
-            addTouch(t) {
-                if (this.getTouchIndex(t.identifier) === -1) {
-                    this.touchesCache.push(new Point(t.clientX, t.clientY, t.identifier));
-                }
-            }
-
-            startTouch(e) {
-                for (let i = 0; i < e.changedTouches.length; i += 1) {
-                    this.addTouch(e.changedTouches[i]);
-                }
-
-                if (this.touchesCache.length === 1) {
-                    this.dragStartTimer = setTimeout(() => {
-                        this.oneFingerDrag(true);
-                        this.dragStartTimer = undefined;
-                        this.dragging = true;
-                    }, 1000);
-                } else {
-                    this.tryStopDrag();
-                }
-            }
-
-            endTouch(e) {
-                for (let i = 0; i < e.changedTouches.length; i += 1) {
-                    const id = this.getTouchIndex(e.changedTouches[i].identifier);
-
-                    if (id !== -1) {
-                        const temp = new Point(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
-
-                        if (!(this.touchesCache[id].checkTime(temp)) || !(this.touchesCache[id].checkRange(temp))) {
-                            this.touchesCache.splice(id, 1);
-                        }
-                    }
-                }
-
-                if (e.targetTouches.length === 0) {
-                    const { length } = this.touchesCache;
-                    if (length >= 1 && length <= 3) {
-                        switch (length) {
-                        case 1:
-                            this.oneFingerClick();
-                            break;
-                        case 2:
-                            this.twoFingersClick();
-                            break;
-                        case 3:
-                            this.threeFingersClick();
-                            break;
-                        default:
-                            break;
-                        }
-                    }
-
-                    this.touchesCache = [];
-                    this.lastMovePosition = undefined;
-                    this.tryStopDrag();
-                }
-            }
-        }
 
         function showPointer(p) {
             const elem = p;
@@ -290,16 +313,12 @@
         }
 
         function processTouchMove(e) {
-            if (e.cancellable) e.preventDefault();
-
             Array.from(e.changedTouches).forEach(element => {
                 movePointer(touchPointers[element.identifier], element.clientX, element.clientY);
             });
         }
 
         function startTouch(e) {
-            if (e.cancellable) e.preventDefault();
-
             Array.from(e.changedTouches).forEach(element => {
                 showPointer(touchPointers[element.identifier]);
                 movePointer(touchPointers[element.identifier], element.clientX, element.clientY);
@@ -307,8 +326,6 @@
         }
 
         function endTouch(e) {
-            if (e.cancellable) e.preventDefault();
-
             Array.from(e.changedTouches).forEach(element => {
                 hidePointer(touchPointers[element.identifier]);
             });
@@ -329,8 +346,12 @@
                 touchElement.append(x);
             });
 
-            touchElement.addEventListener('touchmove', processTouchMove);
-            touchElement.addEventListener('touchstart', startTouch);
+            touchElement.addEventListener('touchmove', processTouchMove, {
+                passive: false
+            });
+            touchElement.addEventListener('touchstart', startTouch, {
+                passive: false
+            });
             touchElement.addEventListener('touchend', endTouch);
             touchElement.addEventListener('touchcancel', endTouch);
 
@@ -374,8 +395,12 @@
 
         function touchShow() {
             touchElement.style.display = prev;
-            setTimeout(() => { touchElement.style.border = prevBorder; }, 200);
+            setTimeout(() => {
+                touchElement.style.border = prevBorder;
+            }, 200);
         }
+
+        //keys
 
         const buttonschangeCLICKINTERVAL = 1000;
 
@@ -439,16 +464,28 @@
 
             buttonBack.addEventListener('touchstart', () => start('back'));
             buttonBack.addEventListener('touchend', end);
-            buttonBack.addEventListener('click', () => { clickEvent.value = 'back'; buttons.dispatchEvent(clickEvent); });
+            buttonBack.addEventListener('click', () => {
+                clickEvent.value = 'back';
+                buttons.dispatchEvent(clickEvent);
+            });
             buttonBack.addEventListener('touchcancel', end);
 
             buttonForth.addEventListener('touchstart', () => start('forth'));
             buttonForth.addEventListener('touchend', end);
-            buttonForth.addEventListener('click', () => { clickEvent.value = 'forth'; buttons.dispatchEvent(clickEvent); });
+            buttonForth.addEventListener('click', () => {
+                clickEvent.value = 'forth';
+                buttons.dispatchEvent(clickEvent);
+            });
             buttonForth.addEventListener('touchcancel', end);
 
-            buttonMediaBack.addEventListener('click', () => { clickEvent.value = 'mediaback'; buttons.dispatchEvent(clickEvent); });
-            buttonMediaForth.addEventListener('click', () => { clickEvent.value = 'mediaforth'; buttons.dispatchEvent(clickEvent); });
+            buttonMediaBack.addEventListener('click', () => {
+                clickEvent.value = 'mediaback';
+                buttons.dispatchEvent(clickEvent);
+            });
+            buttonMediaForth.addEventListener('click', () => {
+                clickEvent.value = 'mediaforth';
+                buttons.dispatchEvent(clickEvent);
+            });
 
             const buttonsArray = [buttonBack, buttonForth, buttonMediaBack, buttonMediaForth];
 
@@ -466,6 +503,8 @@
                 clearTimeout(timeout);
             });
         }
+
+        //text
 
         const textEvent = new Event('textinput');
 
@@ -487,6 +526,8 @@
             element.addEventListener('keyup', processText);
         }
 
+        //init
+
         const Modes = {
             Audio: 'audio',
             Mouse: 'mouse',
@@ -494,11 +535,10 @@
             Text: 'text',
         };
 
-        async function sendRequest(method, param) {
-            return (await fetch(`/api/${method}/${param}`)).text();
-        }
-
         function initElements(volume) {
+
+            console.log(volume);
+
             const slider = document.getElementById('slider');
 
             if (slider) {
@@ -511,9 +551,15 @@
             if (touch) {
                 createTouch(touch);
                 touch.addEventListener('touchpanelclick', e => sendRequest(Modes.Mouse, e.touches));
-                touch.addEventListener('touchpanelmove', e => { if (e.position) sendRequest(Modes.Mouse, e.position); });
-                touch.addEventListener('touchpanelscroll', e => { sendRequest(Modes.Mouse, e.direction); });
-                touch.addEventListener('touchpaneldrag', e => { sendRequest(Modes.Mouse, e.start ? 'dragstart' : 'dragstop'); });
+                touch.addEventListener('touchpanelmove', e => {
+                    if (e.position) sendRequest(Modes.Mouse, e.position);
+                });
+                touch.addEventListener('touchpanelscroll', e => {
+                    sendRequest(Modes.Mouse, e.direction);
+                });
+                touch.addEventListener('touchpaneldrag', e => {
+                    sendRequest(Modes.Mouse, e.start ? 'dragstart' : 'dragstop');
+                });
             }
 
             const buttons = document.getElementById('buttons');
@@ -542,21 +588,22 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            initElements(await sendRequest(Modes.Audio, 'init'));
+        document.addEventListener('DOMContentLoaded', async() => {
+            initElements(await (await sendRequest(Modes.Audio, 'init')).text());
         });
     </script>
 
     <style>
         body {
             background: #2a2a2a;
+            overscroll-behavior: none;
         }
-
+        
         #outer-container {
             display: block;
             height: 100%;
         }
-
+        
         #volume-bar {
             display: block;
             margin: 0 auto;
@@ -566,7 +613,7 @@
             border-radius: 15px;
             margin-bottom: 10px;
         }
-
+        
         #text-input {
             display: none;
             height: 50px;
@@ -578,7 +625,7 @@
             padding-left: 5px;
             font-size: 18pt;
         }
-
+        
         #volume-bar .volume-colored {
             height: 60px;
             position: absolute;
@@ -587,7 +634,7 @@
             border-radius: 15px;
             outline: none;
         }
-
+        
         #volume-bar .volume-handle {
             width: 70px;
             height: 70px;
@@ -598,7 +645,7 @@
             cursor: pointer;
             outline: none;
         }
-
+        
         button {
             cursor: pointer;
             font-weight: bold;
@@ -623,26 +670,27 @@
             height: 115px;
             margin-bottom: 10px;
         }
-
+        
         button:active {
             background-color: #73afde;
             box-shadow: 0 3px 0 #2b638f;
             transform: translateY(5px);
         }
-
+        
         #volume-numeric {
             text-align: center;
             font-size: 70pt;
             color: white;
         }
-
+        
         #touch {
             display: none;
             width: 100%;
             border: 1px solid rgba(135, 206, 250, 0.541);
             border-radius: 15px;
+            overscroll-behavior: none;
         }
-
+        
         .touch-pointer {
             position: absolute;
             width: 50px;
@@ -651,7 +699,7 @@
             background: radial-gradient(25px, lightskyblue, transparent);
             display: none;
         }
-
+        
         #loader {
             position: absolute;
             width: 100%;
@@ -661,7 +709,7 @@
             top: 0;
             left: 0;
         }
-
+        
         .lds-spinner {
             display: inline-block;
             position: absolute;
@@ -670,12 +718,12 @@
             width: 80px;
             height: 80px;
         }
-
+        
         .lds-spinner div {
             transform-origin: 40px 40px;
             animation: lds-spinner 1.2s linear infinite;
         }
-
+        
         .lds-spinner div:after {
             content: " ";
             display: block;
@@ -687,111 +735,104 @@
             border-radius: 20%;
             background: lightskyblue;
         }
-
+        
         .lds-spinner div:nth-child(1) {
             transform: rotate(0deg);
             animation-delay: -1.1s;
         }
-
+        
         .lds-spinner div:nth-child(2) {
             transform: rotate(30deg);
             animation-delay: -1s;
         }
-
+        
         .lds-spinner div:nth-child(3) {
             transform: rotate(60deg);
             animation-delay: -0.9s;
         }
-
+        
         .lds-spinner div:nth-child(4) {
             transform: rotate(90deg);
             animation-delay: -0.8s;
         }
-
+        
         .lds-spinner div:nth-child(5) {
             transform: rotate(120deg);
             animation-delay: -0.7s;
         }
-
+        
         .lds-spinner div:nth-child(6) {
             transform: rotate(150deg);
             animation-delay: -0.6s;
         }
-
+        
         .lds-spinner div:nth-child(7) {
             transform: rotate(180deg);
             animation-delay: -0.5s;
         }
-
+        
         .lds-spinner div:nth-child(8) {
             transform: rotate(210deg);
             animation-delay: -0.4s;
         }
-
+        
         .lds-spinner div:nth-child(9) {
             transform: rotate(240deg);
             animation-delay: -0.3s;
         }
-
+        
         .lds-spinner div:nth-child(10) {
             transform: rotate(270deg);
             animation-delay: -0.2s;
         }
-
+        
         .lds-spinner div:nth-child(11) {
             transform: rotate(300deg);
             animation-delay: -0.1s;
         }
-
+        
         .lds-spinner div:nth-child(12) {
             transform: rotate(330deg);
             animation-delay: 0s;
         }
-
+        
         @keyframes lds-spinner {
             0% {
                 opacity: 1;
             }
-
             100% {
                 opacity: 0;
             }
         }
-
+        
         @media only screen and (min-width: 300px) {
             #text-input {
                 display: block;
             }
-
             #touch {
                 display: block;
             }
-
             #outer-container {
                 display: block;
             }
-
             #inner-container {
                 width: 100%;
                 height: 375px;
             }
-
             #touch {
                 width: 100%;
                 height: calc(100% - 375px);
             }
         }
-
+        
         @media only screen and (min-width: 600px) {
             #outer-container {
                 display: flex;
             }
-
             #inner-container {
                 width: 50%;
                 height: 100%;
             }
-
             #touch {
                 width: 50%;
                 height: 100%;
