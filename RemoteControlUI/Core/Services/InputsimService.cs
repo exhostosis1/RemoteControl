@@ -12,7 +12,7 @@ namespace RemoteControl.Core.Services
 
         public InputsimService()
         {
-            _inputSim = new MyInputProvider();
+            _inputSim = new WindowsInputLibProvider();
         }
 
         public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)

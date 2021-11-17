@@ -6,12 +6,12 @@ using RemoteControl.Core.Interfaces;
 
 namespace RemoteControl.Core.Providers
 {
-    internal class MyInputProvider : IInputProvider
+    internal class WindowsInputLibProvider : IInputProvider
     {
         public IKeyboard Keyboard { get; }
         public IMouse Mouse { get; }
 
-        public MyInputProvider()
+        public WindowsInputLibProvider()
         {
             var inputSim = new InputSimulator();
 

@@ -1,10 +1,9 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using RemoteControl.Core.Enums;
+﻿using RemoteControl.Core.Enums;
 using RemoteControl.Core.Interfaces;
 using RemoteControl.Core.Services;
 using RemoteControl.Core.Utility;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace RemoteControl.Core.Controllers
 {

@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using RemoteControl.Core.Interfaces;
+﻿using RemoteControl.Core.Interfaces;
 using System.Net;
 using System.Threading.Tasks;
 

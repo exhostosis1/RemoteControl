@@ -88,13 +88,15 @@
     <Compile Include="Core\Enums\KeysEnum.cs" />
     <Compile Include="Core\Enums\MouseKeysEnum.cs" />
     <Compile Include="Core\Interfaces\HttpEventHandler.cs" />
+    <Compile Include="Core\Interfaces\IAudioProvider.cs" />
     <Compile Include="Core\Interfaces\IAudioService.cs" />
     <Compile Include="Core\Interfaces\IHttpRequestArgs.cs" />
     <Compile Include="Core\Interfaces\IInputProvider.cs" />
     <Compile Include="Core\Interfaces\IInputService.cs" />
     <Compile Include="Core\Interfaces\IListener.cs" />
     <Compile Include="Core\Listeners\MyHttpListener.cs" />
-    <Compile Include="Core\Providers\MyInputProvider.cs" />
+    <Compile Include="Core\Providers\AudioSwitcherProvider.cs" />
+    <Compile Include="Core\Providers\WindowsInputLibProvider.cs" />
     <Compile Include="Core\Services\AudioService.cs" />
     <Compile Include="Core\Services\InputsimService.cs" />
     <Compile Include="Core\Utility\Point.cs" />
