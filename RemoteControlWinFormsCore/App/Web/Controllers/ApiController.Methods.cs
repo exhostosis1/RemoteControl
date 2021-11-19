@@ -1,6 +1,5 @@
-﻿using RemoteControl.App.Control.Enums;
-using RemoteControl.App.Control.Interfaces;
-using RemoteControl.App.Control.Wrappers;
+﻿using RemoteControl.App.Control;
+using RemoteControl.App.Enums;
 using RemoteControl.App.Utility;
 using System.Net;
 
@@ -8,28 +7,20 @@ namespace RemoteControl.App.Web.Controllers
 {
     internal partial class ApiController
     {
-        private readonly IControlAudio _audioService;
-        private readonly IControlInput _inputService;
-        private readonly MyPoint _point;
-
-        public ApiController()
-        {
-            _inputService = new WindowsInputLibWrapper();
-            _audioService = new AudioSwitchWrapper();
-            _point = new MyPoint();
-        }
+        private readonly ControlFacade _control = new();
+        private readonly MyPoint _point = new();
 
         private int ProcessAudio(string value)
         {
-            if (value == "init") return _audioService.Volume;
+            if (value == "init") return _control.GetVolume();
 
             if (!int.TryParse(value, out var result)) return 0;
 
             result = result > 100 ? 100 : result < 0 ? 0 : result;
 
-            _audioService.Volume = result;
+            _control.SetVolume(result);
 
-            _audioService.Mute(result == 0);
+            _control.Mute(result == 0);
 
             return 0;
         }
@@ -39,64 +30,63 @@ namespace RemoteControl.App.Web.Controllers
             switch (value)
             {
                 case "back":
-                    _inputService.KeyPress(KeysEnum.Back);
+                    _control.KeyboardKeyPress(KeysEnum.Back);
                     break;
                 case "forth":
-                    _inputService.KeyPress(KeysEnum.Forth);
+                    _control.KeyboardKeyPress(KeysEnum.Forth);
                     break;
                 case "pause":
-                    _inputService.KeyPress(KeysEnum.Pause);
+                    _control.KeyboardKeyPress(KeysEnum.Pause);
                     break;
                 case "mediaback":
-                    _inputService.KeyPress(KeysEnum.MediaBack); 
+                    _control.KeyboardKeyPress(KeysEnum.MediaBack); 
                     break;
                 case "mediaforth":
-                    _inputService.KeyPress(KeysEnum.MediaForth);
+                    _control.KeyboardKeyPress(KeysEnum.MediaForth);
                     break;
             }
         }
 
         private void ProcessText(string text)
         {
-            _inputService.TextInput(text);
-            _inputService.KeyPress(KeysEnum.Enter);
+            _control.TextInput(text);
+            _control.KeyboardKeyPress(KeysEnum.Enter);
         }
-
         
         private void ProcessMouse(string value)
         {
             switch (value)
             {
                 case "left":
-                    _inputService.MouseKeyPress();
+                    _control.MouseKeyPress(MouseKeysEnum.Left);
                     break;
                 case "right":
-                    _inputService.MouseKeyPress(MouseKeysEnum.Right);
+                    _control.MouseKeyPress(MouseKeysEnum.Right);
                     break;
                 case "middle":
-                    _inputService.MouseKeyPress(MouseKeysEnum.Middle);
+                    _control.MouseKeyPress(MouseKeysEnum.Middle);
                     break;
                 case "up":
-                    _inputService.MouseWheel(true);
+                    _control.MouseWheel(true);
                     break;
                 case "down":
-                    _inputService.MouseWheel(false);
+                    _control.MouseWheel(false);
                     break;
                 case "dragstart":
-                    _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
+                    _control.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
                     Task.Run(async () =>
                     {
                         await Task.Delay(5_000);
-                        _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+                        _control.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     });
                     break;
                 case "dragstop":
-                    _inputService.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+                    _control.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
                     if (_point.TrySetCoords(WebUtility.UrlDecode(value).Replace("\"", "")))
                     {
-                        _inputService.MouseMove(_point);
+                        _control.MouseMove(_point);
                     }
                     break;
             }

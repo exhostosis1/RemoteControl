@@ -1,4 +1,4 @@
-﻿using RemoteControl.App.Control.Enums;
+﻿using RemoteControl.App.Enums;
 using RemoteControl.App.Control.Interfaces;
 using RemoteControl.App.Utility;
 using WindowsInputLib;

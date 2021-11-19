@@ -1,4 +1,4 @@
-﻿using RemoteControl.App.Control.Enums;
+﻿using RemoteControl.App.Enums;
 using RemoteControl.App.Utility;
 
 namespace RemoteControl.App.Control.Interfaces

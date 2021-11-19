@@ -17,7 +17,7 @@ namespace RemoteControl.App.Web.Listeners
 
     internal class MyHttpListener : IListener
     {
-        private readonly HttpListener _listener = new HttpListener();
+        private readonly HttpListener _listener = new();
 
         public void RestartListen()
         {
@@ -51,33 +51,23 @@ namespace RemoteControl.App.Web.Listeners
         {
             while (true)
             {
-                try
+                var context = _listener.GetContext();
+
+                context.Response.StatusCode = 200;
+
+                var args = new MyHttpListenerRequestArgs(context.Request, context.Response);
+
+                if (context?.Request?.RawUrl?.Contains("api") ?? false)
                 {
-                    ProcessRequest(_listener.GetContext());
+                    OnApiRequest?.Invoke(args);
                 }
-                catch
+                else
                 {
-                    return;
+                    OnHttpRequest?.Invoke(args);
                 }
-            }
-        }
-        
-        private void ProcessRequest(HttpListenerContext context)
-        {
-            context.Response.StatusCode = 200;
 
-            var args = new MyHttpListenerRequestArgs(context.Request, context.Response);
-
-            if (context?.Request?.RawUrl?.Contains("api") ?? false)
-            {
-                OnApiRequest?.Invoke(args);
+                context?.Response.Close();
             }
-            else
-            {
-                OnHttpRequest?.Invoke(args);
-            }
-
-            context?.Response.Close();
         }
 
         public void StopListen()
