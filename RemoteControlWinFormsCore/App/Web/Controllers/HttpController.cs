@@ -6,7 +6,7 @@ namespace RemoteControl.App.Web.Controllers
     {
         private readonly string ContentFolder = AppContext.BaseDirectory + "www";
 
-        private readonly Dictionary<string, string> _contentTypes = new Dictionary<string, string>()
+        private readonly Dictionary<string, string> _contentTypes = new()
         {
             { ".html", "text/html" },
             { ".htm", "text/html" },
