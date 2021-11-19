@@ -1,7 +1,7 @@
-﻿using RemoteControl.Core.Interfaces;
+﻿using RemoteControl.App.Web.Interfaces;
 using System.Net;
 
-namespace RemoteControl.Core.Listeners
+namespace RemoteControl.App.Web.Listeners
 {
     internal class MyHttpListenerRequestArgs : IHttpRequestArgs
     {
@@ -14,6 +14,7 @@ namespace RemoteControl.Core.Listeners
             Response = response;
         }
     }
+
     internal class MyHttpListener : IListener
     {
         private readonly HttpListener _listener = new HttpListener();

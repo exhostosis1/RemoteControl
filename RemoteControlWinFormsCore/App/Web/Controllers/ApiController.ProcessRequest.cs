@@ -1,8 +1,7 @@
-﻿using RemoteControl.Core.Abstract;
-using RemoteControl.Core.Interfaces;
-using RemoteControl.Core.Utility;
+﻿using RemoteControl.App.Web.Interfaces;
+using RemoteControl.App.Utility;
 
-namespace RemoteControl.Core.Controllers
+namespace RemoteControl.App.Web.Controllers
 {
     internal partial class ApiController : AbstractController
     {

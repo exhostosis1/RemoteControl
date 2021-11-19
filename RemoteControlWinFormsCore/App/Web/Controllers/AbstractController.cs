@@ -1,6 +1,6 @@
-﻿using RemoteControl.Core.Interfaces;
+﻿using RemoteControl.App.Web.Interfaces;
 
-namespace RemoteControl.Core.Abstract
+namespace RemoteControl.App.Web.Controllers
 {
     internal abstract class AbstractController
     {

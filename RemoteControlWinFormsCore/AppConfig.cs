@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-
-namespace RemoteControlWinFormsCore
+﻿namespace RemoteControlWinFormsCore
 {
     public static class AppConfig
     {
@@ -50,7 +47,7 @@ namespace RemoteControlWinFormsCore
                         host = value;
                         break;
                     case "port":
-                        int.TryParse(value, out port);
+                        _ = int.TryParse(value, out port);
                         break;
                     default:
                         break;

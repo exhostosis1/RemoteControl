@@ -1,14 +1,14 @@
-﻿using RemoteControl.Core.Controllers;
-using RemoteControl.Core.Interfaces;
-using RemoteControl.Core.Listeners;
+﻿using RemoteControl.App.Web.Controllers;
+using RemoteControl.App.Web.Interfaces;
+using RemoteControl.App.Web.Listeners;
 
-namespace RemoteControl.Core
+namespace RemoteControl.App
 {
-    public class Main
+    public class RemoteControlApp
     {
         private readonly IListener _httplistener;
 
-        public Main()
+        public RemoteControlApp()
         {
             _httplistener = new MyHttpListener();
             _httplistener.OnHttpRequest += new HttpController().ProcessRequest;

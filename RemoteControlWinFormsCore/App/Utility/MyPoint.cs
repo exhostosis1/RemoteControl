@@ -1,7 +1,6 @@
-﻿using System;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-namespace RemoteControl.Core.Utility
+namespace RemoteControl.App.Utility
 {
     internal class MyPoint
     {

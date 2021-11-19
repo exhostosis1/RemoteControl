@@ -1,9 +1,9 @@
-﻿using RemoteControl.Core.Enums;
-using RemoteControl.Core.Utility;
+﻿using RemoteControl.App.Control.Enums;
+using RemoteControl.App.Utility;
 
-namespace RemoteControl.Core.Interfaces
+namespace RemoteControl.App.Control.Interfaces
 {
-    internal interface IInputService
+    internal interface IControlInput
     {
         void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click);
         void TextInput(string text);

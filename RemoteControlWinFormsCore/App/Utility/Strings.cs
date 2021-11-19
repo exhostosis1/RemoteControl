@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace RemoteControl.Core.Utility
+namespace RemoteControl.App.Utility
 {
     internal static class Strings
     {

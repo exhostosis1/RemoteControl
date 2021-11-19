@@ -9,6 +9,9 @@ namespace RemoteControlWinFormsCore
         static void Main()
         {
             ApplicationConfiguration.Initialize();
+
+            Console.WriteLine("yo");
+
             Application.Run(new ConfigForm());
         }
     }

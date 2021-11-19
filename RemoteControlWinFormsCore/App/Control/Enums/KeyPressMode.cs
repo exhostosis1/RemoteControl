@@ -1,4 +1,4 @@
-﻿namespace RemoteControl.Core.Enums
+﻿namespace RemoteControl.App.Control.Enums
 {
     internal enum KeyPressMode
     {

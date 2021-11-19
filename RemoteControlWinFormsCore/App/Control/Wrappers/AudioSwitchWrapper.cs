@@ -1,18 +1,21 @@
 ﻿using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
 using AudioSwitcher.AudioApi.Observables;
-using RemoteControl.Core.Interfaces;
+using RemoteControl.App.Control.Interfaces;
 
-namespace RemoteControl.Core.Providers
+namespace RemoteControl.App.Control.Wrappers
 {
-    internal class AudioSwitcherProvider: IAudioProvider 
+    internal class AudioSwitchWrapper: IControlAudio
     {
         private IDevice _audioDevice;
 
-        public int GetVolume() => (int)_audioDevice.Volume;
-        public void SetVolume(int volume) => _audioDevice.SetVolumeAsync(volume);        
+        public int Volume
+        {
+            get => (int)_audioDevice.Volume;
+            set => _audioDevice.SetVolumeAsync(value);
+        }
 
-        public AudioSwitcherProvider()
+        public AudioSwitchWrapper()
         {
             var audioController = new CoreAudioController();
 

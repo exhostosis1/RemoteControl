@@ -1,4 +1,4 @@
-﻿using RemoteControl.Core;
+﻿using RemoteControl.App;
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -8,22 +8,18 @@ namespace RemoteControlWinFormsCore
 {
     public partial class ConfigForm : Form
     {
-        private readonly Main _program;
-        private readonly ToolStripMenuItem _stoppedMenuItem = new ToolStripMenuItem
+        private readonly RemoteControlApp _program = new();
+        private readonly ToolStripMenuItem _stoppedMenuItem = new()
         {
             Text = @"Stopped",
             Enabled = false,
         };
 
-        private readonly SynchronizationContext _context;
+        private readonly SynchronizationContext _context = SynchronizationContext.Current ?? new();
 
         public ConfigForm()
         {
             InitializeComponent();
-
-            _context = SynchronizationContext.Current ?? new SynchronizationContext();
-
-            _program = new Main();
 
             NetworkChange.NetworkAddressChanged += UpdateUris;
 

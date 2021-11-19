@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace RemoteControl.Core.Interfaces
+namespace RemoteControl.App.Web.Interfaces
 {
     internal interface IHttpRequestArgs
     {

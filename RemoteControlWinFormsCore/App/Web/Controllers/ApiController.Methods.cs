@@ -1,22 +1,21 @@
-﻿using RemoteControl.Core.Enums;
-using RemoteControl.Core.Interfaces;
-using RemoteControl.Core.Services;
-using RemoteControl.Core.Utility;
+﻿using RemoteControl.App.Control.Enums;
+using RemoteControl.App.Control.Interfaces;
+using RemoteControl.App.Control.Wrappers;
+using RemoteControl.App.Utility;
 using System.Net;
-using System.Threading.Tasks;
 
-namespace RemoteControl.Core.Controllers
+namespace RemoteControl.App.Web.Controllers
 {
     internal partial class ApiController
     {
-        private readonly IAudioService _audioService;
-        private readonly IInputService _inputService;
+        private readonly IControlAudio _audioService;
+        private readonly IControlInput _inputService;
         private readonly MyPoint _point;
 
         public ApiController()
         {
-            _inputService = new InputsimService();
-            _audioService = new AudioService();
+            _inputService = new WindowsInputLibWrapper();
+            _audioService = new AudioSwitchWrapper();
             _point = new MyPoint();
         }
 

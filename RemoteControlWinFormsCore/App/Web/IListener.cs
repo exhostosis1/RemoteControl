@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace RemoteControl.Core.Interfaces
+﻿namespace RemoteControl.App.Web.Interfaces
 {
     internal interface IListener
     {
