@@ -18,9 +18,9 @@ namespace RemoteControl.App.Web.Controllers
 
         public void ProcessRequest(HttpListenerContext context)
         {
-            var path = ContentFolder + context?.Request?.Url?.LocalPath;
+            var path = ContentFolder + context.Request.Url?.LocalPath;
 
-            if (context?.Request?.Url?.LocalPath == "/")
+            if (context.Request.Url?.LocalPath == "/")
             {
                 path += "index.html";
             }
