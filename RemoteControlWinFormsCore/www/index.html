@@ -9,6 +9,10 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
     <script>
+        function sendRequest(method, param) {
+            return fetch(`/api/${method}/${param}`);
+        }
+
         class Point {
             constructor(x, y, id = 0) {
                 this.x = Math.round(x);
@@ -68,6 +72,8 @@
                     const diff = new Point(pos.x - this.lastMovePosition.x, pos.y - this.lastMovePosition.y);
 
                     this.lastMovePosition = pos;
+
+                    if (diff.x > 20 || diff.y > 20 || diff.x < -20 || diff.y < -20) return;
 
                     if (e.targetTouches.length === 1) {
                         this.oneFingerMove(JSON.stringify({
@@ -536,9 +542,6 @@
         };
 
         function initElements(volume) {
-
-            console.log(volume);
-
             const slider = document.getElementById('slider');
 
             if (slider) {
