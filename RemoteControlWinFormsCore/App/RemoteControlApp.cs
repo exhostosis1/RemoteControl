@@ -11,8 +11,7 @@ namespace RemoteControl.App
         public RemoteControlApp()
         {
             _httplistener = new MyHttpListener();
-            _httplistener.OnHttpRequest += new HttpController().ProcessRequest;
-            _httplistener.OnApiRequest += new ApiController().ProcessRequest;
+            _httplistener.OnRequest += BaseController.ProcessRequest;
         }
 
         public void Start(Uri uri)

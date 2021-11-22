@@ -1,13 +1,13 @@
-﻿using RemoteControl.App.Web.Interfaces;
-using RemoteControl.App.Utility;
+﻿using RemoteControl.App.Utility;
+using System.Net;
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal partial class ApiController : AbstractController
+    internal partial class ApiController
     {
-        public override void ProcessRequest(IHttpRequestArgs context)
+        public void ProcessRequest(HttpListenerContext context)
         {
-            var (methodName, param) = Strings.ParseAddresString(context?.Request?.RawUrl ?? string.Empty);
+            var (methodName, param) = Strings.ParseAddresString(context.Request?.RawUrl ?? string.Empty);
 
             switch (methodName)
             {
@@ -16,7 +16,7 @@ namespace RemoteControl.App.Web.Controllers
 
                     if (param == "init")
                     {
-                        using var sw = new StreamWriter(context?.Response?.OutputStream ?? new MemoryStream());
+                        using var sw = new StreamWriter(context.Response.OutputStream);
                         sw.Write(result);
                     }
 
@@ -29,6 +29,9 @@ namespace RemoteControl.App.Web.Controllers
                     break;
                 case "keyboard":
                     ProcessKeyboard(param);
+                    break;
+                default:
+                    context.Response.StatusCode = 400;
                     break;
             }
         }

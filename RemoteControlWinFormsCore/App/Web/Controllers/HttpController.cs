@@ -1,8 +1,8 @@
-﻿using RemoteControl.App.Web.Interfaces;
+﻿using System.Net;
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal class HttpController : AbstractController
+    internal class HttpController
     {
         private readonly string ContentFolder = AppContext.BaseDirectory + "www";
 
@@ -16,7 +16,7 @@ namespace RemoteControl.App.Web.Controllers
             { ".css", "text/css" }
         };
 
-        public override void ProcessRequest(IHttpRequestArgs context)
+        public void ProcessRequest(HttpListenerContext context)
         {
             var path = ContentFolder + context?.Request?.Url?.LocalPath;
 

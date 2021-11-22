@@ -1,4 +1,6 @@
-﻿namespace RemoteControl.App.Web.Interfaces
+﻿using System.Net;
+
+namespace RemoteControl.App.Web.Interfaces
 {
-    internal delegate void HttpEventHandler(IHttpRequestArgs args);
+    internal delegate void HttpEventHandler(HttpListenerContext context);
 }

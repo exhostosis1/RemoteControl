@@ -8,7 +8,6 @@
         void RestartListen(string url);
         void RestartListen();
 
-        event HttpEventHandler OnHttpRequest;
-        event HttpEventHandler OnApiRequest;
+        event HttpEventHandler OnRequest;
     }
 }

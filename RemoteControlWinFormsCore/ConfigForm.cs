@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace RemoteControlWinFormsCore
 {
@@ -91,7 +92,33 @@ namespace RemoteControlWinFormsCore
 
         private void IpToolStripMenuItem_Click(object? sender, EventArgs e)
         {
-            Process.Start((sender as ToolStripMenuItem)?.Text ?? "");
+            var address = (sender as ToolStripMenuItem)?.Text ?? string.Empty;
+
+            try
+            {
+                Process.Start(address);
+            }
+            catch
+            {
+                // hack because of this: https://github.com/dotnet/corefx/issues/10361
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    address = address.Replace("&", "^&");
+                    Process.Start(new ProcessStartInfo("cmd", $"/c start {address}") { CreateNoWindow = true });
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    Process.Start("xdg-open", address);
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Process.Start("open", address);
+                }
+                else
+                {
+                    throw;
+                }
+            }
         }
 
         private void ButtonSave_Click(object? sender, EventArgs e)

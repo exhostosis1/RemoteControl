@@ -3,18 +3,6 @@ using System.Net;
 
 namespace RemoteControl.App.Web.Listeners
 {
-    internal class MyHttpListenerRequestArgs : IHttpRequestArgs
-    {
-        public HttpListenerRequest Request { get; }
-        public HttpListenerResponse Response { get; }
-
-        public MyHttpListenerRequestArgs(HttpListenerRequest request, HttpListenerResponse response)
-        {
-            Request = request;
-            Response = response;
-        }
-    }
-
     internal class MyHttpListener : IListener
     {
         private readonly HttpListener _listener = new();
@@ -25,8 +13,7 @@ namespace RemoteControl.App.Web.Listeners
             StartListen();
         }
 
-        public event HttpEventHandler? OnHttpRequest;
-        public event HttpEventHandler? OnApiRequest;
+        public event HttpEventHandler? OnRequest;
 
         public void StartListen(string url)
         {
@@ -42,29 +29,26 @@ namespace RemoteControl.App.Web.Listeners
 
             _listener.Start();
 
-            Task.Factory.StartNew(Start, TaskCreationOptions.LongRunning);
+            Task.Factory.StartNew(Listen, TaskCreationOptions.LongRunning);
         }
 
         public void StartListen() => StartListen(string.Empty);
 
-        private void Start()
+        private void Listen()
         {
             while (true)
             {
-                var context = _listener.GetContext();
+                HttpListenerContext context;
+
+                try
+                {
+                    context = _listener.GetContext();
+                }
+                catch { return; }
 
                 context.Response.StatusCode = 200;
 
-                var args = new MyHttpListenerRequestArgs(context.Request, context.Response);
-
-                if (context?.Request?.RawUrl?.Contains("api") ?? false)
-                {
-                    OnApiRequest?.Invoke(args);
-                }
-                else
-                {
-                    OnHttpRequest?.Invoke(args);
-                }
+                OnRequest?.Invoke(context);
 
                 context?.Response.Close();
             }
