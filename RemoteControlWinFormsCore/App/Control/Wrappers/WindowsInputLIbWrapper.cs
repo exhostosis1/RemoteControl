@@ -1,6 +1,5 @@
-﻿using RemoteControl.App.Enums;
-using RemoteControl.App.Control.Interfaces;
-using RemoteControl.App.Utility;
+﻿using RemoteControl.App.Control.Interfaces;
+using RemoteControl.App.Enums;
 using WindowsInputLib;
 using WindowsInputLib.Native;
 
@@ -61,15 +60,14 @@ namespace RemoteControl.App.Control.Wrappers
             }
         }
 
-
-        public void MouseMove(MyPoint coords)
+        public void MouseMove(int x, int y)
         {
-            _inputSim.Mouse.MoveMouseBy(coords.X, coords.Y);
+            _inputSim.Mouse.MoveMouseBy(x, y);
         }
 
         public void MouseWheel(bool up)
         {
-            _inputSim.Mouse.VerticalScroll(up ? 3 : -3);
+            _inputSim.Mouse.VerticalScroll(up ? 1 : -1);
         }
 
         public void TextInput(string text)

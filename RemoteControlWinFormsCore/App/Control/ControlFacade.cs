@@ -5,18 +5,18 @@ using RemoteControl.App.Utility;
 
 namespace RemoteControl.App.Control
 {
-    internal class ControlFacade
+    internal static class ControlFacade
     {
-        private readonly IControlAudio _audio = new AudioSwitchWrapper();
-        private readonly IControlInput _input = new WindowsInputLibWrapper();
+        private static readonly IControlAudio _audio = new AudioSwitchWrapper();
+        private static readonly IControlInput _input = new WindowsInputLibWrapper();
 
-        public int GetVolume() => _audio.Volume;
-        public int SetVolume(int volume) => _audio.Volume = volume;
-        public void Mute(bool mute) => _audio.Mute(mute);
-        public void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.KeyPress(key, mode);
-        public void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.MouseKeyPress(key, mode);
-        public void TextInput(string text) => _input.TextInput(text);
-        public void MouseWheel(bool up) => _input.MouseWheel(up);
-        public void MouseMove(MyPoint point) => _input.MouseMove(point);
+        public static int GetVolume() => _audio.Volume;
+        public static int SetVolume(int volume) => _audio.Volume = volume;
+        public static void Mute(bool mute) => _audio.Mute(mute);
+        public static void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.KeyPress(key, mode);
+        public static void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.MouseKeyPress(key, mode);
+        public static void TextInput(string text) => _input.TextInput(text);
+        public static void MouseWheel(bool up) => _input.MouseWheel(up);
+        public static void MouseMove(int x, int y) => _input.MouseMove(x, y);
     }
 }

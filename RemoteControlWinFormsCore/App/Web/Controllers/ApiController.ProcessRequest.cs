@@ -3,9 +3,9 @@ using System.Net;
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal partial class ApiController
+    internal static partial class ApiController
     {
-        public void ProcessRequest(HttpListenerContext context)
+        public static void ProcessRequest(HttpListenerContext context)
         {
             var (methodName, param) = Strings.ParseAddresString(context.Request?.RawUrl ?? string.Empty);
 

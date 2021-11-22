@@ -1,37 +1,33 @@
 ﻿using RemoteControl.App.Web.Controllers;
-using RemoteControl.App.Web.Interfaces;
 using RemoteControl.App.Web.Listeners;
 
 namespace RemoteControl.App
 {
-    public class RemoteControlApp
+    public static class RemoteControlApp
     {
-        private readonly IListener _httplistener;
-
-        public RemoteControlApp()
+        static RemoteControlApp()
         {
-            _httplistener = new MyHttpListener();
-            _httplistener.OnRequest += BaseController.ProcessRequest;
+            MyHttpListener.OnRequest += BaseController.ProcessRequest;    
         }
 
-        public void Start(Uri uri)
+        public static void Start(Uri uri)
         {
-            _httplistener.StartListen(uri.ToString());
+            MyHttpListener.StartListen(uri.ToString());
         }
 
-        public void Stop()
+        public static void Stop()
         {
-            _httplistener.StopListen();
+            MyHttpListener.StopListen();
         }
 
-        public void Restart(Uri url)
+        public static void Restart(Uri url)
         {
-            _httplistener.RestartListen(url.ToString());
+            MyHttpListener.RestartListen(url.ToString());
         }
 
-        public void Restart()
+        public static void Restart()
         {
-            _httplistener.RestartListen();
+            MyHttpListener.RestartListen();
         }
     }
 }

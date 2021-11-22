@@ -3,19 +3,19 @@ using System.Net;
 
 namespace RemoteControl.App.Web.Listeners
 {
-    internal class MyHttpListener : IListener
+    internal static class MyHttpListener
     {
-        private readonly HttpListener _listener = new();
+        private static readonly HttpListener _listener = new();
 
-        public void RestartListen()
+        public static void RestartListen()
         {
             StopListen();
             StartListen();
         }
 
-        public event HttpEventHandler? OnRequest;
+        public static event HttpEventHandler? OnRequest;
 
-        public void StartListen(string url)
+        public static void StartListen(string url)
         {
             if (_listener.IsListening) return;
 
@@ -32,9 +32,9 @@ namespace RemoteControl.App.Web.Listeners
             Task.Factory.StartNew(Listen, TaskCreationOptions.LongRunning);
         }
 
-        public void StartListen() => StartListen(string.Empty);
+        public static void StartListen() => StartListen(string.Empty);
 
-        private void Listen()
+        private static void Listen()
         {
             while (true)
             {
@@ -54,7 +54,7 @@ namespace RemoteControl.App.Web.Listeners
             }
         }
 
-        public void StopListen()
+        public static void StopListen()
         {
             if (_listener.IsListening)
             {
@@ -62,7 +62,7 @@ namespace RemoteControl.App.Web.Listeners
             }
         }
 
-        public void RestartListen(string url)
+        public static void RestartListen(string url)
         {
             StopListen();
             StartListen(url);

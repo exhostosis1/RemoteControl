@@ -5,88 +5,85 @@ using System.Net;
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal partial class ApiController
+    internal static partial class ApiController
     {
-        private readonly ControlFacade _control = new();
-        private readonly MyPoint _point = new();
-
-        private int ProcessAudio(string value)
+        private static int ProcessAudio(string value)
         {
-            if (value == "init") return _control.GetVolume();
+            if (value == "init") return ControlFacade.GetVolume();
 
             if (!int.TryParse(value, out var result)) return 0;
 
             result = result > 100 ? 100 : result < 0 ? 0 : result;
 
-            _control.SetVolume(result);
+            ControlFacade.SetVolume(result);
 
-            _control.Mute(result == 0);
+            ControlFacade.Mute(result == 0);
 
             return 0;
         }
 
-        private void ProcessKeyboard(string value)
+        private static void ProcessKeyboard(string value)
         {
             switch (value)
             {
                 case "back":
-                    _control.KeyboardKeyPress(KeysEnum.Back);
+                    ControlFacade.KeyboardKeyPress(KeysEnum.Back);
                     break;
                 case "forth":
-                    _control.KeyboardKeyPress(KeysEnum.Forth);
+                    ControlFacade.KeyboardKeyPress(KeysEnum.Forth);
                     break;
                 case "pause":
-                    _control.KeyboardKeyPress(KeysEnum.Pause);
+                    ControlFacade.KeyboardKeyPress(KeysEnum.Pause);
                     break;
                 case "mediaback":
-                    _control.KeyboardKeyPress(KeysEnum.MediaBack); 
+                    ControlFacade.KeyboardKeyPress(KeysEnum.MediaBack); 
                     break;
                 case "mediaforth":
-                    _control.KeyboardKeyPress(KeysEnum.MediaForth);
+                    ControlFacade.KeyboardKeyPress(KeysEnum.MediaForth);
                     break;
             }
         }
 
-        private void ProcessText(string text)
+        private static void ProcessText(string text)
         {
-            _control.TextInput(text);
-            _control.KeyboardKeyPress(KeysEnum.Enter);
+            ControlFacade.TextInput(text);
+            ControlFacade.KeyboardKeyPress(KeysEnum.Enter);
         }
         
-        private void ProcessMouse(string value)
+        private static void ProcessMouse(string value)
         {
             switch (value)
             {
                 case "left":
-                    _control.MouseKeyPress(MouseKeysEnum.Left);
+                    ControlFacade.MouseKeyPress(MouseKeysEnum.Left);
                     break;
                 case "right":
-                    _control.MouseKeyPress(MouseKeysEnum.Right);
+                    ControlFacade.MouseKeyPress(MouseKeysEnum.Right);
                     break;
                 case "middle":
-                    _control.MouseKeyPress(MouseKeysEnum.Middle);
+                    ControlFacade.MouseKeyPress(MouseKeysEnum.Middle);
                     break;
                 case "up":
-                    _control.MouseWheel(true);
+                    ControlFacade.MouseWheel(true);
                     break;
                 case "down":
-                    _control.MouseWheel(false);
+                    ControlFacade.MouseWheel(false);
                     break;
                 case "dragstart":
-                    _control.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
+                    ControlFacade.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
                     Task.Run(async () =>
                     {
                         await Task.Delay(5_000);
-                        _control.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+                        ControlFacade.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     });
                     break;
                 case "dragstop":
-                    _control.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+                    ControlFacade.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
-                    if (_point.TrySetCoords(WebUtility.UrlDecode(value).Replace("\"", "")))
+                    if (MyPoint.TryGetCoords(value, out var x, out var y))
                     {
-                        _control.MouseMove(_point);
+                        ControlFacade.MouseMove(x, y);
                     }
                     break;
             }

@@ -9,7 +9,6 @@ namespace RemoteControlWinFormsCore
 {
     public partial class ConfigForm : Form
     {
-        private readonly RemoteControlApp _program = new();
         private readonly ToolStripMenuItem _stoppedMenuItem = new()
         {
             Text = @"Stopped",
@@ -44,14 +43,14 @@ namespace RemoteControlWinFormsCore
         {
             try
             {
-                _program.Stop();
+                RemoteControlApp.Stop();
 
                 var uris = GetCurrentUris(AppConfig.DefaultPort).ToList();
                 if (uris.Count == 0) return;
                 
                 AppConfig.CurrentUri = uris.All(x => x.Host != AppConfig.PrefUri?.Host) ? uris.First() : AppConfig.PrefUri;
 
-                _program.Start(AppConfig.CurrentUri ?? new UriBuilder().Uri);
+                RemoteControlApp.Start(AppConfig.CurrentUri ?? new UriBuilder().Uri);
 
                 _context.Send(_ =>
                 {
@@ -63,7 +62,7 @@ namespace RemoteControlWinFormsCore
             }
             catch
             {
-                _program.Stop();
+                RemoteControlApp.Stop();
 
                 _context.Send(_ =>
                 {
@@ -86,7 +85,7 @@ namespace RemoteControlWinFormsCore
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
         {
-            _program.Stop();
+            RemoteControlApp.Stop();
             Application.Exit();
         }
 
@@ -125,11 +124,11 @@ namespace RemoteControlWinFormsCore
         {
             try
             {
-                _program.Stop();
+                RemoteControlApp.Stop();
 
                 AppConfig.PrefUri = new Uri(comboBoxUris.Text);
-                
-                _program.Start(AppConfig.PrefUri);
+
+                RemoteControlApp.Start(AppConfig.PrefUri);
                 AppConfig.CurrentUri = AppConfig.PrefUri;
 
                 IpChanged(AppConfig.CurrentUri.ToString());
@@ -162,7 +161,7 @@ namespace RemoteControlWinFormsCore
         {
             try
             {
-                _program.Restart();
+                RemoteControlApp.Restart();
             }
             catch
             {

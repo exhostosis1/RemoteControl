@@ -2,39 +2,30 @@
 
 namespace RemoteControl.App.Utility
 {
-    internal class MyPoint
+    internal static class MyPoint
     {
-        private readonly Regex CoordRegex = new("(?<=[xyXY]:[ ] *)[-0-9]+(?=[,} ])");
 
-        public int X { get; private set; }
-        public int Y { get; private set; }
+        //(?<=[xy]:[ ]*) match starts with 'x' or 'y' then ':' and zero or more ' '
+        //[-0-9]+ main pattern. one or more '-' or numbers
+        //(?=[,} ]) match ends with ',', '}', ' ', or ']'
+        private static readonly Regex CoordRegex = new("[-0-9]+", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public MyPoint(int x, int y)
+        public static bool TryGetCoords(string input, out int x, out int y)
         {
-            X = x;
-            Y = y;
-        }
+            x = 0;
+            y = 0;
 
-        public MyPoint() { }
-
-        public bool TrySetCoords(string input)
-        {
-            int x;
-            int y;
-                
             try
             {
-                var match = CoordRegex.Match(input);
-                x = Convert.ToInt32(match.Value);
-                y = Convert.ToInt32(match.NextMatch().Value);
+                var matches = CoordRegex.Matches(input);
+
+                x = Convert.ToInt32(matches[0].Value);
+                y = Convert.ToInt32(matches[1].Value);
             }
             catch
             {
                 return false;
             }
-
-            X = x;
-            Y = y;
 
             return true;
         }

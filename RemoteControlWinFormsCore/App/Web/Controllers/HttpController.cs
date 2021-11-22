@@ -2,11 +2,11 @@
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal class HttpController
+    internal static class HttpController
     {
-        private readonly string ContentFolder = AppContext.BaseDirectory + "www";
+        private readonly static string ContentFolder = AppContext.BaseDirectory + "www";
 
-        private readonly Dictionary<string, string> _contentTypes = new()
+        private readonly static Dictionary<string, string> _contentTypes = new()
         {
             { ".html", "text/html" },
             { ".htm", "text/html" },
@@ -16,7 +16,7 @@ namespace RemoteControl.App.Web.Controllers
             { ".css", "text/css" }
         };
 
-        public void ProcessRequest(HttpListenerContext context)
+        public static void ProcessRequest(HttpListenerContext context)
         {
             var path = ContentFolder + context.Request.Url?.LocalPath;
 
