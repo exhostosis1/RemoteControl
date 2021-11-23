@@ -46,7 +46,7 @@ namespace RemoteControl.App.Web.Controllers
 
         private static void ProcessText(string text)
         {
-            ControlFacade.TextInput(text);
+            ControlFacade.TextInput(WebUtility.UrlDecode(text));
             ControlFacade.KeyboardKeyPress(KeysEnum.Enter);
         }
         
@@ -81,7 +81,7 @@ namespace RemoteControl.App.Web.Controllers
                     ControlFacade.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
-                    if (MyPoint.TryGetCoords(value, out var x, out var y))
+                    if (Utils.TryGetCoords(value, out var x, out var y))
                     {
                         ControlFacade.MouseMove(x, y);
                     }

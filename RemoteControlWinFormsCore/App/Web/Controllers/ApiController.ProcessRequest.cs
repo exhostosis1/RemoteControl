@@ -7,7 +7,7 @@ namespace RemoteControl.App.Web.Controllers
     {
         public static void ProcessRequest(HttpListenerContext context)
         {
-            var (methodName, param) = Strings.ParseAddresString(context.Request?.RawUrl ?? string.Empty);
+            var (methodName, param) = Utils.ParseAddresString(context.Request?.RawUrl ?? string.Empty);
 
             switch (methodName)
             {
