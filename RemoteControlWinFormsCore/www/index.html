@@ -32,7 +32,7 @@
         }
 
         class GestureDetector {
-            constructor(element) {
+            constructor(element, oneFingerClick, oneFingerMove, oneFingerDrag, twoFingersClick, twoFingersMove, threeFingersClick) {
                 element.addEventListener('touchmove', this.processTouchMove.bind(this));
                 element.addEventListener('touchstart', this.startTouch.bind(this));
                 element.addEventListener('touchend', this.endTouch.bind(this));
@@ -43,6 +43,15 @@
                 this.touchesCache = [];
                 this.MODIFIER = 3;
                 this.dragging = false;
+
+                this.oneFingerMove = oneFingerMove;
+                this.oneFingerClick = oneFingerClick;
+                this.oneFingerDrag = oneFingerDrag;
+
+                this.twoFingersMove = twoFingersMove;
+                this.twoFingersClick = twoFingersClick;
+
+                this.threeFingersClick = threeFingersClick;
             }
 
             tryStopDrag() {
@@ -73,16 +82,13 @@
 
                     this.lastMovePosition = pos;
 
-                    if (diff.x > 20 || diff.y > 20 || diff.x < -20 || diff.y < -20) return;
+                    if (Math.abs(diff.x) > 50 || Math.abs(diff.y) > 50) return;
 
                     if (e.targetTouches.length === 1) {
-                        this.oneFingerMove(JSON.stringify({
-                            x: diff.x * this.MODIFIER,
-                            y: diff.y * this.MODIFIER
-                        }));
+                        this.oneFingerMove(diff.x * this.MODIFIER, diff.y * this.MODIFIER);
                     }
-                    if (e.targetTouches.length === 2 && Math.abs(diff.y) > 10) {
-                        this.twoFingersMove(diff.y > 0 ? 'up' : 'down');
+                    if (e.targetTouches.length === 2 && Math.abs(diff.y) > 3) {
+                        this.twoFingersMove(diff.x, diff.y);
                     }
                 }
             }
@@ -157,10 +163,6 @@
                     this.tryStopDrag();
                 }
             }
-        }
-
-        function sendRequest(method, param) {
-            return fetch(`/api/${method}/${param}`);
         }
 
         //volume slider
@@ -297,11 +299,6 @@
         let touchElement;
         let touchPointers;
 
-        const touchEvent = new Event('touchpanelclick');
-        const moveEvent = new Event('touchpanelmove');
-        const scrollEvent = new Event('touchpanelscroll');
-        const dragEvent = new Event('touchpaneldrag');
-
         function showPointer(p) {
             const elem = p;
             elem.style.display = 'block';
@@ -352,41 +349,10 @@
                 touchElement.append(x);
             });
 
-            touchElement.addEventListener('touchmove', processTouchMove, {
-                passive: false
-            });
-            touchElement.addEventListener('touchstart', startTouch, {
-                passive: false
-            });
+            touchElement.addEventListener('touchmove', processTouchMove);
+            touchElement.addEventListener('touchstart', startTouch);
             touchElement.addEventListener('touchend', endTouch);
             touchElement.addEventListener('touchcancel', endTouch);
-
-            const gt = new GestureDetector(touchElement);
-
-            gt.oneFingerClick = () => {
-                touchEvent.touches = 'left';
-                touchElement.dispatchEvent(touchEvent);
-            };
-            gt.twoFingersClick = () => {
-                touchEvent.touches = 'right';
-                touchElement.dispatchEvent(touchEvent);
-            };
-            gt.threeFingersClick = () => {
-                touchEvent.touches = 'middle';
-                touchElement.dispatchEvent(touchEvent);
-            };
-            gt.oneFingerMove = coords => {
-                moveEvent.position = coords;
-                touchElement.dispatchEvent(moveEvent);
-            };
-            gt.twoFingersMove = direction => {
-                scrollEvent.direction = direction;
-                touchElement.dispatchEvent(scrollEvent);
-            };
-            gt.oneFingerDrag = s => {
-                dragEvent.start = s;
-                touchElement.dispatchEvent(dragEvent);
-            };
         }
 
         let prev = '';
@@ -533,50 +499,40 @@
         }
 
         //init
-
-        const Modes = {
-            Audio: 'audio',
-            Mouse: 'mouse',
-            Keyboard: 'keyboard',
-            Text: 'text',
-        };
-
         function initElements(volume) {
             const slider = document.getElementById('slider');
 
             if (slider) {
                 createVolumeBar(slider, 100, volume, true);
-                slider.addEventListener('volumechanged', e => sendRequest(Modes.Audio, e.value));
+                slider.addEventListener('volumechanged', e => sendRequest("audio", e.value));
             }
 
             const touch = document.getElementById('touch');
 
             if (touch) {
                 createTouch(touch);
-                touch.addEventListener('touchpanelclick', e => sendRequest(Modes.Mouse, e.touches));
-                touch.addEventListener('touchpanelmove', e => {
-                    if (e.position) sendRequest(Modes.Mouse, e.position);
-                });
-                touch.addEventListener('touchpanelscroll', e => {
-                    sendRequest(Modes.Mouse, e.direction);
-                });
-                touch.addEventListener('touchpaneldrag', e => {
-                    sendRequest(Modes.Mouse, e.start ? 'dragstart' : 'dragstop');
-                });
+
+                new GestureDetector(touch,
+                    () => sendRequest("mouse", 'left'),
+                    (x, y) => sendRequest("mouse", `${x},${y}`),
+                    e => sendRequest("mouse", e ? 'dragstart' : 'dragstop'),
+                    () => sendRequest("mouse", 'right'),
+                    (x, y) => sendRequest("mouse", y > 0 ? "up" : "down"),
+                    () => sendRequest("mouse", 'middle'));
             }
 
             const buttons = document.getElementById('buttons');
 
             if (buttons) {
                 createKeys(buttons);
-                buttons.addEventListener('keyclick', e => sendRequest(Modes.Keyboard, e.value));
+                buttons.addEventListener('keyclick', e => sendRequest("keyboard", e.value));
             }
 
             const textInput = document.getElementById('text-input');
 
             if (textInput) {
                 createTextInput(textInput);
-                textInput.addEventListener('textinput', e => sendRequest(Modes.Text, e.text));
+                textInput.addEventListener('textinput', e => sendRequest("text", e.text));
                 textInput.addEventListener('focus', () => touchHide());
                 textInput.addEventListener('blur', e => {
                     e.target.value = '';
@@ -592,7 +548,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', async() => {
-            initElements(await (await sendRequest(Modes.Audio, 'init')).text());
+            initElements(await (await sendRequest('audio', 'init')).text());
         });
     </script>
 
