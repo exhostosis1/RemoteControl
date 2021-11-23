@@ -501,14 +501,12 @@
         //init
         function initElements(volume) {
             const slider = document.getElementById('slider');
-
             if (slider) {
                 createVolumeBar(slider, 100, volume, true);
                 slider.addEventListener('volumechanged', e => sendRequest("audio", e.value));
             }
 
             const touch = document.getElementById('touch');
-
             if (touch) {
                 createTouch(touch);
 
@@ -522,14 +520,12 @@
             }
 
             const buttons = document.getElementById('buttons');
-
             if (buttons) {
                 createKeys(buttons);
                 buttons.addEventListener('keyclick', e => sendRequest("keyboard", e.value));
             }
 
             const textInput = document.getElementById('text-input');
-
             if (textInput) {
                 createTextInput(textInput);
                 textInput.addEventListener('textinput', e => sendRequest("text", e.text));
@@ -540,11 +536,7 @@
                 });
             }
 
-            const loader = document.getElementById('loader');
-
-            if (loader) {
-                document.getElementById('loader').style.display = 'none';
-            }
+            document.getElementById('loader').style.display = 'none';
         }
 
         document.addEventListener('DOMContentLoaded', async() => {
