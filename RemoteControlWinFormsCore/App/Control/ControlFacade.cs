@@ -11,7 +11,7 @@ namespace RemoteControl.App.Control
         private static readonly IControlDisplay _display = new User32Wrapper();
 
         public static int GetVolume() => _audio.Volume;
-        public static int SetVolume(int volume) => _audio.Volume = volume;
+        public static void SetVolume(int volume) => _audio.Volume = volume;
         public static void Mute(bool mute) => _audio.Mute(mute);
         public static void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.KeyPress(key, mode);
         public static void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.MouseKeyPress(key, mode);
