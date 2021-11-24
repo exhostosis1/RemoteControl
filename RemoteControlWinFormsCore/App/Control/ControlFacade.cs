@@ -1,7 +1,6 @@
-﻿using RemoteControl.App.Enums;
-using RemoteControl.App.Control.Interfaces;
+﻿using RemoteControl.App.Control.Interfaces;
 using RemoteControl.App.Control.Wrappers;
-using RemoteControl.App.Utility;
+using RemoteControl.App.Enums;
 
 namespace RemoteControl.App.Control
 {
@@ -9,6 +8,7 @@ namespace RemoteControl.App.Control
     {
         private static readonly IControlAudio _audio = new AudioSwitchWrapper();
         private static readonly IControlInput _input = new WindowsInputLibWrapper();
+        private static readonly IControlDisplay _display = new User32Wrapper();
 
         public static int GetVolume() => _audio.Volume;
         public static int SetVolume(int volume) => _audio.Volume = volume;
@@ -18,5 +18,6 @@ namespace RemoteControl.App.Control
         public static void TextInput(string text) => _input.TextInput(text);
         public static void MouseWheel(bool up) => _input.MouseWheel(up);
         public static void MouseMove(int x, int y) => _input.MouseMove(x, y);
+        public static void DisplayDarken() => _display.Darken();
     }
 }

@@ -536,6 +536,8 @@
                 });
             }
 
+            document.getElementById('darken').onclick = () => sendRequest('display', 'darken');
+
             document.getElementById('loader').style.display = 'none';
         }
 
@@ -658,6 +660,15 @@
             background-color: #2a2a2a;
             top: 0;
             left: 0;
+        }
+        
+        #darken {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            font-size: 36px;
         }
         
         .lds-spinner {
@@ -793,6 +804,7 @@
 </head>
 
 <body>
+    <div id="darken">⬛</div>
     <div id="outer-container">
         <div id="inner-container">
             <div id="slider"></div>

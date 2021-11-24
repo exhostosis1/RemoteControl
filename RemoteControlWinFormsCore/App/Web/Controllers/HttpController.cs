@@ -38,7 +38,7 @@ namespace RemoteControl.App.Web.Controllers
             }
             else
             {
-                context.Response.StatusCode = 404;
+                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
             }
         }
     }
