@@ -297,7 +297,7 @@
         const CLICKRANGE = 10;
 
         let touchElement;
-        let touchPointers;
+        let touchPointers = [];
 
         function showPointer(p) {
             const elem = p;
@@ -337,8 +337,6 @@
         function createTouch(element) {
             touchElement = element;
             let pointsCount = 5;
-
-            let touchPointers = [];
 
             let pointer = new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild;
 
