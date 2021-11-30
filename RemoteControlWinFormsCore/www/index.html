@@ -336,14 +336,15 @@
 
         function createTouch(element) {
             touchElement = element;
+            let pointsCount = 5;
 
-            touchPointers = [
-                new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild,
-                new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild,
-                new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild,
-                new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild,
-                new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild,
-            ];
+            let touchPointers = [];
+
+            let pointer = new DOMParser().parseFromString('<div class="touch-pointer"></div>', 'text/html').body.firstChild;
+
+            for (i = 0; i < pointsCount; i++) {
+                touchPointers.push(pointer.cloneNode());
+            }
 
             touchPointers.forEach(x => {
                 touchElement.append(x);
@@ -770,9 +771,6 @@
             #text-input {
                 display: block;
             }
-            #touch {
-                display: block;
-            }
             #outer-container {
                 display: block;
             }
@@ -782,6 +780,7 @@
             }
             #touch {
                 width: 100%;
+                display: block;
                 height: calc(100% - 375px);
             }
         }
