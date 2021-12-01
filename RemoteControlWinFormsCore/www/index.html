@@ -186,19 +186,18 @@
 
         let drag = false;
 
+        let correction = 0;
+
         const changeEvent = new Event('volumechanged');
 
         function setVolumeBar(value) {
-            const correction = volumeBarHandle.offsetWidth / 2;
-
             let pixelValue = value - volumeBar.offsetLeft;
             pixelValue = pixelValue <= volumeBar.offsetWidth - correction ? pixelValue : volumeBar.offsetWidth - correction;
             pixelValue = pixelValue >= correction ? pixelValue : correction;
 
-            volumeBarHandle.style.marginLeft = pixelValue - correction;
             volumeBarColored.style.width = pixelValue;
 
-            return pixelValue;
+            return toNumeric(pixelValue);
         }
 
         function setVolumeBarNumeric(value) {
@@ -206,29 +205,33 @@
         }
 
         function toPixels(value) {
-            return ((volumeBar.offsetWidth - volumeBarHandle.offsetWidth) / SLIDERSCALE) * value + (volumeBarHandle.offsetWidth / 2) + volumeBar.offsetLeft;
+            return ((volumeBar.offsetWidth - correction * 2) / SLIDERSCALE) * value + correction + volumeBar.offsetLeft;
         }
 
         function toNumeric(value) {
-            return Math.round(((value - (volumeBarHandle.offsetWidth / 2)) * SLIDERSCALE) / (volumeBar.offsetWidth - volumeBarHandle.offsetWidth));
+            return Math.round(((value - correction) * SLIDERSCALE) / (volumeBar.offsetWidth - correction * 2));
         }
 
-        function checkSendRequest(value) {
-            const newNumeric = toNumeric(setVolumeBar(value));
+        function checkSendRequest(numericValue) {
+            if (numericValue !== volumeNumericValue) {
+                volumeNumericValue = numericValue;
 
-            if (newNumeric !== volumeNumericValue) {
-                volumeNumericValue = newNumeric;
-
-                changeEvent.value = newNumeric;
+                changeEvent.value = numericValue;
                 sliderElement.dispatchEvent(changeEvent);
-                if (numericEnabled) {
-                    setVolumeBarNumeric(newNumeric);
-                }
             }
         }
 
         function wheel(e) {
-            checkSendRequest(toPixels(e > 0 ? volumeNumericValue + 2 : volumeNumericValue - 2));
+            updateElementAndSendRequest(toPixels(e > 0 ? volumeNumericValue + 2 : volumeNumericValue - 2));
+        }
+
+        function updateElementAndSendRequest(absolutePixels) {
+            let numeric = setVolumeBar(absolutePixels);
+            checkSendRequest(numeric);
+
+            if (numericEnabled) {
+                setVolumeBarNumeric(numeric);
+            }
         }
 
         function init(initialValue) {
@@ -261,18 +264,29 @@
             }
 
             volumeBar.innerHTML = `
-                <div class='${COLOREDCLASS}'></div>
-                <div class='${HANDLECLASS}'></div>
-            `;
+                    <div class='${COLOREDCLASS}'></div>
+                    <div class='${HANDLECLASS}'></div>
+                `;
 
             volumeBarHandle = volumeBar.querySelector(`.${HANDLECLASS}`);
             volumeBarColored = volumeBar.querySelector(`.${COLOREDCLASS}`);
 
+            correction = volumeBarHandle.offsetHeight / 2;
+            volumeBarHandle.style.marginLeft = -correction;
+
+            const resize_ob = new ResizeObserver(entries => {
+                let height = entries[0].contentRect.height;
+                volumeBarHandle.style.width = height;
+                correction = height / 2;
+                volumeBarHandle.style.marginLeft = -correction;
+            });
+            resize_ob.observe(volumeBarHandle);
+
             volumeBarHandle.addEventListener('touchmove', e => {
-                checkSendRequest(e.targetTouches[0].clientX);
+                updateElementAndSendRequest(e.targetTouches[0].clientX);
             });
             volumeBar.addEventListener('click', e => {
-                checkSendRequest(e.clientX);
+                updateElementAndSendRequest(e.clientX);
             });
             volumeBar.addEventListener('wheel', e => {
                 wheel(e.wheelDeltaY);
@@ -285,7 +299,7 @@
                 drag = false;
             });
             volumeBarHandle.addEventListener('mousemove', e => {
-                if (drag) checkSendRequest(e.clientX);
+                if (drag) updateElementAndSendRequest(e.clientX);
             });
 
             init(initValue);
@@ -540,7 +554,18 @@
             document.getElementById('loader').style.display = 'none';
         }
 
-        document.addEventListener('DOMContentLoaded', async() => {
+        document.addEventListener('DOMContentLoaded', async () => {
+            let pageInPortraitMode = window.innerHeight > window.innerWidth;
+
+            window.addEventListener("resize", () => {
+                if (((pageInPortraitMode === true) && (window.innerHeight < window.innerWidth)) || ((pageInPortraitMode === false) && (window.innerHeight > window.innerWidth))) {
+                    pageInPortraitMode = window.innerHeight > window.innerWidth;
+                    document.querySelector("meta[name=viewport]").setAttribute("content", "width=" + window.innerWidth + ", height=" + window.innerHeight + ", initial-scale=1.0, maximum-scale=1.0, user-scalable=0");
+                }
+            });
+
+            document.querySelector("meta[name=viewport]").setAttribute("content", "width=" + window.innerWidth + ", height=" + window.innerHeight + ", initial-scale=1.0, maximum-scale=1.0, user-scalable=0");
+
             initElements(await (await sendRequest('audio', 'init')).text());
         });
     </script>
@@ -550,54 +575,57 @@
             background: #2a2a2a;
             overscroll-behavior: none;
         }
-        
+
         #outer-container {
             display: block;
             height: 100%;
         }
-        
-        #volume-bar {
-            display: block;
-            margin: 0 auto;
-            height: 60px;
+
+        #inner-container-one {
+            height: 100%;
             width: 100%;
-            background: #555;
-            border-radius: 15px;
-            margin-bottom: 10px;
         }
-        
-        #text-input {
+
+        #inner-container-two {
             display: none;
-            height: 50px;
+            width: 100%;
+        }
+
+        #volume-numeric {
+            height: 50%;
+            text-align: center;
+            color: white;
+            font-size: 40vh;
+        }
+
+        #volume-bar {
+            height: 17%;
+            display: flex;
+            margin: 0 auto;
             width: 100%;
             background: #555;
             border-radius: 15px;
-            border: 0;
-            color: white;
-            padding-left: 5px;
-            font-size: 18pt;
         }
-        
-        #volume-bar .volume-colored {
-            height: 60px;
-            position: absolute;
-            background: #2ecc71;
-            border: none;
-            border-radius: 15px;
-            outline: none;
+
+            #volume-bar .volume-colored {
+                background: #2ecc71;
+                border: none;
+                border-radius: 15px;
+                outline: none;
+            }
+
+            #volume-bar .volume-handle {
+                height: 100%;
+                border-radius: 15px;
+                background: #FFF;
+                cursor: pointer;
+                outline: none;
+            }
+
+        #buttons {
+            height: 31%;
         }
-        
-        #volume-bar .volume-handle {
-            width: 70px;
-            height: 70px;
-            border-radius: 20px;
-            background: #FFF;
-            position: absolute;
-            margin-top: -5px;
-            cursor: pointer;
-            outline: none;
-        }
-        
+
         button {
             cursor: pointer;
             font-weight: bold;
@@ -610,38 +638,41 @@
             display: block;
             width: 33%;
             float: left;
-            padding-top: 8px;
             text-decoration: none;
-            font-size: 50pt;
+            font-size: 18vw;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
             line-height: 0px;
-            height: 115px;
-            margin-bottom: 10px;
+            height: 100%;
         }
-        
-        button:active {
-            background-color: #73afde;
-            box-shadow: 0 3px 0 #2b638f;
-            transform: translateY(5px);
-        }
-        
-        #volume-numeric {
-            text-align: center;
-            font-size: 70pt;
+
+            button:active {
+                background-color: #73afde;
+                box-shadow: 0 3px 0 #2b638f;
+                transform: translateY(5px);
+            }
+
+        #text-input {
+            height: 14%;
+            width: 100%;
+            background: #555;
+            border-radius: 15px;
+            border: 0;
             color: white;
+            padding-left: 5px;
+            font-size: 4vh;
         }
-        
+
         #touch {
-            display: none;
             width: 100%;
             border: 1px solid rgba(135, 206, 250, 0.541);
             border-radius: 15px;
+            height: 83%;
         }
-        
+
         .touch-pointer {
             position: absolute;
             width: 50px;
@@ -650,7 +681,16 @@
             background: radial-gradient(25px, lightskyblue, transparent);
             display: none;
         }
-        
+
+        #darken {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 50px;
+            height: 50px;
+            font-size: 36px;
+        }
+
         #loader {
             position: absolute;
             width: 100%;
@@ -660,16 +700,11 @@
             top: 0;
             left: 0;
         }
-        
-        #darken {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 50px;
-            height: 50px;
-            font-size: 36px;
+
+        .margin-bottom-10 {
+            margin-bottom: 10px;
         }
-        
+
         .lds-spinner {
             display: inline-block;
             position: absolute;
@@ -678,122 +713,132 @@
             width: 80px;
             height: 80px;
         }
-        
-        .lds-spinner div {
-            transform-origin: 40px 40px;
-            animation: lds-spinner 1.2s linear infinite;
-        }
-        
-        .lds-spinner div:after {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 3px;
-            left: 37px;
-            width: 6px;
-            height: 18px;
-            border-radius: 20%;
-            background: lightskyblue;
-        }
-        
-        .lds-spinner div:nth-child(1) {
-            transform: rotate(0deg);
-            animation-delay: -1.1s;
-        }
-        
-        .lds-spinner div:nth-child(2) {
-            transform: rotate(30deg);
-            animation-delay: -1s;
-        }
-        
-        .lds-spinner div:nth-child(3) {
-            transform: rotate(60deg);
-            animation-delay: -0.9s;
-        }
-        
-        .lds-spinner div:nth-child(4) {
-            transform: rotate(90deg);
-            animation-delay: -0.8s;
-        }
-        
-        .lds-spinner div:nth-child(5) {
-            transform: rotate(120deg);
-            animation-delay: -0.7s;
-        }
-        
-        .lds-spinner div:nth-child(6) {
-            transform: rotate(150deg);
-            animation-delay: -0.6s;
-        }
-        
-        .lds-spinner div:nth-child(7) {
-            transform: rotate(180deg);
-            animation-delay: -0.5s;
-        }
-        
-        .lds-spinner div:nth-child(8) {
-            transform: rotate(210deg);
-            animation-delay: -0.4s;
-        }
-        
-        .lds-spinner div:nth-child(9) {
-            transform: rotate(240deg);
-            animation-delay: -0.3s;
-        }
-        
-        .lds-spinner div:nth-child(10) {
-            transform: rotate(270deg);
-            animation-delay: -0.2s;
-        }
-        
-        .lds-spinner div:nth-child(11) {
-            transform: rotate(300deg);
-            animation-delay: -0.1s;
-        }
-        
-        .lds-spinner div:nth-child(12) {
-            transform: rotate(330deg);
-            animation-delay: 0s;
-        }
-        
+
+            .lds-spinner div {
+                transform-origin: 40px 40px;
+                animation: lds-spinner 1.2s linear infinite;
+            }
+
+                .lds-spinner div:after {
+                    content: " ";
+                    display: block;
+                    position: absolute;
+                    top: 3px;
+                    left: 37px;
+                    width: 6px;
+                    height: 18px;
+                    border-radius: 20%;
+                    background: lightskyblue;
+                }
+
+                .lds-spinner div:nth-child(1) {
+                    transform: rotate(0deg);
+                    animation-delay: -1.1s;
+                }
+
+                .lds-spinner div:nth-child(2) {
+                    transform: rotate(30deg);
+                    animation-delay: -1s;
+                }
+
+                .lds-spinner div:nth-child(3) {
+                    transform: rotate(60deg);
+                    animation-delay: -0.9s;
+                }
+
+                .lds-spinner div:nth-child(4) {
+                    transform: rotate(90deg);
+                    animation-delay: -0.8s;
+                }
+
+                .lds-spinner div:nth-child(5) {
+                    transform: rotate(120deg);
+                    animation-delay: -0.7s;
+                }
+
+                .lds-spinner div:nth-child(6) {
+                    transform: rotate(150deg);
+                    animation-delay: -0.6s;
+                }
+
+                .lds-spinner div:nth-child(7) {
+                    transform: rotate(180deg);
+                    animation-delay: -0.5s;
+                }
+
+                .lds-spinner div:nth-child(8) {
+                    transform: rotate(210deg);
+                    animation-delay: -0.4s;
+                }
+
+                .lds-spinner div:nth-child(9) {
+                    transform: rotate(240deg);
+                    animation-delay: -0.3s;
+                }
+
+                .lds-spinner div:nth-child(10) {
+                    transform: rotate(270deg);
+                    animation-delay: -0.2s;
+                }
+
+                .lds-spinner div:nth-child(11) {
+                    transform: rotate(300deg);
+                    animation-delay: -0.1s;
+                }
+
+                .lds-spinner div:nth-child(12) {
+                    transform: rotate(330deg);
+                    animation-delay: 0s;
+                }
+
         @keyframes lds-spinner {
             0% {
                 opacity: 1;
             }
+
             100% {
                 opacity: 0;
             }
         }
-        
-        @media only screen and (min-width: 300px) {
-            #text-input {
-                display: block;
+
+        @media only screen and (min-width: 361px) {
+            #inner-container-one {
+                height: 50%;
             }
-            #outer-container {
+
+            #inner-container-two {
                 display: block;
+                height: 48%;
             }
-            #inner-container {
-                width: 100%;
-                height: 375px;
-            }
-            #touch {
-                width: 100%;
-                display: block;
-                height: calc(100% - 375px);
+
+            #volume-numeric {
+                font-size: 22vh;
             }
         }
-        
-        @media only screen and (min-width: 600px) {
+
+        @media only screen and (min-width: 800px) {
             #outer-container {
                 display: flex;
             }
-            #inner-container {
-                width: 50%;
-                height: 100%;
+
+            #inner-container-one {
+                height: 99%;
             }
-            #touch {
-                width: 50%;
-                height: 100%;
+
+            #inner-container-two {
+                height: 99%;
+            }
+
+            button {
+                font-size: 20vh;
+            }
+
+            #volume-numeric {
+                font-size: 42vh;
+            }
+
+            #text-input {
+                font-size: 8vh;
             }
         }
     </style>
@@ -803,12 +848,14 @@
 <body>
     <div id="darken">⬛</div>
     <div id="outer-container">
-        <div id="inner-container">
-            <div id="slider"></div>
-            <div id="buttons"></div>
-            <input type="text" autocomplete="false" id="text-input" />
+        <div id="inner-container-one" class="margin-bottom-10">
+            <div id="slider" class="margin-bottom-10"></div>
+            <div id="buttons" class="margin-bottom-10"></div>
         </div>
-        <div id="touch"></div>
+        <div id="inner-container-two">
+            <input type="text" class="margin-bottom-10" autocomplete="false" id="text-input" />
+            <div id="touch"></div>
+        </div>
     </div>
     <div id="loader">
         <div class="lds-spinner">
