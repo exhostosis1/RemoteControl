@@ -30,5 +30,20 @@ namespace RemoteControl.App.Utility
             var str = input.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries);
             return str.Length < 2 ? (string.Empty, string.Empty) : (str[^2], str[^1]);
         }
+
+        public static void Deconstruct(this string[] list, out string first, out string second, out string third, out string fourth)
+        {
+            if(list.Length < 4)
+            {
+                first = second = third = fourth = string.Empty;
+
+                return;
+            }
+
+            first = list[0];
+            second = list[1];
+            third = list[2];
+            fourth = list[3];
+        }
     }
 }

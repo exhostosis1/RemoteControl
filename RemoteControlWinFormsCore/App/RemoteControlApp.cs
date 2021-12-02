@@ -7,12 +7,12 @@ namespace RemoteControl.App
     {
         static RemoteControlApp()
         {
-            MyHttpListener.OnRequest += BaseController.ProcessRequest;    
+            MyHttpListener.OnRequest += Router.ProcessRequest;    
         }
 
         public static void Start(Uri uri)
         {
-            MyHttpListener.StartListen(uri.ToString());
+            MyHttpListener.StartListen(uri);
         }
 
         public static void Stop()
@@ -22,7 +22,7 @@ namespace RemoteControl.App
 
         public static void Restart(Uri url)
         {
-            MyHttpListener.RestartListen(url.ToString());
+            MyHttpListener.RestartListen(url);
         }
 
         public static void Restart()

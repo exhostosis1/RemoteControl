@@ -4,11 +4,14 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using RemoteControl;
 
 namespace RemoteControlWinFormsCore
 {
     public partial class ConfigForm : Form
     {
+        private readonly ILogger _logger;
+
         private readonly ToolStripMenuItem _stoppedMenuItem = new()
         {
             Text = @"Stopped",
@@ -19,6 +22,8 @@ namespace RemoteControlWinFormsCore
 
         public ConfigForm()
         {
+            _logger = Logger.GetFileLogger(this.GetType());
+
             InitializeComponent();
 
             NetworkChange.NetworkAddressChanged += UpdateUris;
@@ -27,8 +32,10 @@ namespace RemoteControlWinFormsCore
             {
                 UpdateUris(null, null);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Log(ErrorLevel.Error, ex.Message);
+
                 SetStopped();
             }
         }
@@ -60,8 +67,10 @@ namespace RemoteControlWinFormsCore
                     IpChanged(AppConfig.CurrentUri?.ToString() ?? string.Empty);
                 }, null);
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.Log(ErrorLevel.Error, ex.Message);
+
                 RemoteControlApp.Stop();
 
                 _context.Send(_ =>
@@ -97,8 +106,10 @@ namespace RemoteControlWinFormsCore
             {
                 Process.Start(address);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Log(ErrorLevel.Error, ex.Message);
+
                 // hack because of this: https://github.com/dotnet/corefx/issues/10361
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
@@ -134,8 +145,10 @@ namespace RemoteControlWinFormsCore
                 IpChanged(AppConfig.CurrentUri.ToString());
                 Minimize();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Log(ErrorLevel.Error, ex.Message);
+
                 SetStopped();
             }
         }
@@ -163,8 +176,10 @@ namespace RemoteControlWinFormsCore
             {
                 RemoteControlApp.Restart();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.Log(ErrorLevel.Error, ex.Message);
+
                 SetStopped();
             }
         }

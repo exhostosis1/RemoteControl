@@ -1,7 +1,11 @@
-﻿namespace RemoteControlWinFormsCore
+﻿using RemoteControl;
+
+namespace RemoteControlWinFormsCore
 {
     public static class AppConfig
     {
+        private static readonly ILogger _logger = Logger.GetFileLogger(typeof(AppConfig));
+
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
 
         public const string DefaultScheme = "http";
@@ -36,8 +40,10 @@
                     param = split[0].Trim();
                     value = split[1].Trim();
                 }
-                catch
+                catch(Exception e)
                 {
+                    _logger.Log(ErrorLevel.Error, e.Message);
+
                     continue;
                 }
 

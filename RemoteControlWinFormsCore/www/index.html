@@ -10,7 +10,7 @@
 
     <script>
         function sendRequest(method, param) {
-            return fetch(`/api/${method}/${param}`);
+            return fetch(`/api/v1/${method}/${param}`);
         }
 
         class Point {
@@ -172,6 +172,7 @@
         const COLOREDCLASS = 'volume-colored';
         const BARID = 'volume-bar';
         const NUMERICID = 'volume-numeric';
+        const VOLUMEBARWRAPPER = 'volume-bar-wrapper'
 
         let volumeBar;
         let volumeBarColored;
@@ -252,8 +253,14 @@
 
             sliderElement = slider;
 
-            let html = `<div id='${BARID}'></div>`;
-            html = numericEnabled ? `<div id='${NUMERICID}'>0</div>\n${html}` : html;
+            let html = `
+                    ${numericEnabled ? `<div id='${NUMERICID}'>0</div>\n` : ''}
+                    <div id=${VOLUMEBARWRAPPER}>
+                        <div id='${BARID}'>
+                            <div class='${COLOREDCLASS}'></div>
+                            <div class='${HANDLECLASS}'></div>
+                        </div>
+                    </div>`;
 
             sliderElement.innerHTML = html;
 
@@ -263,13 +270,8 @@
                 volumeBarNumericElement = sliderElement.querySelector(`#${NUMERICID}`);
             }
 
-            volumeBar.innerHTML = `
-                    <div class='${COLOREDCLASS}'></div>
-                    <div class='${HANDLECLASS}'></div>
-                `;
-
-            volumeBarHandle = volumeBar.querySelector(`.${HANDLECLASS}`);
-            volumeBarColored = volumeBar.querySelector(`.${COLOREDCLASS}`);
+            volumeBarHandle = sliderElement.querySelector(`.${HANDLECLASS}`);
+            volumeBarColored = sliderElement.querySelector(`.${COLOREDCLASS}`);
 
             correction = volumeBarHandle.offsetHeight / 2;
             volumeBarHandle.style.marginLeft = -correction;
@@ -591,15 +593,23 @@
             width: 100%;
         }
 
+        #volume-bar-wrapper {
+            height: 25%;
+        }
+
+        #slider {
+            height: 67%;
+        }
+
         #volume-numeric {
-            height: 50%;
+            height: 75%;
             text-align: center;
             color: white;
             font-size: 40vh;
         }
 
         #volume-bar {
-            height: 17%;
+            height: 100%;
             display: flex;
             margin: 0 auto;
             width: 100%;
@@ -615,7 +625,7 @@
             }
 
             #volume-bar .volume-handle {
-                height: 100%;
+                transform: scale(1.2);
                 border-radius: 15px;
                 background: #FFF;
                 cursor: pointer;

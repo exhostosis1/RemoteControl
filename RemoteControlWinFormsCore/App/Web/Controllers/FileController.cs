@@ -2,7 +2,7 @@
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal static class HttpController
+    internal static class FileController
     {
         private readonly static string ContentFolder = AppContext.BaseDirectory + "www";
 
@@ -16,30 +16,31 @@ namespace RemoteControl.App.Web.Controllers
             { ".css", "text/css" }
         };
 
-        public static void ProcessRequest(HttpListenerContext context)
+        public static Response ProcessRequest(string? uriPath)
         {
-            var path = ContentFolder + context.Request.Url?.LocalPath;
+            var response = new Response();
 
-            if (context.Request.Url?.LocalPath == "/")
+            var path = ContentFolder + uriPath;
+
+            if (string.IsNullOrEmpty(uriPath) || uriPath == "/")
             {
                 path += "index.html";
             }
 
             var extension = Path.GetExtension(path);
 
-            if (context == null) return;
-
-            context.Response.ContentType = _contentTypes.ContainsKey(extension) ? _contentTypes[extension] : "text/plain";
+            response.ContentType = _contentTypes.ContainsKey(extension) ? _contentTypes[extension] : "text/plain";
 
             if (File.Exists(path))
             {
-                var buffer = File.ReadAllBytes(path);
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                response.Payload = File.ReadAllBytes(path);
             }
             else
             {
-                context.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                response.StatusCode = HttpStatusCode.NotFound;
             }
+
+            return response;
         }
     }
 }

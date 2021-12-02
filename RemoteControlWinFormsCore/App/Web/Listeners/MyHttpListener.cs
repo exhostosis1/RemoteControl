@@ -5,7 +5,18 @@ namespace RemoteControl.App.Web.Listeners
 {
     internal static class MyHttpListener
     {
+        private static readonly ILogger _logger = Logger.GetFileLogger(typeof(MyHttpListener));
+
         private static readonly HttpListener _listener = new();
+        public static bool IsListening => _listener.IsListening;
+        public static IEnumerable<string> ListeningUris 
+        { 
+            get 
+            { 
+                foreach (var p in _listener.Prefixes) 
+                    yield return p; 
+            } 
+        }
 
         public static void RestartListen()
         {
@@ -15,14 +26,15 @@ namespace RemoteControl.App.Web.Listeners
 
         public static event HttpEventHandler? OnRequest;
 
-        public static void StartListen(string url)
-        {
-            if (_listener.IsListening) return;
+        public static void StartListen(Uri url) => StartListen(new[] { url });
 
-            if (!string.IsNullOrEmpty(url))
+        public static void StartListen(IEnumerable<Uri> urls)
+        {
+            if (_listener.IsListening) StopListen();
+
+            foreach (var url in urls)
             {
-                _listener.Prefixes.Clear();
-                _listener.Prefixes.Add(url);
+                _listener.Prefixes.Add(url.ToString());
             }
 
             if (_listener.Prefixes.Count == 0) return;
@@ -32,7 +44,7 @@ namespace RemoteControl.App.Web.Listeners
             Task.Factory.StartNew(Listen, TaskCreationOptions.LongRunning);
         }
 
-        public static void StartListen() => StartListen(string.Empty);
+        public static void StartListen() => StartListen(Enumerable.Empty<Uri>());
 
         private static void Listen()
         {
@@ -44,9 +56,12 @@ namespace RemoteControl.App.Web.Listeners
                 {
                     context = _listener.GetContext();
                 }
-                catch { return; }
-
-                context.Response.StatusCode = 200;
+                catch(Exception e) 
+                {
+                    _listener.Stop();
+                    _logger.Log(ErrorLevel.Error, e.Message);
+                    return; 
+                }
 
                 OnRequest?.Invoke(context);
 
@@ -62,10 +77,16 @@ namespace RemoteControl.App.Web.Listeners
             }
         }
 
-        public static void RestartListen(string url)
+        public static void RestartListen(Uri url)
         {
             StopListen();
             StartListen(url);
+        }
+
+        public static void RestartListen(IEnumerable<Uri> uris)
+        {
+            StopListen();
+            StartListen(uris);
         }
     }
 }
