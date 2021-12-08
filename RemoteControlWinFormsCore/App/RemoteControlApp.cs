@@ -10,24 +10,14 @@ namespace RemoteControl.App
             MyHttpListener.OnRequest += Router.ProcessRequest;    
         }
 
-        public static void Start(Uri uri)
-        {
-            MyHttpListener.StartListen(uri);
-        }
+        public static void Start(params Uri[] uris) => MyHttpListener.StartListen(uris);
 
-        public static void Stop()
-        {
-            MyHttpListener.StopListen();
-        }
+        public static void Stop() => MyHttpListener.StopListen();
 
-        public static void Restart(Uri url)
-        {
-            MyHttpListener.RestartListen(url);
-        }
+        public static void Restart(params Uri[] uris) => MyHttpListener.RestartListen(uris);
 
-        public static void Restart()
-        {
-            MyHttpListener.RestartListen();
-        }
+        public static IEnumerable<string> GetCurrentIps() => MyHttpListener.ListeningUris;
+
+        public static bool IsListening() => MyHttpListener.IsListening;
     }
 }

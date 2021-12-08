@@ -32,6 +32,8 @@ namespace RemoteControl.App.Web.Listeners
         {
             if (_listener.IsListening) StopListen();
 
+            _listener.Prefixes.Clear();
+
             foreach (var url in urls)
             {
                 _listener.Prefixes.Add(url.ToString());

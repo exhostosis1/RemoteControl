@@ -24,6 +24,9 @@ namespace RemoteControl.App.Web.Controllers
             },
             {
                 "display", DisplayControl
+            },
+            {
+                "mousemove", MouseMove
             }
         };
 
@@ -96,11 +99,17 @@ namespace RemoteControl.App.Web.Controllers
                     ControlFacade.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
                 default:
-                    if (Utils.TryGetCoords(param, out var x, out var y))
-                    {
-                        ControlFacade.MouseMove(x, y);
-                    }
                     break;
+            }
+
+            return null;
+        }
+
+        public static string? MouseMove(string param)
+        {
+            if (Utils.TryGetCoords(param, out var x, out var y))
+            {
+                ControlFacade.MouseMove(x, y);
             }
 
             return null;
