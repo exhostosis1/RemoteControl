@@ -7,17 +7,23 @@ namespace RemoteControl.App
     {
         static RemoteControlApp()
         {
-            MyHttpListener.OnRequest += Router.ProcessRequest;    
+            MyHttpListener.OnRequest += Router.ProcessRequest;
         }
 
-        public static void Start(params Uri[] uris) => MyHttpListener.StartListen(uris);
+        public static void Start(params Uri[] uris)
+        {
+            MyHttpListener.StartListen(uris);
+        }
 
-        public static void Stop() => MyHttpListener.StopListen();
+        public static void Stop()
+        {
+            MyHttpListener.StopListen();
+        }
 
-        public static void Restart(params Uri[] uris) => MyHttpListener.RestartListen(uris);
+        public static void Restart() => MyHttpListener.StopListen();
 
-        public static IEnumerable<string> GetCurrentIps() => MyHttpListener.ListeningUris;
+        public static IEnumerable<string> GetCurrentUris => MyHttpListener.ListeningUris;
 
-        public static bool IsListening() => MyHttpListener.IsListening;
+        public static bool IsListening => MyHttpListener.IsListening;
     }
 }

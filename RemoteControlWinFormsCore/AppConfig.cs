@@ -8,12 +8,10 @@ namespace RemoteControlWinFormsCore
 
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
 
-        public const string DefaultScheme = "http";
-        public const string DefaultHost = "localhost";
-        public const int DefaultPort = 1488;
+        public static readonly string DefaultScheme = "http";
+        public static readonly int DefaultPort = 1488;
 
-        public static Uri? CurrentUri { get; set; }
-        public static Uri? PrefUri { get; set; }
+        public static Uri[] PrefUris { get; set; } = Array.Empty<Uri>();
 
         static AppConfig()
         {
@@ -25,43 +23,15 @@ namespace RemoteControlWinFormsCore
             if (!File.Exists(ConfigPath))
                 return;
 
-            var lines = File.ReadAllLines(ConfigPath);
-
-            var host = string.Empty;
-            var port = 0;
-
-            foreach (var line in lines)
+            try
             {
-                string param, value;
-
-                try
-                {
-                    var split = line.Split(':');
-                    param = split[0].Trim();
-                    value = split[1].Trim();
-                }
-                catch(Exception e)
-                {
-                    _logger.Log(ErrorLevel.Error, e.Message);
-
-                    continue;
-                }
-
-                switch (param)
-                {
-                    case "host":
-                        host = value;
-                        break;
-                    case "port":
-                        _ = int.TryParse(value, out port);
-                        break;
-                    default:
-                        break;
-                }
+                PrefUris = File.ReadAllLines(ConfigPath).Where(x => !x.StartsWith("//")).Select(x => new Uri(x)).ToArray();
             }
-
-            PrefUri = new UriBuilder(DefaultScheme, string.IsNullOrEmpty(host) ? DefaultHost : host,
-                port == 0 ? DefaultPort : port).Uri;
+            catch(Exception e)
+            {
+                _logger.Log(ErrorLevel.Error, e.Message);
+                throw new Exception("Cannot read config");
+            }
         }
     }
 }

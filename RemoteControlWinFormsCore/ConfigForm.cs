@@ -12,13 +12,10 @@ namespace RemoteControlWinFormsCore
     {
         private readonly ILogger _logger;
 
-        private readonly ToolStripMenuItem _stoppedMenuItem = new()
-        {
-            Text = @"Stopped",
-            Enabled = false,
-        };
+        private readonly SynchronizationContext? _context;
 
-        private readonly SynchronizationContext _context = SynchronizationContext.Current ?? new();
+        private readonly ToolStripItem[] _startedMenuItems;
+        private readonly ToolStripItem[] _stoppedMenuItems;
 
         public ConfigForm()
         {
@@ -26,70 +23,71 @@ namespace RemoteControlWinFormsCore
 
             InitializeComponent();
 
-            NetworkChange.NetworkAddressChanged += UpdateUris;
-
-            try
+            _startedMenuItems = new ToolStripItem[]
             {
-                UpdateUris(null, null);
-            }
-            catch (Exception ex)
+                    this.toolStripSeparator1,
+                    this.stopToolStripMenuItem,
+                    this.toolStripSeparator2,
+                    this.closeToolStripMenuItem
+            };
+            _stoppedMenuItems = new ToolStripItem[]
             {
-                _logger.Log(ErrorLevel.Error, ex.Message);
+                    this.stoppedToolStripMenuItem,
+                    this.toolStripSeparator1,
+                    this.startToolStripMenuItem,
+                    this.toolStripSeparator2,
+                    this.closeToolStripMenuItem
+            };
 
-                SetStopped();
-            }
+            NetworkChange.NetworkAddressChanged += UrisUpdated;
+
+            _context = SynchronizationContext.Current;
+                        
+            UrisUpdated(null, null);
         }
 
         private static IEnumerable<string> GetCurrentIPs => Dns.GetHostAddresses(Dns.GetHostName())
             .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
 
-        private static IEnumerable<Uri> GetCurrentUris(int port) =>
-            GetCurrentIPs.Select(x => new UriBuilder(AppConfig.DefaultScheme, x, port).Uri);
-
-        private void UpdateUris(object? sender, EventArgs? e)
+        private void UrisUpdated(object? sender, EventArgs? e)
         {
             try
             {
-                RemoteControlApp.Stop();
+                if(RemoteControlApp.IsListening)
+                    RemoteControlApp.Stop();
 
-                var uris = GetCurrentUris(AppConfig.DefaultPort).ToList();
-                if (uris.Count == 0) return;
-                
-                AppConfig.CurrentUri = uris.All(x => x.Host != AppConfig.PrefUri?.Host) ? uris.First() : AppConfig.PrefUri;
+                var IPs = new HashSet<string>(GetCurrentIPs);
+                if (IPs.Count == 0) return;
+                Uri[] uris;
 
-                RemoteControlApp.Start(AppConfig.CurrentUri ?? new UriBuilder().Uri);
+                if (AppConfig.PrefUris.Length > 0)
+                    uris = AppConfig.PrefUris.Where(x => IPs.Contains(x.Host)).ToArray();
+                else
+                    uris = IPs.Select(x => new UriBuilder(AppConfig.DefaultScheme, x, AppConfig.DefaultPort).Uri).ToArray();
 
-                _context.Send(_ =>
-                {
-                    comboBoxUris.DataSource = uris.Select(x => x.ToString()).ToList();
-                    comboBoxUris.Text = AppConfig.CurrentUri?.ToString();
-
-                    IpChanged(AppConfig.CurrentUri?.ToString() ?? string.Empty);
-                }, null);
+                RemoteControlApp.Start(uris);
             }
             catch(Exception ex)
             {
                 _logger.Log(ErrorLevel.Error, ex.Message);
 
-                RemoteControlApp.Stop();
-
-                _context.Send(_ =>
+                RemoteControlApp.Stop();               
+            }
+            finally
+            {
+                _context?.Send(_ =>
                 {
-                    SetStopped();
+                    SetContextMenu();
                 }, null);
             }
         }
 
-        private void SetStopped()
+        private void SetContextMenu()
         {
-            this.contextMenuStrip.Items.RemoveAt(0);
-            this.contextMenuStrip.Items.Insert(0, _stoppedMenuItem);
-        }
+            this.contextMenuStrip.Items.Clear();
 
-        private void IpChanged(string uri) 
-        {
-            this.contextMenuStrip.Items.RemoveAt(0);
-            this.contextMenuStrip.Items.Insert(0, new ToolStripMenuItem(uri, null, IpToolStripMenuItem_Click));
+            this.contextMenuStrip.Items.AddRange(RemoteControlApp.IsListening ? RemoteControlApp.GetCurrentUris
+                .Select(x => new ToolStripMenuItem(x, null, IpToolStripMenuItem_Click) as ToolStripItem).Concat(_startedMenuItems).ToArray() : _stoppedMenuItems);  
         }
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -131,76 +129,20 @@ namespace RemoteControlWinFormsCore
             }
         }
 
-        private void ButtonSave_Click(object? sender, EventArgs e)
-        {
-            try
-            {
-                RemoteControlApp.Stop();
-
-                AppConfig.PrefUri = new Uri(comboBoxUris.Text);
-
-                RemoteControlApp.Start(AppConfig.PrefUri);
-                AppConfig.CurrentUri = AppConfig.PrefUri;
-
-                IpChanged(AppConfig.CurrentUri.ToString());
-                Minimize();
-            }
-            catch (Exception ex)
-            {
-                _logger.Log(ErrorLevel.Error, ex.Message);
-
-                SetStopped();
-            }
-        }
-
-        private void NotifyIcon1_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Left)
-            {
-                if (this.Visible) Minimize(); else Maximize();
-            }
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                Minimize();
-                e.Cancel = true;
-            }
-        }
-
-        private void RestartToolStripMenuItem_Click(object? sender, EventArgs e)
-        {
-            try
-            {
-                RemoteControlApp.Restart();
-            }
-            catch (Exception ex)
-            {
-                _logger.Log(ErrorLevel.Error, ex.Message);
-
-                SetStopped();
-            }
-        }
-
         private void Form1_Shown(object? sender, EventArgs e)
         {
             Hide();
         }
 
-        private void Minimize()
+        private void startToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Minimized;
-            this.ShowInTaskbar = false;
-            Hide();
+            UrisUpdated(null, null);
         }
 
-        private void Maximize()
+        private void stopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Show();
-            this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
+            RemoteControlApp.Stop();
+            SetContextMenu();
         }
     }
 }

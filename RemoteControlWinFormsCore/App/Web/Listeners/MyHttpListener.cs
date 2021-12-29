@@ -18,17 +18,9 @@ namespace RemoteControl.App.Web.Listeners
             } 
         }
 
-        public static void RestartListen()
-        {
-            StopListen();
-            StartListen();
-        }
-
         public static event HttpEventHandler? OnRequest;
 
-        public static void StartListen(Uri url) => StartListen(new[] { url });
-
-        public static void StartListen(IEnumerable<Uri> urls)
+        public static async void StartListen(params Uri[] urls)
         {
             if (_listener.IsListening) StopListen();
 
@@ -43,33 +35,24 @@ namespace RemoteControl.App.Web.Listeners
 
             _listener.Start();
 
-            Task.Factory.StartNew(Listen, TaskCreationOptions.LongRunning);
-        }
-
-        public static void StartListen() => StartListen(Enumerable.Empty<Uri>());
-
-        private static void Listen()
-        {
             while (true)
             {
-                HttpListenerContext context;
-
                 try
                 {
-                    context = _listener.GetContext();
+                    var context = await _listener.GetContextAsync();
+
+                    OnRequest?.Invoke(context);
+                    context?.Response.Close();
                 }
-                catch(Exception e) 
+                catch
                 {
-                    _listener.Stop();
-                    _logger.Log(ErrorLevel.Error, e.Message);
-                    return; 
+                    if (_listener.IsListening)
+                        continue;
+                    else
+                        return;
                 }
-
-                OnRequest?.Invoke(context);
-
-                context?.Response.Close();
             }
-        }
+        }                
 
         public static void StopListen()
         {
@@ -77,18 +60,6 @@ namespace RemoteControl.App.Web.Listeners
             {
                 _listener.Stop();
             }
-        }
-
-        public static void RestartListen(Uri url)
-        {
-            StopListen();
-            StartListen(url);
-        }
-
-        public static void RestartListen(IEnumerable<Uri> uris)
-        {
-            StopListen();
-            StartListen(uris);
         }
     }
 }
