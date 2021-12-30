@@ -8,7 +8,7 @@ namespace RemoteControl.App.Control.Wrappers
     internal class WindowsInputLibWrapper : IControlInput
     {
         private readonly InputSimulator _inputSim = new();
-        private static readonly Dictionary<KeysEnum, VirtualKeyCode> _keyboardKeys = new()
+        private static readonly Dictionary<KeysEnum, VirtualKeyCode> KeyboardKeys = new()
         {
             { KeysEnum.Enter, VirtualKeyCode.Enter },
             { KeysEnum.Forth, VirtualKeyCode.Right },
@@ -17,7 +17,7 @@ namespace RemoteControl.App.Control.Wrappers
             { KeysEnum.MediaBack, VirtualKeyCode.MediaPrevTrack },
             { KeysEnum.Pause, VirtualKeyCode.MediaPlayPause },
         };
-        private static readonly Dictionary<MouseKeysEnum, MouseButton> _mouseKeys = new()
+        private static readonly Dictionary<MouseKeysEnum, MouseButton> MouseKeys = new()
         {
             { MouseKeysEnum.Left, MouseButton.LeftButton },
             { MouseKeysEnum.Right, MouseButton.RightButton },
@@ -29,13 +29,13 @@ namespace RemoteControl.App.Control.Wrappers
             switch (mode)
             {
                 case KeyPressMode.Click:
-                    _inputSim.Keyboard.KeyPress(_keyboardKeys[key]);
+                    _inputSim.Keyboard.KeyPress(KeyboardKeys[key]);
                     break;
                 case KeyPressMode.Up:
-                    _inputSim.Keyboard.KeyUp(_keyboardKeys[key]);
+                    _inputSim.Keyboard.KeyUp(KeyboardKeys[key]);
                     break;
                 case KeyPressMode.Down:
-                    _inputSim.Keyboard.KeyDown(_keyboardKeys[key]);
+                    _inputSim.Keyboard.KeyDown(KeyboardKeys[key]);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
@@ -47,13 +47,13 @@ namespace RemoteControl.App.Control.Wrappers
             switch (mode)
             {
                 case KeyPressMode.Click:
-                    _inputSim.Mouse.MouseButtonClick(_mouseKeys[key]);
+                    _inputSim.Mouse.MouseButtonClick(MouseKeys[key]);
                     break;
                 case KeyPressMode.Down:
-                    _inputSim.Mouse.MouseButtonDown(_mouseKeys[key]);
+                    _inputSim.Mouse.MouseButtonDown(MouseKeys[key]);
                     break;
                 case KeyPressMode.Up:
-                    _inputSim.Mouse.MouseButtonUp(_mouseKeys[key]);
+                    _inputSim.Mouse.MouseButtonUp(MouseKeys[key]);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(mode), mode, null);

@@ -4,9 +4,9 @@ namespace RemoteControl.App.Web.Controllers
 {
     internal static class FileController
     {
-        private readonly static string ContentFolder = AppContext.BaseDirectory + "www";
+        private static readonly string ContentFolder = AppContext.BaseDirectory + "www";
 
-        private readonly static Dictionary<string, string> _contentTypes = new()
+        private static readonly Dictionary<string, string> ContentTypes = new()
         {
             { ".html", "text/html" },
             { ".htm", "text/html" },
@@ -29,7 +29,7 @@ namespace RemoteControl.App.Web.Controllers
 
             var extension = Path.GetExtension(path);
 
-            response.ContentType = _contentTypes.ContainsKey(extension) ? _contentTypes[extension] : "text/plain";
+            response.ContentType = ContentTypes.ContainsKey(extension) ? ContentTypes[extension] : "text/plain";
 
             if (File.Exists(path))
             {

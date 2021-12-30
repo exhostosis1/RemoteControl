@@ -6,18 +6,18 @@ namespace RemoteControl.App.Control
 {
     internal static class ControlFacade
     {
-        private static readonly IControlAudio _audio = new AudioSwitchWrapper();
-        private static readonly IControlInput _input = new WindowsInputLibWrapper();
-        private static readonly IControlDisplay _display = new User32Wrapper();
+        private static readonly IControlAudio Audio = new AudioSwitchWrapper();
+        private static readonly IControlInput Input = new WindowsInputLibWrapper();
+        private static readonly IControlDisplay Display = new User32Wrapper();
 
-        public static int GetVolume() => _audio.Volume;
-        public static void SetVolume(int volume) => _audio.Volume = volume;
-        public static void Mute(bool mute) => _audio.Mute(mute);
-        public static void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.KeyPress(key, mode);
-        public static void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.MouseKeyPress(key, mode);
-        public static void TextInput(string text) => _input.TextInput(text);
-        public static void MouseWheel(bool up) => _input.MouseWheel(up);
-        public static void MouseMove(int x, int y) => _input.MouseMove(x, y);
-        public static void DisplayDarken() => _display.Darken();
+        public static int GetVolume() => Audio.Volume;
+        public static void SetVolume(int volume) => Audio.Volume = volume;
+        public static void Mute(bool mute) => Audio.Mute(mute);
+        public static void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => Input.KeyPress(key, mode);
+        public static void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => Input.MouseKeyPress(key, mode);
+        public static void TextInput(string text) => Input.TextInput(text);
+        public static void MouseWheel(bool up) => Input.MouseWheel(up);
+        public static void MouseMove(int x, int y) => Input.MouseMove(x, y);
+        public static void DisplayDarken() => Display.Darken();
     }
 }

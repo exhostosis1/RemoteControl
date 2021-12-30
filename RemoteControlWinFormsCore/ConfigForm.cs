@@ -1,17 +1,14 @@
-﻿using RemoteControl.App;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using RemoteControl;
+using RemoteControl.App;
 
-namespace RemoteControlWinFormsCore
+namespace RemoteControl
 {
     public partial class ConfigForm : Form
     {
-        private readonly ILogger _logger;
-
         private readonly SynchronizationContext? _context;
 
         private readonly ToolStripItem[] _startedMenuItems;
@@ -19,8 +16,6 @@ namespace RemoteControlWinFormsCore
 
         public ConfigForm()
         {
-            _logger = Logger.GetFileLogger(this.GetType());
-
             InitializeComponent();
 
             _startedMenuItems = new ToolStripItem[]
@@ -56,21 +51,17 @@ namespace RemoteControlWinFormsCore
                 if(RemoteControlApp.IsListening)
                     RemoteControlApp.Stop();
 
-                var IPs = new HashSet<string>(GetCurrentIPs);
-                if (IPs.Count == 0) return;
-                Uri[] uris;
+                var ips = new HashSet<string>(GetCurrentIPs);
+                if (ips.Count == 0) return;
 
-                if (AppConfig.PrefUris.Length > 0)
-                    uris = AppConfig.PrefUris.Where(x => IPs.Contains(x.Host)).ToArray();
-                else
-                    uris = IPs.Select(x => new UriBuilder(AppConfig.DefaultScheme, x, AppConfig.DefaultPort).Uri).ToArray();
+                var uris = AppConfig.PrefUris.Length > 0 ? 
+                    AppConfig.PrefUris.Where(x => ips.Contains(x.Host)).ToArray() : 
+                    ips.Select(x => new UriBuilder(AppConfig.DefaultScheme, x, AppConfig.DefaultPort).Uri).ToArray();
 
                 RemoteControlApp.Start(uris);
             }
-            catch(Exception ex)
+            catch
             {
-                _logger.Log(ErrorLevel.Error, ex.Message);
-
                 RemoteControlApp.Stop();               
             }
             finally
@@ -96,7 +87,7 @@ namespace RemoteControlWinFormsCore
             Application.Exit();
         }
 
-        private void IpToolStripMenuItem_Click(object? sender, EventArgs e)
+        private static void IpToolStripMenuItem_Click(object? sender, EventArgs e)
         {
             var address = (sender as ToolStripMenuItem)?.Text ?? string.Empty;
 
@@ -104,10 +95,8 @@ namespace RemoteControlWinFormsCore
             {
                 Process.Start(address);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.Log(ErrorLevel.Error, ex.Message);
-
                 // hack because of this: https://github.com/dotnet/corefx/issues/10361
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 {
@@ -134,12 +123,12 @@ namespace RemoteControlWinFormsCore
             Hide();
         }
 
-        private void startToolStripMenuItem_Click(object sender, EventArgs e)
+        private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
             UrisUpdated(null, null);
         }
 
-        private void stopToolStripMenuItem_Click(object sender, EventArgs e)
+        private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoteControlApp.Stop();
             SetContextMenu();

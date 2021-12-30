@@ -1,54 +1,42 @@
-﻿using RemoteControl.App.Web.Interfaces;
-using System.Net;
+﻿using System.Net;
 
 namespace RemoteControl.App.Web.Listeners
 {
     internal static class MyHttpListener
     {
-        private static readonly ILogger _logger = Logger.GetFileLogger(typeof(MyHttpListener));
-
-        private static readonly HttpListener _listener = new();
-        public static bool IsListening => _listener.IsListening;
-        public static IEnumerable<string> ListeningUris 
-        { 
-            get 
-            { 
-                foreach (var p in _listener.Prefixes) 
-                    yield return p; 
-            } 
-        }
+        private static readonly HttpListener Listener = new();
+        public static bool IsListening => Listener.IsListening;
+        public static IEnumerable<string> ListeningUris => Listener.Prefixes;
 
         public static event HttpEventHandler? OnRequest;
 
-        public static async void StartListen(params Uri[] urls)
+        public static async Task StartListenAsync(params Uri[] urls)
         {
-            if (_listener.IsListening) StopListen();
+            if (urls.Length == 0) return;
 
-            _listener.Prefixes.Clear();
+            StopListen();
 
-            foreach (var url in urls)
+            Listener.Prefixes.Clear();
+
+            foreach(var url in urls)
             {
-                _listener.Prefixes.Add(url.ToString());
+                Listener.Prefixes.Add(url.ToString());
             }
 
-            if (_listener.Prefixes.Count == 0) return;
-
-            _listener.Start();
+            Listener.Start();
 
             while (true)
             {
                 try
                 {
-                    var context = await _listener.GetContextAsync();
+                    var context = await Listener.GetContextAsync();
 
                     OnRequest?.Invoke(context);
                     context?.Response.Close();
                 }
                 catch
                 {
-                    if (_listener.IsListening)
-                        continue;
-                    else
+                    if (!Listener.IsListening)
                         return;
                 }
             }
@@ -56,9 +44,9 @@ namespace RemoteControl.App.Web.Listeners
 
         public static void StopListen()
         {
-            if (_listener.IsListening)
+            if (Listener.IsListening)
             {
-                _listener.Stop();
+                Listener.Stop();
             }
         }
     }

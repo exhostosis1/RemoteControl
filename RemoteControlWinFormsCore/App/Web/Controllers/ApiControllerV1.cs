@@ -8,7 +8,7 @@ namespace RemoteControl.App.Web.Controllers
 {
     internal static class ApiControllerV1
     {
-        private static readonly Dictionary<string, Func<string, string?>> _methods = new()
+        private static readonly Dictionary<string, Func<string, string?>> Methods = new()
         {
             { 
                 "audio", Audio
@@ -30,7 +30,7 @@ namespace RemoteControl.App.Web.Controllers
             }
         };
 
-        public static string? Audio(string param)
+        private static string? Audio(string param)
         {
             if (param == "init") return ControlFacade.GetVolume().ToString();
 
@@ -44,7 +44,7 @@ namespace RemoteControl.App.Web.Controllers
             return null;
         }
 
-        public static string? KeyboardKey(string param)
+        private static string? KeyboardKey(string param)
         {
             switch (param)
             {
@@ -68,7 +68,7 @@ namespace RemoteControl.App.Web.Controllers
             return null;
         }
 
-        public static string? Mouse(string param)
+        private static string? Mouse(string param)
         {
             switch (param)
             {
@@ -98,14 +98,12 @@ namespace RemoteControl.App.Web.Controllers
                 case "dragstop":
                     ControlFacade.MouseKeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
                     break;
-                default:
-                    break;
             }
 
             return null;
         }
 
-        public static string? MouseMove(string param)
+        private static string? MouseMove(string param)
         {
             if (Utils.TryGetCoords(param, out var x, out var y))
             {
@@ -115,7 +113,7 @@ namespace RemoteControl.App.Web.Controllers
             return null;
         }
 
-        public static string? TextInput(string param)
+        private static string? TextInput(string param)
         {
             ControlFacade.TextInput(WebUtility.UrlDecode(param));
             ControlFacade.KeyboardKeyPress(KeysEnum.Enter);
@@ -123,14 +121,12 @@ namespace RemoteControl.App.Web.Controllers
             return null;
         }
 
-        public static string? DisplayControl(string param)
+        private static string? DisplayControl(string param)
         {
             switch (param)
             {
                 case "darken":
                     ControlFacade.DisplayDarken();
-                    break;
-                default:
                     break;
             }
 
@@ -141,13 +137,13 @@ namespace RemoteControl.App.Web.Controllers
         {
             var response = new Response();
 
-            if (!_methods.ContainsKey(method))
+            if (!Methods.ContainsKey(method))
             {
                 response.StatusCode = HttpStatusCode.BadRequest;
                 return response;
             }
 
-            var result = _methods[method].Invoke(param);
+            var result = Methods[method].Invoke(param);
 
             if (!string.IsNullOrEmpty(result))
             {

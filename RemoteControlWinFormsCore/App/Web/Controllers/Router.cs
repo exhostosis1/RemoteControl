@@ -7,8 +7,6 @@ namespace RemoteControl.App.Web.Controllers
     {
         public static void ProcessRequest(HttpListenerContext context)
         {
-            if (context == null) return;
-
             var path = context.Request.Url?.LocalPath;
 
             var (api, version, method, param) = path?.Split("/", StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
