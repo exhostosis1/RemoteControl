@@ -1,6 +1,6 @@
 ﻿namespace RemoteControl.App.Enums
 {
-    internal enum KeysEnum
+    public enum KeysEnum
     {
         Enter,
         Back,

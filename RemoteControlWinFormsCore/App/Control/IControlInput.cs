@@ -2,7 +2,7 @@
 
 namespace RemoteControl.App.Control.Interfaces
 {
-    internal interface IControlInput
+    public interface IControlInput
     {
         void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click);
         void TextInput(string text);

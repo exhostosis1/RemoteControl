@@ -1,6 +1,6 @@
 ﻿namespace RemoteControl.App.Enums
 {
-    internal enum MouseKeysEnum
+    public enum MouseKeysEnum
     {
         Left,
         Right,

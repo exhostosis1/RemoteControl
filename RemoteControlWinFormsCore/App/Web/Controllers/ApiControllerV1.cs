@@ -3,6 +3,7 @@ using RemoteControl.App.Enums;
 using RemoteControl.App.Utility;
 using System.Net;
 using System.Text;
+using System.Text.Json;
 
 namespace RemoteControl.App.Web.Controllers
 {
@@ -12,6 +13,9 @@ namespace RemoteControl.App.Web.Controllers
         {
             { 
                 "audio", Audio
+            },
+            {
+                "audiodevice", AudioDevice
             },
             {
                 "keyboard", KeyboardKey
@@ -29,6 +33,15 @@ namespace RemoteControl.App.Web.Controllers
                 "mousemove", MouseMove
             }
         };
+
+        private static string? AudioDevice(string param)
+        {
+            if (param == "get") return JsonSerializer.Serialize(ControlFacade.GetDevices());
+
+            if (Guid.TryParse(param, out var guid)) ControlFacade.SetDevice(guid);
+
+            return null;
+        }
 
         private static string? Audio(string param)
         {
