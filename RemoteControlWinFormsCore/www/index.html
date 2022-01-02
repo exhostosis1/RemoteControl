@@ -554,10 +554,11 @@
 
             document.getElementById('darken').onclick = () => sendRequest('display', 'darken');
 
-            if (devices.length > 1) {
+            if(devices.length > 1) {
                 document.getElementById('devicon').style.display = 'block';
                 document.getElementById('devicon').onclick = () => showDevices();
             }
+            setDevice(devices.find(x => x.IsDefault).Id);
 
             document.getElementById('loader').style.display = 'none';
         }
@@ -570,7 +571,7 @@
                 return;
             }
 
-            devices = JSON.parse(await (await sendRequest('audiodevice', 'get')).text());
+            let devices = JSON.parse(await (await sendRequest('audiodevice', 'get')).text());
 
             devicesElement.innerHTML = '';
             
@@ -605,8 +606,8 @@
 
             document.querySelector("meta[name=viewport]").setAttribute("content", "width=" + window.innerWidth + ", height=" + window.innerHeight + ", initial-scale=1.0, maximum-scale=1.0, user-scalable=0");
 
-            let volume = await (await sendRequest('audio', 'init')).text();
             let devices = JSON.parse(await (await sendRequest('audiodevice', 'get')).text());
+            let volume = await (await sendRequest('audio', 'init')).text();
 
             initElements(volume, devices);
         });
@@ -762,17 +763,19 @@
             color: white;
             text-shadow: 0px 0px 6px rgba(0, 0, 0, .8);
             display: none;
+            z-index: 1000;
         }
         
         .device {
-            height: 30px;
+            height: 50px;
             display: flex;
             background-color: #538fbe;
             border-radius: 15px;
             padding-left: 12px;
             border: 1px solid #2d6898;
             user-select: none;
-            line-height: 30px;
+            line-height: 50px;
+            font-size: 11px;
         }
         
         #loader {

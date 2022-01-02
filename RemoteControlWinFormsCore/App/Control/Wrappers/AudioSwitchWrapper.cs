@@ -9,6 +9,7 @@ namespace RemoteControl.App.Control.Wrappers
         public Guid Id { get; set; }
         public string Name { get; set; } = "";
         public bool IsActive { get; set; }
+        public bool IsDefault { get; set; }
     }
     internal class AudioSwitchWrapper: IControlAudio
     {
@@ -24,9 +25,6 @@ namespace RemoteControl.App.Control.Wrappers
         public AudioSwitchWrapper()
         {
             _audioDevice = _audioController.GetDefaultDevice(DeviceType.Playback, Role.Multimedia);
-            //_audioController.AudioDeviceChanged
-            //    .When(x => x.ChangedType == DeviceChangedType.DefaultChanged && x.Device.IsPlaybackDevice)
-            //    .Subscribe(x => _audioDevice = x.Device);
         }
 
         public IEnumerable<IAudioDevice> GetDevices()
@@ -34,6 +32,7 @@ namespace RemoteControl.App.Control.Wrappers
             return _audioController.GetDevices(DeviceType.Playback, DeviceState.Active).Select(x => new AudioDevice
             {
                 Id = x.Id,
+                IsDefault = x.IsDefaultDevice,
                 IsActive = x.Id == _audioDevice.Id,
                 Name = x.FullName
             });
