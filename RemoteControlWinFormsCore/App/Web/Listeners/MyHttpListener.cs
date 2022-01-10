@@ -4,50 +4,62 @@ namespace RemoteControl.App.Web.Listeners
 {
     internal static class MyHttpListener
     {
-        private static readonly HttpListener Listener = new();
-        public static bool IsListening => Listener.IsListening;
-        public static IEnumerable<string> ListeningUris => Listener.Prefixes;
+        private static HttpListener? _listener;
+        public static bool IsListening => _listener?.IsListening ?? false;
+        public static IEnumerable<string> ListeningUris => _listener?.Prefixes ?? Enumerable.Empty<string>();
 
         public static event HttpEventHandler? OnRequest;
 
-        public static async Task StartListenAsync(params Uri[] urls)
+        public static void StartListen(params Uri[] urls)
         {
             if (urls.Length == 0) return;
 
             StopListen();
-
-            Listener.Prefixes.Clear();
+            _listener = new HttpListener();
 
             foreach(var url in urls)
             {
-                Listener.Prefixes.Add(url.ToString());
+                _listener.Prefixes.Add(url.ToString());
             }
 
-            Listener.Start();
+            _listener.Start();
 
+            Task.Run(ProcessRequest);
+        }
+
+        private static async Task ProcessRequest()
+        {
             while (true)
             {
                 try
                 {
-                    var context = await Listener.GetContextAsync();
+                    if (_listener == null) return;
+
+                    var context = await _listener.GetContextAsync();
 
                     OnRequest?.Invoke(context);
                     context?.Response.Close();
                 }
+                catch (ObjectDisposedException)
+                {
+                    return;
+                }
                 catch
                 {
-                    if (!Listener.IsListening)
+                    if (!(_listener?.IsListening ?? false))
                         return;
                 }
             }
-        }                
+        }
 
         public static void StopListen()
         {
-            if (Listener.IsListening)
+            if (_listener?.IsListening ?? false)
             {
-                Listener.Stop();
+                _listener.Stop();
             }
+
+            _listener = null;
         }
     }
 }

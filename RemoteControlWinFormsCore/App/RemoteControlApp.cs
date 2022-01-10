@@ -12,7 +12,7 @@ namespace RemoteControl.App
 
         public static void Start(params Uri[] uris)
         {
-            MyHttpListener.StartListenAsync(uris);
+            MyHttpListener.StartListen(uris);
         }
 
         public static void Stop()

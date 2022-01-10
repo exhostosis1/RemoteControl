@@ -41,7 +41,7 @@ namespace RemoteControl
             UrisUpdated(null, null);
         }
 
-        private static IEnumerable<string> GetCurrentIPs => Dns.GetHostAddresses(Dns.GetHostName())
+        private static IEnumerable<string> GetCurrentIPs() => Dns.GetHostAddresses(Dns.GetHostName())
             .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
 
         private void UrisUpdated(object? sender, EventArgs? e)
@@ -51,7 +51,7 @@ namespace RemoteControl
                 if(RemoteControlApp.IsListening)
                     RemoteControlApp.Stop();
 
-                var ips = new HashSet<string>(GetCurrentIPs);
+                var ips = GetCurrentIPs().ToHashSet();
                 if (ips.Count == 0) return;
 
                 var uris = AppConfig.PrefUris.Length > 0 ? 
