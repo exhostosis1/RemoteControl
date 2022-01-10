@@ -20,7 +20,7 @@ namespace RemoteControl.App
             MyHttpListener.StopListen();
         }
 
-        public static IEnumerable<string> GetCurrentUris => MyHttpListener.ListeningUris;
+        public static IEnumerable<string> CurrentUris => MyHttpListener.ListeningUris;
 
         public static bool IsListening => MyHttpListener.IsListening;
     }

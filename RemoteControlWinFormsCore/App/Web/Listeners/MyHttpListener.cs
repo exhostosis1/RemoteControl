@@ -4,9 +4,9 @@ namespace RemoteControl.App.Web.Listeners
 {
     internal static class MyHttpListener
     {
-        private static HttpListener? _listener;
-        public static bool IsListening => _listener?.IsListening ?? false;
-        public static IEnumerable<string> ListeningUris => _listener?.Prefixes ?? Enumerable.Empty<string>();
+        private static HttpListener _listener = new();
+        public static bool IsListening => _listener.IsListening;
+        public static IEnumerable<string> ListeningUris => _listener.Prefixes;
 
         public static event HttpEventHandler? OnRequest;
 
@@ -14,10 +14,12 @@ namespace RemoteControl.App.Web.Listeners
         {
             if (urls.Length == 0) return;
 
-            StopListen();
-            _listener = new HttpListener();
+            if(_listener.IsListening)
+                _listener.Stop();
 
-            foreach(var url in urls)
+            _listener.Prefixes.Clear();
+
+            foreach (var url in urls)
             {
                 _listener.Prefixes.Add(url.ToString());
             }
@@ -33,20 +35,19 @@ namespace RemoteControl.App.Web.Listeners
             {
                 try
                 {
-                    if (_listener == null) return;
-
                     var context = await _listener.GetContextAsync();
 
                     OnRequest?.Invoke(context);
-                    context?.Response.Close();
+                    context.Response.Close();
                 }
                 catch (ObjectDisposedException)
                 {
+                    _listener = new HttpListener();
                     return;
                 }
                 catch
                 {
-                    if (!(_listener?.IsListening ?? false))
+                    if (!_listener.IsListening)
                         return;
                 }
             }
@@ -54,12 +55,10 @@ namespace RemoteControl.App.Web.Listeners
 
         public static void StopListen()
         {
-            if (_listener?.IsListening ?? false)
+            if (_listener.IsListening)
             {
                 _listener.Stop();
             }
-
-            _listener = null;
         }
     }
 }

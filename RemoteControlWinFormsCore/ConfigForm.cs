@@ -1,9 +1,9 @@
-﻿using System.Diagnostics;
+﻿using RemoteControl.App;
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-using RemoteControl.App;
 
 namespace RemoteControl
 {
@@ -13,6 +13,8 @@ namespace RemoteControl
 
         private readonly ToolStripItem[] _startedMenuItems;
         private readonly ToolStripItem[] _stoppedMenuItems;
+
+        private bool _waitingForIp = AppConfig.IpLookup;
 
         public ConfigForm()
         {
@@ -34,35 +36,50 @@ namespace RemoteControl
                     this.closeToolStripMenuItem
             };
 
-            NetworkChange.NetworkAddressChanged += UrisUpdated;
-
             _context = SynchronizationContext.Current;
-                        
-            UrisUpdated(null, null);
+            NetworkChange.NetworkAddressChanged += IpChanged;
+
+            StartListening(GetUris());
+        }
+
+        private void IpChanged(object? sender, EventArgs args)
+        {
+            if (!_waitingForIp) return;
+
+            StartListening(GetUris());
         }
 
         private static IEnumerable<string> GetCurrentIPs() => Dns.GetHostAddresses(Dns.GetHostName())
             .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
 
-        private void UrisUpdated(object? sender, EventArgs? e)
+        private Uri[] GetUris()
+        {
+            if (AppConfig.IpLookup)
+            {
+                return GetCurrentIPs().Select(x =>
+                    new UriBuilder(AppConfig.DefaultScheme, x, AppConfig.DefaultPort).Uri).ToArray();
+            }
+            else
+            {
+                var ips = GetCurrentIPs().ToHashSet();
+
+                var hosts = AppConfig.PrefUris.Where(x => ips.Contains(x.Host)).ToArray();
+
+                _waitingForIp = hosts.Length != AppConfig.PrefUris.Length;
+
+                return hosts;
+            }
+        }
+
+        private void StartListening(Uri[] uris)
         {
             try
             {
-                if(RemoteControlApp.IsListening)
-                    RemoteControlApp.Stop();
-
-                var ips = GetCurrentIPs().ToHashSet();
-                if (ips.Count == 0) return;
-
-                var uris = AppConfig.PrefUris.Length > 0 ? 
-                    AppConfig.PrefUris.Where(x => ips.Contains(x.Host)).ToArray() : 
-                    ips.Select(x => new UriBuilder(AppConfig.DefaultScheme, x, AppConfig.DefaultPort).Uri).ToArray();
-
                 RemoteControlApp.Start(uris);
             }
-            catch
+            catch(Exception e)
             {
-                RemoteControlApp.Stop();               
+                File.AppendAllText(AppContext.BaseDirectory + "error.log", $"{DateTime.Now:G} {e.Message}\n");      
             }
             finally
             {
@@ -77,7 +94,7 @@ namespace RemoteControl
         {
             this.contextMenuStrip.Items.Clear();
 
-            this.contextMenuStrip.Items.AddRange(RemoteControlApp.IsListening ? RemoteControlApp.GetCurrentUris
+            this.contextMenuStrip.Items.AddRange(RemoteControlApp.IsListening ? RemoteControlApp.CurrentUris
                 .Select(x => new ToolStripMenuItem(x, null, IpToolStripMenuItem_Click) as ToolStripItem).Concat(_startedMenuItems).ToArray() : _stoppedMenuItems);  
         }
 
@@ -125,12 +142,13 @@ namespace RemoteControl
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            UrisUpdated(null, null);
+            StartListening(GetUris());
         }
 
         private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoteControlApp.Stop();
+
             SetContextMenu();
         }
     }
