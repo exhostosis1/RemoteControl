@@ -39,6 +39,8 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.labelRunning = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -48,6 +50,7 @@
             this.taskbarNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("taskbarNotify.Icon")));
             this.taskbarNotify.Text = "Remote Control";
             this.taskbarNotify.Visible = true;
+            this.taskbarNotify.Click += new System.EventHandler(this.taskbarNotify_Click);
             // 
             // contextMenuStrip
             // 
@@ -59,25 +62,25 @@
             this.toolStripSeparator1,
             this.toolStripSeparator2});
             this.contextMenuStrip.Name = "contextMenuStrip1";
-            this.contextMenuStrip.Size = new System.Drawing.Size(181, 126);
+            this.contextMenuStrip.Size = new System.Drawing.Size(137, 104);
             // 
             // placeholderToolStripMenuItem
             // 
             this.placeholderToolStripMenuItem.Name = "placeholderToolStripMenuItem";
-            this.placeholderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.placeholderToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.placeholderToolStripMenuItem.Text = "placeholder";
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.StopToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
             // 
@@ -85,18 +88,18 @@
             // 
             this.stoppedToolStripMenuItem.Enabled = false;
             this.stoppedToolStripMenuItem.Name = "stoppedToolStripMenuItem";
-            this.stoppedToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.stoppedToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
             this.stoppedToolStripMenuItem.Text = "Stopped";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(133, 6);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(133, 6);
             // 
             // startToolStripMenuItem
             // 
@@ -105,12 +108,30 @@
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
             // 
+            // labelRunning
+            // 
+            this.labelRunning.AutoSize = true;
+            this.labelRunning.Location = new System.Drawing.Point(76, 9);
+            this.labelRunning.Name = "labelRunning";
+            this.labelRunning.Size = new System.Drawing.Size(38, 15);
+            this.labelRunning.TabIndex = 1;
+            this.labelRunning.Text = "label1";
+            // 
+            // panel1
+            // 
+            this.panel1.Location = new System.Drawing.Point(12, 27);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(188, 88);
+            this.panel1.TabIndex = 2;
+            // 
             // ConfigForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.ClientSize = new System.Drawing.Size(282, 80);
+            this.ClientSize = new System.Drawing.Size(212, 127);
+            this.Controls.Add(this.panel1);
+            this.Controls.Add(this.labelRunning);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -122,9 +143,11 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Config";
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
-            this.Shown += new System.EventHandler(this.Form1_Shown);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ConfigForm_FormClosing);
+            this.Shown += new System.EventHandler(this.ConfigForm_Shown);
             this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -138,6 +161,8 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem startToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator2;
+        private Label labelRunning;
+        private Panel panel1;
     }
 }
 

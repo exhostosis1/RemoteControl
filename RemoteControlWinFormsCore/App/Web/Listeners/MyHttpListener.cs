@@ -10,12 +10,19 @@ namespace RemoteControl.App.Web.Listeners
 
         public static event HttpEventHandler? OnRequest;
 
-        public static void StartListen(params Uri[] urls)
+        public static void StartListen(ICollection<Uri> urls)
         {
-            if (urls.Length == 0) return;
+            if (urls.Count == 0) return;
 
-            if(_listener.IsListening)
-                _listener.Stop();
+            try
+            {
+                if (_listener.IsListening)
+                    _listener.Stop();
+            }
+            catch (ObjectDisposedException)
+            {
+                _listener = new HttpListener();
+            }
 
             _listener.Prefixes.Clear();
 

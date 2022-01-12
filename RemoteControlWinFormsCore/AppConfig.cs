@@ -4,24 +4,20 @@
     {
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
 
-        public const string DefaultScheme = "http";
-        public const int DefaultPort = 1488;
-
-        public static Uri[] PrefUris { get; private set; } = Array.Empty<Uri>();
-        public static bool IpLookup => PrefUris.Length == 0;
-
-        static AppConfig()
+        internal static IEnumerable<Uri> GetConfigUris()
         {
             if (!File.Exists(ConfigPath))
-                return;
+                return Enumerable.Empty<Uri>();
 
             try
             {
-                PrefUris = File.ReadAllLines(ConfigPath).Where(x => !x.StartsWith("//")).Distinct().Select(x => new Uri(x)).ToArray();
+                return File.ReadAllLines(ConfigPath).Where(x => !x.StartsWith("//")).Distinct().Select(x => new Uri(x.Trim()));
             }
-            catch
+            catch(Exception e)
             {
-                throw new Exception("Cannot read config");
+                Logger.Log(e.Message);
+
+                return Enumerable.Empty<Uri>();
             }
         }
     }

@@ -1,8 +1,5 @@
 ﻿using RemoteControl.App;
 using System.Diagnostics;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
 namespace RemoteControl
@@ -14,7 +11,7 @@ namespace RemoteControl
         private readonly ToolStripItem[] _startedMenuItems;
         private readonly ToolStripItem[] _stoppedMenuItems;
 
-        private bool _waitingForIp = AppConfig.IpLookup;
+        private readonly ICollection<Uri> _prefUris = AppConfig.GetConfigUris().ToList();
 
         public ConfigForm()
         {
@@ -37,55 +34,83 @@ namespace RemoteControl
             };
 
             _context = SynchronizationContext.Current;
-            NetworkChange.NetworkAddressChanged += IpChanged;
 
-            StartListening(GetUris());
+            StartListening(_prefUris);   
         }
 
-        private void IpChanged(object? sender, EventArgs args)
+        private void SetLabelRunning()
         {
-            if (!_waitingForIp) return;
-
-            StartListening(GetUris());
+            this.labelRunning.Text = @"Server on";
+            this.labelRunning.ForeColor = Color.LimeGreen;
         }
 
-        private static IEnumerable<string> GetCurrentIPs() => Dns.GetHostAddresses(Dns.GetHostName())
-            .Where(x => x.AddressFamily == AddressFamily.InterNetwork).Select(x => x.ToString());
-
-        private Uri[] GetUris()
+        private void SetLabelStopped()
         {
-            if (AppConfig.IpLookup)
+            this.labelRunning.Text = @"Server off";
+            this.labelRunning.ForeColor = Color.DarkRed;
+        }
+
+        private void GenerateCheckboxes()
+        {
+            this.panel1.Controls.Clear();
+            var y = 0;
+
+            foreach (var uri in _prefUris.Union(RemoteControlApp.GetCurrentIPs()))
             {
-                return GetCurrentIPs().Select(x =>
-                    new UriBuilder(AppConfig.DefaultScheme, x, AppConfig.DefaultPort).Uri).ToArray();
+                var cb = new CheckBox()
+                {
+                    AutoSize = true,
+                    Location = new Point(12, y),
+                    Text = uri.ToString(),
+                    Checked = RemoteControlApp.GetListeningUris().Any(x => x.ToString() == uri.ToString()),
+                };
+
+                cb.CheckedChanged += UriChecked;
+
+                this.panel1.Controls.Add(cb);
+
+                y += 20;
+            }
+
+            this.Height = this.panel1.Height + 70;
+        }
+
+        private void UriChecked(object? sender, EventArgs args)
+        {
+            if (sender == null) return;
+
+            var obj = (CheckBox) sender;
+
+            if (obj.Checked)
+            {
+                _prefUris.Add(new Uri(obj.Text));
             }
             else
             {
-                var ips = GetCurrentIPs().ToHashSet();
-
-                var hosts = AppConfig.PrefUris.Where(x => ips.Contains(x.Host)).ToArray();
-
-                _waitingForIp = hosts.Length != AppConfig.PrefUris.Length;
-
-                return hosts;
+                _prefUris.Remove(_prefUris.First(x => x.ToString() == obj.Text));
             }
+
+            RemoteControlApp.Start(_prefUris);
+            UpdateUI();
         }
 
-        private void StartListening(Uri[] uris)
+        private void StartListening(ICollection<Uri> uris)
         {
             try
             {
                 RemoteControlApp.Start(uris);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
-                File.AppendAllText(AppContext.BaseDirectory + "error.log", $"{DateTime.Now:G} {e.Message}\n");      
+                Logger.Log(e.Message);
+                this.labelRunning.Text = e.Message;
+                this.labelRunning.ForeColor = Color.Red;
             }
             finally
             {
                 _context?.Send(_ =>
                 {
-                    SetContextMenu();
+                    UpdateUI();
                 }, null);
             }
         }
@@ -94,8 +119,23 @@ namespace RemoteControl
         {
             this.contextMenuStrip.Items.Clear();
 
-            this.contextMenuStrip.Items.AddRange(RemoteControlApp.IsListening ? RemoteControlApp.CurrentUris
-                .Select(x => new ToolStripMenuItem(x, null, IpToolStripMenuItem_Click) as ToolStripItem).Concat(_startedMenuItems).ToArray() : _stoppedMenuItems);  
+            this.contextMenuStrip.Items.AddRange(RemoteControlApp.IsListening ? RemoteControlApp.GetListeningUris()
+                .Select(x => new ToolStripMenuItem(x.ToString(), null, IpToolStripMenuItem_Click) as ToolStripItem).Concat(_startedMenuItems).ToArray() : _stoppedMenuItems);  
+        }
+
+        private void UpdateUI()
+        {
+            if (this.WindowState != FormWindowState.Minimized)
+            {
+                if (RemoteControlApp.IsListening)
+                    SetLabelRunning();
+                else
+                    SetLabelStopped();
+
+                GenerateCheckboxes();
+            }
+
+            SetContextMenu();
         }
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -135,21 +175,53 @@ namespace RemoteControl
             }
         }
 
-        private void Form1_Shown(object? sender, EventArgs e)
-        {
-            Hide();
-        }
-
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            StartListening(GetUris());
+            StartListening(_prefUris);
         }
 
         private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoteControlApp.Stop();
 
-            SetContextMenu();
+            UpdateUI();
+        }
+
+        private void Minimize()
+        {
+            this.WindowState = FormWindowState.Minimized;
+            this.ShowInTaskbar = false;
+            Hide();
+        }
+
+        private void Maximize()
+        {
+            Show();
+            this.WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
+            UpdateUI();
+        }
+
+        private void taskbarNotify_Click(object sender, EventArgs e)
+        {
+            if ((e as MouseEventArgs)?.Button == MouseButtons.Left)
+            {
+                if (this.Visible) Minimize(); else Maximize();
+            }
+        }
+
+        private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                Minimize();
+                e.Cancel = true;
+            }
+        }
+
+        private void ConfigForm_Shown(object sender, EventArgs e)
+        {
+            Hide();
         }
     }
 }
