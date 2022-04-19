@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace RemoteControl.App.Web.Controllers
+namespace RemoteControl.App.Web.DataObjects
 {
     internal class Response
     {

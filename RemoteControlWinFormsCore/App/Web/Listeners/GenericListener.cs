@@ -1,19 +1,18 @@
 ﻿using System.Net;
+using RemoteControl.App.Web.DataObjects;
 
 namespace RemoteControl.App.Web.Listeners
 {
-    internal static class MyHttpListener
+    internal class GenericListener
     {
-        private static HttpListener _listener = new();
-        public static bool IsListening => _listener.IsListening;
-        public static IEnumerable<string> ListeningUris => _listener.Prefixes;
+        private HttpListener _listener = new();
+        public bool IsListening => _listener.IsListening;
+        public IEnumerable<string> ListeningUris => _listener.Prefixes;
 
-        public static event HttpEventHandler? OnRequest;
+        public event HttpEventHandler? OnRequest;
 
-        public static void StartListen(ICollection<Uri> urls)
+        public void StartListen(string url)
         {
-            if (urls.Count == 0) return;
-
             try
             {
                 if (_listener.IsListening)
@@ -26,25 +25,33 @@ namespace RemoteControl.App.Web.Listeners
 
             _listener.Prefixes.Clear();
 
-            foreach (var url in urls)
-            {
-                _listener.Prefixes.Add(url.ToString());
-            }
+            _listener.Prefixes.Add(url.ToString());
 
             _listener.Start();
 
             Task.Run(ProcessRequest);
         }
 
-        private static async Task ProcessRequest()
+        private async Task ProcessRequest()
         {
             while (true)
             {
                 try
                 {
                     var context = await _listener.GetContextAsync();
+                    var path = context.Request.RawUrl;
+                    if (path == null) return;
 
-                    OnRequest?.Invoke(context);
+                    var dto = new Context(path);
+
+                    OnRequest?.Invoke(dto);
+
+                    context.Response.StatusCode = (int)dto.Response.StatusCode;
+                    context.Response.ContentType = dto.Response.ContentType;
+
+                    if(dto.Response.Payload.Length > 0)
+                        context.Response.OutputStream.Write(dto.Response.Payload);
+                    
                     context.Response.Close();
                 }
                 catch (ObjectDisposedException)
@@ -60,7 +67,7 @@ namespace RemoteControl.App.Web.Listeners
             }
         }
 
-        public static void StopListen()
+        public void StopListen()
         {
             if (_listener.IsListening)
             {

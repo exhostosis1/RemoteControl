@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using RemoteControl.App.Web.DataObjects;
 
 namespace RemoteControl.App.Web.Controllers
 {
@@ -16,9 +17,9 @@ namespace RemoteControl.App.Web.Controllers
             { ".css", "text/css" }
         };
 
-        public static Response ProcessRequest(string? uriPath)
+        public static void ProcessRequest(Context context)
         {
-            var response = new Response();
+            var uriPath = context.Request.Path;
 
             var path = ContentFolder + uriPath;
 
@@ -29,18 +30,16 @@ namespace RemoteControl.App.Web.Controllers
 
             var extension = Path.GetExtension(path);
 
-            response.ContentType = ContentTypes.ContainsKey(extension) ? ContentTypes[extension] : "text/plain";
+            context.Response.ContentType = ContentTypes.ContainsKey(extension) ? ContentTypes[extension] : "text/plain";
 
             if (File.Exists(path))
             {
-                response.Payload = File.ReadAllBytes(path);
+                context.Response.Payload = File.ReadAllBytes(path);
             }
             else
             {
-                response.StatusCode = HttpStatusCode.NotFound;
+                context.Response.StatusCode = HttpStatusCode.NotFound;
             }
-
-            return response;
         }
     }
 }

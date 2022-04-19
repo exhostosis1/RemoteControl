@@ -4,6 +4,7 @@ using RemoteControl.App.Utility;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using RemoteControl.App.Web.DataObjects;
 
 namespace RemoteControl.App.Web.Controllers
 {
@@ -33,6 +34,25 @@ namespace RemoteControl.App.Web.Controllers
                 "mousemove", MouseMove
             }
         };
+
+        public static void ProcessRequest(Context context)
+        {
+            var (method, param) = context.Request.Path.Split('/');
+
+            if (!Methods.ContainsKey(method))
+            {
+                context.Response.StatusCode = HttpStatusCode.BadRequest;
+                return;
+            }
+
+            var result = Methods[method].Invoke(param);
+
+            if (!string.IsNullOrEmpty(result))
+            {
+                context.Response.ContentType = "application/json";
+                context.Response.Payload = Encoding.UTF8.GetBytes(result);
+            }
+        }
 
         private static string? AudioDevice(string param)
         {
@@ -144,27 +164,6 @@ namespace RemoteControl.App.Web.Controllers
             }
 
             return null;
-        }
-
-        public static Response ProcessRequest(string method, string param)
-        {
-            var response = new Response();
-
-            if (!Methods.ContainsKey(method))
-            {
-                response.StatusCode = HttpStatusCode.BadRequest;
-                return response;
-            }
-
-            var result = Methods[method].Invoke(param);
-
-            if (!string.IsNullOrEmpty(result))
-            {
-                response.ContentType = "application/json";
-                response.Payload = Encoding.UTF8.GetBytes(result);
-            }
-
-            return response;
         }
     }
 }

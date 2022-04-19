@@ -1,6 +1,7 @@
 ﻿using RemoteControl.App;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using RemoteControl.Config;
 
 namespace RemoteControl
 {
@@ -11,7 +12,7 @@ namespace RemoteControl
         private readonly ToolStripItem[] _startedMenuItems;
         private readonly ToolStripItem[] _stoppedMenuItems;
 
-        private readonly ICollection<Uri> _prefUris = AppConfig.GetConfigUris().ToList();
+        private readonly Uri _prefUri = ConfigHelper.GetAppConfigFromFile().Uri.Uri;
 
         public ConfigForm()
         {
@@ -35,82 +36,24 @@ namespace RemoteControl
 
             _context = SynchronizationContext.Current;
 
-            StartListening(_prefUris);   
+            StartListening(_prefUri);   
         }
 
-        private void SetLabelRunning()
-        {
-            this.labelRunning.Text = @"Server on";
-            this.labelRunning.ForeColor = Color.LimeGreen;
-        }
-
-        private void SetLabelStopped()
-        {
-            this.labelRunning.Text = @"Server off";
-            this.labelRunning.ForeColor = Color.DarkRed;
-        }
-
-        private void GenerateCheckboxes()
-        {
-            this.panel1.Controls.Clear();
-            var y = 0;
-
-            foreach (var uri in _prefUris.Union(RemoteControlApp.GetCurrentIPs()))
-            {
-                var cb = new CheckBox()
-                {
-                    AutoSize = true,
-                    Location = new Point(12, y),
-                    Text = uri.ToString(),
-                    Checked = RemoteControlApp.GetListeningUris().Any(x => x.ToString() == uri.ToString()),
-                };
-
-                cb.CheckedChanged += UriChecked;
-
-                this.panel1.Controls.Add(cb);
-
-                y += 20;
-            }
-
-            this.Height = this.panel1.Height + 70;
-        }
-
-        private void UriChecked(object? sender, EventArgs args)
-        {
-            if (sender == null) return;
-
-            var obj = (CheckBox) sender;
-
-            if (obj.Checked)
-            {
-                _prefUris.Add(new Uri(obj.Text));
-            }
-            else
-            {
-                _prefUris.Remove(_prefUris.First(x => x.ToString() == obj.Text));
-            }
-
-            RemoteControlApp.Start(_prefUris);
-            UpdateUI();
-        }
-
-        private void StartListening(ICollection<Uri> uris)
+       private void StartListening(Uri uri)
         {
             try
             {
-                RemoteControlApp.Start(uris);
+                RemoteControlApp.Start(uri);
             }
             catch (Exception e)
             {
                 Logger.Log(e.Message);
-                this.labelRunning.Text = e.Message;
-                this.labelRunning.ForeColor = Color.Red;
             }
             finally
             {
                 _context?.Send(_ =>
                 {
-                    UpdateUI();
+                    SetContextMenu();
                 }, null);
             }
         }
@@ -119,23 +62,16 @@ namespace RemoteControl
         {
             this.contextMenuStrip.Items.Clear();
 
-            this.contextMenuStrip.Items.AddRange(RemoteControlApp.IsListening ? RemoteControlApp.GetListeningUris()
-                .Select(x => new ToolStripMenuItem(x.ToString(), null, IpToolStripMenuItem_Click) as ToolStripItem).Concat(_startedMenuItems).ToArray() : _stoppedMenuItems);  
-        }
-
-        private void UpdateUI()
-        {
-            if (this.WindowState != FormWindowState.Minimized)
+            if (RemoteControlApp.IsUiListening)
             {
-                if (RemoteControlApp.IsListening)
-                    SetLabelRunning();
-                else
-                    SetLabelStopped();
+                this.contextMenuStrip.Items.Add(new ToolStripMenuItem(RemoteControlApp.GetUiListeningUri(), null, IpToolStripMenuItem_Click));
+                this.contextMenuStrip.Items.AddRange(_startedMenuItems);
 
-                GenerateCheckboxes();
             }
-
-            SetContextMenu();
+            else
+            {
+                this.contextMenuStrip.Items.AddRange(_stoppedMenuItems);
+            }
         }
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -177,46 +113,14 @@ namespace RemoteControl
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            StartListening(_prefUris);
+            StartListening(_prefUri);
         }
 
         private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
             RemoteControlApp.Stop();
 
-            UpdateUI();
-        }
-
-        private void Minimize()
-        {
-            this.WindowState = FormWindowState.Minimized;
-            this.ShowInTaskbar = false;
-            Hide();
-        }
-
-        private void Maximize()
-        {
-            Show();
-            this.WindowState = FormWindowState.Normal;
-            this.ShowInTaskbar = true;
-            UpdateUI();
-        }
-
-        private void taskbarNotify_Click(object sender, EventArgs e)
-        {
-            if ((e as MouseEventArgs)?.Button == MouseButtons.Left)
-            {
-                if (this.Visible) Minimize(); else Maximize();
-            }
-        }
-
-        private void ConfigForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                Minimize();
-                e.Cancel = true;
-            }
+            SetContextMenu();
         }
 
         private void ConfigForm_Shown(object sender, EventArgs e)
