@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using RemoteControl.Config;
+using RemoteControl.Autostart;
 
 namespace RemoteControl
 {
@@ -9,8 +10,7 @@ namespace RemoteControl
     {
         private readonly SynchronizationContext? _context;
 
-        private readonly ToolStripItem[] _startedMenuItems;
-        private readonly ToolStripItem[] _stoppedMenuItems;
+        private readonly ToolStripItem[] _commonMenuItems;
 
         private readonly Uri _prefUri = ConfigHelper.GetAppConfigFromFile().Uri.Uri;
 
@@ -18,23 +18,16 @@ namespace RemoteControl
         {
             InitializeComponent();
 
-            _startedMenuItems = new ToolStripItem[]
+            _commonMenuItems = new ToolStripItem[]
             {
-                    this.toolStripSeparator1,
-                    this.stopToolStripMenuItem,
                     this.toolStripSeparator2,
-                    this.closeToolStripMenuItem
-            };
-            _stoppedMenuItems = new ToolStripItem[]
-            {
-                    this.stoppedToolStripMenuItem,
-                    this.toolStripSeparator1,
-                    this.startToolStripMenuItem,
-                    this.toolStripSeparator2,
+                    this.autostartStripMenuItem,
                     this.closeToolStripMenuItem
             };
 
             _context = SynchronizationContext.Current;
+
+            this.autostartStripMenuItem.Checked = AutostartService.CheckAutostart();
 
             StartListening(_prefUri);   
         }
@@ -62,16 +55,17 @@ namespace RemoteControl
         {
             this.contextMenuStrip.Items.Clear();
 
-            if (RemoteControlApp.IsUiListening)
-            {
-                this.contextMenuStrip.Items.Add(new ToolStripMenuItem(RemoteControlApp.GetUiListeningUri(), null, IpToolStripMenuItem_Click));
-                this.contextMenuStrip.Items.AddRange(_startedMenuItems);
+            this.contextMenuStrip.Items.Add(RemoteControlApp.IsUiListening
+                ? new ToolStripMenuItem(RemoteControlApp.GetUiListeningUri(), null, IpToolStripMenuItem_Click)
+                : this.stoppedToolStripMenuItem);
 
-            }
-            else
-            {
-                this.contextMenuStrip.Items.AddRange(_stoppedMenuItems);
-            }
+            this.contextMenuStrip.Items.Add(this.toolStripSeparator1);
+
+            this.contextMenuStrip.Items.Add(RemoteControlApp.IsUiListening
+                ? this.stopToolStripMenuItem
+                : this.startToolStripMenuItem);
+
+            this.contextMenuStrip.Items.AddRange(_commonMenuItems);
         }
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -126,6 +120,14 @@ namespace RemoteControl
         private void ConfigForm_Shown(object sender, EventArgs e)
         {
             Hide();
+        }
+
+        private void autostartStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var value = !this.autostartStripMenuItem.Checked;
+
+            AutostartService.SetAutostart(value);
+            this.autostartStripMenuItem.Checked = value;
         }
     }
 }

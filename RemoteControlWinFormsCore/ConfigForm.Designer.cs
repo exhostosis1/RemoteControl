@@ -38,6 +38,7 @@
             this.stoppedToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.autostartStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -57,9 +58,10 @@
             this.closeToolStripMenuItem,
             this.stoppedToolStripMenuItem,
             this.toolStripSeparator1,
-            this.toolStripSeparator2});
+            this.toolStripSeparator2,
+            this.autostartStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip1";
-            this.contextMenuStrip.Size = new System.Drawing.Size(137, 104);
+            this.contextMenuStrip.Size = new System.Drawing.Size(137, 126);
             // 
             // placeholderToolStripMenuItem
             // 
@@ -97,6 +99,13 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(133, 6);
+            // 
+            // autostartStripMenuItem
+            // 
+            this.autostartStripMenuItem.Name = "autostartStripMenuItem";
+            this.autostartStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.autostartStripMenuItem.Text = "Autostart";
+            this.autostartStripMenuItem.Click += new System.EventHandler(this.autostartStripMenuItem_Click);
             // 
             // startToolStripMenuItem
             // 
@@ -138,6 +147,7 @@
         private ToolStripSeparator toolStripSeparator1;
         private ToolStripMenuItem startToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator2;
+        private ToolStripMenuItem autostartStripMenuItem;
     }
 }
 

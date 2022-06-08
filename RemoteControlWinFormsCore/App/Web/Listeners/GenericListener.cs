@@ -11,6 +11,8 @@ namespace RemoteControl.App.Web.Listeners
 
         public event HttpEventHandler? OnRequest;
 
+        private readonly TaskFactory _factory = new();
+
         public void StartListen(string url)
         {
             try
@@ -29,7 +31,7 @@ namespace RemoteControl.App.Web.Listeners
 
             _listener.Start();
 
-            Task.Run(ProcessRequest);
+            _factory.StartNew(ProcessRequest, TaskCreationOptions.LongRunning);
         }
 
         private async Task ProcessRequest()
