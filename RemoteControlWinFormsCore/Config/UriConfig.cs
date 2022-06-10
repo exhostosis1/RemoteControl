@@ -15,5 +15,7 @@ namespace RemoteControl.Config
         internal int Port { get; set; } = 1488;
 
         internal Uri Uri => new UriBuilder(Scheme, Host, Port).Uri;
+
+        public override string ToString() => $"{Scheme}://{Host}:{Port}/";
     }
 }
