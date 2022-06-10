@@ -486,7 +486,7 @@
             
             buttonPause.addEventListener('pointerup', () => {
                 clearTimeout(timeout);
-                if((newDate).getTime() - startTime.getTime() < buttonschangeCLICKINTERVAL) {
+                if((new Date()).getTime() - startTime.getTime() < buttonschangeCLICKINTERVAL) {
                     clickEvent.value = 'pause';
                     buttons.dispatchEvent(clickEvent);
                 }
