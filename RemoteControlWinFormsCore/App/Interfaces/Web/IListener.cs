@@ -1,6 +1,4 @@
-﻿using RemoteControl.App.Utility;
-
-namespace RemoteControl.App.Interfaces.Web
+﻿namespace RemoteControl.App.Interfaces.Web
 {
     public interface IListener
     {

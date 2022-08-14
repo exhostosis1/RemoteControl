@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using RemoteControl.App.Interfaces.Web;
-using RemoteControl.App.Utility;
 using RemoteControl.App.Web.DataObjects;
 
 namespace RemoteControl.App.Web.Listeners

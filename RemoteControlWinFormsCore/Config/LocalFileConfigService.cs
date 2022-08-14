@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using RemoteControl.App.Interfaces;
-using RemoteControl.App.Utility;
 
 namespace RemoteControl.Config
 {

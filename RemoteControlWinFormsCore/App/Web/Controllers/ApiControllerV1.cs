@@ -1,7 +1,6 @@
 ﻿using RemoteControl.App.Control;
 using RemoteControl.App.Enums;
 using RemoteControl.App.Interfaces.Web;
-using RemoteControl.App.Utility;
 using System.Net;
 using System.Text;
 using System.Text.Json;
