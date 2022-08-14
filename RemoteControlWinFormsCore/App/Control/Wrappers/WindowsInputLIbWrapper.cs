@@ -5,17 +5,17 @@ using WindowsInputLib.Native;
 
 namespace RemoteControl.App.Control.Wrappers
 {
-    internal class WindowsInputLibWrapper : IControlInput
+    internal class WindowsInputLibWrapper : IKeyboardControl, IMouseControl
     {
         private readonly InputSimulator _inputSim = new();
         private static readonly Dictionary<KeysEnum, VirtualKeyCode> KeyboardKeys = new()
         {
             { KeysEnum.Enter, VirtualKeyCode.Enter },
-            { KeysEnum.Forth, VirtualKeyCode.Right },
-            { KeysEnum.Back, VirtualKeyCode.Left },
+            { KeysEnum.ArrowRight, VirtualKeyCode.Right },
+            { KeysEnum.ArrowLeft, VirtualKeyCode.Left },
             { KeysEnum.MediaForth, VirtualKeyCode.MediaNextTrack },
             { KeysEnum.MediaBack, VirtualKeyCode.MediaPrevTrack },
-            { KeysEnum.Pause, VirtualKeyCode.MediaPlayPause },
+            { KeysEnum.MediaPlayPause, VirtualKeyCode.MediaPlayPause },
         };
         private static readonly Dictionary<MouseKeysEnum, MouseButton> MouseKeys = new()
         {
@@ -42,7 +42,7 @@ namespace RemoteControl.App.Control.Wrappers
             }
         }
 
-        public void MouseKeyPress(MouseKeysEnum key = MouseKeysEnum.Left, KeyPressMode mode = KeyPressMode.Click)
+        public void KeyPress(MouseKeysEnum key = MouseKeysEnum.Left, KeyPressMode mode = KeyPressMode.Click)
         {
             switch (mode)
             {
@@ -60,12 +60,12 @@ namespace RemoteControl.App.Control.Wrappers
             }
         }
 
-        public void MouseMove(int x, int y)
+        public void Move(int x, int y)
         {
             _inputSim.Mouse.MoveMouseBy(x, y);
         }
 
-        public void MouseWheel(bool up)
+        public void Wheel(bool up)
         {
             _inputSim.Mouse.VerticalScroll(up ? 1 : -1);
         }

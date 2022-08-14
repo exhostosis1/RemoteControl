@@ -1,6 +1,6 @@
 ﻿namespace RemoteControl.App.Interfaces.Web
 {
-    public interface IController
+    public interface IMiddleware
     {
         public void ProcessRequest(IContext context);
     }

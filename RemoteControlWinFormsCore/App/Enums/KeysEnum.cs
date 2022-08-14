@@ -3,9 +3,9 @@
     public enum KeysEnum
     {
         Enter,
-        Back,
-        Forth,
-        Pause,
+        ArrowLeft,
+        ArrowRight,
+        MediaPlayPause,
         MediaForth,
         MediaBack
     }

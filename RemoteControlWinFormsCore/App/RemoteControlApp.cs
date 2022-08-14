@@ -9,7 +9,7 @@ namespace RemoteControl.App
 
         private const string ApiVersion = "v1";
 
-        public RemoteControlApp(IListener uiListener, IListener apiListener, IController fileController, IController apiController)
+        public RemoteControlApp(IListener uiListener, IListener apiListener, IMiddleware fileController, IMiddleware apiController)
         {
             _apiListener = apiListener;
             _uiListener = uiListener;

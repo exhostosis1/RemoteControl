@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace RemoteControl.App.Control.Wrappers
 {
-    internal class User32Wrapper: IControlDisplay
+    internal class User32Wrapper: IDisplayControl
     {
         private enum MonitorState
         {

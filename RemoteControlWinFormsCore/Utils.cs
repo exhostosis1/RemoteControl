@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using RemoteControl.App.Web.Attributes;
 
 namespace RemoteControl
 {
@@ -22,21 +23,39 @@ namespace RemoteControl
             return true;
         }
 
-        public static void Deconstruct(this string[] list, out string lastButOne, out string last)
-        {
-            if (list.Length < 2)
-            {
-                lastButOne = last = string.Empty;
-                return;
-            }
-
-            lastButOne = list[^2];
-            last = list[^1];
-        }
-
         internal static string? GetDisplayName<T>(this T type) where T: MemberInfo
         {
             return type.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName;
+        }
+
+        internal static string? GetControllerName(this Type controller)
+        {
+            return controller.GetCustomAttribute<ControllerAttribute>()?.Name;
+        }
+
+        internal static string? GetActionName(this MethodInfo methodInfo)
+        {
+            return methodInfo.GetCustomAttribute<ActionAttribute>()?.Name;
+        }
+
+        internal static (string, string, string) ParsePath(this string path, string apiVersion)
+        {
+            var split = path[(path.IndexOf(apiVersion, StringComparison.Ordinal) + apiVersion.Length)..]
+                .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return split.Length switch
+            {
+                < 2 => ("", "", ""),
+                < 3 => (split[0], split[1], ""),
+                _ => (split[0], split[1], split[2])
+            };
+        }
+
+        internal static (string, string) ParseConfig(this string config)
+        {
+            var split = config.Split('=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            return split.Length < 2 ? ("", "") : (split[0], split[1]);
         }
     }
 }

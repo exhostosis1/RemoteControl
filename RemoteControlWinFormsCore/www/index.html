@@ -9,8 +9,8 @@
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
     <script>
-        function sendRequest(method, param) {
-            return fetch(`/api/v1/${method}/${param}`);
+        function sendRequest(controller, action, param) {
+            return fetch(`/api/v1/${controller}/${action}/${param ?? ''}`);
         }
 
         class Point {
@@ -520,7 +520,7 @@
             const slider = document.getElementById('slider');
             if (slider) {
                 createVolumeBar(slider, 100, volume, true);
-                slider.addEventListener('volumechanged', e => sendRequest("audio", e.value));
+                slider.addEventListener('volumechanged', e => sendRequest("audio", "setvolume", e.value));
             }
 
             const touch = document.getElementById('touch');
@@ -529,7 +529,7 @@
 
                 new GestureDetector(touch, {
                     oneFingerClick: () => sendRequest("mouse", 'left'),
-                    oneFingerMove: (x, y) => sendRequest("mousemove", `${x},${y}`),
+                    oneFingerMove: (x, y) => sendRequest("mouse", "move", `${x},${y}`),
                     oneFingerDrag: e => sendRequest("mouse", e ? 'dragstart' : 'dragstop'),
                     twoFingersClick: () => sendRequest("mouse", 'right'),
                     twoFingersMove: (x, y) => sendRequest("mouse", y > 0 ? "up" : "down"),
@@ -546,7 +546,7 @@
             const textInput = document.getElementById('text-input');
             if (textInput) {
                 createTextInput(textInput);
-                textInput.addEventListener('textinput', e => sendRequest("text", e.text));
+                textInput.addEventListener('textinput', e => sendRequest("keyboard", "text", e.text));
                 textInput.addEventListener('focus', () => touchHide());
                 textInput.addEventListener('blur', e => {
                     e.target.value = '';
@@ -573,7 +573,7 @@
                 return;
             }
 
-            let devices = JSON.parse(await (await sendRequest('audiodevice', 'get')).text());
+            let devices = JSON.parse(await (await sendRequest('audio', 'getdevice')).text());
 
             devicesElement.innerHTML = '';
 
@@ -589,8 +589,8 @@
         }
 
         async function setDevice(id) {
-            await sendRequest('audiodevice', id);
-            let volume = await (await sendRequest('audio', 'init')).text();
+            await sendRequest('audio', 'setdevice', id);
+            let volume = await (await sendRequest('audio', 'getvolume')).text();
 
             init(volume);
             document.getElementById('devices').style.display = 'none';
@@ -608,8 +608,8 @@
 
             document.querySelector("meta[name=viewport]").setAttribute("content", "width=" + window.innerWidth + ", height=" + window.innerHeight + ", initial-scale=1.0, maximum-scale=1.0, user-scalable=0");
 
-            let devices = JSON.parse(await (await sendRequest('audiodevice', 'get')).text());
-            let volume = await (await sendRequest('audio', 'init')).text();
+            let devices = JSON.parse(await (await sendRequest('audio', 'getdevice')).text());
+            let volume = await (await sendRequest('audio', 'getvolume')).text();
 
             initElements(volume, devices);
         });

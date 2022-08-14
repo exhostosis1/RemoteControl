@@ -11,7 +11,7 @@ namespace RemoteControl.App.Control.Wrappers
         public bool IsActive { get; set; }
         public bool IsDefault { get; set; }
     }
-    internal class AudioSwitchWrapper: IControlAudio
+    internal class AudioSwitchWrapper: IAudioControl
     {
         private IDevice _audioDevice;
         private readonly IAudioController _audioController = new CoreAudioController();

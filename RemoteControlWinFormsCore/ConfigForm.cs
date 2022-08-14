@@ -38,15 +38,15 @@ namespace RemoteControl
             _context = SynchronizationContext.Current;
 
             this.autostartStripMenuItem.Checked = autostart.CheckAutostart();
-
-            if(_prefUri != null)
-                StartListening(_prefUri);   
+            
+            StartListening(_prefUri!);   
         }
 
        private void StartListening(Uri uri)
         {
             try
             {
+                if (uri is null) throw new ArgumentNullException();
                 _app.Start(uri);
             }
             catch (Exception e)

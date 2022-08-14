@@ -1,9 +1,9 @@
 ﻿using RemoteControl.App.Interfaces.Web;
 using System.Net;
 
-namespace RemoteControl.App.Web.Controllers
+namespace RemoteControl.App.Web.Middleware
 {
-    internal class FileController: IController
+    internal class FileMiddleware : IMiddleware
     {
         private static readonly string ContentFolder = AppContext.BaseDirectory + "www";
 

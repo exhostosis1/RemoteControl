@@ -1,6 +1,6 @@
 ﻿namespace RemoteControl.App.Interfaces.Control
 {
-    public interface IControlDisplay
+    public interface IDisplayControl
     {
         void Darken();
     }

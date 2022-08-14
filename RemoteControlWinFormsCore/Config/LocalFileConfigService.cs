@@ -29,7 +29,7 @@ namespace RemoteControl.Config
                 if(line.StartsWith('[') && line.EndsWith(']'))
                 {
                     var name = line[1..^1];
-                    var types = result.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+                    var types = result.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                         .Where(x => x.PropertyType.GetInterface(nameof(IConfigItem)) != null);
 
                     var configItemProp = types.SingleOrDefault(x => x.PropertyType.GetDisplayName() == name);
@@ -45,8 +45,7 @@ namespace RemoteControl.Config
                 {
                     try
                     {
-                        var (param, value) = line.Split('=',
-                            StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        var (param, value) = line.ParseConfig();
 
                         var prop = configItem.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
                             .SingleOrDefault(x => x.GetDisplayName() == param);
