@@ -15,35 +15,40 @@ namespace RemoteControl.App.Web.Controllers
         }
 
         [Action("getdevice")]
-        public string AudioDevice()
+        public string? AudioDevice(string _)
         {
             return JsonSerializer.Serialize(_audio.GetDevices());
         }
 
         [Action("setdevice")]
-        public void SetDevice(string? param)
+        public string? SetDevice(string param)
         {
             if (Guid.TryParse(param, out var guid))
             {
                 _audio.SetDevice(guid);
+                return ("done");
             }
+
+            return "error";
         }
 
         [Action("getvolume")]
-        public string GetVolume()
+        public string? GetVolume(string _)
         {
             return _audio.Volume.ToString();
         }
 
         [Action("setvolume")]
-        public void SetVolume(string? param)
+        public string? SetVolume(string param)
         {
-            if (!int.TryParse(param, out var result)) return;
+            if (!int.TryParse(param, out var result)) return "error";
 
             result = result > 100 ? 100 : result < 0 ? 0 : result;
 
             _audio.Volume = result;
             _audio.Mute(result == 0);
+
+            return "done";
         }
     }
 }

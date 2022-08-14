@@ -15,37 +15,47 @@ namespace RemoteControl.App.Web.Controllers
         }
 
         [Action("left")]
-        public void Left()
+        public string? Left(string _)
         {
             _input.KeyPress();
+
+            return "done";
         }
 
         [Action("right")]
-        public void Right()
+        public string? Right(string _)
         {
             _input.KeyPress(MouseKeysEnum.Right);
+
+            return "done";
         }
 
         [Action("middle")]
-        public void Middle()
+        public string? Middle(string _)
         {
             _input.KeyPress(MouseKeysEnum.Middle);
+
+            return "done";
         }
 
         [Action("up")]
-        public void DragUp()
+        public string? DragUp(string _)
         {
             _input.Wheel(true);
+
+            return "done";
         }
 
         [Action("down")]
-        public void DragDown()
+        public string? DragDown(string _)
         {
             _input.Wheel(false);
+
+            return "done";
         }
 
         [Action("dragstart")]
-        public void DragStart()
+        public string? DragStart(string _)
         {
             _input.KeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
             Task.Run(async () =>
@@ -53,21 +63,27 @@ namespace RemoteControl.App.Web.Controllers
                 await Task.Delay(5_000);
                 _input.KeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
             });
+
+            return "done";
         }
 
         [Action("dragstop")]
-        public void DragStop()
+        public string? DragStop(string _)
         {
             _input.KeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+
+            return "done";
         }
 
         [Action("move")]
-        public void Move(string param)
+        public string? Move(string param)
         {
             if (Utils.TryGetCoords(param, out var x, out var y))
             {
                 _input.Move(x, y);
             }
+
+            return null;
         }
     }
 }

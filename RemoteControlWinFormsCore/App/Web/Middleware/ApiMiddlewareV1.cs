@@ -1,73 +1,51 @@
-﻿using RemoteControl.App.Interfaces.Control;
-using RemoteControl.App.Interfaces.Web;
+﻿using RemoteControl.App.Interfaces.Web;
 using RemoteControl.App.Web.Controllers;
+using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
-using Windows.Media.Audio;
 
 namespace RemoteControl.App.Web.Middleware
 {
-    internal class InternalMethodInfo
-    {
-        public object Controller { get; set; }
-        public MethodInfo Method { get; set; }
-        public bool HasParameter { get; set; }
-        public bool HasValue { get; set; }
-    }
-
     internal class ApiMiddlewareV1 : IMiddleware
     {
-        private readonly Dictionary<string, Dictionary<string, InternalMethodInfo>> _methods = new();
-        private readonly Dictionary<Type, object> _deps = new();
+        private readonly Dictionary<string, Dictionary<string, Func<string, string?>>> _methods = new();
 
         private const string ApiVersion = "v1";
 
-        public ApiMiddlewareV1(IDisplayControl displayControl, IKeyboardControl keyboardControl,
-            IMouseControl mouseControl, IAudioControl audioControl)
+        private Type GetDelegateType(Type returnType, Type[] paramTypes)
         {
-            _deps.Add(typeof(IDisplayControl), displayControl);
-            _deps.Add(typeof(IKeyboardControl), keyboardControl);
-            _deps.Add(typeof(IMouseControl), mouseControl);
-            _deps.Add(typeof(IAudioControl), audioControl);
+            return returnType == typeof(void)
+                ? Expression.GetActionType(paramTypes)
+                : Expression.GetFuncType(paramTypes.Concat(new[] { returnType }).ToArray());
+        }
 
-            var controllers = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(t => t.GetTypes())
-                .Where(t => t.IsClass && t.BaseType == typeof(BaseController)).ToList();
-
-            foreach (var controllerType in controllers)
+        public ApiMiddlewareV1(IEnumerable<BaseController> controllers)
+        {
+            foreach (var controller in controllers)
             {
-                var controllerKey = controllerType.GetControllerName();
+                var controllerKey = controller.GetType().GetControllerName();
 
                 if (string.IsNullOrEmpty(controllerKey)) continue;
 
-                var methods = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance);
+                var methods = controller.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    .Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 && x.GetParameters().First().ParameterType == typeof(string)).ToArray();
 
                 if (methods.Length == 0) continue;
-                var constructor = controllerType.GetConstructors().First();
-                var constructorParams = constructor.GetParameters().Select(x => _deps[x.ParameterType]).ToArray();
 
-                var controller = constructor.Invoke(constructorParams);
-
-                var controllerValue = new Dictionary<string, InternalMethodInfo>();
+                var controllerValue = new Dictionary<string, Func<string, string?>>();
 
                 foreach (var methodInfo in methods)
                 {
                     var action = methodInfo.GetActionName();
                     if (string.IsNullOrEmpty(action)) continue;
 
-                    var value = new InternalMethodInfo
-                    {
-                        Method = methodInfo,
-                        HasValue = methodInfo.ReturnType != typeof(void),
-                        HasParameter = methodInfo.GetParameters().Length > 0,
-                        Controller = controller
-                    };
+                    var value = methodInfo.CreateDelegate<Func<string, string?>>(controller);
 
                     controllerValue.Add(action, value);
                 }
 
-                if (controllerValue.Any())
+                if (controllerValue.Count > 0)
                 {
                     _methods.Add(controllerKey, controllerValue);
                 }
@@ -84,14 +62,12 @@ namespace RemoteControl.App.Web.Middleware
                 return;
             }
 
-            var actionInfo = _methods[controller][action];
+            var result = _methods[controller][action](param);
 
-            var result = actionInfo.Method.Invoke(actionInfo.Controller, actionInfo.HasParameter ? new object?[] { param } : null);
-
-            if (actionInfo.HasValue && result is string res)
+            if (!string.IsNullOrEmpty(result))
             {
                 context.Response.ContentType = "application/json";
-                context.Response.Payload = Encoding.UTF8.GetBytes(res);
+                context.Response.Payload = Encoding.UTF8.GetBytes(result);
             }
         }
     }

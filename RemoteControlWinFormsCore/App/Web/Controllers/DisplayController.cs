@@ -14,9 +14,11 @@ namespace RemoteControl.App.Web.Controllers
         }
 
         [Action("darken")]
-        public void DisplayControl()
+        public string? DisplayControl(string _)
         {
             _display.Darken();
+
+            return "done";
         }
     }
 }

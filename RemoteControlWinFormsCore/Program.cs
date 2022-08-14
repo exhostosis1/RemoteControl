@@ -1,5 +1,6 @@
 using RemoteControl.App;
 using RemoteControl.App.Control.Wrappers;
+using RemoteControl.App.Web.Controllers;
 using RemoteControl.App.Web.Listeners;
 using RemoteControl.App.Web.Middleware;
 using RemoteControl.Autostart;
@@ -26,7 +27,16 @@ namespace RemoteControl
             var uiListener = new GenericListener();
             var apiListener = new GenericListener();
             var fileController = new FileMiddleware();
-            var apiController = new ApiMiddlewareV1(display, input, input, audio);
+
+            var controllers = new BaseController[]
+            {
+                new AudioController(audio),
+                new KeyboardController(input),
+                new MouseController(input),
+                new DisplayController(display)
+            };
+
+            var apiController = new ApiMiddlewareV1(controllers);
 
             var app = new RemoteControlApp(uiListener, apiListener, fileController, apiController);
             var config = new LocalFileConfigService(logger);

@@ -16,40 +16,52 @@ namespace RemoteControl.App.Web.Controllers
         }
 
         [Action("back")]
-        public void Back()
+        public string? Back(string _)
         {
             _input.KeyPress(KeysEnum.ArrowLeft);
+
+            return "done";
         }
 
         [Action("forth")]
-        public void Forth()
+        public string? Forth(string _)
         {
             _input.KeyPress(KeysEnum.ArrowRight);
+
+            return "done";
         }
 
         [Action("pause")]
-        public void Pause()
+        public string? Pause(string _)
         {
             _input.KeyPress(KeysEnum.MediaPlayPause);
+
+            return "done";
         }
 
         [Action("mediaback")]
-        public void MediaBack()
+        public string? MediaBack(string _)
         {
             _input.KeyPress(KeysEnum.MediaBack);
+
+            return "done";
         }
 
         [Action("mediaforth")]
-        public void MediaForth()
+        public string? MediaForth(string _)
         {
             _input.KeyPress(KeysEnum.MediaForth);
+
+            return "done";
         }
 
         [Action("text")]
-        public void TextInput(string param)
+        public string? TextInput(string param)
         {
             _input.TextInput(WebUtility.UrlDecode(param));
             _input.KeyPress(KeysEnum.Enter);
+
+            return "done";
         }
     }
 }
