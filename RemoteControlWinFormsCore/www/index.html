@@ -10,7 +10,7 @@
 
     <script>
         function sendRequest(controller, action, param) {
-            return fetch(`/api/v1/${controller}/${action}/${param ?? ''}`);
+            return fetch(`/api/v1/${controller}/${action}/${param || ''}`);
         }
 
         class Point {
