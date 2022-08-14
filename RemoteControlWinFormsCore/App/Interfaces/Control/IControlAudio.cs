@@ -4,7 +4,7 @@
     {
         int Volume { get; set; }
         void Mute(bool mute);
-        IEnumerable<IAudioDevice> GetDevices();
+        IReadOnlyCollection<IAudioDevice> GetDevices();
         void SetDevice(Guid id);
     }
 

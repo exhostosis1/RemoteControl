@@ -1,12 +1,20 @@
 ﻿using System.Reflection;
+using RemoteControl.App.Interfaces;
+using RemoteControl.App.Utility;
 
 namespace RemoteControl.Config
 {
-    internal static class ConfigHelper
+    internal class LocalFileConfigService: IConfigService
     {
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
-        
-        public static AppConfig GetAppConfigFromFile()
+        private readonly ILogger _logger;
+
+        public LocalFileConfigService(ILogger logger)
+        {
+            _logger = logger;
+        }
+
+        public AppConfig GetConfig()
         {
             var result = new AppConfig();
 
@@ -36,38 +44,32 @@ namespace RemoteControl.Config
 
                 if (line.Contains('=') && configItem != null)
                 {
-                    string param;
-                    string value;
-
                     try
                     {
-                        (param, value) = line.Split('=',
+                        var (param, value) = line.Split('=',
                             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+                        var prop = configItem.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+                            .SingleOrDefault(x => x.GetDisplayName() == param);
+
+                        if (prop == null) continue;
+
+                        var propType = prop.PropertyType;
+                        var convertedValue = Convert.ChangeType(value, propType);
+
+                        prop.SetValue(configItem, convertedValue);
                     }
                     catch (Exception e)
                     {
-                        Logger.Log(e.Message);
-                        continue;
+                        _logger.Log(e.Message);
                     }
-
-                    var props = configItem.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance);
-
-                    var prop = configItem.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
-                        .SingleOrDefault(x => x.GetDisplayName() == param);
-
-                    if (prop == null) continue;
-
-                    var propType = prop.PropertyType;
-                    var convertedValue = Convert.ChangeType(value, propType);
-
-                    prop.SetValue(configItem, convertedValue);
                 }
             }
 
             return result;
         }
 
-        public static void SaveConfigToFile(AppConfig appConfig)
+        public bool SetConfig(AppConfig appConfig)
         {
             var result = new List<string>();
 
@@ -93,12 +95,8 @@ namespace RemoteControl.Config
             }
 
             File.WriteAllLines(ConfigPath, result);
-        }
 
-        public static void Deconstruct(this string[] input, out string param, out string value)
-        {
-            param = input[0];
-            value = input[1];
+            return true;
         }
     }
 }

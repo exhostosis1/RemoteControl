@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
+using RemoteControl.App.Interfaces;
 
 namespace RemoteControl.Config
 {
     [DisplayName("Common")]
-    internal class CommonConfig : IConfigItem
+    public class CommonConfig : IConfigItem
     {
         [DisplayName("autostart")] 
         internal bool Autostart { get; set; } = false;

@@ -1,8 +1,7 @@
 ﻿using RemoteControl.App;
+using RemoteControl.App.Interfaces;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using RemoteControl.Config;
-using RemoteControl.Autostart;
 
 namespace RemoteControl
 {
@@ -12,14 +11,22 @@ namespace RemoteControl
 
         private readonly ToolStripItem[] _commonMenuItems;
 
-        private readonly Uri? _prefUri = ConfigHelper.GetAppConfigFromFile().Uri?.Uri;
+        private readonly Uri? _prefUri;
         private readonly RemoteControlApp _app;
 
-        public ConfigForm(RemoteControlApp app)
+        private readonly IAutostartService _autostart;
+
+        private readonly ILogger _logger;
+
+        public ConfigForm(RemoteControlApp app, IConfigService config, IAutostartService autostart, ILogger logger)
         {
             InitializeComponent();
 
+            _prefUri = config.GetConfig().Uri?.Uri;
+
             _app = app;
+            _autostart = autostart;
+            _logger = logger;
 
             _commonMenuItems = new ToolStripItem[]
             {
@@ -30,9 +37,10 @@ namespace RemoteControl
 
             _context = SynchronizationContext.Current;
 
-            this.autostartStripMenuItem.Checked = AutostartService.CheckAutostart();
+            this.autostartStripMenuItem.Checked = autostart.CheckAutostart();
 
-            StartListening(_prefUri);   
+            if(_prefUri != null)
+                StartListening(_prefUri);   
         }
 
        private void StartListening(Uri uri)
@@ -43,7 +51,7 @@ namespace RemoteControl
             }
             catch (Exception e)
             {
-                Logger.Log(e.Message);
+                _logger.Log(e.Message);
             }
             finally
             {
@@ -129,7 +137,7 @@ namespace RemoteControl
         {
             var value = !this.autostartStripMenuItem.Checked;
 
-            AutostartService.SetAutostart(value);
+            _autostart.SetAutostart(value);
             this.autostartStripMenuItem.Checked = value;
         }
     }

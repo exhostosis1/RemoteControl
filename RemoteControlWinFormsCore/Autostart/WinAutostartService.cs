@@ -1,13 +1,14 @@
 ﻿using Microsoft.Win32.TaskScheduler;
+using RemoteControl.App.Interfaces;
 
 namespace RemoteControl.Autostart
 {
-    internal static class AutostartService
+    internal class WinAutostartService: IAutostartService
     {
-        private static readonly TaskService _ts = new();
+        private readonly TaskService _ts = new();
         private const string TaskName = "RemoteControl";
-        private static readonly TaskDefinition _td;
-        static AutostartService()
+        private readonly TaskDefinition _td;
+        public WinAutostartService()
         {
             _td = _ts.NewTask();
             _td.Actions.Add(AppContext.BaseDirectory + "run.bat", null, AppContext.BaseDirectory);
@@ -15,12 +16,12 @@ namespace RemoteControl.Autostart
             _td.Principal.RunLevel = TaskRunLevel.Highest;
         }
 
-        public static bool CheckAutostart()
+        public bool CheckAutostart()
         {
             return _ts.FindTask(TaskName)?.Enabled ?? false;
         }
 
-        public static void SetAutostart(bool value)
+        public void SetAutostart(bool value)
         {
             var task = _ts.FindTask(TaskName);
 

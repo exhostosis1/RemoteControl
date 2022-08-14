@@ -21,6 +21,12 @@ namespace RemoteControl.App.Web.Controllers
         {
             var uriPath = context.Request.Path;
 
+            if (uriPath.Contains(".."))
+            {
+                context.Response.StatusCode = HttpStatusCode.NotFound;
+                return;
+            }
+
             var path = ContentFolder + uriPath;
 
             if (string.IsNullOrEmpty(uriPath) || uriPath == "/")

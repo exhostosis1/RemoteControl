@@ -1,8 +1,8 @@
 ﻿namespace RemoteControl.Config
 {
-    internal class AppConfig
+    public class AppConfig
     {
-        internal UriConfig? Uri { get; set; }
-        internal CommonConfig? Common { get; set; }
+        public UriConfig? Uri { get; set; }
+        public CommonConfig? Common { get; set; }
     }
 }

@@ -29,7 +29,7 @@ namespace RemoteControl.App.Web.Listeners
 
             _listener.Prefixes.Clear();
 
-            _listener.Prefixes.Add(url.ToString());
+            _listener.Prefixes.Add(url);
 
             _listener.Start();
 

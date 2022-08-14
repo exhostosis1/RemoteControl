@@ -3,6 +3,8 @@ using RemoteControl.App.Control;
 using RemoteControl.App.Control.Wrappers;
 using RemoteControl.App.Web.Controllers;
 using RemoteControl.App.Web.Listeners;
+using RemoteControl.Autostart;
+using RemoteControl.Config;
 
 namespace RemoteControl
 {
@@ -16,6 +18,8 @@ namespace RemoteControl
         {
             ApplicationConfiguration.Initialize();
 
+            var logger = new FileLogger(AppContext.BaseDirectory + "error.log");
+
             var audio = new AudioSwitchWrapper();
             var input = new WindowsInputLibWrapper();
             var display = new User32Wrapper();
@@ -28,7 +32,10 @@ namespace RemoteControl
             var apiController = new ApiControllerV1(controls);
 
             var app = new RemoteControlApp(uiListener, apiListener, fileController, apiController);
-            var form = new ConfigForm(app);
+            var config = new LocalFileConfigService(logger);
+            var autostart = new WinAutostartService();
+
+            var form = new ConfigForm(app, config, autostart, logger);
 
             Application.Run(form);
         }

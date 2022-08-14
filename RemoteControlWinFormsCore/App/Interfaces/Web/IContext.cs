@@ -2,7 +2,7 @@
 {
     public interface IContext
     {
-        public IRequest Request { get; set; }
-        public IResponse Response { get; set; }
+        public IRequest Request { get; }
+        public IResponse Response { get; }
     }
 }

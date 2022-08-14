@@ -27,7 +27,7 @@ namespace RemoteControl.App.Control.Wrappers
             _audioDevice = _audioController.GetDefaultDevice(DeviceType.Playback, Role.Multimedia);
         }
 
-        public IEnumerable<IAudioDevice> GetDevices()
+        public IReadOnlyCollection<IAudioDevice> GetDevices()
         {
             return _audioController.GetDevices(DeviceType.Playback, DeviceState.Active).Select(x => new AudioDevice
             {
@@ -35,7 +35,7 @@ namespace RemoteControl.App.Control.Wrappers
                 IsDefault = x.IsDefaultDevice,
                 IsActive = x.Id == _audioDevice.Id,
                 Name = x.FullName
-            });
+            }).ToList();
         }
 
         public void SetDevice(Guid id)

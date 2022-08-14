@@ -1,26 +1,36 @@
 ﻿using System.Collections.Concurrent;
+using RemoteControl.App.Interfaces;
 
 namespace RemoteControl
 {
-    internal static class Logger
+    public class FileLogger: ILogger
     {
-        private static readonly BlockingCollection<string> Messages = new ();
+        private readonly BlockingCollection<string> _messages = new ();
+        private readonly string _path;
 
-        static Logger()
+        public FileLogger(string filePath)
         {
+            if (string.IsNullOrWhiteSpace(filePath) || !Path.IsPathFullyQualified(filePath))
+                throw new ArgumentException(nameof(filePath));
+
+            if (!File.Exists(filePath))
+                File.Create(filePath);
+
+            _path = filePath;
+
             new TaskFactory().StartNew(WriteMessages, TaskCreationOptions.LongRunning);
         }
 
-        public static void Log(string message)
+        public void Log(string message)
         {
-            Messages.Add(message);
+            _messages.Add(message);
         }
 
-        private static void WriteMessages()
+        private void WriteMessages()
         {
-            foreach (var msg in Messages.GetConsumingEnumerable())
+            foreach (var msg in _messages.GetConsumingEnumerable())
             {
-                File.AppendAllText(AppContext.BaseDirectory + "error.log", $"{DateTime.Now:G} {msg}\n");
+                File.AppendAllText(_path, $"{DateTime.Now:G} {msg}\n");
             }
         }
     }

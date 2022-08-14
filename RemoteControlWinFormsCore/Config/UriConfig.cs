@@ -1,9 +1,10 @@
 ﻿using System.ComponentModel;
+using RemoteControl.App.Interfaces;
 
 namespace RemoteControl.Config
 {
     [DisplayName("Uri")]
-    internal class UriConfig : IConfigItem
+    public class UriConfig : IConfigItem
     {
         [DisplayName("host")] 
         internal string Host { get; set; } = "localhost";
