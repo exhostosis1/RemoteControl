@@ -1,9 +1,9 @@
-﻿using System.Net;
-using RemoteControl.App.Web.DataObjects;
+﻿using RemoteControl.App.Interfaces.Web;
+using System.Net;
 
 namespace RemoteControl.App.Web.Controllers
 {
-    internal static class FileController
+    internal class FileController: IController
     {
         private static readonly string ContentFolder = AppContext.BaseDirectory + "www";
 
@@ -17,7 +17,7 @@ namespace RemoteControl.App.Web.Controllers
             { ".css", "text/css" }
         };
 
-        public static void ProcessRequest(Context context)
+        public void ProcessRequest(IContext context)
         {
             var uriPath = context.Request.Path;
 

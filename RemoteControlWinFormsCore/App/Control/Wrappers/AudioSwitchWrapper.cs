@@ -1,6 +1,6 @@
 ﻿using AudioSwitcher.AudioApi;
 using AudioSwitcher.AudioApi.CoreAudio;
-using RemoteControl.App.Control.Interfaces;
+using RemoteControl.App.Interfaces.Control;
 
 namespace RemoteControl.App.Control.Wrappers
 {

@@ -1,37 +1,39 @@
-﻿using RemoteControl.App.Web.Controllers;
-using RemoteControl.App.Web.Listeners;
+﻿using RemoteControl.App.Interfaces.Web;
 
 namespace RemoteControl.App
 {
-    public static class RemoteControlApp
+    public class RemoteControlApp
     {
-        private static readonly GenericListener UiListener = new();
-        private static readonly GenericListener ApiListener = new();
+        private readonly IListener _uiListener;
+        private readonly IListener _apiListener;
 
         private const string ApiVersion = "v1";
 
-        static RemoteControlApp()
+        public RemoteControlApp(IListener uiListener, IListener apiListener, IController fileController, IController apiController)
         {
-            UiListener.OnRequest += FileController.ProcessRequest;
-            ApiListener.OnRequest += ApiControllerV1.ProcessRequest;
+            _apiListener = apiListener;
+            _uiListener = uiListener;
+
+            _uiListener.OnRequest += fileController.ProcessRequest;
+            _apiListener.OnRequest += apiController.ProcessRequest;
         }
 
-        public static void Start(Uri uri)
+        public void Start(Uri uri)
         {
-            UiListener.StartListen(uri.ToString());
-            ApiListener.StartListen($"{uri}api/{ApiVersion}/");
+            _uiListener.StartListen(uri.ToString());
+            _apiListener.StartListen($"{uri}api/{ApiVersion}/");
         }
 
-        public static void Stop()
+        public void Stop()
         {
-            UiListener.StopListen();
-            ApiListener.StopListen();
+            _uiListener.StopListen();
+            _apiListener.StopListen();
         }
 
-        public static string? GetUiListeningUri() => UiListener.ListeningUris.FirstOrDefault();
-        public static string? GetApiListeningUri() => ApiListener.ListeningUris.FirstOrDefault();
+        public string? GetUiListeningUri() => _uiListener.ListeningUris.FirstOrDefault();
+        public string? GetApiListeningUri() => _apiListener.ListeningUris.FirstOrDefault();
 
-        public static bool IsUiListening => UiListener.IsListening;
-        public static bool IsApiListening => ApiListener.IsListening;
+        public bool IsUiListening => _uiListener.IsListening;
+        public bool IsApiListening => _apiListener.IsListening;
     }
 }

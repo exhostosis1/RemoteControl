@@ -1,4 +1,4 @@
-﻿using RemoteControl.App.Control.Interfaces;
+﻿using RemoteControl.App.Interfaces.Control;
 using System.Runtime.InteropServices;
 
 namespace RemoteControl.App.Control.Wrappers

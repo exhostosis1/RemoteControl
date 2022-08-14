@@ -1,6 +1,6 @@
 ﻿using RemoteControl.App.Enums;
 
-namespace RemoteControl.App.Control.Interfaces
+namespace RemoteControl.App.Interfaces.Control
 {
     public interface IControlInput
     {

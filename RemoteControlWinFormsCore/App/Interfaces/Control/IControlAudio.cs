@@ -1,4 +1,4 @@
-﻿namespace RemoteControl.App.Control.Interfaces
+﻿namespace RemoteControl.App.Interfaces.Control
 {
     public interface IControlAudio
     {

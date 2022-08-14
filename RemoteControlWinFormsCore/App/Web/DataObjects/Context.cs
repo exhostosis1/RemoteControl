@@ -1,9 +1,11 @@
-﻿namespace RemoteControl.App.Web.DataObjects
+﻿using RemoteControl.App.Interfaces.Web;
+
+namespace RemoteControl.App.Web.DataObjects
 {
-    internal class Context
+    internal class Context: IContext
     {
-        internal Request Request { get; set; }
-        internal Response Response { get; set; } = new();
+        public IRequest Request { get; set; }
+        public IResponse Response { get; set; } = new Response();
 
         internal Context(string path) => Request = new Request(path);
     }

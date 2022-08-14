@@ -2,7 +2,7 @@
 {
     internal class AppConfig
     {
-        internal UriConfig Uri { get; set; }
-        internal CommonConfig Common { get; set; }
+        internal UriConfig? Uri { get; set; }
+        internal CommonConfig? Common { get; set; }
     }
 }

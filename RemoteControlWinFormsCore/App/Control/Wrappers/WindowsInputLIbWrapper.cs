@@ -1,5 +1,5 @@
-﻿using RemoteControl.App.Control.Interfaces;
-using RemoteControl.App.Enums;
+﻿using RemoteControl.App.Enums;
+using RemoteControl.App.Interfaces.Control;
 using WindowsInputLib;
 using WindowsInputLib.Native;
 

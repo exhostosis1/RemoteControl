@@ -12,11 +12,14 @@ namespace RemoteControl
 
         private readonly ToolStripItem[] _commonMenuItems;
 
-        private readonly Uri _prefUri = ConfigHelper.GetAppConfigFromFile().Uri.Uri;
+        private readonly Uri? _prefUri = ConfigHelper.GetAppConfigFromFile().Uri?.Uri;
+        private readonly RemoteControlApp _app;
 
-        public ConfigForm()
+        public ConfigForm(RemoteControlApp app)
         {
             InitializeComponent();
+
+            _app = app;
 
             _commonMenuItems = new ToolStripItem[]
             {
@@ -36,7 +39,7 @@ namespace RemoteControl
         {
             try
             {
-                RemoteControlApp.Start(uri);
+                _app.Start(uri);
             }
             catch (Exception e)
             {
@@ -55,13 +58,13 @@ namespace RemoteControl
         {
             this.contextMenuStrip.Items.Clear();
 
-            this.contextMenuStrip.Items.Add(RemoteControlApp.IsUiListening
-                ? new ToolStripMenuItem(RemoteControlApp.GetUiListeningUri(), null, IpToolStripMenuItem_Click)
+            this.contextMenuStrip.Items.Add(_app.IsUiListening
+                ? new ToolStripMenuItem(_app.GetUiListeningUri(), null, IpToolStripMenuItem_Click)
                 : this.stoppedToolStripMenuItem);
 
             this.contextMenuStrip.Items.Add(this.toolStripSeparator1);
 
-            this.contextMenuStrip.Items.Add(RemoteControlApp.IsUiListening
+            this.contextMenuStrip.Items.Add(_app.IsUiListening
                 ? this.stopToolStripMenuItem
                 : this.startToolStripMenuItem);
 
@@ -70,7 +73,7 @@ namespace RemoteControl
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
         {
-            RemoteControlApp.Stop();
+            _app.Stop();
             Application.Exit();
         }
 
@@ -112,7 +115,7 @@ namespace RemoteControl
 
         private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            RemoteControlApp.Stop();
+            _app.Stop();
 
             SetContextMenu();
         }

@@ -1,13 +1,15 @@
 ﻿using System.Net;
+using RemoteControl.App.Interfaces.Web;
+using RemoteControl.App.Utility;
 using RemoteControl.App.Web.DataObjects;
 
 namespace RemoteControl.App.Web.Listeners
 {
-    internal class GenericListener
+    public class GenericListener: IListener
     {
         private HttpListener _listener = new();
         public bool IsListening => _listener.IsListening;
-        public IEnumerable<string> ListeningUris => _listener.Prefixes;
+        public IReadOnlyCollection<string> ListeningUris => _listener.Prefixes.ToList();
 
         public event HttpEventHandler? OnRequest;
 

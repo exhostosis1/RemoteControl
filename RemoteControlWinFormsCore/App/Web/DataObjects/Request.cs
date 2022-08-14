@@ -1,8 +1,10 @@
-﻿namespace RemoteControl.App.Web.DataObjects
+﻿using RemoteControl.App.Interfaces.Web;
+
+namespace RemoteControl.App.Web.DataObjects
 {
-    internal class Request
+    internal class Request: IRequest
     {
-        internal string Path { get; set; }
+        public string Path { get; set; }
 
         internal Request(string path) => Path = path;
     }

@@ -1,25 +1,31 @@
-﻿using RemoteControl.App.Control.Interfaces;
-using RemoteControl.App.Control.Wrappers;
-using RemoteControl.App.Enums;
+﻿using RemoteControl.App.Enums;
+using RemoteControl.App.Interfaces.Control;
 
 namespace RemoteControl.App.Control
 {
-    internal static class ControlFacade
+    internal class ControlFacade
     {
-        private static readonly IControlAudio Audio = new AudioSwitchWrapper();
-        private static readonly IControlInput Input = new WindowsInputLibWrapper();
-        private static readonly IControlDisplay Display = new User32Wrapper();
+        private readonly IControlAudio _audio;
+        private readonly IControlInput _input;
+        private readonly IControlDisplay _display;
 
-        public static IEnumerable<IAudioDevice> GetDevices() => Audio.GetDevices();
-        public static void SetDevice(Guid id) => Audio.SetDevice(id);
-        public static int GetVolume() => Audio.Volume;
-        public static void SetVolume(int volume) => Audio.Volume = volume;
-        public static void Mute(bool mute) => Audio.Mute(mute);
-        public static void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => Input.KeyPress(key, mode);
-        public static void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => Input.MouseKeyPress(key, mode);
-        public static void TextInput(string text) => Input.TextInput(text);
-        public static void MouseWheel(bool up) => Input.MouseWheel(up);
-        public static void MouseMove(int x, int y) => Input.MouseMove(x, y);
-        public static void DisplayDarken() => Display.Darken();
+        public ControlFacade(IControlAudio audio, IControlInput input, IControlDisplay display)
+        {
+            _audio = audio;
+            _input = input;
+            _display = display;
+        }
+
+        public IEnumerable<IAudioDevice> GetDevices() => _audio.GetDevices();
+        public void SetDevice(Guid id) => _audio.SetDevice(id);
+        public int GetVolume() => _audio.Volume;
+        public void SetVolume(int volume) => _audio.Volume = volume;
+        public void Mute(bool mute) => _audio.Mute(mute);
+        public void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.KeyPress(key, mode);
+        public void MouseKeyPress(MouseKeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _input.MouseKeyPress(key, mode);
+        public void TextInput(string text) => _input.TextInput(text);
+        public void MouseWheel(bool up) => _input.MouseWheel(up);
+        public void MouseMove(int x, int y) => _input.MouseMove(x, y);
+        public void DisplayDarken() => _display.Darken();
     }
 }

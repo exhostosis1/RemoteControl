@@ -30,6 +30,7 @@
   <ItemGroup>
     <PackageReference Include="AudioSwitcher.AudioApi" Version="4.0.0-alpha5" />
     <PackageReference Include="AudioSwitcher.AudioApi.CoreAudio" Version="4.0.0-alpha5" />
+    <PackageReference Include="InputSimulatorCore" Version="1.0.5" />
     <PackageReference Include="TaskScheduler" Version="2.10.1" />
     <PackageReference Include="WindowsInputLibrary" Version="1.4.0" />
   </ItemGroup>
