@@ -1,8 +1,9 @@
-﻿using Shared.Interfaces.Web;
+﻿using Shared.Interfaces;
+using Shared.Interfaces.Web;
 
 namespace RemoteControlApp
 {
-    public class RemoteControl
+    public class RemoteControl: IRemoteControlApp
     {
         private readonly IListener _uiListener;
         private readonly IListener _apiListener;

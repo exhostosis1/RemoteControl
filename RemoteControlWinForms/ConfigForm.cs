@@ -1,11 +1,8 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
+﻿using Shared.Config;
 using Shared.Interfaces;
 using Shared.Interfaces.Logging;
-using RemoteControlApp;
-using Shared.Config;
-using System.Net.Sockets;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace RemoteControlWinForms
 {
@@ -16,13 +13,13 @@ namespace RemoteControlWinForms
         private readonly ToolStripItem[] _commonMenuItems;
 
         private readonly Uri _prefUri;
-        private readonly RemoteControl _app;
+        private readonly IRemoteControlApp _app;
 
         private readonly IAutostartService _autostart;
 
         private readonly ILogger _logger;
 
-        public ConfigForm(RemoteControl app, IConfigService config, IAutostartService autostart, ILogger logger)
+        public ConfigForm(IRemoteControlApp app, IConfigService config, IAutostartService autostart, ILogger logger)
         {
             InitializeComponent();
 

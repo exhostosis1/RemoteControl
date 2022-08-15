@@ -1,51 +1,34 @@
-using Autostart;
-using Config;
-using Control.Wrappers;
-using Http.Listeners;
-using Logging;
-using RemoteControlApp;
-using RemoteControlApp.Web.Controllers;
-using RemoteControlApp.Web.Middleware;
-using Shared.Enums;
+using Shared.Config;
+using Shared.Interfaces;
+using Shared.Interfaces.Logging;
 
 namespace RemoteControlWinForms
 {
-    internal static class Program
+    public static class Program
     {
+        private static IRemoteControlApp _app;
+        private static IConfigService _config;
+        private static IAutostartService _autostart;
+        private static ILogger _logger;
+
+        public static void Inject(IRemoteControlApp app, IConfigService config, IAutostartService autostart,
+            ILogger logger)
+        {
+            _app = app;
+            _config = config;
+            _autostart = autostart;
+            _logger = logger;
+        }
+
         /// <summary>
         ///  The main entry point for the application.
         /// </summary>
         [STAThread]
-        private static void Main()
+        public static void Main()
         {
             ApplicationConfiguration.Initialize();
 
-            var fileLogger = new FileLogger(AppContext.BaseDirectory + "error.log");
-            var consoleLogger = new ConsoleLogger(LoggingLevel.Info);
-
-            var audio = new AudioSwitchWrapper();
-            var input = new WindowsInputLibWrapper();
-            var display = new User32Wrapper();
-
-            var uiListener = new GenericListener();
-            var apiListener = new GenericListener();
-            var fileController = new FileMiddleware();
-
-            var controllers = new BaseController[]
-            {
-                new AudioController(audio, consoleLogger),
-                new KeyboardController(input, consoleLogger),
-                new MouseController(input, consoleLogger),
-                new DisplayController(display, consoleLogger)
-            };
-
-            var apiController = new ApiMiddlewareV1(controllers);
-
-            var app = new RemoteControl(uiListener, apiListener, fileController, apiController);
-            var config = new LocalFileConfigService(fileLogger);
-            var autostart = new WinAutostartService();
-
-            var form = new ConfigForm(app, config, autostart, fileLogger);
+            var form = new ConfigForm(_app, _config, _autostart, _logger);
 
             Application.Run(form);
         }
