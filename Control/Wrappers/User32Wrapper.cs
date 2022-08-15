@@ -403,7 +403,7 @@ namespace Control.Wrappers
         public void ButtonPress(MouseKeysEnum button = MouseKeysEnum.Left, KeyPressMode mode = KeyPressMode.Click) =>
             MouseButtonPress(button, mode);
 
-        public void Wheel(bool up) => VerticalScroll(up ? -1 : 1);
+        public void Wheel(bool up) => VerticalScroll(up ? 1 : -1);
 
 
 
