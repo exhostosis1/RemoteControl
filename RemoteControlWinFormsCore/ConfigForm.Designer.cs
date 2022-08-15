@@ -1,4 +1,4 @@
-﻿namespace RemoteControl
+﻿namespace RemoteControlWinForms
 {
     partial class ConfigForm
     {

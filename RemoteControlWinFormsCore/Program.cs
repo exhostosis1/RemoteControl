@@ -1,12 +1,14 @@
-using RemoteControl.App;
-using RemoteControl.App.Control.Wrappers;
-using RemoteControl.App.Web.Controllers;
-using RemoteControl.App.Web.Listeners;
-using RemoteControl.App.Web.Middleware;
-using RemoteControl.Autostart;
-using RemoteControl.Config;
+using Logging;
+using RemoteControlApp.Web.Listeners;
+using RemoteControlApp.Control.Wrappers;
+using RemoteControlApp.Web.Middleware;
+using RemoteControlApp.Web.Controllers;
+using Config;
+using Autostart;
+using RemoteControlApp;
+using Shared.Enums;
 
-namespace RemoteControl
+namespace RemoteControlWinForms
 {
     internal static class Program
     {
@@ -18,7 +20,8 @@ namespace RemoteControl
         {
             ApplicationConfiguration.Initialize();
 
-            var logger = new FileLogger(AppContext.BaseDirectory + "error.log");
+            var fileLogger = new FileLogger(AppContext.BaseDirectory + "error.log");
+            var consoleLogger = new ConsoleLogger(LoggingLevel.Info);
 
             var audio = new AudioSwitchWrapper();
             var input = new WindowsInputLibWrapper();
@@ -30,19 +33,19 @@ namespace RemoteControl
 
             var controllers = new BaseController[]
             {
-                new AudioController(audio),
-                new KeyboardController(input),
-                new MouseController(input),
-                new DisplayController(display)
+                new AudioController(audio, consoleLogger),
+                new KeyboardController(input, consoleLogger),
+                new MouseController(input, consoleLogger),
+                new DisplayController(display, consoleLogger)
             };
 
             var apiController = new ApiMiddlewareV1(controllers);
 
-            var app = new RemoteControlApp(uiListener, apiListener, fileController, apiController);
-            var config = new LocalFileConfigService(logger);
+            var app = new RemoteControl(uiListener, apiListener, fileController, apiController);
+            var config = new LocalFileConfigService(fileLogger);
             var autostart = new WinAutostartService();
 
-            var form = new ConfigForm(app, config, autostart, logger);
+            var form = new ConfigForm(app, config, autostart, fileLogger);
 
             Application.Run(form);
         }
