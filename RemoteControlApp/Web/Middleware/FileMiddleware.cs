@@ -3,7 +3,7 @@ using System.Net;
 
 namespace RemoteControlApp.Web.Middleware
 {
-    public class FileMiddleware : IMiddleware
+    public class FileMiddleware : BaseMiddleware
     {
         private static readonly string ContentFolder = AppContext.BaseDirectory + "www";
 
@@ -17,7 +17,7 @@ namespace RemoteControlApp.Web.Middleware
             { ".css", "text/css" }
         };
 
-        public void ProcessRequest(IContext context)
+        protected override void ProcessRequestInternal(IContext context)
         {
             var uriPath = context.Request.Path;
 

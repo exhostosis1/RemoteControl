@@ -9,7 +9,7 @@ using System.Text;
 
 namespace RemoteControlApp.Web.Middleware
 {
-    public class ApiMiddlewareV1 : IMiddleware
+    public class ApiMiddlewareV1 : BaseMiddleware
     {
         private readonly Dictionary<string, Dictionary<string, Func<string, string?>>> _methods = new();
 
@@ -54,7 +54,7 @@ namespace RemoteControlApp.Web.Middleware
             }
         }
 
-        public void ProcessRequest(IContext context)
+        protected override void ProcessRequestInternal(IContext context)
         {
             var (controller, action, param) = context.Request.Path.ParsePath(ApiVersion);
 

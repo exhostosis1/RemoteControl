@@ -24,7 +24,7 @@ namespace RemoteControlWinForms
         {
             InitializeComponent();
 
-            _prefUri = config.GetConfig().Uri?.Uri;
+            _prefUri = config.GetConfig().UriConfig?.Uri;
 
             _app = app;
             _autostart = autostart;

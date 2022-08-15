@@ -9,13 +9,13 @@ namespace RemoteControlApp
 
         private const string ApiVersion = "v1";
 
-        public RemoteControl(IListener uiListener, IListener apiListener, IMiddleware fileController, IMiddleware apiController)
+        public RemoteControl(IListener uiListener, IListener apiListener, IMiddleware uiMiddlewareChain, IMiddleware apiMiddlewareChain)
         {
             _apiListener = apiListener;
             _uiListener = uiListener;
 
-            _uiListener.OnRequest += fileController.ProcessRequest;
-            _apiListener.OnRequest += apiController.ProcessRequest;
+            _uiListener.OnRequest += uiMiddlewareChain.ProcessRequest;
+            _apiListener.OnRequest += apiMiddlewareChain.ProcessRequest;
         }
 
         public void Start(Uri uri)

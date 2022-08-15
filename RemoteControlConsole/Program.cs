@@ -17,7 +17,6 @@ var display = new User32Wrapper();
 
 var uiListener = new GenericListener();
 var apiListener = new GenericListener();
-var fileController = new FileMiddleware();
 
 var controllers = new BaseController[]
 {
@@ -27,8 +26,15 @@ var controllers = new BaseController[]
     new DisplayController(display, consoleLogger)
 };
 
-var apiController = new ApiMiddlewareV1(controllers);
+var uiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new FileMiddleware());
+var apiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new ApiMiddlewareV1(controllers));
 
-var app = new RemoteControl(uiListener, apiListener, fileController, apiController);
+var app = new RemoteControl(uiListener, apiListener, uiMiddlewareChain, apiMiddlewareChain);
 var config = new LocalFileConfigService(fileLogger);
 var autostart = new WinAutostartService();
+
+var uri = config.GetConfig().UriConfig?.Uri;
+
+app.Start(uri ?? throw new NullReferenceException());
+
+Console.Read();

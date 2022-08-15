@@ -2,7 +2,7 @@
 {
     public class AppConfig
     {
-        public UriConfig? Uri { get; set; }
+        public UriConfig? UriConfig { get; set; }
         public CommonConfig? Common { get; set; }
     }
 }

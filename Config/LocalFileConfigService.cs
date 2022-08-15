@@ -49,7 +49,7 @@ namespace Config
                     {
                         var (param, value) = line.ParseConfig();
 
-                        var prop = configItem.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+                        var prop = configItem.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                             .SingleOrDefault(x => x.GetDisplayName() == param);
 
                         if (prop == null) continue;
@@ -73,7 +73,7 @@ namespace Config
         {
             var result = new List<string>();
 
-            var appConifigProps = appConfig.GetType().GetProperties(BindingFlags.NonPublic | BindingFlags.Instance)
+            var appConifigProps = appConfig.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x => x.PropertyType.GetInterface(nameof(IConfigItem)) != null);
 
             foreach (var appConfigProp in appConifigProps)
@@ -83,7 +83,7 @@ namespace Config
 
                 result.Add($"[{appConfigProp.PropertyType.GetDisplayName()}]\n");
 
-                foreach (var configItemProp in appConfigItem.GetType().GetProperties(BindingFlags.Instance | BindingFlags.NonPublic))
+                foreach (var configItemProp in appConfigItem.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public))
                 {
                     var name = configItemProp.GetDisplayName();
                     var value = configItemProp.GetValue(appConfigItem)?.ToString() ?? string.Empty;
