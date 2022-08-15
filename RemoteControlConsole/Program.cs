@@ -26,8 +26,8 @@ var controllers = new BaseController[]
     new DisplayController(display, consoleLogger)
 };
 
-var uiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new FileMiddleware());
-var apiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new ApiMiddlewareV1(controllers));
+var uiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new FileMiddleware()).GetFirst();
+var apiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new ApiMiddlewareV1(controllers)).GetFirst();
 
 var app = new RemoteControl(uiListener, apiListener, uiMiddlewareChain, apiMiddlewareChain);
 var config = new LocalFileConfigService(fileLogger);

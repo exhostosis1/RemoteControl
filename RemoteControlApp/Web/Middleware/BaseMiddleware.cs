@@ -5,24 +5,22 @@ namespace RemoteControlApp.Web.Middleware
     public abstract class BaseMiddleware: IMiddleware
     {
         public IMiddleware? Next { get; set; }
+        public IMiddleware First { get; set; }
+
+        protected BaseMiddleware()
+        {
+            First = this;
+        }
 
         public IMiddleware Attach(IMiddleware next)
         {
-            if (Next == null) Next = next;
-            else
-            {
-                var localnext = Next;
+            Next = next;
+            next.First = First;
 
-                while (localnext.Next != null)
-                {
-                    localnext = localnext.Next;
-                }
-
-                localnext.Next = next;
-            }
-
-            return this;
+            return next;
         }
+
+        public IMiddleware GetFirst() => First;
 
         public void ProcessRequest(IContext context)
         {
