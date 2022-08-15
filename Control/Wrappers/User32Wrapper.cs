@@ -404,29 +404,5 @@ namespace Control.Wrappers
             MouseButtonPress(button, mode);
 
         public void Wheel(bool up) => VerticalScroll(up ? 1 : -1);
-
-
-
-        
-            
-           
-            
-            
-
-           
-
-           
-
-            
-            
-            
-
-            
-
-            
-
-            
-
-            
     }
 }

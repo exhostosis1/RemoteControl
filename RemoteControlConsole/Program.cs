@@ -34,5 +34,4 @@ var autostart = new WinAutostartService();
 
 app.Start(config.GetConfig().UriConfig.Uri);
 
-
-Console.ReadKey();
+while(true) Console.ReadLine();
