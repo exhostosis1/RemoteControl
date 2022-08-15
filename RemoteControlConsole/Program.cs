@@ -33,9 +33,5 @@ var app = new RemoteControl(uiListener, apiListener, uiMiddlewareChain, apiMiddl
 var config = new LocalFileConfigService(fileLogger);
 var autostart = new WinAutostartService();
 
-var uri = config.GetConfig().UriConfig.Uri;
-
 RemoteControlWinForms.Program.Inject(app, config, autostart, fileLogger);
 RemoteControlWinForms.Program.Main();
-
-Console.Read();
