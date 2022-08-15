@@ -12,8 +12,7 @@ var fileLogger = new FileLogger(AppContext.BaseDirectory + "error.log");
 var consoleLogger = new ConsoleLogger(LoggingLevel.Info);
 
 var audio = new AudioSwitchWrapper();
-var input = new WindowsInputLibWrapper();
-var display = new User32Wrapper();
+var input = new User32Wrapper();
 
 var uiListener = new GenericListener();
 var apiListener = new GenericListener();
@@ -23,7 +22,7 @@ var controllers = new BaseController[]
     new AudioController(audio, consoleLogger),
     new KeyboardController(input, consoleLogger),
     new MouseController(input, consoleLogger),
-    new DisplayController(display, consoleLogger)
+    new DisplayController(input, consoleLogger)
 };
 
 var uiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new FileMiddleware()).GetFirst();
@@ -33,5 +32,7 @@ var app = new RemoteControl(uiListener, apiListener, uiMiddlewareChain, apiMiddl
 var config = new LocalFileConfigService(fileLogger);
 var autostart = new WinAutostartService();
 
-RemoteControlWinForms.Program.Inject(app, config, autostart, fileLogger);
-RemoteControlWinForms.Program.Main();
+app.Start(config.GetConfig().UriConfig.Uri);
+
+
+Console.ReadKey();

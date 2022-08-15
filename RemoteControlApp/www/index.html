@@ -8,7 +8,7 @@
 
     <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-    <script>
+<script>
         function sendRequest(controller, action, param) {
             return fetch(`/api/v1/${controller}/${action}/${param === undefined ? '' : param}`);
         }
@@ -79,6 +79,8 @@
                     }
 
                     const diff = new Point(pos.x - this.lastMovePosition.x, pos.y - this.lastMovePosition.y);
+
+                    if (diff.x === 0 && diff.y === 0) return;
 
                     this.lastMovePosition = pos;
 

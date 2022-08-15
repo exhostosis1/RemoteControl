@@ -19,7 +19,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("left")]
         public string? Left(string _)
         {
-            _input.KeyPress();
+            _input.ButtonPress();
 
             return "done";
         }
@@ -27,7 +27,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("right")]
         public string? Right(string _)
         {
-            _input.KeyPress(MouseKeysEnum.Right);
+            _input.ButtonPress(MouseKeysEnum.Right);
 
             return "done";
         }
@@ -35,7 +35,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("middle")]
         public string? Middle(string _)
         {
-            _input.KeyPress(MouseKeysEnum.Middle);
+            _input.ButtonPress(MouseKeysEnum.Middle);
 
             return "done";
         }
@@ -59,11 +59,11 @@ namespace RemoteControlApp.Web.Controllers
         [Action("dragstart")]
         public string? DragStart(string _)
         {
-            _input.KeyPress(MouseKeysEnum.Left, KeyPressMode.Down);
+            _input.ButtonPress(MouseKeysEnum.Left, KeyPressMode.Down);
             Task.Run(async () =>
             {
                 await Task.Delay(5_000);
-                _input.KeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+                _input.ButtonPress(MouseKeysEnum.Left, KeyPressMode.Up);
             });
 
             return "done";
@@ -72,7 +72,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("dragstop")]
         public string? DragStop(string _)
         {
-            _input.KeyPress(MouseKeysEnum.Left, KeyPressMode.Up);
+            _input.ButtonPress(MouseKeysEnum.Left, KeyPressMode.Up);
 
             return "done";
         }

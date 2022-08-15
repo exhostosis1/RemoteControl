@@ -43,7 +43,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("mediaback")]
         public string? MediaBack(string _)
         {
-            _input.KeyPress(KeysEnum.MediaBack);
+            _input.KeyPress(KeysEnum.MediaPrev);
 
             return "done";
         }
@@ -51,7 +51,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("mediaforth")]
         public string? MediaForth(string _)
         {
-            _input.KeyPress(KeysEnum.MediaForth);
+            _input.KeyPress(KeysEnum.MediaNext);
 
             return "done";
         }
