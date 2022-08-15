@@ -95,10 +95,12 @@ namespace Control.Wrappers
 
         #region private
 
+        private const uint Length = 1;
         private const int MouseWheelClickSize = 120;
-        private readonly List<Input> _inputList = new();
+        private readonly Input[] _inputList = new Input[Length];
+        private readonly int _size = Marshal.SizeOf(typeof(Input));
 
-        private readonly Dictionary<MouseKeysEnum, MouseFlags> _mouseFlags = new()
+        private static readonly Dictionary<MouseKeysEnum, MouseFlags> KeysToFlags = new()
         {
             {
                 MouseKeysEnum.Left, new MouseFlags(MouseFlag.LeftUp, MouseFlag.LeftDown)
@@ -113,72 +115,7 @@ namespace Control.Wrappers
 
         private static void SetMonitorInState(MonitorState state) => SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
 
-        private void DispatchInput()
-        {
-            if (_inputList.Count == 0) return;
-
-            SendInput((uint)_inputList.Count, _inputList.ToArray(), Marshal.SizeOf(typeof(Input)));
-
-            _inputList.Clear();
-        }
-
-        private void KeyboardKeyPress(KeysEnum keyCode, KeyPressMode mode)
-        {
-            switch (mode)
-            {
-                case KeyPressMode.Up:
-                    AddKeyUp(keyCode);
-                    break;
-                case KeyPressMode.Down:
-                    AddKeyDown(keyCode);
-                    break;
-                case KeyPressMode.Click:
-                    AddKeyPress(keyCode);
-                    break;
-                default:
-                    return;
-            }
-
-            DispatchInput();
-        }
-
-        private void TextEntry(string text)
-        {
-            AddCharacters(text);
-            DispatchInput();
-        }
-
-        private void MoveMouseBy(int pixelDeltaX, int pixelDeltaY)
-        {
-            AddRelativeMouseMovement(pixelDeltaX, pixelDeltaY);
-            DispatchInput();
-        }
-
-        private void MouseButtonPress(MouseKeysEnum button, KeyPressMode mode)
-        {
-            switch (mode)
-            {
-                case KeyPressMode.Up:
-                    AddMouseButtonUp(button);
-                    break;
-                case KeyPressMode.Down:
-                    AddMouseButtonDown(button);
-                    break;
-                case KeyPressMode.Click:
-                    AddMouseButtonClick(button);
-                    break;
-                default:
-                    return;
-            }
-
-            DispatchInput();
-        }
-
-        private void VerticalScroll(int scrollAmountInClicks)
-        {
-            AddMouseVerticalWheelScroll(scrollAmountInClicks * MouseWheelClickSize);
-            DispatchInput();
-        }
+        private void DispatchInput() => SendInput(Length, _inputList, _size);
 
         private static bool IsExtendedKey(KeysEnum keyCode)
         {
@@ -202,193 +139,122 @@ namespace Control.Wrappers
                 KeysEnum.Divide;
         }
 
-        private void AddKeyDown(KeysEnum keyCode)
+        private void KeyboardKeyPress(KeysEnum keyCode, KeyPressMode mode)
         {
-            var down = new Input
+            if (mode == KeyPressMode.Click)
             {
-                Type = (uint)InputType.Keyboard,
-                Data =
-                {
-                    Keyboard = 
-                    {
-                        KeyCode = (ushort) keyCode,
-                        Scan = (ushort)(MapVirtualKey((uint)keyCode, 0) & 0xFFU),
-                        Flags = IsExtendedKey(keyCode) ? (uint) KeyboardFlag.ExtendedKey : 0,
-                        Time = 0,
-                        ExtraInfo = IntPtr.Zero
-                    }
-                }
-            };
-
-            _inputList.Add(down);
-        }
-
-        private void AddKeyUp(KeysEnum keyCode)
-        {
-            var up = new Input
-            {
-                Type = (uint)InputType.Keyboard,
-                Data =
-                {
-                    Keyboard =
-                    {
-                        KeyCode = (ushort) keyCode,
-                        Scan = (ushort)(MapVirtualKey((uint)keyCode, 0) & 0xFFU),
-                        Flags = (uint) (IsExtendedKey(keyCode)
-                            ? KeyboardFlag.KeyUp | KeyboardFlag.ExtendedKey
-                            : KeyboardFlag.KeyUp),
-                        Time = 0,
-                        ExtraInfo = IntPtr.Zero
-                    }
-                }
-            };
-
-            _inputList.Add(up);
-        }
-
-        private void AddKeyPress(KeysEnum keyCode)
-        {
-            AddKeyDown(keyCode);
-            AddKeyUp(keyCode);
-        }
-
-        private void AddCharacter(char character)
-        {
-            ushort scanCode = character;
-
-            var down = new Input
-            {
-                Type = (uint)InputType.Keyboard,
-                Data =
-                {
-                    Keyboard =
-                    {
-                        KeyCode = 0,
-                        Scan = scanCode,
-                        Flags = (uint)KeyboardFlag.Unicode,
-                        Time = 0,
-                        ExtraInfo = IntPtr.Zero
-                    }
-                }
-            };
-
-            var up = new Input
-            {
-                Type = (uint)InputType.Keyboard,
-                Data =
-                {
-                    Keyboard =
-                    {
-                        KeyCode = 0,
-                        Scan = scanCode,
-                        Flags = (uint)(KeyboardFlag.KeyUp | KeyboardFlag.Unicode),
-                        Time = 0,
-                        ExtraInfo = IntPtr.Zero
-                    }
-                }
-            };
-
-            // Handle extended keys:
-            // If the scan code is preceded by a prefix byte that has the value 0xE0 (224),
-            // we need to include the KEYEVENTF_EXTENDEDKEY flag in the Flags property. 
-            if ((scanCode & 0xFF00) == 0xE000)
-            {
-                down.Data.Keyboard.Flags |= (uint)KeyboardFlag.ExtendedKey;
-                up.Data.Keyboard.Flags |= (uint)KeyboardFlag.ExtendedKey;
+                SendInput(keyCode, KeyPressMode.Down);
+                SendInput(keyCode, KeyPressMode.Up);
             }
-
-            _inputList.Add(down);
-            _inputList.Add(up);
-        }
-
-        private void AddCharacters(IEnumerable<char> characters)
-        {
-            foreach (var character in characters)
+            else
             {
-                AddCharacter(character);
+                SendInput(keyCode, mode);
             }
         }
 
-        private void AddCharacters(string characters)
+        private void TextEntry(string text)
         {
-            AddCharacters(characters.ToCharArray());
+            foreach (var c in text.ToCharArray())
+            {
+                SendInput(c, KeyPressMode.Down);
+                SendInput(c, KeyPressMode.Up);
+            }
         }
 
-        private void AddRelativeMouseMovement(int x, int y)
+        private void MoveMouseBy(int pixelDeltaX, int pixelDeltaY)
         {
-            var movement = new Input
+            SendInput(pixelDeltaX, pixelDeltaY);
+        }
+
+        private void MouseButtonPress(MouseKeysEnum button, KeyPressMode mode)
+        {
+            if (mode == KeyPressMode.Click)
             {
-                Type = (uint)InputType.Mouse,
-                Data =
-                {
-                    Mouse =
-                    {
-                        Flags = (uint)MouseFlag.Move,
-                        X = x,
-                        Y = y
-                    }
-                }
+                SendInput(button, KeyPressMode.Down);
+                SendInput(button, KeyPressMode.Up);
+            }
+            else
+            {
+                SendInput(button, mode);
+            }
+        }
+
+        private void VerticalScroll(int scrollAmountInClicks)
+        {
+            SendInput(scrollAmountInClicks * MouseWheelClickSize);
+        }
+
+        private void SendInput(KeysEnum keyCode, KeyPressMode mode)
+        {
+            var flag = mode == KeyPressMode.Up ? KeyboardFlag.KeyUp : 0;
+
+            _inputList[0].Type = (uint)InputType.Keyboard;
+
+            _inputList[0].Data.Keyboard = new KeyboardInput
+            {
+                KeyCode = (ushort) keyCode,
+                Scan = (ushort) (MapVirtualKey((uint) keyCode, 0) & 0xFFU),
+                Flags = (uint) (IsExtendedKey(keyCode) ? flag | KeyboardFlag.ExtendedKey : flag),
             };
 
-            _inputList.Add(movement);
+            DispatchInput();
         }
 
-        private void AddMouseButtonDown(MouseKeysEnum button)
+        private void SendInput(char character, KeyPressMode mode)
         {
-            var buttonDown = new Input
+            var flag = mode == KeyPressMode.Up ? KeyboardFlag.KeyUp : 0;
+
+            _inputList[0].Type = (uint) InputType.Keyboard;
+
+            _inputList[0].Data.Keyboard = new KeyboardInput
             {
-                Type = (uint)InputType.Mouse,
-                Data =
-                {
-                    Mouse =
-                    {
-                        Flags = (uint)_mouseFlags[button].Down
-                    }
-                }
+                Scan = character,
+                Flags = (uint) (KeyboardFlag.Unicode | flag),
             };
 
-            _inputList.Add(buttonDown);
+            if ((character & 0xFF00) == 0xE000)
+                _inputList[0].Data.Keyboard.Flags |= (uint)KeyboardFlag.ExtendedKey;
+
+            DispatchInput();
         }
 
-        private void AddMouseButtonUp(MouseKeysEnum button)
+        private void SendInput(int x, int y)
         {
-            var buttonUp = new Input
+            _inputList[0].Type = (uint) InputType.Mouse;
+
+            _inputList[0].Data.Mouse = new Mouseinput
             {
-                Type = (uint)InputType.Mouse,
-                Data =
-                {
-                    Mouse =
-                    {
-                        Flags = (uint)_mouseFlags[button].Up
-                    }
-                }
+                Flags = (uint)MouseFlag.Move,
+                X = x,
+                Y = y,
             };
 
-            _inputList.Add(buttonUp);
+            DispatchInput();
         }
 
-        private void AddMouseButtonClick(MouseKeysEnum button)
+        private void SendInput(MouseKeysEnum button, KeyPressMode mode)
         {
-            AddMouseButtonDown(button);
-            AddMouseButtonUp(button);
-        }
+            _inputList[0].Type = (uint) InputType.Mouse;
 
-        private void AddMouseVerticalWheelScroll(int scrollAmount)
-        {
-            var scroll = new Input
+            _inputList[0].Data.Mouse = new Mouseinput
             {
-                Type = (uint)InputType.Mouse,
-                Data =
-                {
-                    Mouse =
-                    {
-                        Flags = (uint)MouseFlag.VerticalWheel,
-                        MouseData = (uint)scrollAmount
-                    }
-                }
+                Flags = (uint) (mode == KeyPressMode.Up ? KeysToFlags[button].Up : KeysToFlags[button].Down),
             };
 
-            _inputList.Add(scroll);
+            DispatchInput();
+        }
+
+        private void SendInput(int scrollAmount)
+        {
+            _inputList[0].Type = (uint)InputType.Mouse;
+
+            _inputList[0].Data.Mouse = new Mouseinput
+            {
+                Flags = (uint) MouseFlag.VerticalWheel,
+                MouseData = (uint) scrollAmount,
+            };
+
+            DispatchInput();
         }
         #endregion
 
