@@ -10,6 +10,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\Config\Config.csproj" />
+    <ProjectReference Include="..\Control\Control.csproj" />
+    <ProjectReference Include="..\Http\Http.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\RemoteControlApp\RemoteControlApp.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />

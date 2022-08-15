@@ -1,8 +1,8 @@
 ﻿using Shared.Interfaces.Web;
 
-namespace RemoteControlApp.Web.DataObjects
+namespace Shared.DataObjects
 {
-    internal class Request: IRequest
+    public class Request: IRequest
     {
         public string Path { get; set; }
 

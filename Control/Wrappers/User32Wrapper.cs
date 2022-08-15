@@ -1,7 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using Shared.Interfaces.Control;
 
-namespace RemoteControlApp.Control.Wrappers
+namespace Control.Wrappers
 {
     public class User32Wrapper: IDisplayControl
     {

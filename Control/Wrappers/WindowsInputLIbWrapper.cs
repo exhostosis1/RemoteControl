@@ -3,7 +3,7 @@ using Shared.Interfaces.Control;
 using WindowsInputLib;
 using WindowsInputLib.Native;
 
-namespace RemoteControlApp.Control.Wrappers
+namespace Control.Wrappers
 {
     public class WindowsInputLibWrapper : IKeyboardControl, IMouseControl
     {

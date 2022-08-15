@@ -4,11 +4,11 @@ namespace RemoteControlApp.Web.Controllers
 {
     public abstract class BaseController
     {
-        protected readonly ILogger _logger;
+        protected readonly ILogger Logger;
 
         protected BaseController(ILogger logger)
         {
-            _logger = logger;
+            Logger = logger;
         }
     }
 }

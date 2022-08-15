@@ -1,12 +1,12 @@
 ﻿using Shared.Interfaces.Web;
 
-namespace RemoteControlApp.Web.DataObjects
+namespace Shared.DataObjects
 {
-    internal class Context: IContext
+    public class Context: IContext
     {
         public IRequest Request { get; set; }
         public IResponse Response { get; set; } = new Response();
 
-        internal Context(string path) => Request = new Request(path);
+        public Context(string path) => Request = new Request(path);
     }
 }

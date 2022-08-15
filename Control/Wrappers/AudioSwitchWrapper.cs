@@ -2,7 +2,7 @@
 using AudioSwitcher.AudioApi.CoreAudio;
 using Shared.Interfaces.Control;
 
-namespace RemoteControlApp.Control.Wrappers
+namespace Control.Wrappers
 {
     internal class AudioDevice : IAudioDevice
     {

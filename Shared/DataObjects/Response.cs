@@ -1,9 +1,9 @@
-﻿using Shared.Interfaces.Web;
-using System.Net;
+﻿using System.Net;
+using Shared.Interfaces.Web;
 
-namespace RemoteControlApp.Web.DataObjects
+namespace Shared.DataObjects
 {
-    internal class Response : IResponse
+    public class Response : IResponse
     {
         public string ContentType { get; set; } = "text/plain";
         public byte[] Payload { get; set; } = Array.Empty<byte>();

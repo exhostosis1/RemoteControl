@@ -1,9 +1,11 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Runtime.InteropServices;
 using Shared.Interfaces;
 using Shared.Interfaces.Logging;
 using RemoteControlApp;
 using Shared.Config;
+using System.Net.Sockets;
 
 namespace RemoteControlWinForms
 {
@@ -13,7 +15,7 @@ namespace RemoteControlWinForms
 
         private readonly ToolStripItem[] _commonMenuItems;
 
-        private readonly Uri? _prefUri;
+        private readonly Uri _prefUri;
         private readonly RemoteControl _app;
 
         private readonly IAutostartService _autostart;
@@ -23,8 +25,6 @@ namespace RemoteControlWinForms
         public ConfigForm(RemoteControl app, IConfigService config, IAutostartService autostart, ILogger logger)
         {
             InitializeComponent();
-
-            _prefUri = config.GetConfig().UriConfig?.Uri;
 
             _app = app;
             _autostart = autostart;
@@ -40,8 +40,9 @@ namespace RemoteControlWinForms
             _context = SynchronizationContext.Current;
 
             this.autostartStripMenuItem.Checked = autostart.CheckAutostart();
+            _prefUri = config.GetConfig().UriConfig.Uri;
             
-            StartListening(_prefUri!);   
+            StartListening(_prefUri);   
         }
 
        private void StartListening(Uri uri)

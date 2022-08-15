@@ -1,9 +1,8 @@
 ﻿using System.Net;
-using RemoteControlApp.Web.DataObjects;
-using Shared;
+using Shared.DataObjects;
 using Shared.Interfaces.Web;
 
-namespace RemoteControlApp.Web.Listeners
+namespace Http.Listeners
 {
     public class GenericListener: IListener
     {
