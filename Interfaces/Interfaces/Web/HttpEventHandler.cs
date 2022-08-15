@@ -1,6 +1,4 @@
-﻿using Shared.Interfaces.Web;
-
-namespace Shared
+﻿namespace Shared.Interfaces.Web
 {
     public delegate void HttpEventHandler(IContext context);
 }

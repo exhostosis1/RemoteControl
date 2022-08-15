@@ -1,4 +1,4 @@
-﻿namespace Shared.Interfaces
+﻿namespace Shared.Config
 {
     public interface IConfigItem
     {

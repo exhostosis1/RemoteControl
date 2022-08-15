@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using Shared.Interfaces;
 using Shared.Interfaces.Logging;
 using RemoteControlApp;
+using Shared.Config;
 
 namespace RemoteControlWinForms
 {

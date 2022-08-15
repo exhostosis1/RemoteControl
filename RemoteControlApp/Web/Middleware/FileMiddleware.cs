@@ -1,5 +1,5 @@
-﻿using System.Net;
-using Shared.Interfaces.Web;
+﻿using Shared.Interfaces.Web;
+using System.Net;
 
 namespace RemoteControlApp.Web.Middleware
 {

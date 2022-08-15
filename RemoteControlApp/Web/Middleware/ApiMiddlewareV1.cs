@@ -1,11 +1,11 @@
-﻿using System.Linq.Expressions;
-using System.Net;
-using System.Reflection;
-using System.Text;
-using RemoteControlApp.Web.Attributes;
+﻿using RemoteControlApp.Web.Attributes;
 using RemoteControlApp.Web.Controllers;
 using Shared;
 using Shared.Interfaces.Web;
+using System.Linq.Expressions;
+using System.Net;
+using System.Reflection;
+using System.Text;
 
 namespace RemoteControlApp.Web.Middleware
 {

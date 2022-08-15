@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using Shared;
 using Shared.Config;
-using Shared.Interfaces;
 using Shared.Interfaces.Logging;
 
 namespace Config
