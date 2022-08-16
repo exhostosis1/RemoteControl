@@ -60,7 +60,7 @@ namespace Http.Listeners
                     context.Response.StatusCode = (int)dto.Response.StatusCode;
                     context.Response.ContentType = dto.Response.ContentType;
 
-                    if(dto.Response.Payload.Length > 0)
+                    if (dto.Response.Payload.Length > 0)
                         context.Response.OutputStream.Write(dto.Response.Payload);
                     
                     context.Response.Close();
