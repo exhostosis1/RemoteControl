@@ -26,8 +26,7 @@ namespace RemoteControlApp.Web.Controllers
         {
             if (Guid.TryParse(param, out var guid))
             {
-                _audio.SetDevice(guid);
-                return ("done");
+                return JsonSerializer.Serialize(_audio.SetCurrentControlDevice(guid));
             }
 
             return "error";

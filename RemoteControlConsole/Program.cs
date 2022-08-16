@@ -8,14 +8,13 @@ using RemoteControlApp.Web.Controllers;
 using RemoteControlApp.Web.Middleware;
 using Shared.Enums;
 
-var fileLogger = new FileLogger(AppContext.BaseDirectory + "error.log");
 var consoleLogger = new ConsoleLogger(LoggingLevel.Info);
 
-var audio = new AudioSwitchWrapper();
+var audio = new NAudioWrapper();
 var input = new User32Wrapper();
 
-var uiListener = new GenericListener();
-var apiListener = new GenericListener();
+var uiListener = new GenericListener(consoleLogger);
+var apiListener = new GenericListener(consoleLogger);
 
 var controllers = new BaseController[]
 {
@@ -29,7 +28,7 @@ var uiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new FileMidd
 var apiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new ApiMiddlewareV1(controllers)).GetFirst();
 
 var app = new RemoteControl(uiListener, apiListener, uiMiddlewareChain, apiMiddlewareChain);
-var config = new LocalFileConfigService(fileLogger);
+var config = new LocalFileConfigService(consoleLogger);
 var autostart = new WinAutostartService();
 
 app.Start(config.GetConfig().UriConfig.Uri);

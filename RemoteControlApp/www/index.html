@@ -561,41 +561,41 @@
             if (devices.length > 1) {
                 document.getElementById('devicon').style.display = 'block';
                 document.getElementById('devicon').onclick = () => showDevices();
+
+                drawDevices(devices);
             }
-            setDevice(devices.find(x => x.IsDefault).Id);
 
             document.getElementById('loader').style.display = 'none';
         }
 
-        async function showDevices() {
+        function drawDevices(devices) {
             let devicesElement = document.getElementById('devices');
-
-            if (devicesElement.style.display === 'block') {
-                devicesElement.style.display = 'none';
-                return;
-            }
-
-            let devices = JSON.parse(await (await sendRequest('audio', 'getdevice')).text());
-
             devicesElement.innerHTML = '';
 
             devices.forEach(x => {
                 devicesElement.innerHTML += `
-                        <div class="device" onclick='setDevice("${x.Id}")'>
-                            <div>${x.IsActive ? '✅' : '&#160'}</div>
+                        <div class="device" onclick="setDevice('${x.Id}')">
+                            <div class="device-icon">${x.IsCurrentControlDevice ? '✅' : '&#160'}</div>
                             <div>${x.Name}</div>
-                        </div>`;
+                        </div>
+                        `;
             });
+        }
 
-            devicesElement.style.display = 'block';
+        function showDevices() {
+            let element = document.getElementById('devices');    
+            element.style.display = element.style.display === 'block' ? 'none' : 'block';
         }
 
         async function setDevice(id) {
-            await sendRequest('audio', 'setdevice', id);
+            document.getElementById('devices').style.display = 'none';
+            
+            let devices = JSON.parse(await (await sendRequest('audio', 'setdevice', id)).text());
             let volume = await (await sendRequest('audio', 'getvolume')).text();
 
             init(volume);
-            document.getElementById('devices').style.display = 'none';
+
+            drawDevices(devices);
         }
 
         document.addEventListener('DOMContentLoaded', async () => {

@@ -5,6 +5,6 @@
         int Volume { get; set; }
         void Mute(bool mute);
         IReadOnlyCollection<IAudioDevice> GetDevices();
-        void SetDevice(Guid id);
+        IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id);
     }
 }

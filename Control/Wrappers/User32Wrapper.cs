@@ -60,7 +60,7 @@ namespace Control.Wrappers
             [FieldOffset(0)]
             public KeyboardInput Keyboard;
         }
-
+#pragma warning disable CS0649
         private struct KeyboardInput
         {
             public ushort KeyCode;
@@ -79,6 +79,7 @@ namespace Control.Wrappers
             public uint Time;
             public IntPtr ExtraInfo;
         }
+#pragma warning restore CS0649
         #endregion
 
         #region user32

@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Shared.DataObjects;
+using Shared.Interfaces.Logging;
 using Shared.Interfaces.Web;
 
 namespace Http.Listeners
@@ -13,6 +14,13 @@ namespace Http.Listeners
         public event HttpEventHandler? OnRequest;
 
         private readonly TaskFactory _factory = new();
+
+        private readonly ILogger _logger;
+
+        public GenericListener(ILogger logger)
+        {
+            _logger = logger;
+        }
 
         public void StartListen(string url)
         {
@@ -62,8 +70,10 @@ namespace Http.Listeners
                     _listener = new HttpListener();
                     return;
                 }
-                catch
+                catch (Exception e)
                 {
+                    _logger.Log(e.Message);
+
                     if (!_listener.IsListening)
                         return;
                 }
