@@ -11,7 +11,7 @@ namespace Logging.Abstract
         private readonly IMessageFormatter _formatter;
         private readonly LoggingLevel _currentLoggingLevel;
 
-        protected AbstractLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null)
+        protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
         {
             _formatter = formatter ?? new DefaultMessageFormatter();
             _currentLoggingLevel = level;
