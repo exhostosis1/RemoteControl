@@ -40,6 +40,8 @@ namespace Http.Listeners
 
             _listener.Start();
 
+            _logger.LogInfo($"started listening on {url}");
+
             _factory.StartNew(ProcessRequest, TaskCreationOptions.LongRunning);
         }
 
@@ -72,7 +74,7 @@ namespace Http.Listeners
                 }
                 catch (Exception e)
                 {
-                    _logger.Log(e.Message);
+                    _logger.LogError(e.Message);
 
                     if (!_listener.IsListening)
                         return;

@@ -1,7 +1,7 @@
-﻿using System.Reflection;
-using Shared;
+﻿using Shared;
 using Shared.Config;
 using Shared.Interfaces.Logging;
+using System.Reflection;
 
 namespace Config
 {
@@ -61,7 +61,7 @@ namespace Config
                     }
                     catch (Exception e)
                     {
-                        _logger.Log(e.Message);
+                        _logger.LogError(e.Message);
                     }
                 }
             }

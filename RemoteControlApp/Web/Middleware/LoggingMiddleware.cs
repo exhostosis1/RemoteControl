@@ -1,5 +1,4 @@
-﻿using Shared.Enums;
-using Shared.Interfaces.Logging;
+﻿using Shared.Interfaces.Logging;
 using Shared.Interfaces.Web;
 
 namespace RemoteControlApp.Web.Middleware
@@ -15,7 +14,7 @@ namespace RemoteControlApp.Web.Middleware
 
         protected override void ProcessRequestInternal(IContext context)
         {
-            _logger.Log(context.Request.Path, LoggingLevel.Info);
+            _logger.LogInfo(context.Request.Path);
         }
     }
 }

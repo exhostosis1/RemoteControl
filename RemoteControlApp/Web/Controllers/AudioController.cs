@@ -35,7 +35,7 @@ namespace RemoteControlApp.Web.Controllers
         [Action("getvolume")]
         public string? GetVolume(string _)
         {
-            return _audio.Volume.ToString();
+            return _audio.GetVolume().ToString();
         }
 
         [Action("setvolume")]
@@ -45,7 +45,7 @@ namespace RemoteControlApp.Web.Controllers
 
             result = result > 100 ? 100 : result < 0 ? 0 : result;
 
-            _audio.Volume = result;
+            _audio.SetVolume(result);
             _audio.Mute(result == 0);
 
             return "done";

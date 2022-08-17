@@ -1,11 +1,16 @@
 ﻿using Shared.Enums;
 using Shared.Interfaces.Control;
 using System.Runtime.InteropServices;
+using Shared.Interfaces.Logging;
 
 namespace Control.Wrappers
 {
-    public class User32Wrapper: IDisplayControl, IKeyboardControl, IMouseControl
+    public class User32Wrapper: BaseWrapper, IDisplayControl, IKeyboardControl, IMouseControl
     {
+        public User32Wrapper(ILogger logger) : base(logger)
+        {
+        }
+
         #region Enums
         private enum MonitorState
         {
@@ -231,7 +236,7 @@ namespace Control.Wrappers
             DispatchInput();
         }
         #endregion
-
+        
         public void Darken() => SetMonitorInState(MonitorState.MonitorStateOff);
 
         public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)

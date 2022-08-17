@@ -1,5 +1,4 @@
 ﻿using Logging.Formatters;
-using Shared;
 using Shared.Enums;
 using Shared.Interfaces.Logging;
 using System.Collections.Concurrent;
@@ -12,7 +11,7 @@ namespace Logging.Abstract
         private readonly IMessageFormatter _formatter;
         private readonly LoggingLevel _currentLoggingLevel;
 
-        protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
+        protected AbstractLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null)
         {
             _formatter = formatter ?? new DefaultMessageFormatter();
             _currentLoggingLevel = level;

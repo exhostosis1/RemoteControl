@@ -2,7 +2,8 @@
 {
     public interface IAudioControl
     {
-        int Volume { get; set; }
+        public int GetVolume();
+        public void SetVolume(int volume);
         void Mute(bool mute);
         IReadOnlyCollection<IAudioDevice> GetDevices();
         IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id);

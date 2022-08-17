@@ -6,7 +6,7 @@ namespace Logging
 {
     public class ConsoleLogger : AbstractLogger
     {
-        public ConsoleLogger(LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
+        public ConsoleLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level, formatter)
         {}
 
         protected override void ProcessMessage(string message)
