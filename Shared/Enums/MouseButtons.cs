@@ -1,6 +1,6 @@
 ﻿namespace Shared.Enums
 {
-    public enum MouseKeysEnum
+    public enum MouseButtons
     {
         Left,
         Right,

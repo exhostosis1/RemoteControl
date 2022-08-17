@@ -5,13 +5,130 @@ using Shared.Interfaces.Logging;
 
 namespace Control.Wrappers
 {
-    public class User32Wrapper: BaseWrapper, IDisplayControl, IKeyboardControl, IMouseControl
+    public class User32Wrapper : BaseWrapper, IDisplayControl, IKeyboardControl, IMouseControl
     {
         public User32Wrapper(ILogger logger) : base(logger)
         {
         }
 
         #region Enums
+        private enum User32KeyCodes
+        {
+            Backspace = 0x08,
+            Tab = 0x09,
+            Enter = 0x0D,
+            Shift = 0x10,
+            Ctrl = 0x11,
+            Alt = 0x12,
+            Pause = 0x13,
+            CapsLock = 0x14,
+            Escape = 0x1B,
+            Space = 0x20,
+            PageUp = 0x21,
+            PageDown = 0x22,
+            End = 0x23,
+            Home = 0x24,
+            ArrowLeft = 0x25,
+            ArrowUp = 0x26,
+            ArrowRight = 0x27,
+            ArrowDown = 0x28,
+            Select = 0x29,
+            Print = 0x2A,
+            PrintScreen = 0x2C,
+            Insert = 0x2D,
+            Del = 0x2E,
+            Help = 0x2F,
+            Key0 = 0x30,
+            Key1 = 0x31,
+            Key2 = 0x32,
+            Key3 = 0x33,
+            Key4 = 0x34,
+            Key5 = 0x35,
+            Key6 = 0x36,
+            Key7 = 0x37,
+            Key8 = 0x38,
+            Key9 = 0x39,
+            KeyA = 0x41,
+            KeyB = 0x42,
+            KeyC = 0x43,
+            KeyD = 0x44,
+            KeyE = 0x45,
+            KeyF = 0x46,
+            KeyG = 0x47,
+            KeyH = 0x48,
+            KeyI = 0x49,
+            KeyJ = 0x4A,
+            KeyK = 0x4B,
+            KeyL = 0x4C,
+            KeyM = 0x4D,
+            KeyN = 0x4E,
+            KeyO = 0x4F,
+            KeyP = 0x50,
+            KeyQ = 0x51,
+            KeyR = 0x52,
+            KeyS = 0x53,
+            KeyT = 0x54,
+            KeyU = 0x55,
+            KeyV = 0x56,
+            KeyW = 0x57,
+            KeyX = 0x58,
+            KeyY = 0x59,
+            KeyZ = 0x5A,
+            Win = 0x5B,
+            Sleep = 0x5F,
+            Numpad0 = 0x60,
+            Numpad1 = 0x61,
+            Numpad2 = 0x62,
+            Numpad3 = 0x63,
+            Numpad4 = 0x64,
+            Numpad5 = 0x65,
+            Numpad6 = 0x66,
+            Numpad7 = 0x67,
+            Numpad8 = 0x68,
+            Numpad9 = 0x69,
+            Multiply = 0x6A,
+            Add = 0x6B,
+            Separator = 0x6C,
+            Substract = 0x6D,
+            Decimal = 0x6E,
+            Divide = 0x6F,
+            F1 = 0x70,
+            F2 = 0x71,
+            F3 = 0x72,
+            F4 = 0x73,
+            F5 = 0x74,
+            F6 = 0x75,
+            F7 = 0x76,
+            F8 = 0x77,
+            F9 = 0x78,
+            F10 = 0x79,
+            F11 = 0x7A,
+            F12 = 0x7B,
+            NumLock = 0x90,
+            ScrollLock = 0x91,
+            LShift = 0xA0,
+            RShift = 0xA1,
+            LControl = 0xA2,
+            RControl = 0xA3,
+            LAlt = 0xA4,
+            RAlt = 0xA5,
+            BrowserBack = 0xA6,
+            BrowserForward = 0xA7,
+            BrowserRefresh = 0xA8,
+            BrowserStop = 0xA9,
+            BrowserSearch = 0xAA,
+            BrowserFavorites = 0xAB,
+            BrowserHome = 0xAC,
+            VolumeMute = 0xAD,
+            VolumeDown = 0xAE,
+            VolumeUp = 0xAF,
+            MediaNext = 0xB0,
+            MediaPrev = 0xB1,
+            MediaStop = 0xB2,
+            MediaPlayPause = 0xB3,
+            Mail = 0xB4,
+            MediaSelect = 0xB5,
+        }
         private enum MonitorState
         {
             MonitorStateOn = -1,
@@ -28,6 +145,7 @@ namespace Control.Wrappers
         [Flags]
         private enum KeyboardFlag : uint
         {
+            KeyDown = 0x0000,
             ExtendedKey = 0x0001,
             KeyUp = 0x0002,
             Unicode = 0x0004
@@ -106,16 +224,38 @@ namespace Control.Wrappers
         private readonly Input[] _buffer = new Input[Length];
         private readonly int _size = Marshal.SizeOf(typeof(Input));
 
-        private static readonly Dictionary<MouseKeysEnum, MouseFlags> KeysToFlags = new()
+        private static readonly Dictionary<KeysEnum, User32KeyCodes> KeysToKeyCodes = new()
         {
             {
-                MouseKeysEnum.Left, new MouseFlags(MouseFlag.LeftUp, MouseFlag.LeftDown)
+                KeysEnum.ArrowLeft, User32KeyCodes.ArrowLeft
             },
             {
-                MouseKeysEnum.Right, new MouseFlags(MouseFlag.RightUp, MouseFlag.RightDown)
+                KeysEnum.ArrowRight, User32KeyCodes.ArrowRight
             },
             {
-                MouseKeysEnum.Middle, new MouseFlags(MouseFlag.MiddleUp, MouseFlag.MiddleDown)
+                KeysEnum.MediaNext, User32KeyCodes.MediaNext
+            },
+            {
+                KeysEnum.MediaPrev, User32KeyCodes.MediaPrev
+            },
+            {
+                KeysEnum.MediaPlayPause, User32KeyCodes.MediaPlayPause
+            },
+            {
+                KeysEnum.Enter, User32KeyCodes.Enter
+            },
+        };
+
+        private static readonly Dictionary<MouseButtons, MouseFlags> MouseButtonsToFlags = new()
+        {
+            {
+                MouseButtons.Left, new MouseFlags(MouseFlag.LeftUp, MouseFlag.LeftDown)
+            },
+            {
+                MouseButtons.Right, new MouseFlags(MouseFlag.RightUp, MouseFlag.RightDown)
+            },
+            {
+                MouseButtons.Middle, new MouseFlags(MouseFlag.MiddleUp, MouseFlag.MiddleDown)
             }
         };
 
@@ -123,60 +263,56 @@ namespace Control.Wrappers
 
         private void DispatchInput() => SendInput(Length, _buffer, _size);
 
-        private static bool IsExtendedKey(KeysEnum keyCode)
+        private static bool IsExtendedKey(User32KeyCodes keyCode)
         {
             return keyCode is
-                KeysEnum.Alt or
-                KeysEnum.RAlt or
-                KeysEnum.Ctrl or
-                KeysEnum.RControl or
-                KeysEnum.Insert or
-                KeysEnum.Del or
-                KeysEnum.Home or
-                KeysEnum.End or
-                KeysEnum.PageUp or
-                KeysEnum.PageDown or
-                KeysEnum.ArrowRight or
-                KeysEnum.ArrowUp or
-                KeysEnum.ArrowLeft or
-                KeysEnum.ArrowDown or
-                KeysEnum.NumLock or
-                KeysEnum.PrintScreen or
-                KeysEnum.Divide;
+                User32KeyCodes.Alt or
+                User32KeyCodes.RAlt or
+                User32KeyCodes.Ctrl or
+                User32KeyCodes.RControl or
+                User32KeyCodes.Insert or
+                User32KeyCodes.Del or
+                User32KeyCodes.Home or
+                User32KeyCodes.End or
+                User32KeyCodes.PageUp or
+                User32KeyCodes.PageDown or
+                User32KeyCodes.ArrowRight or
+                User32KeyCodes.ArrowUp or
+                User32KeyCodes.ArrowLeft or
+                User32KeyCodes.ArrowDown or
+                User32KeyCodes.NumLock or
+                User32KeyCodes.PrintScreen or
+                User32KeyCodes.Divide;
         }
 
-        
-
-        private void SendInput(KeysEnum keyCode, bool up)
+        private void SendKeyInput(User32KeyCodes keyCode, KeyboardFlag flags)
         {
-            var flag = up ? KeyboardFlag.KeyUp : 0;
-
             _buffer[0].Type = (uint)InputType.Keyboard;
 
             _buffer[0].Data.Keyboard = new KeyboardInput
             {
-                KeyCode = (ushort) keyCode,
-                Scan = (ushort) (MapVirtualKey((uint) keyCode, 0) & 0xFFU),
-                Flags = (uint) (IsExtendedKey(keyCode) ? flag | KeyboardFlag.ExtendedKey : flag),
+                KeyCode = (ushort)keyCode,
+                Scan = (ushort)(MapVirtualKey((uint)keyCode, 0) & 0xFFU),
+                Flags = (uint)(IsExtendedKey(keyCode) ? KeyboardFlag.ExtendedKey | flags : flags),
             };
 
             DispatchInput();
         }
 
-        private void SendInput(KeysEnum key)
+        private void SendKeyInput(User32KeyCodes key)
         {
-            SendInput(key, false);
-            SendInput(key, true);
+            SendKeyInput(key, KeyboardFlag.KeyDown);
+            SendKeyInput(key, KeyboardFlag.KeyUp);
         }
 
-        private void SendInput(char character, bool up)
+        private void SendCharInput(char character, KeyboardFlag flags)
         {
-            _buffer[0].Type = (uint) InputType.Keyboard;
+            _buffer[0].Type = (uint)InputType.Keyboard;
 
             _buffer[0].Data.Keyboard = new KeyboardInput
             {
                 Scan = character,
-                Flags = (uint) (KeyboardFlag.Unicode | (up ? KeyboardFlag.KeyUp : 0)),
+                Flags = (uint)(KeyboardFlag.Unicode | flags),
             };
 
             if ((character & 0xFF00) == 0xE000)
@@ -185,15 +321,15 @@ namespace Control.Wrappers
             DispatchInput();
         }
 
-        private void SendInput(char character)
+        private void SendCharInput(char character)
         {
-            SendInput(character, false);
-            SendInput(character, true);
+            SendCharInput(character, KeyboardFlag.KeyDown);
+            SendCharInput(character, KeyboardFlag.KeyUp);
         }
 
-        private void SendInput(int x, int y)
+        private void SendMouseInput(int x, int y)
         {
-            _buffer[0].Type = (uint) InputType.Mouse;
+            _buffer[0].Type = (uint)InputType.Mouse;
 
             _buffer[0].Data.Mouse = new Mouseinput
             {
@@ -205,66 +341,65 @@ namespace Control.Wrappers
             DispatchInput();
         }
 
-        private void SendInput(MouseKeysEnum button, bool up)
-        {
-            _buffer[0].Type = (uint) InputType.Mouse;
-
-            _buffer[0].Data.Mouse = new Mouseinput
-            {
-                Flags = (uint) (up ? KeysToFlags[button].Up : KeysToFlags[button].Down),
-            };
-
-            DispatchInput();
-        }
-
-        private void SendInput(MouseKeysEnum button)
-        {
-            SendInput(button, false);
-            SendInput(button, true);
-        }
-
-        private void SendInput(int scrollAmount)
+        private void SendMouseInput(MouseFlag button)
         {
             _buffer[0].Type = (uint)InputType.Mouse;
 
             _buffer[0].Data.Mouse = new Mouseinput
             {
-                Flags = (uint) MouseFlag.VerticalWheel,
-                MouseData = (uint) scrollAmount,
+                Flags = (uint)(button),
+            };
+
+            DispatchInput();
+        }
+
+        private void SendScrollInput(int scrollAmount)
+        {
+            _buffer[0].Type = (uint)InputType.Mouse;
+
+            _buffer[0].Data.Mouse = new Mouseinput
+            {
+                Flags = (uint)MouseFlag.VerticalWheel,
+                MouseData = (uint)scrollAmount,
             };
 
             DispatchInput();
         }
         #endregion
-        
+
         public void Darken() => SetMonitorInState(MonitorState.MonitorStateOff);
 
         public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
         {
             if (mode == KeyPressMode.Click)
-                SendInput(key);
+                SendKeyInput(KeysToKeyCodes[key]);
             else
-                SendInput(key, mode == KeyPressMode.Up);
+                SendKeyInput(KeysToKeyCodes[key], mode == KeyPressMode.Up ? KeyboardFlag.KeyUp : 0);
         }
 
         public void TextInput(string text)
         {
             foreach (var c in text.ToCharArray())
             {
-                SendInput(c);
+                SendCharInput(c);
             }
         }
 
-        public void Move(int x, int y) => SendInput(x, y);
+        public void Move(int x, int y) => SendMouseInput(x, y);
 
-        public void ButtonPress(MouseKeysEnum button = MouseKeysEnum.Left, KeyPressMode mode = KeyPressMode.Click)
+        public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
         {
             if (mode == KeyPressMode.Click)
-                SendInput(button);
+            {
+                SendMouseInput(MouseButtonsToFlags[button].Down);
+                SendMouseInput(MouseButtonsToFlags[button].Up);
+            }
             else
-                SendInput(button, mode == KeyPressMode.Up);
+            {
+                SendMouseInput(mode == KeyPressMode.Up ? MouseButtonsToFlags[button].Up : MouseButtonsToFlags[button].Down);
+            }
         }
 
-        public void Wheel(bool up) => SendInput(up ? MouseWheelClickSize : -MouseWheelClickSize);
+        public void Wheel(bool up) => SendScrollInput(up ? MouseWheelClickSize : -MouseWheelClickSize);
     }
 }

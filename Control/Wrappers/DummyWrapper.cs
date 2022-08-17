@@ -42,7 +42,7 @@ namespace Control.Wrappers
             Logger.LogInfo($"Dummy MouseMove {x} {y}");
         }
 
-        public void ButtonPress(MouseKeysEnum key = MouseKeysEnum.Left, KeyPressMode mode = KeyPressMode.Click)
+        public void ButtonPress(MouseButtons key = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
         {
             Logger.LogInfo($"Dummy MouseButtonPress {key}");
         }
