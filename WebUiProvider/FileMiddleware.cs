@@ -1,11 +1,18 @@
 ﻿using Shared.Interfaces.Web;
 using System.Net;
 
-namespace RemoteControlApp.Web.Middleware
+namespace WebUiProvider
 {
-    public class FileMiddleware : BaseMiddleware
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class FileMiddleware : IMiddleware
     {
         private static readonly string ContentFolder = AppContext.BaseDirectory + "www";
+        private readonly HttpEventHandler _next;
+
+        public FileMiddleware(HttpEventHandler next)
+        {
+            _next = next;
+        }
 
         private static readonly Dictionary<string, string> ContentTypes = new()
         {
@@ -17,7 +24,7 @@ namespace RemoteControlApp.Web.Middleware
             { ".css", "text/css" }
         };
 
-        protected override void ProcessRequestInternal(IContext context)
+        public void ProcessRequest(IContext context)
         {
             var uriPath = context.Request.Path;
 
@@ -46,6 +53,8 @@ namespace RemoteControlApp.Web.Middleware
             {
                 context.Response.StatusCode = HttpStatusCode.NotFound;
             }
+
+            _next(context);
         }
     }
 }

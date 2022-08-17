@@ -1,10 +1,10 @@
-﻿using RemoteControlApp.Web.Attributes;
-using Shared;
+﻿using Shared;
 using Shared.Enums;
 using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
+using WebApiProvider.Attributes;
 
-namespace RemoteControlApp.Web.Controllers
+namespace WebApiProvider.Controllers
 {
     [Controller("mouse")]
     public class MouseController : BaseController

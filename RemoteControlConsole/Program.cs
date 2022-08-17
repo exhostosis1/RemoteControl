@@ -1,12 +1,13 @@
-﻿using System.Runtime.InteropServices;
-using Config;
+﻿using Config;
 using Control.Wrappers;
 using Http.Listeners;
 using Logging;
 using RemoteControlApp;
-using RemoteControlApp.Web.Controllers;
-using RemoteControlApp.Web.Middleware;
 using Shared.Interfaces.Control;
+using System.Runtime.InteropServices;
+using WebApiProvider;
+using WebApiProvider.Controllers;
+using WebUiProvider;
 
 var consoleLogger = new ConsoleLogger();
 
@@ -43,8 +44,7 @@ else
     return;
 }
 
-var uiListener = new GenericListener(consoleLogger);
-var apiListener = new GenericListener(consoleLogger);
+var listener = new GenericListener(consoleLogger);
 
 var controllers = new BaseController[]
 {
@@ -54,10 +54,18 @@ var controllers = new BaseController[]
     new MouseController(mouseControl, consoleLogger)
 };
 
-var uiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new FileMiddleware()).GetFirst();
-var apiMiddlewareChain = new LoggingMiddleware(consoleLogger).Attach(new ApiMiddlewareV1(controllers)).GetFirst();
+var app = new RemoteControl(listener)
+    .Use((context, next) =>
+    {
+        Console.WriteLine("placeholder before");
+        next(context);
+        Console.WriteLine("placeholder after");
+    })
+    .UseMiddleware<LoggingMiddleware>(consoleLogger)
+    .UseMiddleware<ApiMiddlewareV1>((object)controllers)
+    .UseMiddleware<FileMiddleware>()
+    .Build();
 
-var app = new RemoteControl(uiListener, apiListener, uiMiddlewareChain, apiMiddlewareChain);
 var config = new LocalFileConfigService(consoleLogger);
 
 app.Start(config.GetConfig().UriConfig.Uri);

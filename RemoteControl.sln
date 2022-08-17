@@ -15,9 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlConsole", "Rem
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{477FD6B7-D7A8-4EFA-B5A5-AA700FAECB80}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Control", "Control\Control.csproj", "{B7A22B55-9A71-4EA2-84C1-979364B2DB3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Control", "Control\Control.csproj", "{B7A22B55-9A71-4EA2-84C1-979364B2DB3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Http", "Http\Http.csproj", "{FC0B5E8B-A342-4697-85C9-E2B4F50AB7CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Http", "Http\Http.csproj", "{FC0B5E8B-A342-4697-85C9-E2B4F50AB7CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUiProvider", "WebUiProvider\WebUiProvider.csproj", "{4E529740-F763-4871-8ECA-21897CD0935F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApiProvider", "WebApiProvider\WebApiProvider.csproj", "{CD210AE1-342E-405F-BA55-10ABB1B55223}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,6 +95,22 @@ Global
 		{FC0B5E8B-A342-4697-85C9-E2B4F50AB7CE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FC0B5E8B-A342-4697-85C9-E2B4F50AB7CE}.Release|x64.ActiveCfg = Release|Any CPU
 		{FC0B5E8B-A342-4697-85C9-E2B4F50AB7CE}.Release|x64.Build.0 = Release|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Debug|x64.Build.0 = Debug|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Release|x64.ActiveCfg = Release|Any CPU
+		{4E529740-F763-4871-8ECA-21897CD0935F}.Release|x64.Build.0 = Release|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Debug|x64.Build.0 = Debug|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Release|x64.ActiveCfg = Release|Any CPU
+		{CD210AE1-342E-405F-BA55-10ABB1B55223}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

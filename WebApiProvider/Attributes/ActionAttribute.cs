@@ -1,4 +1,4 @@
-﻿namespace RemoteControlApp.Web.Attributes
+﻿namespace WebApiProvider.Attributes
 {
     internal class ActionAttribute : Attribute
     {

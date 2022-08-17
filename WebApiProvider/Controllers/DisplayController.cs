@@ -1,8 +1,8 @@
-﻿using RemoteControlApp.Web.Attributes;
-using Shared.Interfaces.Control;
+﻿using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
+using WebApiProvider.Attributes;
 
-namespace RemoteControlApp.Web.Controllers
+namespace WebApiProvider.Controllers
 {
     [Controller("display")]
     public class DisplayController: BaseController

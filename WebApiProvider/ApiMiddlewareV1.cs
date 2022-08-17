@@ -1,17 +1,19 @@
-﻿using RemoteControlApp.Web.Attributes;
-using RemoteControlApp.Web.Controllers;
-using Shared;
+﻿using Shared;
 using Shared.Interfaces.Web;
 using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using WebApiProvider.Attributes;
+using WebApiProvider.Controllers;
 
-namespace RemoteControlApp.Web.Middleware
+namespace WebApiProvider
 {
-    public class ApiMiddlewareV1 : BaseMiddleware
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class ApiMiddlewareV1: IMiddleware
     {
         private readonly Dictionary<string, Dictionary<string, Func<string, string?>>> _methods = new();
+        private readonly HttpEventHandler _next;
 
         private const string ApiVersion = "v1";
 
@@ -22,8 +24,10 @@ namespace RemoteControlApp.Web.Middleware
                 : Expression.GetFuncType(paramTypes.Concat(new[] { returnType }).ToArray());
         }
 
-        public ApiMiddlewareV1(IEnumerable<BaseController> controllers)
+        public ApiMiddlewareV1(HttpEventHandler next, IEnumerable<BaseController> controllers)
         {
+            _next = next;
+
             foreach (var controller in controllers)
             {
                 var controllerKey = controller.GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
@@ -54,8 +58,14 @@ namespace RemoteControlApp.Web.Middleware
             }
         }
 
-        protected override void ProcessRequestInternal(IContext context)
+        public void ProcessRequest(IContext context)
         {
+            if (!context.Request.Path.Contains($"api/{ApiVersion}"))
+            {
+                _next(context);
+                return;
+            }
+
             var (controller, action, param) = context.Request.Path.ParsePath(ApiVersion);
 
             if (!_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))

@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using RemoteControlApp.Web.Attributes;
 using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
+using WebApiProvider.Attributes;
 
-namespace RemoteControlApp.Web.Controllers
+namespace WebApiProvider.Controllers
 {
     [Controller("audio")]
     public class AudioController: BaseController

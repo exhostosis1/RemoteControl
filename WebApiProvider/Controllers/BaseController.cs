@@ -1,6 +1,6 @@
 ﻿using Shared.Interfaces.Logging;
 
-namespace RemoteControlApp.Web.Controllers
+namespace WebApiProvider.Controllers
 {
     public abstract class BaseController
     {
