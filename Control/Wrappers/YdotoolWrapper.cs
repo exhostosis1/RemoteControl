@@ -1,6 +1,10 @@
-﻿using Shared.Enums;
+﻿using System.Diagnostics;
+using NAudio.MediaFoundation;
+using Shared.Enums;
 using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
+// ReSharper disable UnusedMember.Local
+// ReSharper disable InconsistentNaming
 
 namespace Control.Wrappers
 {
@@ -9,7 +13,8 @@ namespace Control.Wrappers
         public YdotoolWrapper(ILogger logger) : base(logger)
         { }
 
-        enum YdotoolKey: byte
+        #region enums
+        private enum YdotoolKey: byte
         {
             KEY_RESERVED = 0,
             KEY_ESC = 115,
@@ -101,7 +106,8 @@ namespace Control.Wrappers
             KEY_PREVIOUSSONG = 165,
         }
 
-        enum MouseCodes: byte
+        [Flags]
+        private enum MouseCodes: byte
         {
             LEFT = 0x00,
             RIGHT = 0x01,
@@ -111,9 +117,13 @@ namespace Control.Wrappers
             FORWARD = 0x05,
             BACK = 0x06,
             TASK = 0x07,
+
             Down = 0x40,
             Up = 0x80
         }
+        #endregion
+
+        #region private
 
         private readonly Dictionary<KeysEnum, YdotoolKey> KeyToScanCode = new()
         {
@@ -150,7 +160,7 @@ namespace Control.Wrappers
             }
         };
 
-        private (string, string) RunLinuxCommand(string command)
+        private static (string, string) RunLinuxCommand(string command)
         {
             using var proc = new System.Diagnostics.Process();
 
@@ -170,96 +180,71 @@ namespace Control.Wrappers
             return (result.Trim(), error.Trim());
         }
 
-        private (string, string) RunYdotool(string args)
+        private static readonly Process _proc = new()
         {
-            return RunLinuxCommand($"ydotool {args}");
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "/bin/bash",
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            }
+        };
+
+        private static void FastRunLinuxCommand(string command)
+        {
+            _proc.StartInfo.Arguments = $"-c \" {command} \"";
+            _proc.Start();
         }
 
-        private (string, string) SendKey(YdotoolKey key)
+        private static void RunYdotool(string args)
         {
-            return RunYdotool($"key {(byte)key}:1 {(byte)key}:0");
+            FastRunLinuxCommand($"ydotool {args}");
         }
 
-        private (string, string) SendText(string text)
+        private static void SendKey(YdotoolKey key)
         {
-            return RunYdotool($"type {text}");
+            RunYdotool($"key {key:D}:1 {key:D}:0");
         }
 
-        private (string, string) SendMouseMove(int x, int y)
+        private static void SendText(string text)
         {
-            return RunYdotool($"mousemove -- {x} {y}");
+            RunYdotool($"type {text}");
         }
 
-        private (string, string) SendMouseButton(MouseCodes button)
+        private static void SendMouseMove(int x, int y)
         {
-            return RunYdotool($"click {((byte)button):x}");
+            RunYdotool($"mousemove -- {x} {y}");
         }
+
+        private static void SendMouseButton(MouseCodes button)
+        {
+            RunYdotool($"click {button:X}");
+        }
+        #endregion
 
         public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
         {
-            var (result, error) = SendKey(KeyToScanCode[key]);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                Logger.LogError(error);
-            }
-            else if (!string.IsNullOrEmpty(result))
-            {
-                Logger.LogInfo(result);
-            }
+            SendKey(KeyToScanCode[key]);
         }
 
         public void TextInput(string text)
         {
-            var (result, error) = SendText(text);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                Logger.LogError(error);
-            }
-            else if (!string.IsNullOrEmpty(result))
-            {
-                Logger.LogInfo(result);
-            }
+            SendText(text);
         }
 
         public void Move(int x, int y)
         {
-            var (result, error) = SendMouseMove(x, y);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                Logger.LogError(error);
-            }
-            else if (!string.IsNullOrEmpty(result))
-            {
-                Logger.LogInfo(result);
-            }
+            SendMouseMove(x, y);
         }
 
         public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
         {
-            MouseCodes mouseCode;
+            var mouseCode = mode == KeyPressMode.Click
+                ? ButtonToCode[button] | MouseCodes.Down | MouseCodes.Up
+                : ButtonToCode[button] | (mode == KeyPressMode.Up ? MouseCodes.Up : MouseCodes.Down);
 
-            if(mode == KeyPressMode.Click)
-            {
-                mouseCode = ButtonToCode[button] | MouseCodes.Down | MouseCodes.Up;
-            }
-            else
-            {
-                mouseCode = ButtonToCode[button] | (mode == KeyPressMode.Up ? MouseCodes.Up : MouseCodes.Up);
-            }
-
-            var (result, error) = SendMouseButton(mouseCode);
-
-            if (!string.IsNullOrEmpty(error))
-            {
-                Logger.LogError(error);
-            }
-            else if (!string.IsNullOrEmpty(result))
-            {
-                Logger.LogInfo(result);
-            }
+            SendMouseButton(mouseCode);
         }
 
         public void Wheel(bool up)

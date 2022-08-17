@@ -46,7 +46,6 @@ namespace RemoteControlApp.Web.Controllers
             result = result > 100 ? 100 : result < 0 ? 0 : result;
 
             _audio.SetVolume(result);
-            _audio.Mute(result == 0);
 
             return "done";
         }

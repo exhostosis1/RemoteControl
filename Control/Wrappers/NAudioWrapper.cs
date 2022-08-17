@@ -27,10 +27,9 @@ namespace Control.Wrappers
 
         public void SetVolume(int volume) => _defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar = (float)volume / 100;
 
-        public void Mute(bool mute)
-        {
-            _defaultDevice.AudioEndpointVolume.Mute = mute;
-        }
+        public void Mute() => _defaultDevice.AudioEndpointVolume.Mute = true;
+
+        public void Unmute() => _defaultDevice.AudioEndpointVolume.Mute = false;
 
         public IReadOnlyCollection<IAudioDevice> GetDevices()
         {

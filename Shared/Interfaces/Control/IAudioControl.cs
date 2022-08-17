@@ -4,7 +4,8 @@
     {
         public int GetVolume();
         public void SetVolume(int volume);
-        void Mute(bool mute);
+        void Mute();
+        void Unmute();
         IReadOnlyCollection<IAudioDevice> GetDevices();
         IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id);
     }

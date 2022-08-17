@@ -68,9 +68,14 @@ namespace Control.Wrappers
             Logger.LogInfo($"Dummy SetVolume {volume}");
         }
 
-        public void Mute(bool mute)
+        public void Mute()
         {
             Logger.LogInfo($"Dummy Mute");
+        }
+
+        public void Unmute()
+        {
+            Logger.LogInfo("Dummy Unmute");
         }
 
         public IReadOnlyCollection<IAudioDevice> GetDevices()
