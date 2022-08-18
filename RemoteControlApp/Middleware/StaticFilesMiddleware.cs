@@ -1,5 +1,4 @@
-﻿using Shared.Interfaces;
-using Shared.Interfaces.Web;
+﻿using Shared.Interfaces.Web;
 using System.Net;
 
 namespace RemoteControlApp.Middleware
@@ -60,15 +59,6 @@ namespace RemoteControlApp.Middleware
             {
                 context.Response.StatusCode = HttpStatusCode.NotFound;
             }
-        }
-    }
-
-    public static partial class AppExtensions
-    {
-        public static IRemoteControlApp UseStaticFilesMiddleware(this IRemoteControlApp app)
-        {
-            app.UseMiddleware<StaticFilesMiddleware>();
-            return app;
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Shared.Interfaces;
-using Shared.Interfaces.Logging;
+﻿using Shared.Interfaces.Logging;
 using Shared.Interfaces.Web;
 
 namespace RemoteControlApp.Middleware
@@ -21,15 +20,6 @@ namespace RemoteControlApp.Middleware
             _logger.LogInfo(context.Request.Path);
 
             _next(context);
-        }
-    }
-
-    public static partial class AppExtensions
-    {
-        public static IRemoteControlApp UseLoggingMiddleware(this IRemoteControlApp app)
-        {
-            app.UseMiddleware<LoggingMiddleware>();
-            return app;
         }
     }
 }

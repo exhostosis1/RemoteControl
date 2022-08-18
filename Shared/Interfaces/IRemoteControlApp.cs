@@ -10,9 +10,5 @@ namespace Shared.Interfaces
         public string? GetApiListeningUri();
         public bool IsUiListening { get; }
         public bool IsApiListening { get; }
-
-        public IRemoteControlApp UseMiddleware<T>() where T : IMiddleware;
-        public IRemoteControlApp Use(Action<IContext, HttpEventHandler> middlewareMethod);
-        public IRemoteControlApp Build();
     }
 }
