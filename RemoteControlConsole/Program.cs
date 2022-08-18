@@ -9,6 +9,7 @@ using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
 using Shared.Interfaces.Web;
 using System.Runtime.InteropServices;
+using WebApiProvider.Controllers;
 
 var container = new Container()
     .Register<ILogger, ConsoleLogger>();
@@ -36,6 +37,12 @@ else
 }
 
 container.Register<IListener, GenericListener>();
+
+container
+    .RegisterController<AudioController>()
+    .RegisterController<DisplayController>()
+    .RegisterController<KeyboardController>()
+    .RegisterController<MouseController>();
 
 var app = new RemoteControl(container.Get<IListener>(), container)
     .UseLoggingMiddleware()

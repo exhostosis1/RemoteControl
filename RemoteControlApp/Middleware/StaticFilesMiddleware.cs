@@ -1,7 +1,6 @@
 ﻿using Shared.Interfaces;
 using Shared.Interfaces.Web;
 using System.Net;
-using WebApiProvider.Controllers;
 
 namespace RemoteControlApp.Middleware
 {

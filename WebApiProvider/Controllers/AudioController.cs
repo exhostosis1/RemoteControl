@@ -1,7 +1,7 @@
-﻿using System.Text.Json;
-using Shared.Interfaces.Control;
+﻿using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
-using WebApiProvider.Attributes;
+using System.Text.Json;
+using Shared.Interfaces.Web.Attributes;
 
 namespace WebApiProvider.Controllers
 {

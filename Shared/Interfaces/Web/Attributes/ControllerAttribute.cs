@@ -1,4 +1,4 @@
-﻿namespace WebApiProvider.Attributes
+﻿namespace Shared.Interfaces.Web.Attributes
 {
     public class ControllerAttribute : Attribute
     {

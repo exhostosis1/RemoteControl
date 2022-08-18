@@ -1,6 +1,6 @@
 ﻿using Shared.Interfaces.Control;
 using Shared.Interfaces.Logging;
-using WebApiProvider.Attributes;
+using Shared.Interfaces.Web.Attributes;
 
 namespace WebApiProvider.Controllers
 {

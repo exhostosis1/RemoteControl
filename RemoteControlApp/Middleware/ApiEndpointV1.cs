@@ -2,55 +2,20 @@
 using Shared.Interfaces;
 using Shared.Interfaces.Web;
 using System.Net;
-using System.Reflection;
 using System.Text;
-using WebApiProvider.Attributes;
-using WebApiProvider.Controllers;
 
 namespace RemoteControlApp.Middleware
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public class ApiEndpointV1 : IMiddleware
     {
-        private readonly Dictionary<string, Dictionary<string, Func<string, string?>>> _methods = new();
+        private readonly ControllerMethods _methods;
 
         private const string ApiVersion = "v1";
 
-        public ApiEndpointV1(HttpEventHandler _, IContainer container)
+        public ApiEndpointV1(HttpEventHandler _, ControllerMethods methods)
         {
-            var controllers = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).Where(x =>
-                x.IsClass && x.IsAssignableTo(typeof(BaseController)));
-
-            foreach (var controllerType in controllers)
-            {
-                var controllerKey = controllerType.GetCustomAttribute<ControllerAttribute>()?.Name;
-
-                if (string.IsNullOrEmpty(controllerKey)) continue;
-
-                var methods = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 && x.GetParameters().First().ParameterType == typeof(string)).ToArray();
-
-                if (methods.Length == 0) continue;
-
-                var controllerInstance = container.GetUnregistered(controllerType);
-
-                var controllerValue = new Dictionary<string, Func<string, string?>>();
-
-                foreach (var methodInfo in methods)
-                {
-                    var action = methodInfo.GetCustomAttribute<ActionAttribute>()?.Name;
-                    if (string.IsNullOrEmpty(action)) continue;
-
-                    var value = methodInfo.CreateDelegate<Func<string, string?>>(controllerInstance);
-
-                    controllerValue.Add(action, value);
-                }
-
-                if (controllerValue.Count > 0)
-                {
-                    _methods.Add(controllerKey, controllerValue);
-                }
-            }
+            _methods = methods;
         }
 
         public void ProcessRequest(IContext context)

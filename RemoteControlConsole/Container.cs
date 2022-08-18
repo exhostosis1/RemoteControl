@@ -1,5 +1,7 @@
-﻿using System.Reflection;
-using Shared.Interfaces;
+﻿using Shared.Interfaces;
+using Shared.Interfaces.Web;
+using Shared.Interfaces.Web.Attributes;
+using System.Reflection;
 
 namespace RemoteControlConsole
 {
@@ -7,8 +9,50 @@ namespace RemoteControlConsole
     {
         private Dictionary<Type, Type> RegisteredTypes { get; } = new();
         private Dictionary<Type, object> ObjectCache { get; } = new();
+        private readonly ControllerMethods _controllerMethods = new ();
 
         public Container()
+        {
+            RegisteredTypes.Add(typeof(ControllerMethods), typeof(ControllerMethods));
+            ObjectCache.Add(typeof(ControllerMethods), _controllerMethods);
+        }
+
+        public IContainer RegisterController<TController>() where TController: IController
+        {
+            var type = typeof(TController);
+
+            var controllerKey = type.GetCustomAttribute<ControllerAttribute>()?.Name;
+
+            if (string.IsNullOrEmpty(controllerKey)) return this;
+
+            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                .Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 &&
+                            x.GetParameters().First().ParameterType == typeof(string)).ToArray();
+
+            if (methods.Length == 0) return this;
+
+            var controllerValue = new Dictionary<string, Func<string, string?>>();
+            var controller = GetUnregistered(type);
+
+            foreach (var methodInfo in methods)
+            {
+                var action = methodInfo.GetCustomAttribute<ActionAttribute>()?.Name;
+                if (string.IsNullOrEmpty(action)) continue;
+
+                var value = methodInfo.CreateDelegate<Func<string, string?>>(controller);
+
+                controllerValue.Add(action, value);
+            }
+
+            if (controllerValue.Count > 0)
+            {
+                _controllerMethods.Add(controllerKey, controllerValue);
+            }
+
+            return this;
+        }
+
+        public void RegisterSelf()
         {
             RegisteredTypes.Add(typeof(IContainer), typeof(Container));
             ObjectCache.Add(typeof(Container), this);
