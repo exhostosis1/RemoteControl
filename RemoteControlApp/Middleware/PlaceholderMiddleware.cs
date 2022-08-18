@@ -1,8 +1,8 @@
 ﻿using Shared.Interfaces.Web;
 
-namespace RemoteControlApp
+namespace RemoteControlApp.Middleware
 {
-    internal class PlaceholderMiddleware: IMiddleware
+    internal class PlaceholderMiddleware : IMiddleware
     {
         private readonly Action<IContext, HttpEventHandler> _action;
         private readonly HttpEventHandler _next;

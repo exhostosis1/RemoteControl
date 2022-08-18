@@ -1,43 +1,38 @@
 ﻿using Shared;
+using Shared.Interfaces;
 using Shared.Interfaces.Web;
-using System.Linq.Expressions;
 using System.Net;
 using System.Reflection;
 using System.Text;
 using WebApiProvider.Attributes;
 using WebApiProvider.Controllers;
 
-namespace WebApiProvider
+namespace RemoteControlApp.Middleware
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class ApiMiddlewareV1: IMiddleware
+    public class ApiEndpointV1 : IMiddleware
     {
         private readonly Dictionary<string, Dictionary<string, Func<string, string?>>> _methods = new();
-        private readonly HttpEventHandler _next;
 
         private const string ApiVersion = "v1";
 
-        private Type GetDelegateType(Type returnType, Type[] paramTypes)
+        public ApiEndpointV1(HttpEventHandler _, IContainer container)
         {
-            return returnType == typeof(void)
-                ? Expression.GetActionType(paramTypes)
-                : Expression.GetFuncType(paramTypes.Concat(new[] { returnType }).ToArray());
-        }
+            var controllers = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.GetTypes()).Where(x =>
+                x.IsClass && x.IsAssignableTo(typeof(BaseController)));
 
-        public ApiMiddlewareV1(HttpEventHandler next, IEnumerable<BaseController> controllers)
-        {
-            _next = next;
-
-            foreach (var controller in controllers)
+            foreach (var controllerType in controllers)
             {
-                var controllerKey = controller.GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
+                var controllerKey = controllerType.GetCustomAttribute<ControllerAttribute>()?.Name;
 
                 if (string.IsNullOrEmpty(controllerKey)) continue;
 
-                var methods = controller.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                var methods = controllerType.GetMethods(BindingFlags.Public | BindingFlags.Instance)
                     .Where(x => x.ReturnType == typeof(string) && x.GetParameters().Length == 1 && x.GetParameters().First().ParameterType == typeof(string)).ToArray();
 
                 if (methods.Length == 0) continue;
+
+                var controllerInstance = container.GetUnregistered(controllerType);
 
                 var controllerValue = new Dictionary<string, Func<string, string?>>();
 
@@ -46,7 +41,7 @@ namespace WebApiProvider
                     var action = methodInfo.GetCustomAttribute<ActionAttribute>()?.Name;
                     if (string.IsNullOrEmpty(action)) continue;
 
-                    var value = methodInfo.CreateDelegate<Func<string, string?>>(controller);
+                    var value = methodInfo.CreateDelegate<Func<string, string?>>(controllerInstance);
 
                     controllerValue.Add(action, value);
                 }
@@ -60,12 +55,6 @@ namespace WebApiProvider
 
         public void ProcessRequest(IContext context)
         {
-            if (!context.Request.Path.Contains($"api/{ApiVersion}"))
-            {
-                _next(context);
-                return;
-            }
-
             var (controller, action, param) = context.Request.Path.ParsePath(ApiVersion);
 
             if (!_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))
@@ -81,6 +70,15 @@ namespace WebApiProvider
                 context.Response.ContentType = "application/json";
                 context.Response.Payload = Encoding.UTF8.GetBytes(result);
             }
+        }
+    }
+
+    public static partial class AppExtensions
+    {
+        public static IRemoteControlApp UseApiV1Enpoint(this IRemoteControlApp app)
+        {
+            app.UseMiddleware<ApiEndpointV1>();
+            return app;
         }
     }
 }

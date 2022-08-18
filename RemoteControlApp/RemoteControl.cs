@@ -1,30 +1,31 @@
 ﻿using Shared.Interfaces;
 using Shared.Interfaces.Web;
 using System.Reflection;
+using RemoteControlApp.Middleware;
 
 namespace RemoteControlApp
 {
     public class RemoteControl: IRemoteControlApp
     {
-        private record MiddlewareConfigItem(Type? Type, object?[] Parameters, Action<IContext, HttpEventHandler>? Action);
-
         private readonly IListener _listener;
-        private readonly List<MiddlewareConfigItem> _middlewareConfig = new();
+        private readonly IContainer _container;
+        private readonly List<object> _middlewareConfig = new();
 
-        public RemoteControl(IListener listener)
+        public RemoteControl(IListener listener, IContainer container)
         {
+            _container = container;
             _listener = listener;
         }
 
-        public IRemoteControlApp UseMiddleware<T>(params object?[] optionalParameters) where T: IMiddleware 
+        public IRemoteControlApp UseMiddleware<T>() where T: IMiddleware 
         {
-            _middlewareConfig.Add(new MiddlewareConfigItem(typeof(T), optionalParameters, null));
+            _middlewareConfig.Add(typeof(T));
             return this;
         }
 
         public IRemoteControlApp Use(Action<IContext, HttpEventHandler> middlewareMethod)
         {
-            _middlewareConfig.Add(new MiddlewareConfigItem(null, Array.Empty<object?>(), middlewareMethod));
+            _middlewareConfig.Add(middlewareMethod);
             return this;
         }
 
@@ -34,24 +35,25 @@ namespace RemoteControlApp
 
             for (var i = _middlewareConfig.Count - 1; i >= 0; i--)
             {
-                if (_middlewareConfig[i].Type != null)
+                if (_middlewareConfig[i] is Type type)
                 {
-                    var constructor = _middlewareConfig[i].Type!
+                    var constructor = type
                         .GetConstructors(BindingFlags.Public | BindingFlags.Instance)
                         .MinBy(x => x.GetParameters().Length);
 
-                    if (_middlewareConfig[i].Parameters.Length + 1 != constructor?.GetParameters().Length)
-                        throw new Exception($"Cannot find suitable constructor for type {_middlewareConfig[i].Type}");
+                    if (constructor == null)
+                        throw new Exception($"Cannot find public constructor for {type}");
 
-                    var middleware =
-                        (IMiddleware) constructor.Invoke(new[] { next }.Concat(_middlewareConfig[i].Parameters)
-                            .ToArray());
+                    var parameters = constructor.GetParameters()
+                        .Select(x => x.ParameterType == typeof(HttpEventHandler) ? next : _container.Get(x.ParameterType)).ToArray();
+
+                    var middleware = (IMiddleware) constructor.Invoke(parameters);
 
                     next = middleware.ProcessRequest;
                 }
                 else
                 {
-                    var middleware = new PlaceholderMiddleware(next, _middlewareConfig[i].Action!);
+                    var middleware = new PlaceholderMiddleware(next, (Action<IContext, HttpEventHandler>)_middlewareConfig[i]);
 
                     next = middleware.ProcessRequest;
                 }
@@ -62,10 +64,7 @@ namespace RemoteControlApp
             return this;
         }
 
-        public void Start(Uri uri)
-        {
-            _listener.StartListen(uri.ToString());
-        }
+        public void Start(Uri uri) => _listener.StartListen(uri.ToString());
 
         public void Stop() => _listener.StopListen();
 

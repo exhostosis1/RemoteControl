@@ -3,70 +3,47 @@ using Control.Wrappers;
 using Http.Listeners;
 using Logging;
 using RemoteControlApp;
+using RemoteControlApp.Middleware;
+using RemoteControlConsole;
 using Shared.Interfaces.Control;
+using Shared.Interfaces.Logging;
+using Shared.Interfaces.Web;
 using System.Runtime.InteropServices;
-using WebApiProvider;
-using WebApiProvider.Controllers;
-using WebUiProvider;
 
-var consoleLogger = new ConsoleLogger();
+var container = new Container()
+    .Register<ILogger, ConsoleLogger>();
 
-IKeyboardControl keyboardControl;
-IMouseControl mouseControl;
-IDisplayControl displayControl;
-IAudioControl audioControl;
-
-if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 {
-    var wrapper = new User32Wrapper(consoleLogger);
-
-    keyboardControl = wrapper;
-    mouseControl = wrapper;
-    displayControl = wrapper;
-
-    audioControl = new NAudioWrapper(consoleLogger);
+    container
+        .Register<IKeyboardControl, User32Wrapper>()
+        .Register<IMouseControl, User32Wrapper>()
+        .Register<IDisplayControl, User32Wrapper>()
+        .Register<IAudioControl, NAudioWrapper>();
 }
 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
 {
-    var wrapper = new YdotoolWrapper(consoleLogger);
-
-    keyboardControl = wrapper;
-    mouseControl = wrapper;
-
-    var dummy = new DummyWrapper(consoleLogger);
-    displayControl = dummy;
-    audioControl = dummy;
+    container
+        .Register<IKeyboardControl, YdotoolWrapper>()
+        .Register<IMouseControl, YdotoolWrapper>()
+        .Register<IDisplayControl, DummyWrapper>()
+        .Register<IAudioControl, DummyWrapper>();
 }
-
 else
 {
     Console.WriteLine("OS not supported");
     return;
 }
 
-var listener = new GenericListener(consoleLogger);
+container.Register<IListener, GenericListener>();
 
-var controllers = new BaseController[]
-{
-    new AudioController(audioControl, consoleLogger),
-    new DisplayController(displayControl, consoleLogger),
-    new KeyboardController(keyboardControl, consoleLogger),
-    new MouseController(mouseControl, consoleLogger)
-};
-
-var app = new RemoteControl(listener)
-    .Use((context, next) =>
-    {
-        Console.WriteLine("placeholder before");
-        next(context);
-        Console.WriteLine("placeholder after");
-    })
-    .UseMiddleware<LoggingMiddleware>(consoleLogger)
-    .UseMiddleware<ApiMiddlewareV1>((object)controllers)
-    .UseMiddleware<FileMiddleware>()
+var app = new RemoteControl(container.Get<IListener>(), container)
+    .UseLoggingMiddleware()
+    .UseStaticFilesMiddleware()
+    .UseApiV1Enpoint()
     .Build();
 
-var config = new LocalFileConfigService(consoleLogger);
+var config = new LocalFileConfigService(container.Get<ILogger>());
 
 app.Start(config.GetConfig().UriConfig.Uri);
 

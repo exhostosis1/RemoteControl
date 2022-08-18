@@ -16,6 +16,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\WebApiProvider\WebApiProvider.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="www\" />
   </ItemGroup>
 
 </Project>

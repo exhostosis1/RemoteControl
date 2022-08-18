@@ -1,6 +1,6 @@
 ﻿namespace WebApiProvider.Attributes
 {
-    internal class ActionAttribute : Attribute
+    public class ActionAttribute : Attribute
     {
         public string Name { get; set; }
 

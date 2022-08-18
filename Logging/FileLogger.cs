@@ -19,6 +19,24 @@ namespace Logging
             _path = filePath;
         }
 
+        public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error)
+            : this(filePath, level, null)
+        {
+
+        }
+
+        public FileLogger(string filePath, IMessageFormatter? formatter = null)
+            : this(filePath, LoggingLevel.Error, formatter)
+        {
+
+        }
+
+        public FileLogger(string filePath)
+            : this(filePath, LoggingLevel.Error, null)
+        {
+
+        }
+
         protected override void ProcessMessage(string message)
         {
             File.AppendAllText(_path, message);

@@ -15,7 +15,6 @@
     <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\RemoteControlApp\RemoteControlApp.csproj" />
     <ProjectReference Include="..\WebApiProvider\WebApiProvider.csproj" />
-    <ProjectReference Include="..\WebUiProvider\WebUiProvider.csproj" />
   </ItemGroup>
 
 </Project>
