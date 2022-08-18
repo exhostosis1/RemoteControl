@@ -23,4 +23,13 @@
     <Folder Include="www\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="www\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="www\index.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
