@@ -1,6 +1,6 @@
-﻿using Shared.Control;
-using Shared.Controllers;
+﻿using Shared.Controllers;
 using Shared.Controllers.Attributes;
+using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 
 namespace RemoteControlApp.Controllers
@@ -8,9 +8,9 @@ namespace RemoteControlApp.Controllers
     [Controller("display")]
     public class DisplayController: BaseController
     {
-        private readonly IDisplayControl _display;
+        private readonly IDisplayControlProvider _display;
 
-        public DisplayController(IDisplayControl display, ILogger logger) : base(logger)
+        public DisplayController(IDisplayControlProvider display, ILogger logger) : base(logger)
         {
             _display = display;
         }

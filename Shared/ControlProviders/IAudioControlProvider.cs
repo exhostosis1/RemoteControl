@@ -1,6 +1,8 @@
-﻿namespace Shared.Control
+﻿using Shared.ControlProviders.Devices;
+
+namespace Shared.ControlProviders
 {
-    public interface IAudioControl
+    public interface IAudioControlProvider
     {
         public int GetVolume();
         public void SetVolume(int volume);

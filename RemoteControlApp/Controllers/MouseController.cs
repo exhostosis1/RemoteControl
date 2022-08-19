@@ -1,7 +1,7 @@
 ﻿using Shared;
-using Shared.Control;
 using Shared.Controllers;
 using Shared.Controllers.Attributes;
+using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
@@ -10,9 +10,9 @@ namespace RemoteControlApp.Controllers
     [Controller("mouse")]
     public class MouseController : BaseController
     {
-        private readonly IMouseControl _input;
+        private readonly IMouseControlProvider _input;
 
-        public MouseController(IMouseControl input, ILogger logger) : base(logger)
+        public MouseController(IMouseControlProvider input, ILogger logger) : base(logger)
         {
             _input = input;
         }

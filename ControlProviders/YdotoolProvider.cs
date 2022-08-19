@@ -1,15 +1,17 @@
-﻿using Shared.Control;
+﻿using System.Diagnostics;
+using ControlProviders.Abstract;
+using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
-using System.Diagnostics;
+
 // ReSharper disable UnusedMember.Local
 // ReSharper disable InconsistentNaming
 
-namespace Control.Wrappers
+namespace ControlProviders
 {
-    public class YdotoolWrapper : BaseWrapper, IKeyboardControl, IMouseControl
+    public class YdotoolProvider : BaseProvider, IKeyboardControlProvider, IMouseControlProvider
     {
-        public YdotoolWrapper(ILogger logger) : base(logger)
+        public YdotoolProvider(ILogger logger) : base(logger)
         { }
 
         #region enums

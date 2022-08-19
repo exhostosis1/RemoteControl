@@ -1,6 +1,6 @@
-﻿using Shared.Control;
+﻿using Shared.ControlProviders.Devices;
 
-namespace Control
+namespace ControlProviders.Devices
 {
     internal class AudioDevice : IAudioDevice
     {

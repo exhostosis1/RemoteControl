@@ -1,13 +1,13 @@
-﻿using Config;
-using Control.Wrappers;
-using Http.Listeners;
+﻿using ConfigProviders;
+using ControlProviders;
+using Listeners;
 using Logging;
-using System.Runtime.InteropServices;
 using RemoteControlApp.Controllers;
-using Server;
-using Server.Middleware;
-using Shared.Control;
+using Servers;
+using Servers.Middleware;
 using Shared.Controllers;
+using Shared.ControlProviders;
+using System.Runtime.InteropServices;
 
 namespace RemoteControlApp
 {
@@ -16,25 +16,25 @@ namespace RemoteControlApp
         public static void Main()
         {
             var consoleLogger = new ConsoleLogger();
-            IKeyboardControl keyboard;
-            IMouseControl mouse;
-            IDisplayControl display;
-            IAudioControl audio;
+            IKeyboardControlProvider keyboard;
+            IMouseControlProvider mouse;
+            IDisplayControlProvider display;
+            IAudioControlProvider audio;
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var user32Wrapper = new User32Wrapper(consoleLogger);
+                var user32Wrapper = new User32Provider(consoleLogger);
 
                 keyboard = user32Wrapper;
                 mouse = user32Wrapper;
                 display = user32Wrapper;
 
-                audio = new NAudioWrapper(consoleLogger);
+                audio = new NAudioProvider(consoleLogger);
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                var ydotoolWrapper = new YdotoolWrapper(consoleLogger);
-                var dummyWrapper = new DummyWrapper(consoleLogger);
+                var ydotoolWrapper = new YdotoolProvider(consoleLogger);
+                var dummyWrapper = new DummyProvider(consoleLogger);
 
                 keyboard = ydotoolWrapper;
                 mouse = ydotoolWrapper;
@@ -64,7 +64,7 @@ namespace RemoteControlApp
 
             var server = new SimpleServer(listener, loggingMiddleware);
 
-            var config = new LocalFileConfigService(consoleLogger);
+            var config = new LocalFileConfigProvider(consoleLogger);
 
             server.Start(config.GetConfig().UriConfig.Uri);
 

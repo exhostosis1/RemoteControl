@@ -4,9 +4,9 @@ using Shared.Server;
 using Shared.Server.Interfaces;
 using System.Net;
 
-namespace Http.Listeners
+namespace Listeners
 {
-    public class GenericListener: IListener
+    public class GenericListener : IListener
     {
         private HttpListener _listener = new();
         public bool IsListening => _listener.IsListening;
@@ -65,7 +65,7 @@ namespace Http.Listeners
 
                     if (dto.Response.Payload.Length > 0)
                         context.Response.OutputStream.Write(dto.Response.Payload);
-                    
+
                     context.Response.Close();
                 }
                 catch (ObjectDisposedException)

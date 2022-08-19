@@ -1,8 +1,8 @@
 ﻿using Shared.Enums;
 
-namespace Shared.Control
+namespace Shared.ControlProviders
 {
-    public interface IKeyboardControl
+    public interface IKeyboardControlProvider
     {
         void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click);
         void TextInput(string text);

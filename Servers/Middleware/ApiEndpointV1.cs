@@ -1,13 +1,13 @@
-﻿using Shared;
+﻿using System.Net;
+using System.Reflection;
+using System.Text;
+using Shared;
 using Shared.Controllers;
 using Shared.Controllers.Attributes;
 using Shared.DataObjects.Interfaces;
 using Shared.Server.Interfaces;
-using System.Net;
-using System.Reflection;
-using System.Text;
 
-namespace Server.Middleware
+namespace Servers.Middleware
 {
     public class ApiEndpointV1 : IMiddleware
     {

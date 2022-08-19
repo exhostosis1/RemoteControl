@@ -1,7 +1,7 @@
 ﻿using System.Net;
-using Shared.Control;
 using Shared.Controllers;
 using Shared.Controllers.Attributes;
+using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
@@ -10,9 +10,9 @@ namespace RemoteControlApp.Controllers
     [Controller("keyboard")]
     public class KeyboardController: BaseController
     {
-        private readonly IKeyboardControl _input;
+        private readonly IKeyboardControlProvider _input;
 
-        public KeyboardController(IKeyboardControl input, ILogger logger) : base(logger)
+        public KeyboardController(IKeyboardControlProvider input, ILogger logger) : base(logger)
         {
             _input = input;
         }

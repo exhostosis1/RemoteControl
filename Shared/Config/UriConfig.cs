@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
+using Shared.Config.Interfaces;
 
-namespace Shared.Config.Interfaces
+namespace Shared.Config
 {
     [DisplayName("Uri")]
     public class UriConfig : IConfigItem

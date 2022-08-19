@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Shared.Control;
 using Shared.Controllers;
 using Shared.Controllers.Attributes;
+using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 
 namespace RemoteControlApp.Controllers
@@ -9,9 +9,9 @@ namespace RemoteControlApp.Controllers
     [Controller("audio")]
     public class AudioController: BaseController
     {
-        private readonly IAudioControl _audio;
+        private readonly IAudioControlProvider _audio;
 
-        public AudioController(IAudioControl audio, ILogger logger) : base(logger)
+        public AudioController(IAudioControlProvider audio, ILogger logger) : base(logger)
         {
             _audio = audio;
         }

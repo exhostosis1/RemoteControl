@@ -1,12 +1,12 @@
 ﻿using Shared.Logging.Interfaces;
 
-namespace Control.Wrappers
+namespace ControlProviders.Abstract
 {
-    public abstract class BaseWrapper
+    public abstract class BaseProvider
     {
         protected readonly ILogger Logger;
 
-        protected BaseWrapper(ILogger logger)
+        protected BaseProvider(ILogger logger)
         {
             Logger = logger;
         }

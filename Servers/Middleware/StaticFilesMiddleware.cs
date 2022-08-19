@@ -1,9 +1,9 @@
-﻿using Shared.DataObjects.Interfaces;
+﻿using System.Net;
+using Shared.DataObjects.Interfaces;
 using Shared.Server;
 using Shared.Server.Interfaces;
-using System.Net;
 
-namespace Server.Middleware
+namespace Servers.Middleware
 {
     public class StaticFilesMiddleware : IMiddleware
     {

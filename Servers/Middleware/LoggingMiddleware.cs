@@ -3,7 +3,7 @@ using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.Server.Interfaces;
 
-namespace Server.Middleware
+namespace Servers.Middleware
 {
     public class LoggingMiddleware : IMiddleware
     {

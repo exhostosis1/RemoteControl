@@ -1,14 +1,17 @@
-﻿using Shared.Control;
+﻿using ControlProviders.Abstract;
+using ControlProviders.Devices;
+using Shared.ControlProviders;
+using Shared.ControlProviders.Devices;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Control.Wrappers
+namespace ControlProviders
 {
-    public class DummyWrapper: BaseWrapper, IKeyboardControl, IMouseControl, IDisplayControl, IAudioControl
+    public class DummyProvider: BaseProvider, IKeyboardControlProvider, IMouseControlProvider, IDisplayControlProvider, IAudioControlProvider
     {
         private readonly IAudioDevice[] _dummyDevices;
 
-        public DummyWrapper(ILogger logger) : base(logger)
+        public DummyProvider(ILogger logger) : base(logger)
         {
             _dummyDevices = new IAudioDevice[]
             {

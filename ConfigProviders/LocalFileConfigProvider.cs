@@ -1,17 +1,17 @@
-﻿using Shared;
+﻿using System.Reflection;
+using Shared;
 using Shared.Config;
 using Shared.Config.Interfaces;
 using Shared.Logging.Interfaces;
-using System.Reflection;
 
-namespace Config
+namespace ConfigProviders
 {
-    public class LocalFileConfigService: IConfigService
+    public class LocalFileConfigProvider: IConfigProvider
     {
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
         private readonly ILogger _logger;
 
-        public LocalFileConfigService(ILogger logger)
+        public LocalFileConfigProvider(ILogger logger)
         {
             _logger = logger;
         }

@@ -1,11 +1,14 @@
-﻿using NAudio.CoreAudioApi;
-using System.Text.RegularExpressions;
-using Shared.Control;
+﻿using System.Text.RegularExpressions;
+using ControlProviders.Abstract;
+using ControlProviders.Devices;
+using NAudio.CoreAudioApi;
+using Shared.ControlProviders;
+using Shared.ControlProviders.Devices;
 using Shared.Logging.Interfaces;
 
-namespace Control.Wrappers
+namespace ControlProviders
 {
-    public class NAudioWrapper: BaseWrapper, IAudioControl
+    public class NAudioProvider: BaseProvider, IAudioControlProvider
     {
         private MMDevice _defaultDevice;
         private readonly IEnumerable<MMDevice> _devices;
@@ -13,7 +16,7 @@ namespace Control.Wrappers
         private static readonly Regex GuidRegex =
             new ("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
-        public NAudioWrapper(ILogger logger): base(logger)
+        public NAudioProvider(ILogger logger): base(logger)
         {
             var enumerator = new MMDeviceEnumerator();
 

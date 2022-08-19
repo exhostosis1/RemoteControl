@@ -1,13 +1,14 @@
-﻿using Shared.Enums;
-using System.Runtime.InteropServices;
-using Shared.Control;
+﻿using System.Runtime.InteropServices;
+using ControlProviders.Abstract;
+using Shared.ControlProviders;
+using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Control.Wrappers
+namespace ControlProviders
 {
-    public class User32Wrapper : BaseWrapper, IDisplayControl, IKeyboardControl, IMouseControl
+    public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardControlProvider, IMouseControlProvider
     {
-        public User32Wrapper(ILogger logger) : base(logger)
+        public User32Provider(ILogger logger) : base(logger)
         {
         }
 

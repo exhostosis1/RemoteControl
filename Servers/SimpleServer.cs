@@ -1,7 +1,7 @@
 ﻿using Shared;
 using Shared.Server.Interfaces;
 
-namespace Server
+namespace Servers
 {
     public class SimpleServer: IRemoteControlApp
     {
