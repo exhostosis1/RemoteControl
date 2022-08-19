@@ -1,6 +1,7 @@
 ﻿using Shared;
 using Shared.Config;
-using Shared.Interfaces.Logging;
+using Shared.Config.Interfaces;
+using Shared.Logging.Interfaces;
 using System.Reflection;
 
 namespace Config

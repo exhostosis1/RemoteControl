@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using Shared.Config.Interfaces;
 
 namespace Shared.Config
 {

@@ -1,7 +1,8 @@
 ﻿using Logging.Formatters;
 using Shared.Enums;
-using Shared.Interfaces.Logging;
+using Shared.Logging.Interfaces;
 using System.Collections.Concurrent;
+using Shared.Logging;
 
 namespace Logging.Abstract
 {

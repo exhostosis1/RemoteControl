@@ -1,4 +1,4 @@
-﻿using Shared.Interfaces.Logging;
+﻿using Shared.Logging.Interfaces;
 
 namespace Control.Wrappers
 {

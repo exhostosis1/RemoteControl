@@ -1,4 +1,6 @@
-﻿namespace Shared.Config
+﻿using Shared.Config.Interfaces;
+
+namespace Shared.Config
 {
     public class AppConfig
     {

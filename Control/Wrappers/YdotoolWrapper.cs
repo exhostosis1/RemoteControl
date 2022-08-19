@@ -1,8 +1,7 @@
-﻿using System.Diagnostics;
-using NAudio.MediaFoundation;
+﻿using Shared.Control;
 using Shared.Enums;
-using Shared.Interfaces.Control;
-using Shared.Interfaces.Logging;
+using Shared.Logging.Interfaces;
+using System.Diagnostics;
 // ReSharper disable UnusedMember.Local
 // ReSharper disable InconsistentNaming
 

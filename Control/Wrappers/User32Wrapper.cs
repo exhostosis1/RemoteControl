@@ -1,7 +1,7 @@
 ﻿using Shared.Enums;
-using Shared.Interfaces.Control;
 using System.Runtime.InteropServices;
-using Shared.Interfaces.Logging;
+using Shared.Control;
+using Shared.Logging.Interfaces;
 
 namespace Control.Wrappers
 {

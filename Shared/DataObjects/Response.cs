@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Shared.Interfaces.Web;
+using Shared.DataObjects.Interfaces;
 
 namespace Shared.DataObjects
 {

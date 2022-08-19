@@ -1,5 +1,5 @@
-﻿using Shared;
-using Shared.Interfaces.Logging;
+﻿using Shared.Logging;
+using Shared.Logging.Interfaces;
 
 namespace Logging.Formatters
 {

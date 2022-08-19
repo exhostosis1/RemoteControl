@@ -1,6 +1,6 @@
 ﻿using Logging.Abstract;
 using Shared.Enums;
-using Shared.Interfaces.Logging;
+using Shared.Logging.Interfaces;
 
 namespace Logging
 {
@@ -17,24 +17,6 @@ namespace Logging
                 File.Create(filePath);
 
             _path = filePath;
-        }
-
-        public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error)
-            : this(filePath, level, null)
-        {
-
-        }
-
-        public FileLogger(string filePath, IMessageFormatter? formatter = null)
-            : this(filePath, LoggingLevel.Error, formatter)
-        {
-
-        }
-
-        public FileLogger(string filePath)
-            : this(filePath, LoggingLevel.Error, null)
-        {
-
         }
 
         protected override void ProcessMessage(string message)

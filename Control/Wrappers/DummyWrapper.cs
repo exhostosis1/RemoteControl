@@ -1,6 +1,6 @@
-﻿using Shared.Enums;
-using Shared.Interfaces.Control;
-using Shared.Interfaces.Logging;
+﻿using Shared.Control;
+using Shared.Enums;
+using Shared.Logging.Interfaces;
 
 namespace Control.Wrappers
 {

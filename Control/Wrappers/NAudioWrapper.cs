@@ -1,7 +1,7 @@
 ﻿using NAudio.CoreAudioApi;
-using Shared.Interfaces.Control;
 using System.Text.RegularExpressions;
-using Shared.Interfaces.Logging;
+using Shared.Control;
+using Shared.Logging.Interfaces;
 
 namespace Control.Wrappers
 {

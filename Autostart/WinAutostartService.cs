@@ -1,5 +1,5 @@
 ﻿using Microsoft.Win32.TaskScheduler;
-using Shared.Interfaces;
+using Shared;
 
 namespace Autostart
 {

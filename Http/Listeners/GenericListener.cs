@@ -1,7 +1,8 @@
-﻿using System.Net;
-using Shared.DataObjects;
-using Shared.Interfaces.Logging;
-using Shared.Interfaces.Web;
+﻿using Shared.DataObjects;
+using Shared.Logging.Interfaces;
+using Shared.Server;
+using Shared.Server.Interfaces;
+using System.Net;
 
 namespace Http.Listeners
 {
