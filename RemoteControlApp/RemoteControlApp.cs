@@ -8,6 +8,7 @@ using Servers.Middleware;
 using Shared.Controllers;
 using Shared.ControlProviders;
 using System.Runtime.InteropServices;
+using MyApp;
 
 namespace RemoteControlApp
 {
@@ -68,7 +69,7 @@ namespace RemoteControlApp
 
             server.Start(config.GetConfig().UriConfig.Uri);
 
-            Console.ReadLine();
+            AvaloniaProgram.Main(Array.Empty<string>());
         }
     }
 }
