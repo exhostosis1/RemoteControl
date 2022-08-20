@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logging", "Logging\Logging.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{477FD6B7-D7A8-4EFA-B5A5-AA700FAECB80}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlApp", "RemoteControlApp\RemoteControlApp.csproj", "{115B9B32-CBC1-4D5A-82B0-00ED78A2C0F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlContainer", "RemoteControlApp\RemoteControlContainer.csproj", "{115B9B32-CBC1-4D5A-82B0-00ED78A2C0F8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfigProviders", "ConfigProviders\ConfigProviders.csproj", "{7A690186-0D45-4AA8-B979-68419525E986}"
 EndProject
@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Listeners", "Listeners\List
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Servers", "Servers\Servers.csproj", "{E8B78725-E09E-471D-ACBF-7C4B9436D8BB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyApp", "MyApp\MyApp.csproj", "{AB35B0C3-9571-4F1C-86E8-4C47D739F8DC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlAvalonia", "MyApp\RemoteControlAvalonia.csproj", "{AB35B0C3-9571-4F1C-86E8-4C47D739F8DC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

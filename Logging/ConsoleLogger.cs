@@ -9,9 +9,23 @@ namespace Logging
         public ConsoleLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level, formatter)
         {}
 
-        protected override void ProcessMessage(string message)
+        protected override void ProcessInfo(string message)
         {
             Console.WriteLine(message);
+        }
+
+        protected override void ProcessWarning(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(message);
+            Console.ResetColor();
+        }
+
+        protected override void ProcessError(string message)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(message);
+            Console.ResetColor();
         }
     }
 }

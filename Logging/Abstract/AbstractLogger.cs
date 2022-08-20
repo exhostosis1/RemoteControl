@@ -29,10 +29,25 @@ namespace Logging.Abstract
         {
             foreach (var message in _messages.GetConsumingEnumerable())
             {
-                ProcessMessage(_formatter.Format(message));
+                switch (message.Level)
+                {
+                    case LoggingLevel.Error:
+                        ProcessError(_formatter.Format(message));
+                        break;
+                    case LoggingLevel.Warn:
+                        ProcessWarning(_formatter.Format(message));
+                        break;
+                    case LoggingLevel.Info:
+                        ProcessInfo(_formatter.Format(message));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
-        protected abstract void ProcessMessage(string message);
+        protected abstract void ProcessInfo(string message);
+        protected abstract void ProcessWarning(string message);
+        protected abstract void ProcessError(string message);
     }
 }

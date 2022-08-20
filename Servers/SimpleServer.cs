@@ -3,7 +3,7 @@ using Shared.Server.Interfaces;
 
 namespace Servers
 {
-    public class SimpleServer: IRemoteControlApp
+    public class SimpleServer: IServer
     {
         private readonly IListener _listener;
 
@@ -14,13 +14,8 @@ namespace Servers
         }
 
         public void Start(Uri uri) => _listener.StartListen(uri.ToString());
-
         public void Stop() => _listener.StopListen();
-
-        public string? GetUiListeningUri() => _listener.ListeningUris.FirstOrDefault();
-        public string? GetApiListeningUri() => _listener.ListeningUris.FirstOrDefault();
-
-        public bool IsUiListening => _listener.IsListening;
-        public bool IsApiListening => _listener.IsListening;
+        public string? GetListeningUri() => _listener.ListeningUris.FirstOrDefault();
+        public bool IsListening => _listener.IsListening;
     }
 }

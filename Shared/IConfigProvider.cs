@@ -1,4 +1,6 @@
-﻿namespace Shared.Config.Interfaces
+﻿using Shared.Config;
+
+namespace Shared
 {
     public interface IConfigProvider
     {

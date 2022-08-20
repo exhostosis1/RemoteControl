@@ -10,7 +10,7 @@ namespace Logging
 
         public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
         {
-            if (string.IsNullOrWhiteSpace(filePath) || !Path.IsPathFullyQualified(filePath))
+            if (string.IsNullOrWhiteSpace(filePath))
                 throw new ArgumentException(nameof(filePath));
 
             if (!File.Exists(filePath))
@@ -19,9 +19,12 @@ namespace Logging
             _path = filePath;
         }
 
-        protected override void ProcessMessage(string message)
+        protected override void ProcessInfo(string message)
         {
             File.AppendAllText(_path, message);
         }
+
+        protected override void ProcessWarning(string message) => ProcessInfo(message);
+        protected override void ProcessError(string message) => ProcessInfo(message);
     }
 }

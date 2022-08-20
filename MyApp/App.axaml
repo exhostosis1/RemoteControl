@@ -1,24 +1,14 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             x:Class="MyApp.App">
+             x:Class="RemoteControlAvalonia.App">
     <Application.Styles>
         <FluentTheme Mode="Dark"/>
     </Application.Styles>
 	<TrayIcon.Icons>
         <TrayIcons>
-            <TrayIcon Icon="/Assets/test_icon.ico" ToolTipText="Avalonia Tray Icon ToolTip">
+            <TrayIcon Icon="/Assets/Device.theme-dark.ico" ToolTipText="Remote Control">
                 <TrayIcon.Menu>
-                    <NativeMenu>
-                        <NativeMenuItem Header="Settings">
-                            <NativeMenu>
-                                <NativeMenuItem Header="Option 1" ToggleType="Radio" IsChecked="True" Command="{Binding ToggleCommand}" />
-                                <NativeMenuItem Header="Option 2" ToggleType="Radio" IsChecked="True" Command="{Binding ToggleCommand}" />
-                                <NativeMenuItemSeparator />
-                                <NativeMenuItem Header="Option 3" ToggleType="CheckBox" IsChecked="True" Command="{Binding ToggleCommand}" />
-                                <NativeMenuItem Icon="/Assets/test_icon.ico" Header="Restore Defaults" Command="{Binding ToggleCommand}" />
-                            </NativeMenu>
-                        </NativeMenuItem>
-                        <NativeMenuItem Header="Exit" Command="{Binding ExitCommand}" />
+                    <NativeMenu Items="MenuItems">
                     </NativeMenu>
                 </TrayIcon.Menu>
             </TrayIcon>

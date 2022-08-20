@@ -1,28 +1,23 @@
 using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Metadata;
+using RemoteControlContainer;
+using Shared;
 
-namespace MyApp
+namespace RemoteControlAvalonia
 {
-    public partial class App : Application
+    public class App : Application
     {
-        private TrayIcon tray { get; set; }
+        private IServer _server;
+        private IConfigProvider _configProvider;
+        private IAutostartService _autostartService;
 
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-        }
 
-        public override void OnFrameworkInitializationCompleted()
-        {
-            if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            {
-                desktop.MainWindow = new MainWindow();
-            }
-
-            base.OnFrameworkInitializationCompleted();
+            _server = Container.Server;
+            _configProvider = Container.Config;
+            _autostartService = Container.AutostartService;
         }
     }
 }
