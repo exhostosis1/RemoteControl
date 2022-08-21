@@ -41,7 +41,7 @@ namespace ControlProviders
                 {
                     Id = GetGuid(x.ID),
                     IsCurrentControlDevice = x.ID == _defaultDevice.ID,
-                    Name = x.FriendlyName
+                    Name = x.DeviceFriendlyName
                 }).ToList();
         }
 

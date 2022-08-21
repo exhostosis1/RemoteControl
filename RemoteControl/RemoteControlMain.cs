@@ -11,17 +11,18 @@ using Shared.Controllers;
 using Shared.ControlProviders;
 using System.Runtime.InteropServices;
 
-namespace RemoteControlContainer
+namespace RemoteControl
 {
-    public static class Container
+    public static class RemoteControlMain
     {
         public static IServer Server { get; private set; }
         public static IConfigProvider Config { get; private set; }
         public static IAutostartService AutostartService { get; private set; }
 
-        static Container()
+        static RemoteControlMain()
         {
             var fileLogger = new FileLogger("error.log");
+            var consoleLogger = new ConsoleLogger();
 
             IKeyboardControlProvider keyboard;
             IMouseControlProvider mouse;
@@ -70,7 +71,7 @@ namespace RemoteControlContainer
 
             var endPoint = new ApiEndpointV1(controllers);
             var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
-            var loggingMiddleware = new LoggingMiddleware(staticMiddleware.ProcessRequest, fileLogger);
+            var loggingMiddleware = new LoggingMiddleware(staticMiddleware.ProcessRequest, consoleLogger);
 
             Server = new SimpleServer(listener, loggingMiddleware);
             Config = new LocalFileConfigProvider(fileLogger);
