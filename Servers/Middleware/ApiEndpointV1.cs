@@ -37,12 +37,20 @@ namespace Servers.Middleware
                 return;
             }
 
-            var result = _methods[controller][action](param);
-
-            if (!string.IsNullOrEmpty(result))
+            try
             {
-                context.Response.ContentType = "application/json";
-                context.Response.Payload = Encoding.UTF8.GetBytes(result);
+                var result = _methods[controller][action](param);
+
+                if (!string.IsNullOrEmpty(result))
+                {
+                    context.Response.ContentType = "application/json";
+                    context.Response.Payload = Encoding.UTF8.GetBytes(result);
+                }
+            }
+            catch (Exception e)
+            {
+                context.Response.StatusCode = HttpStatusCode.InternalServerError;
+                context.Response.Payload = Encoding.UTF8.GetBytes(e.Message);
             }
         }
     }
