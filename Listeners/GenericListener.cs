@@ -46,7 +46,7 @@ namespace Listeners
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                return;
+                throw;
             }
 
             _logger.LogInfo($"started listening on {url}");
