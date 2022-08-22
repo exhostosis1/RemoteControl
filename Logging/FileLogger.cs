@@ -8,6 +8,8 @@ namespace Logging
     {
         private readonly string _path;
 
+        private static readonly object FileLock = new();
+
         public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
         {
             if (string.IsNullOrWhiteSpace(filePath))
@@ -21,7 +23,10 @@ namespace Logging
 
         protected override void ProcessInfo(string message)
         {
-            File.AppendAllText(_path, message);
+            lock (FileLock)
+            {
+                File.AppendAllText(_path, message);
+            }
         }
 
         protected override void ProcessWarning(string message) => ProcessInfo(message);
