@@ -13,6 +13,7 @@ namespace RemoteControl
                 var config = container.Config.GetConfig();
 
                 container.Server.Start(config.UriConfig.Uri);
+                container.Autostart.SetAutostart(config.Common.Autostart);
 
                 await Task.Delay(-1);
             }
