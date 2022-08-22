@@ -5,8 +5,8 @@ namespace RemoteControlWinForms
 {
     public static class Program
     {
-        private static IContainer _container;
-        private static ILogger _logger;
+        private static IContainer? _container;
+        private static ILogger? _logger;
 
         public static void Inject(IContainer container, ILogger logger)
         {
