@@ -6,17 +6,15 @@ namespace RemoteControl
     {
         public static async Task Main()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                var container = new RemoteControlMain();
 
-                var config = container.Config.GetConfig();
+            var container = new RemoteControlMain();
 
-                container.Server.Start(config.UriConfig.Uri);
-                container.Autostart.SetAutostart(config.Common.Autostart);
+            var config = container.Config.GetConfig();
 
-                await Task.Delay(-1);
-            }
+            container.Server.Start(config.UriConfig.Uri);
+            container.Autostart.SetAutostart(config.Common.Autostart);
+
+            await Task.Delay(-1);
         }
     }
 }
