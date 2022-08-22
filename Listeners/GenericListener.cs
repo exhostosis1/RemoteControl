@@ -39,7 +39,15 @@ namespace Listeners
 
             _listener.Prefixes.Add(url);
 
-            _listener.Start();
+            try
+            {
+                _listener.Start();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                return;
+            }
 
             _logger.LogInfo($"started listening on {url}");
 

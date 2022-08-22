@@ -22,6 +22,7 @@ namespace RemoteControl
         public RemoteControlMain()
         {
             var fileLogger = new FileLogger("error.log");
+            var consoleLogger = new ConsoleLogger();
 
             IKeyboardControlProvider keyboard;
             IMouseControlProvider mouse;
@@ -58,7 +59,7 @@ namespace RemoteControl
                 throw new Exception("OS not supported");
             }
 
-            var listener = new GenericListener(fileLogger);
+            var listener = new GenericListener(consoleLogger);
 
             var controllers = new BaseController[]
             {

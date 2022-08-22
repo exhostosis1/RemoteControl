@@ -1,12 +1,9 @@
-﻿using System.Runtime.InteropServices;
-
-namespace RemoteControl
+﻿namespace RemoteControl
 {
     public static class Program
     {
         public static async Task Main()
         {
-
             var container = new RemoteControlMain();
 
             var config = container.Config.GetConfig();
