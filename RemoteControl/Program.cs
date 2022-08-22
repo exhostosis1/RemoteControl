@@ -2,7 +2,7 @@
 {
     public static class Program
     {
-        public static async Task Main()
+        public static void Main()
         {
             var container = new RemoteControlMain();
 
@@ -11,7 +11,7 @@
             container.Server.Start(config.UriConfig.Uri);
             container.Autostart.SetAutostart(config.Common.Autostart);
 
-            await Task.Delay(-1);
+            Console.ReadLine();
         }
     }
 }

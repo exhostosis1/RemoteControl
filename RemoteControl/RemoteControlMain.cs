@@ -71,8 +71,9 @@ namespace RemoteControl
 
             var endPoint = new ApiEndpointV1(controllers);
             var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
+            var loggingMiddleware = new LoggingMiddleware(staticMiddleware.ProcessRequest, consoleLogger);
 
-            Server = new SimpleServer(listener, staticMiddleware);
+            Server = new SimpleServer(listener, loggingMiddleware);
             Config = new LocalFileConfigProvider(fileLogger);
         }
     }
