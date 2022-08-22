@@ -1,19 +1,20 @@
-﻿using Logging;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace RemoteControl
 {
     public static class Program
     {
-        public static void Main()
+        public static async Task Main()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 var container = new RemoteControlMain();
-                var logger = new ConsoleLogger();
 
-                RemoteControlWinForms.Program.Inject(container, logger);
-                RemoteControlWinForms.Program.Main();
+                var config = container.Config.GetConfig();
+
+                container.Server.Start(config.UriConfig.Uri);
+
+                await Task.Delay(-1);
             }
         }
     }
