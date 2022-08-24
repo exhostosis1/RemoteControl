@@ -15,9 +15,9 @@ namespace RemoteControl
 {
     public class RemoteControlMain : IContainer
     {
-        public IServer Server { get; private set; }
-        public IConfigProvider Config { get; private set; }
-        public IAutostartService Autostart { get; private set; }
+        public IServer Server { get; }
+        public IConfigProvider Config { get; }
+        public IAutostartService Autostart { get; }
 
         public RemoteControlMain()
         {
