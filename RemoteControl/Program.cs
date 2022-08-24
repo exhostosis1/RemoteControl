@@ -14,6 +14,8 @@ namespace RemoteControl
 
                 RemoteControlWinForms.Program.Inject(container, logger);
                 RemoteControlWinForms.Program.Main();
+
+                Console.ReadLine();
             }
         }
     }

@@ -20,7 +20,7 @@ namespace RemoteControlWinForms
             if (_container == null || _logger == null)
                 throw new Exception("Should call Inject(IContainer, ILogger) first");
 
-            ApplicationConfiguration.Initialize();
+            //ApplicationConfiguration.Initialize();
 
             var form = new ConfigForm(_container.Server, _container.Config, _container.Autostart, _logger);
 
