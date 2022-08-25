@@ -1,24 +1,22 @@
 ﻿using Shared.Logging.Interfaces;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using Shared;
 
 namespace RemoteControlWinForms
 {
-    public partial class ConfigForm : Form
+    public partial class WinFormsUI : Form, IUserInterface
     {
-        private readonly SynchronizationContext? _context;
-
         private readonly ToolStripItem[] _commonMenuItems;
 
         private ViewModel? _model;
 
         private readonly ILogger _logger;
+        public Func<ViewModel>? StartEvent { get; set; }
+        public Func<ViewModel>? StopEvent { get; set; }
+        public Func<ViewModel>? AutostartEvent { get; set; }
 
-        public Func<ViewModel>? StartEvent;
-        public Func<ViewModel>? StopEvent;
-        public Func<ViewModel>? AutostartEvent;
-
-        public ConfigForm(ViewModel model, ILogger logger)
+        public WinFormsUI(ViewModel model, ILogger logger)
         {
             InitializeComponent();
             
@@ -31,8 +29,6 @@ namespace RemoteControlWinForms
                     this.autostartStripMenuItem,
                     this.closeToolStripMenuItem
             };
-
-            _context = SynchronizationContext.Current;
 
             this.autostartStripMenuItem.Checked = model.Autostart; 
 
@@ -117,6 +113,10 @@ namespace RemoteControlWinForms
         {
             _model = AutostartEvent?.Invoke();
             SetContextMenu();
+        }
+        public void ShowUI()
+        {
+            Application.Run(this);
         }
     }
 }

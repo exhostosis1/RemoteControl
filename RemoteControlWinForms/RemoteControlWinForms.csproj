@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Update="ConfigForm.cs">
+    <Compile Update="WinFormsUI.cs">
       <SubType>Form</SubType>
     </Compile>
   </ItemGroup>

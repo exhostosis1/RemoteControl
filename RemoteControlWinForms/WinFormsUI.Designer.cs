@@ -1,6 +1,6 @@
 ﻿namespace RemoteControlWinForms
 {
-    partial class ConfigForm
+    partial class WinFormsUI
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ConfigForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WinFormsUI));
             this.taskbarNotify = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.placeholderToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();

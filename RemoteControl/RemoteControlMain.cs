@@ -1,78 +1,61 @@
-﻿using Autostart;
-using ConfigProviders;
-using ControlProviders;
-using Listeners;
-using Logging;
-using RemoteControlApp.Controllers;
-using Servers;
-using Servers.Middleware;
+﻿using RemoteControlWinForms;
 using Shared;
-using Shared.Controllers;
-using Shared.ControlProviders;
 using System.Runtime.InteropServices;
 
 namespace RemoteControl
 {
-    public class RemoteControlMain : IContainer
+    public static class Program
     {
-        public IServer Server { get; }
-        public IConfigProvider Config { get; }
-        public IAutostartService Autostart { get; }
-
-        public RemoteControlMain()
+        public static void Main()
         {
-            var fileLogger = new FileLogger("error.log");
-
-            IKeyboardControlProvider keyboard;
-            IMouseControlProvider mouse;
-            IDisplayControlProvider display;
-            IAudioControlProvider audio;
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                var user32Wrapper = new User32Provider(fileLogger);
+                var container = new RemoteControlContainer();
+                var uri = container.Config.GetConfig().UriConfig.Uri;
 
-                keyboard = user32Wrapper;
-                mouse = user32Wrapper;
-                display = user32Wrapper;
+                container.Server.Start(uri);
 
-                audio = new NAudioProvider(fileLogger);
+                var form = new RemoteControlConsole.ConsoleUI(new ViewModel(uri.ToString(), container.Server.IsListening, container.Autostart.CheckAutostart()), container.DefaultLogger);
+                
+                form.StartEvent = () =>
+                {
+                    try
+                    {
+                        container.Server.Start(uri);
+                    }
+                    catch (Exception exception)
+                    {
+                        container.DefaultLogger.Log(exception.Message);
+                        throw;
+                    }
 
-                Autostart = new WinAutostartService();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                var ydotoolWrapper = new YdotoolProvider(fileLogger);
-                var dummyWrapper = new DummyProvider(fileLogger);
+                    return new ViewModel(container.Server.GetListeningUri(), container.Server.IsListening,
+                        container.Autostart.CheckAutostart());
+                };
 
-                keyboard = ydotoolWrapper;
-                mouse = ydotoolWrapper;
+                form.StopEvent = () =>
+                {
+                    container.Server.Stop();
 
-                display = dummyWrapper;
-                audio = dummyWrapper;
+                    return new ViewModel(container.Server.GetListeningUri(), container.Server.IsListening,
+                        container.Autostart.CheckAutostart());
+                };
 
-                Autostart = new DummyAutostartService();
+                form.AutostartEvent = () =>
+                {
+                    var autostart = container.Autostart.CheckAutostart();
+                    container.Autostart.SetAutostart(!autostart);
+
+                    return new ViewModel(container.Server.GetListeningUri(), container.Server.IsListening,
+                        container.Autostart.CheckAutostart());
+                };
+
+                form.ShowUI();
             }
             else
             {
-                throw new Exception("OS not supported");
+                Console.WriteLine(@"OS is not supported");
             }
-
-            var listener = new GenericListener(fileLogger);
-
-            var controllers = new BaseController[]
-            {
-                new AudioController(audio, fileLogger),
-                new DisplayController(display, fileLogger),
-                new KeyboardController(keyboard, fileLogger),
-                new MouseController(mouse, fileLogger)
-            };
-
-            var endPoint = new ApiEndpointV1(controllers);
-            var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
-
-            Server = new SimpleServer(listener, staticMiddleware);
-            Config = new LocalFileConfigProvider(fileLogger);
         }
     }
 }
