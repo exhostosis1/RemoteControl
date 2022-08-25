@@ -1,4 +1,6 @@
-﻿namespace Shared.Controllers.Attributes
+﻿using System;
+
+namespace Shared.Controllers.Attributes
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class ActionAttribute : Attribute

@@ -1,6 +1,7 @@
-﻿namespace Shared.Logging.Interfaces;
-
-public interface IMessageFormatter
+﻿namespace Shared.Logging.Interfaces
 {
-    public string Format(LogMessage message);
+    public interface IMessageFormatter
+    {
+        public string Format(LogMessage message);
+    }
 }

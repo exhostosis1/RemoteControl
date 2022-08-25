@@ -1,6 +1,10 @@
-﻿namespace Shared.Controllers;
+﻿using System;
+using System.Collections.Generic;
 
-public class ControllerMethods : Dictionary<string, Func<string, string?>>
+namespace Shared.Controllers
 {
+    public class ControllerMethods : Dictionary<string, Func<string, string?>>
+    {
 
+    }
 }

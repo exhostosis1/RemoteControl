@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -6,7 +8,7 @@ namespace Shared
 {
     public static class Utils
     {
-        private static readonly Regex CoordRegex = new("[-0-9]+", RegexOptions.Compiled);
+        private static readonly Regex CoordRegex = new Regex("[-0-9]+", RegexOptions.Compiled);
 
         public static bool TryGetCoords(string input, out int x, out int y)
         {
@@ -30,19 +32,25 @@ namespace Shared
         public static (string, string, string) ParsePath(this string path, string apiVersion)
         {
             var split = path[(path.IndexOf(apiVersion, StringComparison.Ordinal) + apiVersion.Length)..]
-                .Split('/', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                .Split('/', StringSplitOptions.RemoveEmptyEntries);
 
-            return split.Length switch
+            if (split.Length < 2)
             {
-                < 2 => ("", "", ""),
-                < 3 => (split[0], split[1], ""),
-                _ => (split[0], split[1], split[2])
-            };
+                return ("", "", "");
+            }
+            else if (split.Length < 3)
+            {
+                return (split[0], split[1], "");
+            }
+            else
+            {
+                return (split[0], split[1], split[2]);
+            }
         }
 
         public static (string, string) ParseConfig(this string config)
         {
-            var split = config.Split('=', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            var split = config.Split('=').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 
             return split.Length < 2 ? ("", "") : (split[0], split[1]);
         }

@@ -1,6 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Linq;
 using Shared.Controllers.Attributes;
 using Shared.Logging.Interfaces;
+using System.Reflection;
 
 namespace Shared.Controllers
 {
@@ -30,19 +32,19 @@ namespace Shared.Controllers
 
             foreach (var methodInfo in methods)
             {
-                if (methodInfo.ReturnType != typeof(string) ||
-                    methodInfo.GetParameters().Length != 1 ||
-                    methodInfo.GetParameters().First().ParameterType != typeof(string))
-                {
-                    throw new Exception($"Action method must return 'string?' and contain 'string' parameter");
-                }
-
                 var action = methodInfo.GetCustomAttribute<ActionAttribute>()?.Name;
                 if (string.IsNullOrEmpty(action)) continue;
 
-                var value = methodInfo.CreateDelegate<Func<string, string?>>(this);
-
-                controllerMethods.Add(action, value);
+                try
+                {
+                    var value = (Func<string, string?>)methodInfo.CreateDelegate(typeof(Func<string, string?>), this);
+                    controllerMethods.Add(action, value);
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e.Message);
+                    throw new Exception($"Action method must return 'string?' and contain 'string' parameter");
+                }
             }
 
             return controllerMethods;
