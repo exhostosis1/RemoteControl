@@ -1,4 +1,6 @@
-﻿namespace Shared.Server.Interfaces
+﻿using System.Collections.Generic;
+
+namespace Shared.Server.Interfaces
 {
     public interface IListener
     {
