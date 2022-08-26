@@ -1,10 +1,19 @@
-﻿namespace RemoteControl
+﻿using System.Runtime.InteropServices;
+
+namespace RemoteControl
 {
     public static class Program
     {
         public static void Main()
         {
             var container = new RemoteControlContainer();
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Environment.UserName != "root")
+            {
+                container.DefaultLogger.LogError("Should run as root");
+                return;
+            }
+
             var uri = container.Config.GetConfig().UriConfig.Uri;
             var ui = container.UserInterface;
 
