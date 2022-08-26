@@ -4,7 +4,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable><ApplicationManifest>app.manifest</ApplicationManifest>
+	<Nullable>enable</Nullable>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,8 +14,9 @@
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />
-    <ProjectReference Include="..\Servers\Servers.csproj" />
+    <ProjectReference Include="..\RemoteControlConsole\RemoteControlConsole.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Servers\Servers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

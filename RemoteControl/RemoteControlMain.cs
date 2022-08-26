@@ -1,80 +1,45 @@
-﻿using Autostart;
-using ConfigProviders;
-using ControlProviders;
-using Listeners;
-using Logging;
-using RemoteControlApp.Controllers;
-using Servers;
-using Servers.Middleware;
-using Shared;
-using Shared.Controllers;
-using Shared.ControlProviders;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace RemoteControl
 {
-    public class RemoteControlMain : IContainer
+    public static class Program
     {
-        public IServer Server { get; }
-        public IConfigProvider Config { get; }
-        public IAutostartService Autostart { get; }
-
-        public RemoteControlMain()
+        public static void Main()
         {
-            var fileLogger = new FileLogger("error.log");
-            var consoleLogger = new ConsoleLogger();
+            var container = new RemoteControlContainer();
 
-            IKeyboardControlProvider keyboard;
-            IMouseControlProvider mouse;
-            IDisplayControlProvider display;
-            IAudioControlProvider audio;
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Environment.UserName != "root")
             {
-                var user32Wrapper = new User32Provider(fileLogger);
-
-                keyboard = user32Wrapper;
-                mouse = user32Wrapper;
-                display = user32Wrapper;
-
-                audio = new NAudioProvider(fileLogger);
-
-                Autostart = new WinAutostartService();
-            }
-            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                var ydotoolWrapper = new YdotoolProvider(fileLogger);
-                var dummyWrapper = new DummyProvider(fileLogger);
-
-                keyboard = ydotoolWrapper;
-                mouse = ydotoolWrapper;
-
-                display = dummyWrapper;
-                audio = dummyWrapper;
-
-                Autostart = new DummyAutostartService();
-            }
-            else
-            {
-                throw new Exception("OS not supported");
+                container.DefaultLogger.LogError("Should run as root");
+                return;
             }
 
-            var listener = new GenericListener(consoleLogger);
+            var uri = container.Config.GetConfig().UriConfig.Uri;
+            var ui = container.UserInterface;
 
-            var controllers = new BaseController[]
+            container.Server.Start(uri);
+
+            ui.IsListening = container.Server.IsListening;
+            ui.IsAutostart = container.Autostart.CheckAutostart();
+            ui.Uri = uri;
+
+            ui.StartEvent += () =>
             {
-                new AudioController(audio, fileLogger),
-                new DisplayController(display, fileLogger),
-                new KeyboardController(keyboard, fileLogger),
-                new MouseController(mouse, fileLogger)
+                container.Server.Start(uri);
+                ui.IsListening = container.Server.IsListening;
+            };
+            ui.StopEvent += () =>
+            {
+                container.Server.Stop();
+                ui.IsListening = container.Server.IsListening;
+            };
+            ui.AutostartChangeEvent += value =>
+            {
+                container.Autostart.SetAutostart(value);
+                ui.IsAutostart = container.Autostart.CheckAutostart();
             };
 
-            var endPoint = new ApiEndpointV1(controllers);
-            var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
-            var loggingMiddleware = new LoggingMiddleware(staticMiddleware.ProcessRequest, consoleLogger);
-
-            Server = new SimpleServer(listener, loggingMiddleware);
-            Config = new LocalFileConfigProvider(fileLogger);
+            ui.RunUI();
         }
     }
 }

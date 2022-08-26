@@ -19,6 +19,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Servers", "Servers\Servers.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControl", "RemoteControl\RemoteControl.csproj", "{E255611D-3CBB-4862-B187-E5F99B64E562}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlConsole", "RemoteControlConsole\RemoteControlConsole.csproj", "{802A76F8-3A83-4BE4-9998-601052D6A712}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,6 +93,14 @@ Global
 		{E255611D-3CBB-4862-B187-E5F99B64E562}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E255611D-3CBB-4862-B187-E5F99B64E562}.Release|x64.ActiveCfg = Release|Any CPU
 		{E255611D-3CBB-4862-B187-E5F99B64E562}.Release|x64.Build.0 = Release|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Debug|x64.Build.0 = Debug|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Release|Any CPU.Build.0 = Release|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Release|x64.ActiveCfg = Release|Any CPU
+		{802A76F8-3A83-4BE4-9998-601052D6A712}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
