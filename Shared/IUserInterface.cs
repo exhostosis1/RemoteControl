@@ -4,10 +4,16 @@ namespace Shared
 {
     public interface IUserInterface
     {
-        public Func<ViewModel>? StartEvent { get; set; }
-        public Func<ViewModel>? StopEvent { get; set; }
-        public Func<ViewModel>? AutostartEvent { get; set; }
+        public event EmptyEventHandler? StartEvent;
+        public event EmptyEventHandler? StopEvent;
+        public event BoolEventHandler? AutostartChangeEvent;
+        public event EmptyEventHandler? CloseEvent;
 
-        public void ShowUI();
+        public Uri? Uri { get; set; }
+        public bool IsListening { get; set; }
+        public bool IsAutostart { get; set; }
+
+        // ReSharper disable once InconsistentNaming
+        public void RunUI();
     }
 }

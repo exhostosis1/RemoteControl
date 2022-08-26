@@ -1,45 +1,44 @@
 ﻿using Shared;
-using Shared.Logging.Interfaces;
 
 namespace RemoteControlConsole
 {
+    // ReSharper disable once InconsistentNaming
     public class ConsoleUI: IUserInterface
     {
-        private ViewModel? _model;
-        private readonly ILogger _logger;
+        public event EmptyEventHandler? StartEvent;
+        public event EmptyEventHandler? StopEvent;
+        public event BoolEventHandler? AutostartChangeEvent;
+        public event EmptyEventHandler? CloseEvent;
+        
+        public Uri? Uri { get; set; }
+        public bool IsListening { get; set; }
+        public bool IsAutostart { get; set; }
 
-        public ConsoleUI(ViewModel model, ILogger logger)
+        // ReSharper disable once InconsistentNaming
+        public void RunUI()
         {
-            _model = model;
-            _logger = logger;
-        }
-
-        void Main()
-        {
-            try
-            {
-                _model = StartEvent?.Invoke();
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-            }
-            
             DisplayInfo();
 
             while (true)
             {
                 var key = Console.ReadLine();
 
-                if (key == "x") return;
+                if (key == "x")
+                {
+                    CloseEvent?.Invoke();
+                    return;
+                }
 
                 switch (key)
                 {
                     case "s":
-                        _model = _model?.IsListening ?? true ? StopEvent?.Invoke() : StartEvent?.Invoke();
+                        if(IsListening)
+                            StopEvent?.Invoke();
+                        else
+                            StartEvent?.Invoke();
                         break;
                     case "a":
-                        _model = AutostartEvent?.Invoke();
+                        AutostartChangeEvent?.Invoke(!IsAutostart);
                         break;
                     default:
                         continue;
@@ -51,19 +50,11 @@ namespace RemoteControlConsole
 
         private void DisplayInfo()
         {
-            Console.WriteLine(_model?.IsListening ?? false ? $"Server listening on {_model.Uri}" : "Server stopped");
-            Console.WriteLine($"Autostart {(_model?.Autostart ?? false ? "enabled" : "disabled")}");
+            Console.WriteLine(IsListening ? $"Server listening on {Uri}" : "Server stopped");
+            Console.WriteLine($"Autostart {(IsAutostart ? "enabled" : "disabled")}");
             Console.WriteLine();
 
-            Console.Write($"{(_model?.IsListening ?? false ? "[s]top" : "[s]tart")}, toggle [a]utostart, e[x]it:");
-        }
-
-        public Func<ViewModel>? StartEvent { get; set; }
-        public Func<ViewModel>? StopEvent { get; set; }
-        public Func<ViewModel>? AutostartEvent { get; set; }
-        public void ShowUI()
-        {
-            Main();
+            Console.Write($"{(IsListening ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
         }
     }
 }

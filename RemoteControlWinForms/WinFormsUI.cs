@@ -1,27 +1,25 @@
-﻿using Shared.Logging.Interfaces;
+﻿using Shared;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using Shared;
 
 namespace RemoteControlWinForms
 {
+    // ReSharper disable once InconsistentNaming
     public partial class WinFormsUI : Form, IUserInterface
     {
         private readonly ToolStripItem[] _commonMenuItems;
 
-        private ViewModel? _model;
+        public event EmptyEventHandler? StartEvent;
+        public event EmptyEventHandler? StopEvent;
+        public event BoolEventHandler? AutostartChangeEvent;
+        public event EmptyEventHandler? CloseEvent;
+        public Uri? Uri { get; set; }
+        public bool IsListening { get; set; }
+        public bool IsAutostart { get; set; }
 
-        private readonly ILogger _logger;
-        public Func<ViewModel>? StartEvent { get; set; }
-        public Func<ViewModel>? StopEvent { get; set; }
-        public Func<ViewModel>? AutostartEvent { get; set; }
-
-        public WinFormsUI(ViewModel model, ILogger logger)
+        public WinFormsUI()
         {
             InitializeComponent();
-            
-            _logger = logger;
-            _model = model;
 
             _commonMenuItems = new ToolStripItem[]
             {
@@ -30,34 +28,37 @@ namespace RemoteControlWinForms
                     this.closeToolStripMenuItem
             };
 
-            this.autostartStripMenuItem.Checked = model.Autostart; 
+            this.autostartStripMenuItem.Checked = IsAutostart;
+        }
 
+        public void RunUI()
+        {
             SetContextMenu();
+            Application.Run(this);
         }
 
         private void SetContextMenu()
         {
             this.contextMenuStrip.Items.Clear();
 
-            if (_model == null) return;
-
-            this.contextMenuStrip.Items.Add(_model.IsListening
-                ? new ToolStripMenuItem(_model.Uri, null, IpToolStripMenuItem_Click)
+            this.contextMenuStrip.Items.Add(IsListening
+                ? new ToolStripMenuItem(Uri?.ToString(), null, IpToolStripMenuItem_Click)
                 : this.stoppedToolStripMenuItem);
 
             this.contextMenuStrip.Items.Add(this.toolStripSeparator1);
 
-            this.contextMenuStrip.Items.Add(_model.IsListening
+            this.contextMenuStrip.Items.Add(IsListening
                 ? this.stopToolStripMenuItem
                 : this.startToolStripMenuItem);
 
             this.contextMenuStrip.Items.AddRange(_commonMenuItems);
 
-            this.autostartStripMenuItem.Checked = _model.Autostart;
+            this.autostartStripMenuItem.Checked = IsAutostart;
         }
 
         private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
         {
+            CloseEvent?.Invoke();
             Application.Exit();
         }
 
@@ -94,13 +95,13 @@ namespace RemoteControlWinForms
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _model = StartEvent?.Invoke();
+            StartEvent?.Invoke();
             SetContextMenu();
         }
 
         private void StopToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            _model = StopEvent?.Invoke();
+            StopEvent?.Invoke();
             SetContextMenu();
         }
 
@@ -111,12 +112,8 @@ namespace RemoteControlWinForms
 
         private void autostartStripMenuItem_Click(object sender, EventArgs e)
         {
-            _model = AutostartEvent?.Invoke();
+            AutostartChangeEvent?.Invoke(!IsAutostart);
             SetContextMenu();
-        }
-        public void ShowUI()
-        {
-            Application.Run(this);
         }
     }
 }
