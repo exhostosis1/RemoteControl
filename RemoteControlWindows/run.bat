@@ -1,1 +1,1 @@
-start RemoteControl.exe
+start RemoteControlWindows.exe
