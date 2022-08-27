@@ -24,6 +24,7 @@
     <ProjectReference Include="..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\RemoteControlConsole\RemoteControlConsole.csproj" />
+    <ProjectReference Include="..\RemoteControlMain\RemoteControlMain.csproj" />
     <ProjectReference Include="..\RemoteControlWinForms\RemoteControlWinForms.csproj" />
     <ProjectReference Include="..\Servers\Servers.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />

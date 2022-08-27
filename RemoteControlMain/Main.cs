@@ -1,16 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using Shared;
 
-namespace RemoteControlWindows
+namespace RemoteControlMain
 {
-    public static class Program
+    public static class Main
     {
-        public static void Main()
+        public static void Run(IContainer container)
         {
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                throw new Exception("OS not supported");
-
-            var container = new RemoteControlContainer();
-
             var uri = container.Config.GetConfig().UriConfig.Uri;
             var ui = container.UserInterface;
 
