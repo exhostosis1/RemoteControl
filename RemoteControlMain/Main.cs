@@ -1,19 +1,11 @@
-﻿using System.Runtime.InteropServices;
+﻿using Shared;
 
-namespace RemoteControl
+namespace RemoteControlMain
 {
-    public static class Program
+    public static class Main
     {
-        public static void Main()
+        public static void Run(IContainer container)
         {
-            var container = new RemoteControlContainer();
-
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && Environment.UserName != "root")
-            {
-                container.DefaultLogger.LogError("Should run as root");
-                return;
-            }
-
             var uri = container.Config.GetConfig().UriConfig.Uri;
             var ui = container.UserInterface;
 

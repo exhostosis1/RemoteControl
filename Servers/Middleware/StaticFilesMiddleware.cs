@@ -7,11 +7,12 @@ namespace Servers.Middleware
 {
     public class StaticFilesMiddleware : IMiddleware
     {
-        private static readonly string ContentFolder = AppContext.BaseDirectory + "www";
+        private readonly string _contentFolder;
         private readonly HttpEventHandler _next;
 
-        public StaticFilesMiddleware(HttpEventHandler next)
+        public StaticFilesMiddleware(HttpEventHandler next, string directory = "www")
         {
+            _contentFolder = AppContext.BaseDirectory + directory;
             _next = next;
         }
 
@@ -41,7 +42,7 @@ namespace Servers.Middleware
                 return;
             }
 
-            var path = ContentFolder + uriPath;
+            var path = _contentFolder + uriPath;
 
             if (string.IsNullOrEmpty(uriPath) || uriPath == "/")
             {

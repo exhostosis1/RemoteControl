@@ -4,7 +4,7 @@ using Shared.Controllers.Attributes;
 using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 
-namespace RemoteControlApp.Controllers
+namespace Web.Controllers
 {
     [Controller("audio")]
     public class AudioController: BaseController
