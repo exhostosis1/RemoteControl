@@ -5,7 +5,7 @@ using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace RemoteControlApp.Controllers
+namespace Web.Controllers
 {
     [Controller("keyboard")]
     public class KeyboardController: BaseController

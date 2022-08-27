@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Autostart\Autostart.csproj" />
+    <ProjectReference Include="..\ConfigProviders\ConfigProviders.csproj" />
+    <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
+    <ProjectReference Include="..\Listeners\Listeners.csproj" />
+    <ProjectReference Include="..\Logging\Logging.csproj" />
+    <ProjectReference Include="..\RemoteControlConsole\RemoteControlConsole.csproj" />
+    <ProjectReference Include="..\Servers\Servers.csproj" />
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Web\Web.csproj" />
+  </ItemGroup>
+
+</Project>

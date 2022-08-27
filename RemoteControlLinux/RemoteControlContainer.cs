@@ -3,7 +3,7 @@ using ConfigProviders;
 using ControlProviders;
 using Listeners;
 using Logging;
-using RemoteControlWinForms;
+using RemoteControlConsole;
 using Servers;
 using Servers.Middleware;
 using Shared;
@@ -11,7 +11,7 @@ using Shared.Controllers;
 using Shared.Logging.Interfaces;
 using Web.Controllers;
 
-namespace RemoteControlWindows
+namespace RemoteControlLinux
 {
     public class RemoteControlContainer : IContainer
     {
@@ -28,14 +28,15 @@ namespace RemoteControlWindows
 #else
             DefaultLogger = new FileLogger("error.log");
 #endif
-            var user32Wrapper = new User32Provider(DefaultLogger);
-            
+            var ydotoolWrapper = new YdotoolProvider(DefaultLogger);
+            var dummyWrapper = new DummyProvider(DefaultLogger);
+
             var controllers = new BaseController[]
             {
-                new AudioController(new NAudioProvider(DefaultLogger), DefaultLogger),
-                new DisplayController(user32Wrapper, DefaultLogger),
-                new KeyboardController(user32Wrapper, DefaultLogger),
-                new MouseController(user32Wrapper, DefaultLogger)
+                new AudioController(dummyWrapper, DefaultLogger),
+                new DisplayController(dummyWrapper, DefaultLogger),
+                new KeyboardController(ydotoolWrapper, DefaultLogger),
+                new MouseController(ydotoolWrapper, DefaultLogger)
             };
 
             var endPoint = new ApiEndpointV1(controllers);
@@ -45,8 +46,8 @@ namespace RemoteControlWindows
 
             Server = new SimpleServer(listener, staticMiddleware);
             Config = new LocalFileConfigProvider(DefaultLogger);
-            Autostart = new WinAutostartService();
-            UserInterface = new WinFormsUI();
+            Autostart = new DummyAutostartService();
+            UserInterface = new ConsoleUI();
         }
     }
 }

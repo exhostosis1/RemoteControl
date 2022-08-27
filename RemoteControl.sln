@@ -17,11 +17,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Listeners", "Listeners\List
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Servers", "Servers\Servers.csproj", "{E8B78725-E09E-471D-ACBF-7C4B9436D8BB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControl", "RemoteControl\RemoteControl.csproj", "{E255611D-3CBB-4862-B187-E5F99B64E562}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlWindows", "RemoteControl\RemoteControlWindows.csproj", "{E255611D-3CBB-4862-B187-E5F99B64E562}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlWinForms", "RemoteControlWinForms\RemoteControlWinForms.csproj", "{70B9B8C6-5E14-4040-BC9D-523BF4DF4698}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlConsole", "RemoteControlConsole\RemoteControlConsole.csproj", "{276BB8ED-A2A9-4CB7-91E7-F45A4B9F03E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlConsole", "RemoteControlConsole\RemoteControlConsole.csproj", "{276BB8ED-A2A9-4CB7-91E7-F45A4B9F03E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RemoteControlLinux", "RemoteControlLinux\RemoteControlLinux.csproj", "{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web", "Web\Web.csproj", "{65364FAB-64F4-4ACF-BEEF-F34E03486E06}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -111,6 +115,22 @@ Global
 		{276BB8ED-A2A9-4CB7-91E7-F45A4B9F03E1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{276BB8ED-A2A9-4CB7-91E7-F45A4B9F03E1}.Release|x64.ActiveCfg = Release|Any CPU
 		{276BB8ED-A2A9-4CB7-91E7-F45A4B9F03E1}.Release|x64.Build.0 = Release|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Debug|x64.Build.0 = Debug|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Release|x64.ActiveCfg = Release|Any CPU
+		{4F05D6DF-4EBB-4D28-A2C5-6C96266D45BA}.Release|x64.Build.0 = Release|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Debug|x64.Build.0 = Debug|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Release|Any CPU.Build.0 = Release|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Release|x64.ActiveCfg = Release|Any CPU
+		{65364FAB-64F4-4ACF-BEEF-F34E03486E06}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
