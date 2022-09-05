@@ -218,12 +218,7 @@ namespace ControlProviders
         private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
         #endregion
 
-        #region private
-
-        private const uint Length = 1;
-        private const int MouseWheelClickSize = 120;
-        private readonly Input[] _buffer = new Input[Length];
-        private readonly int _size = Marshal.SizeOf(typeof(Input));
+        #region Dictionaries
 
         private static readonly Dictionary<KeysEnum, User32KeyCodes> KeysToKeyCodes = new()
         {
@@ -260,6 +255,15 @@ namespace ControlProviders
             }
         };
 
+        #endregion
+
+        #region private
+
+        private const uint Length = 1;
+        private const int MouseWheelClickSize = 120;
+        private readonly Input[] _buffer = new Input[Length];
+        private readonly int _size = Marshal.SizeOf(typeof(Input));
+
         private static void SetMonitorInState(MonitorState state) => SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
 
         private void DispatchInput() => SendInput(Length, _buffer, _size);
@@ -286,46 +290,35 @@ namespace ControlProviders
                 User32KeyCodes.Divide;
         }
 
-        private void SendKeyInput(User32KeyCodes keyCode, KeyboardFlag flags)
+        private void SendKeyInput(User32KeyCodes keyCode, bool up)
         {
             _buffer[0].Type = (uint)InputType.Keyboard;
+            var flag = up ? KeyboardFlag.KeyUp : KeyboardFlag.KeyDown;
 
             _buffer[0].Data.Keyboard = new KeyboardInput
             {
                 KeyCode = (ushort)keyCode,
                 Scan = (ushort)(MapVirtualKey((uint)keyCode, 0) & 0xFFU),
-                Flags = (uint)(IsExtendedKey(keyCode) ? KeyboardFlag.ExtendedKey | flags : flags),
+                Flags = (uint)(IsExtendedKey(keyCode) ? KeyboardFlag.ExtendedKey | flag : flag),
             };
 
             DispatchInput();
         }
 
-        private void SendKeyInput(User32KeyCodes key)
-        {
-            SendKeyInput(key, KeyboardFlag.KeyDown);
-            SendKeyInput(key, KeyboardFlag.KeyUp);
-        }
-
-        private void SendCharInput(char character, KeyboardFlag flags)
+        private void SendCharInput(char character, bool up)
         {
             _buffer[0].Type = (uint)InputType.Keyboard;
 
             _buffer[0].Data.Keyboard = new KeyboardInput
             {
                 Scan = character,
-                Flags = (uint)(KeyboardFlag.Unicode | flags),
+                Flags = (uint)(KeyboardFlag.Unicode | (up ? KeyboardFlag.KeyUp : KeyboardFlag.KeyDown)),
             };
 
             if ((character & 0xFF00) == 0xE000)
                 _buffer[0].Data.Keyboard.Flags |= (uint)KeyboardFlag.ExtendedKey;
 
             DispatchInput();
-        }
-
-        private void SendCharInput(char character)
-        {
-            SendCharInput(character, KeyboardFlag.KeyDown);
-            SendCharInput(character, KeyboardFlag.KeyUp);
         }
 
         private void SendMouseInput(int x, int y)
@@ -348,7 +341,7 @@ namespace ControlProviders
 
             _buffer[0].Data.Mouse = new Mouseinput
             {
-                Flags = (uint)(button),
+                Flags = (uint)button,
             };
 
             DispatchInput();
@@ -372,17 +365,19 @@ namespace ControlProviders
 
         public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
         {
-            if (mode == KeyPressMode.Click)
-                SendKeyInput(KeysToKeyCodes[key]);
-            else
-                SendKeyInput(KeysToKeyCodes[key], mode == KeyPressMode.Up ? KeyboardFlag.KeyUp : 0);
+            if (mode.HasFlag(KeyPressMode.Down))
+                SendKeyInput(KeysToKeyCodes[key], false);
+
+            if (mode.HasFlag(KeyPressMode.Up))
+                SendKeyInput(KeysToKeyCodes[key], true);
         }
 
         public void TextInput(string text)
         {
             foreach (var c in text.ToCharArray())
             {
-                SendCharInput(c);
+                SendCharInput(c, false);
+                SendCharInput(c, true);
             }
         }
 
@@ -390,15 +385,11 @@ namespace ControlProviders
 
         public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
         {
-            if (mode == KeyPressMode.Click)
-            {
+            if(mode.HasFlag(KeyPressMode.Down))
                 SendMouseInput(MouseButtonsToFlags[button].Down);
+
+            if (mode.HasFlag(KeyPressMode.Up))
                 SendMouseInput(MouseButtonsToFlags[button].Up);
-            }
-            else
-            {
-                SendMouseInput(mode == KeyPressMode.Up ? MouseButtonsToFlags[button].Up : MouseButtonsToFlags[button].Down);
-            }
         }
 
         public void Wheel(bool up) => SendScrollInput(up ? MouseWheelClickSize : -MouseWheelClickSize);

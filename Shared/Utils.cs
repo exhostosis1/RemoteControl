@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -53,6 +54,24 @@ namespace Shared
             var split = config.Split('=').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 
             return split.Length < 2 ? ("", "") : (split[0], split[1]);
+        }
+
+        public static void RunLinuxCommand(string command, out string result, out string error)
+        {
+            using var proc = new Process();
+
+            proc.StartInfo.FileName = "/bin/bash";
+            proc.StartInfo.Arguments = "-c \" " + command + " \"";
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardError = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+
+            proc.Start();
+
+            result = proc.StandardOutput.ReadToEnd();
+            error = proc.StandardError.ReadToEnd();
+
+            proc.WaitForExit();
         }
     }
 }

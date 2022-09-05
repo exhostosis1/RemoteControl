@@ -124,7 +124,7 @@ namespace ControlProviders
         }
         #endregion
 
-        #region private
+        #region dictionaries
 
         private readonly Dictionary<KeysEnum, YdotoolKey> KeyToScanCode = new()
         {
@@ -161,25 +161,9 @@ namespace ControlProviders
             }
         };
 
-        private static (string, string) RunLinuxCommand(string command)
-        {
-            using var proc = new System.Diagnostics.Process();
+        #endregion
 
-            proc.StartInfo.FileName = "/bin/bash";
-            proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardError = true;
-            proc.StartInfo.RedirectStandardOutput = true;
-
-            proc.Start();
-
-            var result = proc.StandardOutput.ReadToEnd();
-            var error = proc.StandardError.ReadToEnd();
-
-            proc.WaitForExit();
-
-            return (result.Trim(), error.Trim());
-        }
+        #region private
 
         private static readonly Process _proc = new()
         {
@@ -203,9 +187,16 @@ namespace ControlProviders
             FastRunLinuxCommand($"ydotool {args}");
         }
 
-        private static void SendKey(YdotoolKey key)
+        private static void SendKey(YdotoolKey key, KeyPressMode mode)
         {
-            RunYdotool($"key {key:D}:1 {key:D}:0");
+            var command = "key ";
+
+            if (mode.HasFlag(KeyPressMode.Down))
+                command += $"{key:D}:1 ";
+            if (mode.HasFlag(KeyPressMode.Up))
+                command += $"{key:D}:0 ";
+
+            RunYdotool(command);
         }
 
         private static void SendText(string text)
@@ -226,7 +217,7 @@ namespace ControlProviders
 
         public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
         {
-            SendKey(KeyToScanCode[key]);
+            SendKey(KeyToScanCode[key], mode);
         }
 
         public void TextInput(string text)
@@ -241,9 +232,12 @@ namespace ControlProviders
 
         public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
         {
-            var mouseCode = mode == KeyPressMode.Click
-                ? ButtonToCode[button] | MouseCodes.Down | MouseCodes.Up
-                : ButtonToCode[button] | (mode == KeyPressMode.Up ? MouseCodes.Up : MouseCodes.Down);
+            var mouseCode = ButtonToCode[button];
+            
+            if (mode.HasFlag(KeyPressMode.Down))
+                mouseCode |= MouseCodes.Down;
+            if (mode.HasFlag(KeyPressMode.Up))
+                mouseCode |= MouseCodes.Up;
 
             SendMouseButton(mouseCode);
         }
