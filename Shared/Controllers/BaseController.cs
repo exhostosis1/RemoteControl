@@ -15,17 +15,17 @@ namespace Shared.Controllers
             Logger = logger;
         }
 
+        public string? GetName() => GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
+
         public ControllerMethods GetMethods()
         {
             var controllerMethods = new ControllerMethods();
 
-            var type = GetType();
-
-            var controllerKey = type.GetCustomAttribute<ControllerAttribute>()?.Name;
+            var controllerKey = GetName();
 
             if (string.IsNullOrEmpty(controllerKey)) return controllerMethods;
 
-            var methods = type.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            var methods = GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
                 .Where(x => x.CustomAttributes.Any(a => a.AttributeType == typeof(ActionAttribute))).ToArray();
 
             if (methods.Length == 0) return controllerMethods;

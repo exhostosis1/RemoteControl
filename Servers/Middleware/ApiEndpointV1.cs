@@ -1,11 +1,9 @@
-﻿using System.Net;
-using System.Reflection;
-using System.Text;
-using Shared;
+﻿using Shared;
 using Shared.Controllers;
-using Shared.Controllers.Attributes;
 using Shared.DataObjects.Interfaces;
 using Shared.Server.Interfaces;
+using System.Net;
+using System.Text;
 
 namespace Servers.Middleware
 {
@@ -19,7 +17,7 @@ namespace Servers.Middleware
         {
             foreach (var controller in controllers)
             {
-                var controllerName = controller.GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
+                var controllerName = controller.GetName();
 
                 if(string.IsNullOrEmpty(controllerName)) continue;
 
