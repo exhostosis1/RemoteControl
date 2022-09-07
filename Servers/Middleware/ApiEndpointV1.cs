@@ -17,7 +17,7 @@ namespace Servers.Middleware
         {
             foreach (var controller in controllers)
             {
-                var controllerName = controller.GetName();
+                var controllerName = controller.GetControllerName();
 
                 if(string.IsNullOrEmpty(controllerName)) continue;
 
@@ -27,7 +27,8 @@ namespace Servers.Middleware
 
         public void ProcessRequest(IContext context)
         {
-            var (controller, action, param) = context.Request.Path.ParsePath(ApiVersion);
+            if(!context.Request.Path.TryParsePath(ApiVersion, out var controller, out var action, out var param))
+                return;
 
             if (!_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))
             {
@@ -37,7 +38,7 @@ namespace Servers.Middleware
 
             try
             {
-                var result = _methods[controller][action](param);
+                var result = _methods[controller][action](param ?? "");
 
                 if (!string.IsNullOrEmpty(result))
                 {

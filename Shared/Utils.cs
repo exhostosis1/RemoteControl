@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using Shared.Controllers;
+using Shared.Controllers.Attributes;
 
 namespace Shared
 {
@@ -25,35 +27,50 @@ namespace Shared
             return true;
         }
 
-        public static string? GetDisplayName<T>(this T type) where T: MemberInfo
-        {
-            return type.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName;
-        }
+        public static string? GetDisplayName<T>(this T type) where T : MemberInfo => 
+            type.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName;
 
-        public static (string, string, string) ParsePath(this string path, string apiVersion)
+        public static string? GetControllerName<T>(this T controller) where T : BaseController =>
+            controller.GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
+
+        public static string? GetActionName<T>(this T type) where T : MethodInfo =>
+            type.GetCustomAttribute<ActionAttribute>()?.Name;
+
+        public static bool TryParsePath(this string path, string apiVersion, out string controller, out string action, out string? parameter)
         {
             var split = path[(path.IndexOf(apiVersion, StringComparison.Ordinal) + apiVersion.Length)..]
                 .Split('/', StringSplitOptions.RemoveEmptyEntries);
 
+            controller = string.Empty;
+            action = string.Empty;
+            parameter = null;
+
             if (split.Length < 2)
-            {
-                return ("", "", "");
-            }
-            else if (split.Length < 3)
-            {
-                return (split[0], split[1], "");
-            }
-            else
-            {
-                return (split[0], split[1], split[2]);
-            }
+                return false;
+
+            controller = split[0];
+            action = split[1];
+            
+            if(split.Length > 2)
+                parameter = split[2];
+
+            return true;
         }
 
-        public static (string, string) ParseConfig(this string config)
+        public static bool TryParseConfig(this string config, out string parameter, out string value)
         {
-            var split = config.Split('=').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+            var split = config.Split('=').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 
-            return split.Length < 2 ? ("", "") : (split[0], split[1]);
+            parameter = string.Empty;
+            value = string.Empty;
+
+            if (split.Length < 2)
+                return false;
+
+            parameter = split[0];
+            value = split[1];
+
+            return true;
         }
 
         public static void RunLinuxCommand(string command, out string result, out string error)

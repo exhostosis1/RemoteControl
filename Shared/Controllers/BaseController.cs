@@ -1,7 +1,6 @@
-﻿using System;
+﻿using Shared.Logging.Interfaces;
+using System;
 using System.Linq;
-using Shared.Controllers.Attributes;
-using Shared.Logging.Interfaces;
 using System.Reflection;
 
 namespace Shared.Controllers
@@ -15,24 +14,17 @@ namespace Shared.Controllers
             Logger = logger;
         }
 
-        public string? GetName() => GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
-
         public ControllerMethods GetMethods()
         {
             var controllerMethods = new ControllerMethods();
 
-            var controllerKey = GetName();
-
-            if (string.IsNullOrEmpty(controllerKey)) return controllerMethods;
-
-            var methods = GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.CustomAttributes.Any(a => a.AttributeType == typeof(ActionAttribute))).ToArray();
+            var methods = GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance).ToArray();
 
             if (methods.Length == 0) return controllerMethods;
 
             foreach (var methodInfo in methods)
             {
-                var action = methodInfo.GetCustomAttribute<ActionAttribute>()?.Name;
+                var action = methodInfo.GetActionName();
                 if (string.IsNullOrEmpty(action)) continue;
 
                 try

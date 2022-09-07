@@ -48,7 +48,8 @@ namespace ConfigProviders
                 {
                     try
                     {
-                        var (param, value) = line.ParseConfig();
+                        if (!line.TryParseConfig(out var param, out var value))
+                            continue;
 
                         var prop = configItem.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
                             .SingleOrDefault(x => x.GetDisplayName() == param);
