@@ -14,7 +14,7 @@ namespace ControlProviders
         public YdotoolProvider(ILogger logger) : base(logger)
         { }
 
-        #region enums
+        #region Enums
         private enum YdotoolKey: byte
         {
             KEY_RESERVED = 0,
@@ -124,7 +124,7 @@ namespace ControlProviders
         }
         #endregion
 
-        #region dictionaries
+        #region Dictionaries
 
         private readonly Dictionary<KeysEnum, YdotoolKey> KeyToScanCode = new()
         {
@@ -215,25 +215,16 @@ namespace ControlProviders
         }
         #endregion
 
-        public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
-        {
-            SendKey(KeyToScanCode[key], mode);
-        }
+        public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => SendKey(KeyToScanCode[key], mode);
 
-        public void TextInput(string text)
-        {
-            SendText(text);
-        }
+        public void TextInput(string text) => SendText(text);
 
-        public void Move(int x, int y)
-        {
-            SendMouseMove(x, y);
-        }
+        public void Move(int x, int y) => SendMouseMove(x, y);
 
         public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
         {
             var mouseCode = ButtonToCode[button];
-            
+
             if (mode.HasFlag(KeyPressMode.Down))
                 mouseCode |= MouseCodes.Down;
             if (mode.HasFlag(KeyPressMode.Up))
@@ -244,6 +235,7 @@ namespace ControlProviders
 
         public void Wheel(bool up)
         {
+            //TODO: add mouse scroll functionality
             Logger.LogInfo(up.ToString());
         }
     }
