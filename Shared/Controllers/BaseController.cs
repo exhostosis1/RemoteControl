@@ -37,7 +37,7 @@ namespace Shared.Controllers
 
                 try
                 {
-                    var value = (Func<string, string?>)methodInfo.CreateDelegate(typeof(Func<string, string?>), this);
+                    var value = methodInfo.CreateDelegate<Func<string, string?>>(this);
                     controllerMethods.Add(action, value);
                 }
                 catch (Exception e)
