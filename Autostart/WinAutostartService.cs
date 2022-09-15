@@ -1,43 +1,46 @@
 ﻿using Microsoft.Win32.TaskScheduler;
 using Shared;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace Autostart
 {
     public class WinAutostartService : IAutostartService
     {
         private readonly TaskService _ts = new();
-        private const string TaskName = "RemoteControl";
+        private readonly string _taskName;
         private readonly TaskDefinition _td;
         private const string Filename = "run.bat";
-        private const string Admins = "S-1-5-32-544";
-        private const string Users = "S-1-5-32-545";
-        private const string Author = "exhostosis";
 
         public WinAutostartService()
         {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                throw new Exception("OS not supported");
+
+            var userName = WindowsIdentity.GetCurrent().Name;
+            _taskName =
+                $"RemoteControl{(userName.LastIndexOf("\\", StringComparison.Ordinal) != -1 ? userName[(userName.LastIndexOf("\\", StringComparison.Ordinal) + 1)..] : userName)}";
+
             _td = _ts.NewTask();
             _td.Actions.Add(AppContext.BaseDirectory + Filename, null, AppContext.BaseDirectory);
-            _td.Triggers.Add(new LogonTrigger());
-            _td.Principal.RunLevel = TaskRunLevel.Highest;
-            _td.Settings.Compatibility = TaskCompatibility.V2_3;
-            _td.Principal.GroupId = Admins;
-            _td.RegistrationInfo.Author = Author;
+            _td.Triggers.Add(new LogonTrigger { UserId = userName });
+            _td.Principal.UserId = userName;
         }
 
         public bool CheckAutostart()
         {
-            return _ts.FindTask(TaskName)?.Enabled ?? false;
+            return _ts.FindTask(_taskName)?.Enabled ?? false;
         }
 
         public void SetAutostart(bool value)
         {
-            _ts.RootFolder.DeleteTask(TaskName, false);
+            _ts.RootFolder.DeleteTask(_taskName, false);
 
             if (value)
             {
                 File.WriteAllText(Filename, $"start {Process.GetCurrentProcess().MainModule?.FileName}");
-                _ts.RootFolder.RegisterTaskDefinition(TaskName, _td);
+                _ts.RootFolder.RegisterTaskDefinition(_taskName, _td);
             }
         }
     }

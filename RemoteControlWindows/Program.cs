@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace RemoteControlWindows
 {
@@ -18,10 +19,13 @@ namespace RemoteControlWindows
             }
             catch (HttpListenerException)
             {
-                var args =
-                    $"http add urlacl url={container.Config.GetConfig().UriConfig.Uri} user={System.Security.Principal.WindowsIdentity.GetCurrent().Name}";
+                var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+                var translatedValue = sid.Translate(typeof(NTAccount)).Value;
 
-                Process.Start(new ProcessStartInfo("netsh", args) { Verb = "runas", UseShellExecute = true});
+                var args =
+                    $"http add urlacl url={container.Config.GetConfig().UriConfig.Uri} user={translatedValue}";
+
+                Process.Start(new ProcessStartInfo("netsh", args) { Verb = "runas", UseShellExecute = true, CreateNoWindow = true});
                 RemoteControlMain.Main.Run(container);
             }
         }
