@@ -1,4 +1,6 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Diagnostics;
+using System.Net;
+using System.Runtime.InteropServices;
 
 namespace RemoteControlWindows
 {
@@ -10,7 +12,18 @@ namespace RemoteControlWindows
                 throw new Exception("OS not supported");
 
             var container = new RemoteControlContainer();
-            RemoteControlMain.Main.Run(container);
+            try
+            {
+                RemoteControlMain.Main.Run(container);
+            }
+            catch (HttpListenerException)
+            {
+                var args =
+                    $"http add urlacl url={container.Config.GetConfig().UriConfig.Uri} user={System.Security.Principal.WindowsIdentity.GetCurrent().Name}";
+
+                Process.Start(new ProcessStartInfo("netsh", args) { Verb = "runas", UseShellExecute = true});
+                RemoteControlMain.Main.Run(container);
+            }
         }
     }
 }

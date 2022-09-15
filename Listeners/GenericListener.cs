@@ -30,12 +30,14 @@ namespace Listeners
                 if (_listener.IsListening)
                     _listener.Stop();
             }
-            catch (ObjectDisposedException)
+            catch(ObjectDisposedException)
+            {
+
+            }
+            finally
             {
                 _listener = new HttpListener();
             }
-
-            _listener.Prefixes.Clear();
 
             _listener.Prefixes.Add(url);
 

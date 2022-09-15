@@ -10,6 +10,7 @@ namespace ConfigProviders
     {
         private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
         private readonly ILogger _logger;
+        private AppConfig? _cachedConfig;
 
         public LocalFileConfigProvider(ILogger logger)
         {
@@ -18,6 +19,8 @@ namespace ConfigProviders
 
         public AppConfig GetConfig()
         {
+            if (_cachedConfig != null) return _cachedConfig;
+
             var result = new AppConfig();
 
             var lines = File.ReadAllLines(ConfigPath)
@@ -67,6 +70,7 @@ namespace ConfigProviders
                 }
             }
 
+            _cachedConfig = result;
             return result;
         }
 

@@ -77,23 +77,8 @@ namespace RemoteControlWinForms
             }
             catch
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    address = address.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {address}") { CreateNoWindow = true });
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    Process.Start("xdg-open", address);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Process.Start("open", address);
-                }
-                else
-                {
-                    throw;
-                }
+                address = address.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {address}") { CreateNoWindow = true });
             }
         }
 
