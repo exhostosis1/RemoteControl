@@ -1,0 +1,20 @@
+﻿<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="64.000000pt" height="64.000000pt" viewBox="0 0 64.000000 64.000000" preserveAspectRatio="xMidYMid meet">
+    <style>
+    g {
+        fill: black;
+    }
+    @media (prefers-color-scheme: dark) {
+      g {
+        fill: white;
+      }
+    }
+    </style>
+    <g transform="translate(0.000000,64.000000) scale(0.100000,-0.100000)"
+       stroke="none">
+        <path d="M0 320 l0 -320 320 0 320 0 0 320 0 320 -320 0 -320 0 0 -320z m520
+79 l0 -122 41 -44 c32 -35 40 -50 37 -76 l-3 -32 -275 0 -275 0 -3 32 c-3 26
+5 41 37 76 l41 44 0 122 0 121 200 0 200 0 0 -121z" />
+        <path d="M160 380 l0 -100 160 0 160 0 0 100 0 100 -160 0 -160 0 0 -100z" />
+        <path d="M125 200 l-39 -40 234 0 234 0 -39 40 -39 40 -156 0 -156 0 -39 -40z" />
+    </g>
+</svg>

@@ -28,7 +28,6 @@ namespace ConfigProviders
 
             foreach (var line in lines)
             {
-
                 if(line.StartsWith('[') && line.EndsWith(']'))
                 {
                     var name = line[1..^1];

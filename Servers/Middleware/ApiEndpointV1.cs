@@ -27,10 +27,8 @@ namespace Servers.Middleware
 
         public void ProcessRequest(IContext context)
         {
-            if(!context.Request.Path.TryParsePath(ApiVersion, out var controller, out var action, out var param))
-                return;
-
-            if (!_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))
+            if(!context.Request.Path.TryParsePath(ApiVersion, out var controller, out var action, out var param)
+               || !_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))
             {
                 context.Response.StatusCode = HttpStatusCode.NotFound;
                 return;

@@ -25,7 +25,7 @@ namespace Logging
         {
             lock (FileLock)
             {
-                File.AppendAllText(_path, message);
+                File.AppendAllText(_path, message + "\n");
             }
         }
 

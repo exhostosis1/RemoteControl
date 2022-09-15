@@ -1,4 +1,5 @@
-﻿using Shared;
+﻿using Microsoft.Win32;
+using Shared;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
@@ -20,6 +21,10 @@ namespace RemoteControlWinForms
         public WinFormsUI()
         {
             InitializeComponent();
+
+            var res = Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1) as int?;
+            
+            this.taskbarNotify.Icon = res == 1 ? new Icon("Device.theme-light.ico") : new Icon("Device.theme-dark.ico");
 
             _commonMenuItems = new ToolStripItem[]
             {

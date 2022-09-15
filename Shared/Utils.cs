@@ -59,7 +59,7 @@ namespace Shared
 
         public static bool TryParseConfig(this string config, out string parameter, out string value)
         {
-            var split = config.Split('=').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+            var split = config.Split('=').Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
 
             parameter = string.Empty;
             value = string.Empty;

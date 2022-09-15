@@ -6,16 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
-	<ApplicationManifest>app.manifest</ApplicationManifest>
+	  <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="app.manifest" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="app.manifest" />
-  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Autostart\Autostart.csproj" />
@@ -29,12 +21,6 @@
     <ProjectReference Include="..\Servers\Servers.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
     <ProjectReference Include="..\Web\Web.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="run.bat">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>
