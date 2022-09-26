@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Shared.Controllers;
 using Shared.Controllers.Attributes;
@@ -73,15 +74,19 @@ namespace Shared
             return true;
         }
 
-        public static void RunLinuxCommand(string command, out string result, out string error)
+        public static void RunCommand(OSPlatform platform, string command, out string result, out string error, bool elevated = false, bool createWindow = false, 
+            bool shellExecute = false)
         {
             using var proc = new Process();
 
-            proc.StartInfo.FileName = "/bin/bash";
-            proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.FileName = platform == OSPlatform.Windows ? "cmd" : "/bin/bash";
+            proc.StartInfo.Arguments = $"{(platform == OSPlatform.Windows ? "/c" : "-c")} \"{command}\"";
+            proc.StartInfo.UseShellExecute = shellExecute;
             proc.StartInfo.RedirectStandardError = true;
             proc.StartInfo.RedirectStandardOutput = true;
+            if (elevated)
+                proc.StartInfo.Verb = "runas";
+            proc.StartInfo.CreateNoWindow = !createWindow;
 
             proc.Start();
 

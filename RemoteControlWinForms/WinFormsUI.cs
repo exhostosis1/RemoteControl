@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using Shared;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace RemoteControlWinForms
@@ -69,17 +68,9 @@ namespace RemoteControlWinForms
 
         private static void IpToolStripMenuItem_Click(object? sender, EventArgs e)
         {
-            var address = (sender as ToolStripMenuItem)?.Text ?? string.Empty;
+            var address = (sender as ToolStripMenuItem)?.Text?.Replace("&", "^&") ?? string.Empty;
 
-            try
-            {
-                Process.Start(address);
-            }
-            catch
-            {
-                address = address.Replace("&", "^&");
-                Process.Start(new ProcessStartInfo("cmd", $"/c start {address}") { CreateNoWindow = true });
-            }
+            Utils.RunCommand(OSPlatform.Windows, $"start {address}", out _, out _);
         }
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
