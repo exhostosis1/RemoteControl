@@ -1,8 +1,11 @@
-﻿using Shared.DataObjects;
+﻿using Shared;
+using Shared.DataObjects;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.Server.Interfaces;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 
 namespace Listeners
 {
@@ -43,6 +46,20 @@ namespace Listeners
 
             try
             {
+                _listener.Start();
+            }
+            catch (HttpListenerException)
+            {
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    throw;
+
+                var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+                var translatedValue = sid.Translate(typeof(NTAccount)).Value;
+                var command =
+                    $"netsh http add urlacl url={url} user={translatedValue}";
+
+                Utils.RunCommand(OSPlatform.Windows, command, out _, out _, true, false, true);
+
                 _listener.Start();
             }
             catch (Exception e)
