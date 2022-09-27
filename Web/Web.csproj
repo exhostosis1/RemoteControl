@@ -11,6 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="www\favicon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="www\favicon.svg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

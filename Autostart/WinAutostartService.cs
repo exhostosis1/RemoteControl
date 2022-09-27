@@ -30,12 +30,15 @@ namespace Autostart
 
         public bool CheckAutostart()
         {
-            return _ts.FindTask(_taskName)?.Enabled ?? false;
+            return (_ts.FindTask(_taskName)?.Enabled ?? false) && File.Exists(Filename);
         }
 
         public void SetAutostart(bool value)
         {
             _ts.RootFolder.DeleteTask(_taskName, false);
+
+            if(File.Exists(Filename))
+                File.Delete(Filename);
 
             if (value)
             {
