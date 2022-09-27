@@ -28,10 +28,7 @@ namespace Autostart
             _td.Principal.UserId = userName;
         }
 
-        public bool CheckAutostart()
-        {
-            return (_ts.FindTask(_taskName)?.Enabled ?? false) && File.Exists(Filename);
-        }
+        public bool CheckAutostart() => (_ts.FindTask(_taskName)?.Enabled ?? false) && File.Exists(Filename);
 
         public void SetAutostart(bool value)
         {
