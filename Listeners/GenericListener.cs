@@ -26,7 +26,7 @@ namespace Listeners
             _logger = logger;
         }
 
-        public void StartListen(string url)
+        public void StartListen(Uri url)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace Listeners
                 _listener = new HttpListener();
             }
 
-            _listener.Prefixes.Add(url);
+            _listener.Prefixes.Add(url.ToString());
 
             try
             {
@@ -58,7 +58,7 @@ namespace Listeners
                 var command =
                     $"netsh http add urlacl url={url} user={translatedValue}";
 
-                Utils.RunCommand(OSPlatform.Windows, command, out _, out _, true, false, true);
+                Utils.RunWindowsCommandAsAdmin(command);
 
                 _listener.Start();
             }

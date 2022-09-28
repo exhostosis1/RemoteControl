@@ -1,6 +1,5 @@
 ﻿using Microsoft.Win32;
 using Shared;
-using System.Runtime.InteropServices;
 
 namespace RemoteControlWinForms
 {
@@ -17,18 +16,19 @@ namespace RemoteControlWinForms
         public bool IsListening { get; set; }
         public bool IsAutostart { get; set; }
 
+        private static bool IsDarkMode => Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1) as int? == 1;
+
         public WinFormsUI()
         {
             InitializeComponent();
 
-            var res = Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1) as int?;
-            
-            this.taskbarNotify.Icon = res == 1 ? new Icon("Device.theme-light.ico") : new Icon("Device.theme-dark.ico");
+            this.taskbarNotify.Icon = IsDarkMode ? new Icon("Device.theme-light.ico") : new Icon("Device.theme-dark.ico");
 
             _commonMenuItems = new ToolStripItem[]
             {
                     this.toolStripSeparator2,
                     this.autostartStripMenuItem,
+                    this.addFirewallRuleToolStripMenuItem,
                     this.closeToolStripMenuItem
             };
 
@@ -70,7 +70,7 @@ namespace RemoteControlWinForms
         {
             var address = (sender as ToolStripMenuItem)?.Text?.Replace("&", "^&") ?? string.Empty;
 
-            Utils.RunCommand(OSPlatform.Windows, $"start {address}", out _, out _);
+            Utils.RunWindowsCommand($"start {address}", out _, out _);
         }
 
         private void StartToolStripMenuItem_Click(object sender, EventArgs e)
@@ -94,6 +94,14 @@ namespace RemoteControlWinForms
         {
             AutostartChangeEvent?.Invoke(!IsAutostart);
             SetContextMenu();
+        }
+
+        private void addFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            var command =
+                $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={Uri?.Host} localport={Uri?.Port} protocol=tcp";
+
+            Utils.RunWindowsCommandAsAdmin(command);
         }
     }
 }

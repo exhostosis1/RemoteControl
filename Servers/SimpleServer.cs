@@ -13,7 +13,7 @@ namespace Servers
             _listener.OnRequest += middleware.ProcessRequest;
         }
 
-        public void Start(Uri uri) => _listener.StartListen(uri.ToString());
+        public void Start(Uri uri) => _listener.StartListen(uri);
         public void Stop() => _listener.StopListen();
         public string? GetListeningUri() => _listener.ListeningUris.FirstOrDefault();
         public bool IsListening => _listener.IsListening;

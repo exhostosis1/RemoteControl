@@ -40,6 +40,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.autostartStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.addFirewallRuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -59,27 +60,28 @@
             this.stoppedToolStripMenuItem,
             this.toolStripSeparator1,
             this.toolStripSeparator2,
-            this.autostartStripMenuItem});
+            this.autostartStripMenuItem,
+            this.addFirewallRuleToolStripMenuItem});
             this.contextMenuStrip.Name = "contextMenuStrip1";
-            this.contextMenuStrip.Size = new System.Drawing.Size(137, 126);
+            this.contextMenuStrip.Size = new System.Drawing.Size(181, 170);
             // 
             // placeholderToolStripMenuItem
             // 
             this.placeholderToolStripMenuItem.Name = "placeholderToolStripMenuItem";
-            this.placeholderToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.placeholderToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.placeholderToolStripMenuItem.Text = "placeholder";
             // 
             // stopToolStripMenuItem
             // 
             this.stopToolStripMenuItem.Name = "stopToolStripMenuItem";
-            this.stopToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.stopToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.stopToolStripMenuItem.Text = "Stop";
             this.stopToolStripMenuItem.Click += new System.EventHandler(this.StopToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
             this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.closeToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.closeToolStripMenuItem.Text = "Close";
             this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
             // 
@@ -87,23 +89,23 @@
             // 
             this.stoppedToolStripMenuItem.Enabled = false;
             this.stoppedToolStripMenuItem.Name = "stoppedToolStripMenuItem";
-            this.stoppedToolStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.stoppedToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.stoppedToolStripMenuItem.Text = "Stopped";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(133, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(177, 6);
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(133, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(177, 6);
             // 
             // autostartStripMenuItem
             // 
             this.autostartStripMenuItem.Name = "autostartStripMenuItem";
-            this.autostartStripMenuItem.Size = new System.Drawing.Size(136, 22);
+            this.autostartStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.autostartStripMenuItem.Text = "Autostart";
             this.autostartStripMenuItem.Click += new System.EventHandler(this.autostartStripMenuItem_Click);
             // 
@@ -114,7 +116,14 @@
             this.startToolStripMenuItem.Text = "Start";
             this.startToolStripMenuItem.Click += new System.EventHandler(this.StartToolStripMenuItem_Click);
             // 
-            // TrayForm
+            // addFirewallRuleToolStripMenuItem
+            // 
+            this.addFirewallRuleToolStripMenuItem.Name = "addFirewallRuleToolStripMenuItem";
+            this.addFirewallRuleToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.addFirewallRuleToolStripMenuItem.Text = "Add firewall rule";
+            this.addFirewallRuleToolStripMenuItem.Click += new System.EventHandler(this.addFirewallRuleToolStripMenuItem_Click);
+            // 
+            // WinFormsUI
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -126,7 +135,7 @@
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
-            this.Name = "TrayForm";
+            this.Name = "WinFormsUI";
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Config";
@@ -148,6 +157,7 @@
         private ToolStripMenuItem startToolStripMenuItem;
         private ToolStripSeparator toolStripSeparator2;
         private ToolStripMenuItem autostartStripMenuItem;
+        private ToolStripMenuItem addFirewallRuleToolStripMenuItem;
     }
 }
 

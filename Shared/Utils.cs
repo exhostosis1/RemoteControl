@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Shared.Controllers;
+using Shared.Controllers.Attributes;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
-using Shared.Controllers;
-using Shared.Controllers.Attributes;
 
 namespace Shared
 {
@@ -74,19 +74,21 @@ namespace Shared
             return true;
         }
 
-        public static void RunCommand(OSPlatform platform, string command, out string result, out string error, bool elevated = false, bool createWindow = false, 
-            bool shellExecute = false)
+        public static void RunWindowsCommand(string command, out string result, out string error)
         {
             using var proc = new Process();
 
-            proc.StartInfo.FileName = platform == OSPlatform.Windows ? "cmd" : "/bin/bash";
-            proc.StartInfo.Arguments = $"{(platform == OSPlatform.Windows ? "/c" : "-c")} \"{command}\"";
-            proc.StartInfo.UseShellExecute = shellExecute;
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            proc.StartInfo.FileName = "cmd";
+            proc.StartInfo.Arguments = $"/c \"{command}\"";
+            proc.StartInfo.CreateNoWindow = true;
+            
             proc.StartInfo.RedirectStandardError = true;
             proc.StartInfo.RedirectStandardOutput = true;
-            if (elevated)
-                proc.StartInfo.Verb = "runas";
-            proc.StartInfo.CreateNoWindow = !createWindow;
+            proc.StartInfo.StandardOutputEncoding = Encoding.GetEncoding(866);
+            proc.StartInfo.StandardErrorEncoding = Encoding.GetEncoding(866);
+            proc.StartInfo.UseShellExecute = false;
 
             proc.Start();
 
@@ -96,9 +98,46 @@ namespace Shared
             proc.WaitForExit();
         }
 
-        public static T CreateDelegate<T>(this MethodInfo methodInfo, object target) where T: Delegate
+        public static void RunWindowsCommandAsAdmin(string command)
         {
-            return (T)methodInfo.CreateDelegate(typeof(T), target);
+            using var proc = new Process();
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            proc.StartInfo.FileName = "cmd";
+            proc.StartInfo.Arguments = $"/c \"{command}\"";
+            proc.StartInfo.CreateNoWindow = true;
+
+            proc.StartInfo.Verb = "runas";
+            proc.StartInfo.UseShellExecute = true;
+
+            proc.Start();
+
+            proc.WaitForExit();
         }
+
+        public static void RunLinuxCommand(string command, out string result, out string error)
+        {
+            using var proc = new Process();
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            proc.StartInfo.FileName = "/bin/bash";
+            proc.StartInfo.Arguments = $"-c \"{command}\"";
+            proc.StartInfo.CreateNoWindow = true;
+
+            proc.StartInfo.RedirectStandardError = true;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.UseShellExecute = false;
+
+            proc.Start();
+
+            result = proc.StandardOutput.ReadToEnd();
+            error = proc.StandardError.ReadToEnd();
+
+            proc.WaitForExit();
+        }
+
+        public static T CreateDelegate<T>(this MethodInfo methodInfo, object target) where T: Delegate => (T)methodInfo.CreateDelegate(typeof(T), target);
     }
 }

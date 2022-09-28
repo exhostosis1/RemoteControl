@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Shared.Server.Interfaces
 {
@@ -9,7 +10,7 @@ namespace Shared.Server.Interfaces
 
         public event HttpEventHandler? OnRequest;
 
-        public void StartListen(string url);
+        public void StartListen(Uri url);
 
         public void StopListen();
     }
