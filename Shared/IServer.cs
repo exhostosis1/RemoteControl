@@ -1,12 +1,11 @@
 ﻿using System;
 
-namespace Shared
+namespace Shared;
+
+public interface IServer
 {
-    public interface IServer
-    {
-        public void Start(Uri uri);
-        public void Stop();
-        public string? GetListeningUri();
-        public bool IsListening { get; }
-    }
+    public void Start(Uri uri);
+    public void Stop();
+    public string? GetListeningUri();
+    public bool IsListening { get; }
 }

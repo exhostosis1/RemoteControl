@@ -1,11 +1,10 @@
 ﻿using Shared.Enums;
 
-namespace Shared.ControlProviders
+namespace Shared.ControlProviders;
+
+public interface IMouseControlProvider
 {
-    public interface IMouseControlProvider
-    {
-        void Move(int x, int y);
-        void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click);
-        void Wheel(bool up);
-    }
+    void Move(int x, int y);
+    void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click);
+    void Wheel(bool up);
 }

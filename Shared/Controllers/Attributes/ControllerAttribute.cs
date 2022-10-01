@@ -1,18 +1,17 @@
 ﻿using System;
 
-namespace Shared.Controllers.Attributes
+namespace Shared.Controllers.Attributes;
+
+[AttributeUsage(AttributeTargets.Class)]
+public class ControllerAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Class)]
-    public class ControllerAttribute : Attribute
+    public string Name { get; }
+
+    public ControllerAttribute(string name)
     {
-        public string Name { get; }
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Controller must have a name");
 
-        public ControllerAttribute(string name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Controller must have a name");
-
-            Name = name;
-        }
+        Name = name;
     }
 }

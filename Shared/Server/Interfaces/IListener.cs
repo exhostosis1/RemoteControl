@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Shared.Server.Interfaces
+namespace Shared.Server.Interfaces;
+
+public interface IListener
 {
-    public interface IListener
-    {
-        public bool IsListening { get; }
-        public IReadOnlyCollection<string> ListeningUris { get; }
+    public bool IsListening { get; }
+    public IReadOnlyCollection<string> ListeningUris { get; }
 
-        public event HttpEventHandler? OnRequest;
+    public event HttpEventHandler? OnRequest;
 
-        public void StartListen(Uri url);
+    public void StartListen(Uri url);
 
-        public void StopListen();
-    }
+    public void StopListen();
 }

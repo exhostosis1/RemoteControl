@@ -1,9 +1,8 @@
-﻿namespace Shared.Enums
+﻿namespace Shared.Enums;
+
+public enum LoggingLevel
 {
-    public enum LoggingLevel
-    {
-        Info,
-        Warn,
-        Error
-    }
+    Info,
+    Warn,
+    Error
 }

@@ -1,7 +1,6 @@
-﻿namespace Shared.DataObjects.Interfaces
+﻿namespace Shared.DataObjects.Interfaces;
+
+public interface IRequest
 {
-    public interface IRequest
-    {
-        public string Path { get; }
-    }
+    public string Path { get; }
 }

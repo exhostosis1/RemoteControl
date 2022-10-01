@@ -1,12 +1,11 @@
-﻿namespace Shared.Enums
+﻿namespace Shared.Enums;
+
+public enum KeysEnum
 {
-    public enum KeysEnum
-    {
-        Enter,
-        ArrowLeft,
-        ArrowRight,
-        MediaNext,
-        MediaPrev,
-        MediaPlayPause,
-    }
+    Enter,
+    ArrowLeft,
+    ArrowRight,
+    MediaNext,
+    MediaPrev,
+    MediaPlayPause,
 }

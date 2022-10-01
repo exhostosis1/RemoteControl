@@ -1,10 +1,9 @@
 ﻿using Shared.Config;
 
-namespace Shared
+namespace Shared;
+
+public interface IConfigProvider
 {
-    public interface IConfigProvider
-    {
-        public AppConfig GetConfig();
-        public bool SetConfig(AppConfig config);
-    }
+    public AppConfig GetConfig();
+    public bool SetConfig(AppConfig config);
 }

@@ -1,6 +1,5 @@
-﻿namespace Shared.Config.Interfaces
+﻿namespace Shared.Config.Interfaces;
+
+public interface IConfigItem
 {
-    public interface IConfigItem
-    {
-    }
 }

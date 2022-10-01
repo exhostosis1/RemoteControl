@@ -1,9 +1,8 @@
-﻿namespace Shared.Enums
+﻿namespace Shared.Enums;
+
+public enum MouseButtons
 {
-    public enum MouseButtons
-    {
-        Left,
-        Right,
-        Middle
-    }
+    Left,
+    Right,
+    Middle
 }

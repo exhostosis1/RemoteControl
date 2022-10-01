@@ -1,9 +1,8 @@
-﻿namespace Shared
-{
-    public interface IAutostartService
-    {
-        public bool CheckAutostart();
+﻿namespace Shared;
 
-        public void SetAutostart(bool value);
-    }
+public interface IAutostartService
+{
+    public bool CheckAutostart();
+
+    public void SetAutostart(bool value);
 }

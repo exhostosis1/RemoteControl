@@ -1,6 +1,5 @@
-﻿namespace Shared
-{
-    public delegate void EmptyEventHandler();
+﻿namespace Shared;
 
-    public delegate void BoolEventHandler(bool value);
-}
+public delegate void EmptyEventHandler();
+
+public delegate void BoolEventHandler(bool value);

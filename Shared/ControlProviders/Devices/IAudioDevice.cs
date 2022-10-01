@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace Shared.ControlProviders.Devices
+namespace Shared.ControlProviders.Devices;
+
+public interface IAudioDevice
 {
-    public interface IAudioDevice
-    {
-        Guid Id { get; set; }
-        string Name { get; set; }
-        bool IsCurrentControlDevice { get; set; }
-    }
+    Guid Id { get; set; }
+    string Name { get; set; }
+    bool IsCurrentControlDevice { get; set; }
 }

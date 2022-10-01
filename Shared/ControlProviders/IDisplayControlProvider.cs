@@ -1,7 +1,6 @@
-﻿namespace Shared.ControlProviders
+﻿namespace Shared.ControlProviders;
+
+public interface IDisplayControlProvider
 {
-    public interface IDisplayControlProvider
-    {
-        void Darken();
-    }
+    void Darken();
 }
