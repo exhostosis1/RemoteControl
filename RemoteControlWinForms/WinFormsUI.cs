@@ -22,7 +22,8 @@ namespace RemoteControlWinForms
         {
             InitializeComponent();
 
-            this.taskbarNotify.Icon = IsDarkMode ? new Icon("Device.theme-light.ico") : new Icon("Device.theme-dark.ico");
+            this.taskbarNotify.Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
+                IsDarkMode ? "Device.theme-light.ico" : "Device.theme-dark.ico"));
 
             _commonMenuItems = new ToolStripItem[]
             {

@@ -6,14 +6,14 @@ using System.Security.Principal;
 
 namespace Autostart
 {
-    public class WinAutostartService : IAutostartService
+    public class WinTaskAutostartService : IAutostartService
     {
         private readonly TaskService _ts = new();
         private readonly string _taskName;
         private readonly TaskDefinition _td;
         private const string Filename = "run.bat";
 
-        public WinAutostartService()
+        public WinTaskAutostartService()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw new Exception("OS not supported");
@@ -34,7 +34,7 @@ namespace Autostart
         {
             _ts.RootFolder.DeleteTask(_taskName, false);
 
-            if(File.Exists(Filename))
+            if (File.Exists(Filename))
                 File.Delete(Filename);
 
             if (value)

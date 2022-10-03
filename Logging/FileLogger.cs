@@ -12,13 +12,13 @@ namespace Logging
 
         public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
         {
-            if (string.IsNullOrWhiteSpace(filePath))
-                throw new ArgumentException(nameof(filePath));
+            _path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
 
-            if (!File.Exists(filePath))
-                File.Create(filePath);
+            if (string.IsNullOrWhiteSpace(_path))
+                throw new ArgumentException(nameof(_path));
 
-            _path = filePath;
+            if (!File.Exists(_path))
+                File.Create(_path);
         }
 
         protected override void ProcessInfo(string message)

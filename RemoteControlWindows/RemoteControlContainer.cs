@@ -45,7 +45,7 @@ namespace RemoteControlWindows
 
             Server = new SimpleServer(listener, staticMiddleware);
             Config = new LocalFileConfigProvider(DefaultLogger);
-            Autostart = new WinAutostartService();
+            Autostart = new WinRegistryAutostartService();
             UserInterface = new WinFormsUI();
         }
     }

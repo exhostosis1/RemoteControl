@@ -6,6 +6,13 @@ public static class Program
     {
         var container = new RemoteControlContainer();
 
-        RemoteControlMain.Main.Run(container);
+        try
+        {
+            RemoteControlMain.Main.Run(container);
+        }
+        catch (Exception e)
+        {
+            container.DefaultLogger.LogError(e.Message);
+        }
     }
 }
