@@ -48,8 +48,17 @@ namespace Listeners
             {
                 _listener.Start();
             }
-            catch (HttpListenerException)
+            catch (HttpListenerException e)
             {
+                if(e.Message.Contains("Failed to listen"))
+                {
+                    _logger.LogError($"{url.ToString} is already registered");
+
+                    return;
+                }
+
+                _logger.LogWarn("Trying to add listening permissions to user");
+
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw;
 
