@@ -3,6 +3,9 @@ using Shared.Controllers.Attributes;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -121,5 +124,10 @@ public static class Utils
         error = elevated ? null : proc.StandardError.ReadToEnd();
 
         proc.WaitForExit();
+    }
+
+    public static string[] GetCurrentIPs()
+    {
+        return Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString()).ToArray();
     }
 }
