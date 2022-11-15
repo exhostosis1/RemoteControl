@@ -8,7 +8,7 @@ public static class Program
     {
         var container = new RemoteControlContainer();
 
-        string? listeningUri = null;
+        Uri? listeningUri = null;
 
         SystemEvents.SessionSwitch += (_, args) =>
         {
@@ -22,7 +22,7 @@ public static class Program
             if(args.Reason == SessionSwitchReason.SessionUnlock)
             {
                 if (listeningUri != null)
-                    container.Server.Start(new Uri(listeningUri));
+                    container.Server.Start(listeningUri);
             }
         };
 

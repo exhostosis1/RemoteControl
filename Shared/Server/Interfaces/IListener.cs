@@ -6,7 +6,7 @@ namespace Shared.Server.Interfaces;
 public interface IListener
 {
     public bool IsListening { get; }
-    public IReadOnlyCollection<string> ListeningUris { get; }
+    public IReadOnlyCollection<Uri> ListeningUris { get; }
 
     public event HttpEventHandler? OnRequest;
 

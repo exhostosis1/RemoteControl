@@ -13,7 +13,7 @@ namespace Listeners
     {
         private HttpListener _listener = new();
         public bool IsListening => _listener.IsListening;
-        public IReadOnlyCollection<string> ListeningUris => _listener.Prefixes.ToList();
+        public IReadOnlyCollection<Uri> ListeningUris => _listener.Prefixes.Select(x => new Uri(x)).ToList();
 
         public event HttpEventHandler? OnRequest;
 
