@@ -57,8 +57,6 @@ namespace Listeners
                     return;
                 }
 
-                var ips = Utils.GetCurrentIPs();
-
                 if(!Utils.GetCurrentIPs().Contains(url.Host))
                 {
                     _logger.LogError($"{url.Host} is currently unavailable");
