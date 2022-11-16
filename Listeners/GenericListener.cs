@@ -52,7 +52,7 @@ namespace Listeners
             {
                 if(e.Message.Contains("Failed to listen"))
                 {
-                    _logger.LogError($"{url.ToString} is already registered");
+                    _logger.LogError($"{url} is already registered");
 
                     return;
                 }
