@@ -39,7 +39,7 @@ namespace RemoteControlLinux
                 new MouseController(ydotoolWrapper, DefaultLogger)
             };
 
-            var endPoint = new ApiEndpointV1(controllers);
+            var endPoint = new ApiMiddlewareV1(controllers);
             var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
 
             var listener = new GenericListener(DefaultLogger);

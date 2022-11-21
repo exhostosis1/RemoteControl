@@ -38,13 +38,13 @@ namespace RemoteControlWindows
                 new MouseController(user32Wrapper, DefaultLogger)
             };
 
-            var endPoint = new ApiEndpointV1(controllers);
+            var endPoint = new ApiMiddlewareV1(controllers);
             var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
 
             var listener = new GenericListener(DefaultLogger);
 
             Server = new SimpleServer(listener, staticMiddleware);
-            ConfigProvider = new WinRegistryConfigProvider(DefaultLogger);
+            ConfigProvider = new LocalFileConfigProvider(DefaultLogger);
             AutostartService = new WinRegistryAutostartService();
             UserInterface = new WinFormsUI();
         }

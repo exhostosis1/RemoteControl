@@ -7,20 +7,24 @@ namespace Servers.Middleware
 {
     public class LoggingMiddleware : IMiddleware
     {
-        private readonly HttpEventHandler _next;
+        private readonly HttpEventHandler? _next;
         private readonly ILogger _logger;
 
-        public LoggingMiddleware(HttpEventHandler next, ILogger logger)
+        public LoggingMiddleware(HttpEventHandler next, ILogger logger): this(logger)
+        {
+            _next = next;
+        }
+
+        public LoggingMiddleware(ILogger logger)
         {
             _logger = logger;
-            _next = next;
         }
 
         public void ProcessRequest(IContext context)
         {
             _logger.LogInfo(context.Request.Path);
 
-            _next(context);
+            _next?.Invoke(context);
         }
     }
 }

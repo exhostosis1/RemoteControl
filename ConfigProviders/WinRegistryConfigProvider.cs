@@ -31,13 +31,13 @@ public class WinRegistryConfigProvider: BaseConfigProvider
             switch (name)
             {
                 case HostName:
-                    result.Host = _regKey.GetValue(name) as string ?? string.Empty;
+                    result.Host = _regKey.GetValue(name) as string ?? result.Host;
                     break;
                 case PortName:
-                    result.Port = _regKey.GetValue(name) as int? ?? default;
+                    result.Port = _regKey.GetValue(name) as int? ?? result.Port;
                     break;
                 case SchemeName:
-                    result.Scheme = _regKey.GetValue(name) as string ?? string.Empty;
+                    result.Scheme = _regKey.GetValue(name) as string ?? result.Scheme;
                     break;
             }
         }

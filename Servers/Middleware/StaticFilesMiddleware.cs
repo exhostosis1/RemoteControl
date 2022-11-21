@@ -8,12 +8,16 @@ namespace Servers.Middleware
     public class StaticFilesMiddleware : IMiddleware
     {
         private readonly string _contentFolder;
-        private readonly HttpEventHandler _next;
+        private readonly HttpEventHandler? _next;
 
-        public StaticFilesMiddleware(HttpEventHandler next, string directory = "www")
+        public StaticFilesMiddleware(HttpEventHandler next, string directory = "www"): this(directory)
+        {
+            _next = next;
+        }
+
+        public StaticFilesMiddleware(string directory = "www")
         {
             _contentFolder = AppContext.BaseDirectory + directory;
-            _next = next;
         }
 
         private static readonly Dictionary<string, string> ContentTypes = new()
@@ -32,7 +36,7 @@ namespace Servers.Middleware
 
             if (uriPath.Contains("/api/"))
             {
-                _next(context);
+                _next?.Invoke(context);
                 return;
             }
 
