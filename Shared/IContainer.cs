@@ -2,8 +2,8 @@
 
 public interface IContainer
 {
-    public IAutostartService Autostart { get; }
-    public IConfigProvider Config { get; }
+    public IAutostartService AutostartService { get; }
+    public IConfigProvider ConfigProvider { get; }
     public IServer Server { get; }
     public IUserInterface UserInterface { get; }
 }

@@ -16,8 +16,8 @@ namespace RemoteControlLinux
     public class RemoteControlContainer : IContainer
     {
         public IServer Server { get; }
-        public IConfigProvider Config { get; }
-        public IAutostartService Autostart { get; }
+        public IConfigProvider ConfigProvider { get; }
+        public IAutostartService AutostartService { get; }
         public ILogger DefaultLogger { get; }
         public IUserInterface UserInterface { get; set; }
 
@@ -45,8 +45,8 @@ namespace RemoteControlLinux
             var listener = new GenericListener(DefaultLogger);
 
             Server = new SimpleServer(listener, staticMiddleware);
-            Config = new LocalFileConfigProvider(DefaultLogger);
-            Autostart = new DummyAutostartService();
+            ConfigProvider = new LocalFileConfigProvider(DefaultLogger);
+            AutostartService = new DummyAutostartService();
             UserInterface = new ConsoleUI();
         }
     }

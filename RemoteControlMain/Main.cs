@@ -6,13 +6,13 @@ namespace RemoteControlMain
     {
         public static void Run(IContainer container)
         {
-            var uri = container.Config.GetConfig().UriConfig.Uri;
+            var uri = container.ConfigProvider.Config.Uri;
             var ui = container.UserInterface;
 
             container.Server.Start(uri);
 
             ui.IsListening = container.Server.IsListening;
-            ui.IsAutostart = container.Autostart.CheckAutostart();
+            ui.IsAutostart = container.AutostartService.CheckAutostart();
             ui.Uri = uri;
 
             ui.StartEvent += () =>
@@ -27,8 +27,8 @@ namespace RemoteControlMain
             };
             ui.AutostartChangeEvent += value =>
             {
-                container.Autostart.SetAutostart(value);
-                ui.IsAutostart = container.Autostart.CheckAutostart();
+                container.AutostartService.SetAutostart(value);
+                ui.IsAutostart = container.AutostartService.CheckAutostart();
             };
 
             ui.RunUI();

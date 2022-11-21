@@ -1,7 +1,12 @@
-﻿namespace Shared.Config;
+﻿using System;
 
-public class AppConfig
+namespace Shared.Config;
+
+public record AppConfig
 {
-    public UriConfig UriConfig { get; set; } = new();
-    public CommonConfig Common { get; set; } = new();
+    public string Host { get; set; } = "localhost";
+    public string Scheme { get; set; } = "http";
+    public int Port { get; set; } = 1488;
+    public Uri Uri => new UriBuilder(Scheme, Host, Port).Uri;
+    public override string ToString() => $"{Scheme}://{Host}:{Port}/";
 }
