@@ -1,8 +1,7 @@
 ﻿using Microsoft.Win32;
-using Shared.Config;
+using Shared.Logging.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
-using Shared.Logging.Interfaces;
 
 namespace ConfigProviders;
 
@@ -20,10 +19,8 @@ public class WinRegistryConfigProvider: BaseConfigProvider
                   Registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
     }
 
-    protected override AppConfig GetConfigInternal()
+    protected override Uri GetConfigInternal()
     {
-        var result = new AppConfig();
-
         var names = _regKey.GetValueNames();
 
         foreach (var name in names)
@@ -31,21 +28,29 @@ public class WinRegistryConfigProvider: BaseConfigProvider
             switch (name)
             {
                 case HostName:
-                    result.Host = _regKey.GetValue(name) as string ?? result.Host;
+                    Host = _regKey.GetValue(name) as string ?? Host;
                     break;
                 case PortName:
-                    result.Port = _regKey.GetValue(name) as int? ?? result.Port;
+                    Port = _regKey.GetValue(name) as int? ?? Port;
                     break;
                 case SchemeName:
-                    result.Scheme = _regKey.GetValue(name) as string ?? result.Scheme;
+                    Scheme = _regKey.GetValue(name) as string ?? Scheme;
                     break;
             }
         }
 
-        return result;
+        try
+        {
+            return new UriBuilder(Scheme, Host, Port).Uri;
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+            throw;
+        }
     }
 
-    protected override void SetConfigInternal(AppConfig config)
+    protected override void SetConfigInternal(Uri config)
     {
         _regKey.SetValue(HostName, config.Host, RegistryValueKind.String);
         _regKey.SetValue(SchemeName, config.Scheme, RegistryValueKind.String);

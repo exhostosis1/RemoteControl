@@ -52,22 +52,25 @@ namespace Listeners
             {
                 if(e.Message.Contains("Failed to listen"))
                 {
-                    _logger.LogError($"{url} is already registered");
+                    var message = $"{url} is already registered";
+                    _logger.LogError(message);
 
-                    return;
+                    throw new Exception(message);
                 }
 
                 if(!Utils.GetCurrentIPs().Contains(url.Host))
                 {
-                    _logger.LogError($"{url.Host} is currently unavailable");
+                    var message = $"{url.Host} is currently unavailable";
 
-                    return;
+                    _logger.LogError(message);
+
+                    throw new Exception(message);
                 }
-
-                _logger.LogWarn("Trying to add listening permissions to user");
 
                 if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     throw;
+
+                _logger.LogWarn("Trying to add listening permissions to user");
 
                 var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
                 var translatedValue = sid.Translate(typeof(NTAccount)).Value;

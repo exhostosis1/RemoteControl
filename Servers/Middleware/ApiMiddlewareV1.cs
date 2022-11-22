@@ -6,62 +6,61 @@ using Shared.Server.Interfaces;
 using System.Net;
 using System.Text;
 
-namespace Servers.Middleware
+namespace Servers.Middleware;
+
+public class ApiMiddlewareV1 : IMiddleware
 {
-    public class ApiMiddlewareV1 : IMiddleware
+    private readonly Dictionary<string, ControllerMethods> _methods = new();
+
+    private const string ApiVersion = "v1";
+
+    private readonly HttpEventHandler? _next;
+
+    public ApiMiddlewareV1(HttpEventHandler next, IEnumerable<BaseController> controllers): this(controllers)
     {
-        private readonly Dictionary<string, ControllerMethods> _methods = new();
+        _next = next;
+    }
 
-        private const string ApiVersion = "v1";
-
-        private readonly HttpEventHandler? _next;
-
-        public ApiMiddlewareV1(HttpEventHandler next, IEnumerable<BaseController> controllers): this(controllers)
+    public ApiMiddlewareV1(IEnumerable<BaseController> controllers)
+    {
+        foreach (var controller in controllers)
         {
-            _next = next;
+            var controllerName = controller.GetControllerName();
+
+            if (string.IsNullOrEmpty(controllerName)) continue;
+
+            _methods.Add(controllerName, controller.GetMethods());
+        }
+    }
+
+    public void ProcessRequest(IContext context)
+    {
+        if(!context.Request.Path.TryParsePath(ApiVersion, out var controller, out var action, out var param)
+           || !_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))
+        {
+            context.Response.StatusCode = HttpStatusCode.NotFound;
+            _next?.Invoke(context);
+            return;
         }
 
-        public ApiMiddlewareV1(IEnumerable<BaseController> controllers)
+        try
         {
-            foreach (var controller in controllers)
+            var result = _methods[controller][action](param ?? "");
+
+            if (!string.IsNullOrEmpty(result))
             {
-                var controllerName = controller.GetControllerName();
-
-                if (string.IsNullOrEmpty(controllerName)) continue;
-
-                _methods.Add(controllerName, controller.GetMethods());
+                context.Response.ContentType = "application/json";
+                context.Response.Payload = Encoding.UTF8.GetBytes(result);
             }
         }
-
-        public void ProcessRequest(IContext context)
+        catch (Exception e)
         {
-            if(!context.Request.Path.TryParsePath(ApiVersion, out var controller, out var action, out var param)
-               || !_methods.ContainsKey(controller) || !_methods[controller].ContainsKey(action))
-            {
-                context.Response.StatusCode = HttpStatusCode.NotFound;
-                _next?.Invoke(context);
-                return;
-            }
-
-            try
-            {
-                var result = _methods[controller][action](param ?? "");
-
-                if (!string.IsNullOrEmpty(result))
-                {
-                    context.Response.ContentType = "application/json";
-                    context.Response.Payload = Encoding.UTF8.GetBytes(result);
-                }
-            }
-            catch (Exception e)
-            {
-                context.Response.StatusCode = HttpStatusCode.InternalServerError;
-                context.Response.Payload = Encoding.UTF8.GetBytes(e.Message);
-            }
-            finally
-            {
-                _next?.Invoke(context);
-            }
+            context.Response.StatusCode = HttpStatusCode.InternalServerError;
+            context.Response.Payload = Encoding.UTF8.GetBytes(e.Message);
+        }
+        finally
+        {
+            _next?.Invoke(context);
         }
     }
 }

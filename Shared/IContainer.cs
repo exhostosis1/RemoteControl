@@ -1,4 +1,6 @@
-﻿namespace Shared;
+﻿using Shared.Logging.Interfaces;
+
+namespace Shared;
 
 public interface IContainer
 {
@@ -6,4 +8,5 @@ public interface IContainer
     public IConfigProvider ConfigProvider { get; }
     public IServer Server { get; }
     public IUserInterface UserInterface { get; }
+    public ILogger Logger { get; }
 }

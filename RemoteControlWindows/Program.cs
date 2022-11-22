@@ -32,7 +32,7 @@ public static class Program
         }
         catch (Exception e)
         {
-            container.DefaultLogger.LogError(e.Message);
+            container.Logger.LogError(e.Message);
         }
     }
 }

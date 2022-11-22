@@ -18,33 +18,33 @@ namespace RemoteControlWindows
         public IServer Server { get; }
         public IConfigProvider ConfigProvider { get; }
         public IAutostartService AutostartService { get; }
-        public ILogger DefaultLogger { get; }
+        public ILogger Logger { get; }
         public IUserInterface UserInterface { get; set; }
 
         public RemoteControlContainer()
         {
 #if DEBUG
-            DefaultLogger = new TraceLogger();
+            Logger = new TraceLogger();
 #else
-            DefaultLogger = new FileLogger("error.log");
+            Logger = new FileLogger("error.log");
 #endif
-            var user32Wrapper = new User32Provider(DefaultLogger);
+            var user32Wrapper = new User32Provider(Logger);
             
             var controllers = new BaseController[]
             {
-                new AudioController(new NAudioProvider(DefaultLogger), DefaultLogger),
-                new DisplayController(user32Wrapper, DefaultLogger),
-                new KeyboardController(user32Wrapper, DefaultLogger),
-                new MouseController(user32Wrapper, DefaultLogger)
+                new AudioController(new NAudioProvider(Logger), Logger),
+                new DisplayController(user32Wrapper, Logger),
+                new KeyboardController(user32Wrapper, Logger),
+                new MouseController(user32Wrapper, Logger)
             };
 
             var endPoint = new ApiMiddlewareV1(controllers);
             var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
 
-            var listener = new GenericListener(DefaultLogger);
+            var listener = new GenericListener(Logger);
 
             Server = new SimpleServer(listener, staticMiddleware);
-            ConfigProvider = new LocalFileConfigProvider(DefaultLogger);
+            ConfigProvider = new LocalFileConfigProvider(Logger);
             AutostartService = new WinRegistryAutostartService();
             UserInterface = new WinFormsUI();
         }

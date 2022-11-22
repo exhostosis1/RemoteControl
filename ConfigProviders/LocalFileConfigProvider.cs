@@ -1,5 +1,4 @@
 ﻿using Shared;
-using Shared.Config;
 using Shared.Logging.Interfaces;
 
 namespace ConfigProviders;
@@ -12,10 +11,8 @@ public class LocalFileConfigProvider : BaseConfigProvider
     {
     }
 
-    protected override AppConfig GetConfigInternal()
+    protected override Uri GetConfigInternal()
     {
-        var result = new AppConfig();
-
         IEnumerable<string> lines;
 
         try
@@ -27,7 +24,7 @@ public class LocalFileConfigProvider : BaseConfigProvider
         catch (Exception e)
         {
             Logger.LogError(e.Message);
-            return result;
+            return new UriBuilder(Scheme, Host, Port).Uri;
         }
 
         foreach (var line in lines)
@@ -40,23 +37,31 @@ public class LocalFileConfigProvider : BaseConfigProvider
                 switch (param)
                 {
                     case HostName:
-                        result.Host = value;
+                        Host = value;
                         break;
                     case PortName:
                         if(int.TryParse(value, out var port))
-                            result.Port = port;
+                            Port = port;
                         break;
                     case SchemeName:
-                        result.Scheme = value;
+                        Scheme = value;
                         break;
                 }
             }
         }
 
-        return result;
+        try
+        {
+            return new UriBuilder(Scheme, Host, Port).Uri;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
 
-    protected override void SetConfigInternal(AppConfig appConfig)
+    protected override void SetConfigInternal(Uri appConfig)
     {
         var result = new []
         {
@@ -67,12 +72,12 @@ public class LocalFileConfigProvider : BaseConfigProvider
 
         try
         {
-
             File.WriteAllLines(ConfigPath, result);
         }
         catch (Exception e)
         {
             Logger.LogError(e.Message);
+            throw;
         }
     }
 }

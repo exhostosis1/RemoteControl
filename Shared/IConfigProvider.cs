@@ -1,8 +1,8 @@
-﻿using Shared.Config;
+﻿using System;
 
 namespace Shared;
 
 public interface IConfigProvider
 {
-    public AppConfig Config { get; set; }
+    public Uri ConfigUri { get; set; }
 }

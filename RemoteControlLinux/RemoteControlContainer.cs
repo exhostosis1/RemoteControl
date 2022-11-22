@@ -18,34 +18,34 @@ namespace RemoteControlLinux
         public IServer Server { get; }
         public IConfigProvider ConfigProvider { get; }
         public IAutostartService AutostartService { get; }
-        public ILogger DefaultLogger { get; }
+        public ILogger Logger { get; }
         public IUserInterface UserInterface { get; set; }
 
         public RemoteControlContainer()
         {
 #if DEBUG
-            DefaultLogger = new TraceLogger();
+            Logger = new TraceLogger();
 #else
-            DefaultLogger = new FileLogger("error.log");
+            Logger = new FileLogger("error.log");
 #endif
-            var ydotoolWrapper = new YdotoolProvider(DefaultLogger);
-            var dummyWrapper = new DummyProvider(DefaultLogger);
+            var ydotoolWrapper = new YdotoolProvider(Logger);
+            var dummyWrapper = new DummyProvider(Logger);
 
             var controllers = new BaseController[]
             {
-                new AudioController(dummyWrapper, DefaultLogger),
-                new DisplayController(dummyWrapper, DefaultLogger),
-                new KeyboardController(ydotoolWrapper, DefaultLogger),
-                new MouseController(ydotoolWrapper, DefaultLogger)
+                new AudioController(dummyWrapper, Logger),
+                new DisplayController(dummyWrapper, Logger),
+                new KeyboardController(ydotoolWrapper, Logger),
+                new MouseController(ydotoolWrapper, Logger)
             };
 
             var endPoint = new ApiMiddlewareV1(controllers);
             var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
 
-            var listener = new GenericListener(DefaultLogger);
+            var listener = new GenericListener(Logger);
 
             Server = new SimpleServer(listener, staticMiddleware);
-            ConfigProvider = new LocalFileConfigProvider(DefaultLogger);
+            ConfigProvider = new LocalFileConfigProvider(Logger);
             AutostartService = new DummyAutostartService();
             UserInterface = new ConsoleUI();
         }

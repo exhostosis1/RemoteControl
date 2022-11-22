@@ -25,6 +25,8 @@ namespace Servers.Middleware
             _logger.LogInfo(context.Request.Path);
 
             _next?.Invoke(context);
+
+            _logger.LogInfo($"{context.Response.StatusCode}\n{context.Response.ContentType}\n{context.Response.Payload}");
         }
     }
 }
