@@ -61,7 +61,7 @@ public static class Main
             {
                 ui.Uri = null;
                 container.Logger.LogError(e.Message);
-                container.UserInterface.ShowError(e.Message);
+                ui.ShowError(e.Message);
             }
 
             ui.IsListening = container.Server.IsListening;
