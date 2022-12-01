@@ -1,4 +1,5 @@
 ﻿using Shared;
+using Shared.Config;
 
 namespace RemoteControlMain;
 
@@ -6,12 +7,12 @@ public static class Main
 {
     public static void Run(IContainer container)
     {
-        var uri = container.ConfigProvider.ConfigUri;
+        var config = container.ConfigProvider.GetConfig();
         var ui = container.UserInterface;
 
         try
         {
-            container.Server.Start(uri);
+            container.Server.Start(config);
         }
         catch (Exception e)
         {
@@ -20,13 +21,13 @@ public static class Main
 
         ui.IsListening = container.Server.IsListening;
         ui.IsAutostart = container.AutostartService.CheckAutostart();
-        ui.Uri = uri;
+        ui.Uri = config.ServerConfig.Uri;
 
         ui.StartEvent += () =>
         {
             try
             {
-                container.Server.Start(uri);
+                container.Server.Start(config);
             }
             catch (Exception e)
             {
@@ -54,8 +55,13 @@ public static class Main
             container.Server.Stop();
             try
             {
-                container.Server.Start(value);
-                container.ConfigProvider.ConfigUri = value;
+                config.ServerConfig.Scheme = value.Scheme;
+                config.ServerConfig.Host = value.Host;
+                config.ServerConfig.Port = value.Port;
+
+                container.Server.Start(config);
+
+                container.ConfigProvider.SetConfig(config);
             }
             catch (Exception e)
             {
@@ -65,7 +71,6 @@ public static class Main
             }
 
             ui.IsListening = container.Server.IsListening;
-            uri = value;
         };
 
         ui.CloseEvent += () => Environment.Exit(0);

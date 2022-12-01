@@ -2,46 +2,89 @@
 using Shared.Logging.Interfaces;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using Shared.Config;
 
 namespace ConfigProviders;
 
 [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Planform check in constructor is sufficient")]
 public class WinRegistryConfigProvider: BaseConfigProvider
 {
-    private readonly RegistryKey _regKey;
+    private readonly RegistryKey _serverKey;
+    private readonly RegistryKey _botKey;
 
     public WinRegistryConfigProvider(ILogger logger): base(logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
 
-        _regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ?? 
+        var regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ?? 
                   Registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
+        _serverKey = regKey.OpenSubKey(ServerSectionName) ?? regKey.CreateSubKey(ServerSectionName);
+        _botKey = regKey.OpenSubKey(BotSectionName) ?? regKey.CreateSubKey(BotSectionName);
     }
 
-    protected override Uri GetConfigInternal()
+    protected override ConfigItem GetConfigInternal()
     {
-        var names = _regKey.GetValueNames();
+        var names = _serverKey.GetValueNames();
 
         foreach (var name in names)
         {
             switch (name)
             {
                 case HostName:
-                    Host = _regKey.GetValue(name) as string ?? Host;
+                    Host = _serverKey.GetValue(name) as string ?? Host;
                     break;
                 case PortName:
-                    Port = _regKey.GetValue(name) as int? ?? Port;
+                    Port = _serverKey.GetValue(name) as int? ?? Port;
                     break;
                 case SchemeName:
-                    Scheme = _regKey.GetValue(name) as string ?? Scheme;
+                    Scheme = _serverKey.GetValue(name) as string ?? Scheme;
+                    break;
+                case ServerAutostartName:
+                    ServerAutostart = _serverKey.GetValue(name) as bool? ?? ServerAutostart;
+                    break;
+            }
+        }
+
+        names = _botKey.GetValueNames();
+
+        foreach (var name in names)
+        {
+            switch (name)
+            {
+                case ChatIdsName:
+                    ChatIds = (_botKey.GetValue(name) as string)?.Split(';',
+                        StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(
+                        x =>
+                        {
+                            if (int.TryParse(x, out var res))
+                                return res;
+                            return -1;
+                        }).Where(x => x != -1).ToList() ?? ChatIds;
+                    break;
+                case BotAutostartName:
+                    BotAutostart = _serverKey.GetValue(name) as bool? ?? BotAutostart;
                     break;
             }
         }
 
         try
         {
-            return new UriBuilder(Scheme, Host, Port).Uri;
+            return new ConfigItem
+            {
+                BotConfig = new BotConfig
+                {
+                    ChatIds = ChatIds,
+                    StartListening = BotAutostart
+                },
+                ServerConfig = new ServerConfig
+                {
+                    Scheme = Scheme,
+                    Host = Host,
+                    Port = Port,
+                    StartListening = ServerAutostart
+                }
+            };
         }
         catch (Exception e)
         {
@@ -50,10 +93,14 @@ public class WinRegistryConfigProvider: BaseConfigProvider
         }
     }
 
-    protected override void SetConfigInternal(Uri config)
+    protected override void SetConfigInternal(ConfigItem config)
     {
-        _regKey.SetValue(HostName, config.Host, RegistryValueKind.String);
-        _regKey.SetValue(SchemeName, config.Scheme, RegistryValueKind.String);
-        _regKey.SetValue(PortName, config.Port, RegistryValueKind.DWord);
+        _serverKey.SetValue(HostName, config.ServerConfig.Host, RegistryValueKind.String);
+        _serverKey.SetValue(SchemeName, config.ServerConfig.Scheme, RegistryValueKind.String);
+        _serverKey.SetValue(PortName, config.ServerConfig.Port, RegistryValueKind.DWord);
+        _serverKey.SetValue(ServerAutostartName, config.ServerConfig.StartListening, RegistryValueKind.Binary);
+
+        _botKey.SetValue(ChatIdsName, string.Join(';', config.BotConfig.ChatIds), RegistryValueKind.String);
+        _botKey.SetValue(BotAutostartName, config.BotConfig.StartListening, RegistryValueKind.Binary);
     }
 }

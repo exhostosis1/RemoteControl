@@ -28,7 +28,7 @@ public static class Program
                 case SessionSwitchReason.SessionUnlock:
                 {
                     if (listeningUri != null)
-                        container.Server.Start(listeningUri);
+                        container.Server.Start(container.ConfigProvider.GetConfig());
                     break;
                 }
                 case SessionSwitchReason.ConsoleConnect:
