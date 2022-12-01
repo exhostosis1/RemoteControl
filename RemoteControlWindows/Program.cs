@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace RemoteControlWindows;
 
@@ -10,19 +11,42 @@ public static class Program
 
         Uri? listeningUri = null;
 
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            return;
+
         SystemEvents.SessionSwitch += (_, args) =>
         {
-            if(args.Reason == SessionSwitchReason.SessionLock)
+            switch (args.Reason)
             {
-                listeningUri = container.Server.IsListening ? container.Server.GetListeningUri() : null;
-                if (listeningUri != null)
-                    container.Server.Stop();
-            }
-
-            if(args.Reason == SessionSwitchReason.SessionUnlock)
-            {
-                if (listeningUri != null)
-                    container.Server.Start(listeningUri);
+                case SessionSwitchReason.SessionLock:
+                {
+                    listeningUri = container.Server.IsListening ? container.Server.GetListeningUri() : null;
+                    if (listeningUri != null)
+                        container.Server.Stop();
+                    break;
+                }
+                case SessionSwitchReason.SessionUnlock:
+                {
+                    if (listeningUri != null)
+                        container.Server.Start(listeningUri);
+                    break;
+                }
+                case SessionSwitchReason.ConsoleConnect:
+                    break;
+                case SessionSwitchReason.ConsoleDisconnect:
+                    break;
+                case SessionSwitchReason.RemoteConnect:
+                    break;
+                case SessionSwitchReason.RemoteDisconnect:
+                    break;
+                case SessionSwitchReason.SessionLogon:
+                    break;
+                case SessionSwitchReason.SessionLogoff:
+                    break;
+                case SessionSwitchReason.SessionRemoteControl:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         };
 

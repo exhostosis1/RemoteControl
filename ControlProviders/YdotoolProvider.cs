@@ -236,7 +236,7 @@ namespace ControlProviders
         public void Wheel(bool up)
         {
             //TODO: add mouse scroll functionality
-            Logger.LogInfo(up.ToString());
+            Logger.LogInfo($"scroll {(up ? "up" : "down")}");
         }
     }
 }
