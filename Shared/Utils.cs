@@ -1,6 +1,7 @@
 ﻿using Shared.Controllers;
 using Shared.Controllers.Attributes;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -130,4 +131,11 @@ public static class Utils
     {
         return Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString()).ToArray();
     }
+
+    public static PropertyInfo? GetPropertyByDisplayName(this object obj, string name) => obj.GetType()
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public).SingleOrDefault(x => x.GetDisplayName() == name);
+
+    public static IEnumerable<PropertyInfo> GetPropertiesWithDisplayName(this object obj) => obj.GetType()
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        .Where(x => !string.IsNullOrEmpty(x.GetDisplayName()));
 }

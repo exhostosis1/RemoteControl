@@ -2,6 +2,6 @@
 
 public interface IConfigProvider
 {
-    public ConfigItem GetConfig();
-    public void SetConfig(ConfigItem config);
+    public AppConfig GetConfig();
+    public bool SetConfig(AppConfig config);
 }

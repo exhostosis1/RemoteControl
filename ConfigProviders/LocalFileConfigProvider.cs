@@ -12,163 +12,74 @@ public class LocalFileConfigProvider : BaseConfigProvider
     {
     }
 
-    protected override ConfigItem GetConfigInternal()
+    protected override AppConfig GetConfigInternal()
     {
-        IEnumerable<string> lines;
+        var result = new AppConfig();
 
-        try
-        {
-            lines = File.ReadAllLines(ConfigPath)
-                .Select(x => x.Contains('#') ? x[..x.IndexOf('#')].Trim() : x.Trim())
-                .Where(x => !string.IsNullOrEmpty(x));
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(e.Message);
+        var lines = File.ReadAllLines(ConfigPath)
+            .Select(x => x.Contains('#') ? x[..x.IndexOf('#')].Trim() : x.Trim())
+            .Where(x => !string.IsNullOrWhiteSpace(x));
 
-            return new ConfigItem
-            {
-                BotConfig = new BotConfig
-                {
-                    ChatIds = ChatIds,
-                    StartListening = BotAutostart
-                },
-                ServerConfig = new ServerConfig
-                {
-                    Host = Host,
-                    Port = Port,
-                    Scheme = Scheme,
-                    StartListening = ServerAutostart
-                }
-            };
-        }
+        object? configItem = null;
 
         foreach (var line in lines)
         {
             if (line.StartsWith('[') && line.EndsWith(']'))
             {
-                configSection = line[1..^1] switch
-                {
-                    ServerSectionName => ConfigSection.Server,
-                    BotSectionName => ConfigSection.Bot,
-                    _ => configSection
-                };
+                var name = line[1..^1];
 
-                continue;
+                var configItemProp = result.GetPropertyByDisplayName(name);
+
+                configItem = configItemProp?.GetValue(result);
             }
-
-            switch (configSection)
+            else if (line.Contains('=') && configItem != null)
             {
-                case ConfigSection.Server:
+                try
                 {
-                    if (line.Contains('='))
-                    {
-                        if (!line.TryParseConfig(out var param, out var value))
-                            continue;
+                    if (!line.TryParseConfig(out var param, out var value))
+                        continue;
 
-                        switch (param)
-                        {
-                            case HostName:
-                                Host = value;
-                                break;
-                            case PortName:
-                                if (int.TryParse(value, out var port))
-                                    Port = port;
-                                break;
-                            case SchemeName:
-                                Scheme = value;
-                                break;
-                            case ServerAutostartName:
-                                if (bool.TryParse(value, out var autostart))
-                                    ServerAutostart = autostart;
-                                break;
-                        }
-                    }
+                    var prop = configItem.GetPropertyByDisplayName(param);
 
-                    break;
+                    if (prop == null) continue;
+                    
+                    var convertedValue = Convert.ChangeType(value, prop.PropertyType);
+
+                    prop.SetValue(configItem, convertedValue);
                 }
-                case ConfigSection.Bot:
+                catch (Exception e)
                 {
-                    if (line.Contains('='))
-                    {
-                        if (!line.TryParseConfig(out var param, out var value))
-                            continue;
-
-                        switch (param)
-                        {
-                            case BotAutostartName:
-                                if (bool.TryParse(value, out var autostart))
-                                    BotAutostart = autostart;
-                                break;
-                            case ChatIdsName:
-                                ChatIds = value.Split(';',
-                                    StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(x =>
-                                {
-                                    if(int.TryParse(x, out var res))
-                                        return res;
-                                    return -1;
-                                }).Where(x => x != -1).ToList();
-                                break;
-                        }
-                    }
-
-                    break;
+                    Logger.LogError(e.Message);
                 }
-                case ConfigSection.None:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
         }
 
-        try
-        {
-            return new ConfigItem
-            {
-                BotConfig = new BotConfig
-                {
-                    ChatIds = ChatIds,
-                    StartListening = BotAutostart
-                },
-                ServerConfig = new ServerConfig
-                {
-                    Host = Host,
-                    Port = Port,
-                    Scheme = Scheme,
-                    StartListening = ServerAutostart
-                }
-            };
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            throw;
-        }
+        return result;
     }
 
-    protected override void SetConfigInternal(ConfigItem appConfig)
+    protected override void SetConfigInternal(AppConfig appConfig)
     {
-        var result = new []
-        {
-            $"[{ServerSectionName}]",
-            $"{SchemeName} = {appConfig.ServerConfig.Scheme}",
-            $"{HostName} = {appConfig.ServerConfig.Host}",
-            $"{PortName} = {appConfig.ServerConfig.Port}",
-            $"{ServerAutostartName} = {appConfig.ServerConfig.StartListening}",
-            $"",
-            $"[{BotSectionName}",
-            $"{ChatIdsName} = {string.Join(';', appConfig.BotConfig.ChatIds)}",
-            $"{BotAutostartName} = {appConfig.BotConfig.StartListening}"
-        };
+        var result = new List<string>();
 
-        try
+        var appConifigProps = appConfig.GetPropertiesWithDisplayName();
+
+        foreach (var appConfigProp in appConifigProps)
         {
-            File.WriteAllLines(ConfigPath, result);
+            var appConfigItem = appConfigProp.GetValue(appConfig);
+            if (appConfigItem == null) continue;
+
+            result.Add($"[{appConfigProp.PropertyType.GetDisplayName()}]");
+
+            foreach (var configItemProp in appConfigItem.GetPropertiesWithDisplayName())
+            {
+                var name = configItemProp.GetDisplayName();
+                var value = configItemProp.GetValue(appConfigItem)?.ToString() ?? string.Empty;
+
+                result.Add($"{name} = {value}");
+            }
+            result.Add("");
         }
-        catch (Exception e)
-        {
-            Logger.LogError(e.Message);
-            throw;
-        }
+
+        File.WriteAllLines(ConfigPath, result);
     }
 }
