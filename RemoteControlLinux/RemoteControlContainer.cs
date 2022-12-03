@@ -1,5 +1,6 @@
 ﻿using Autostart;
 using ConfigProviders;
+using ControlProcessors;
 using ControlProviders;
 using Listeners;
 using Logging;
@@ -9,6 +10,7 @@ using Servers.Middleware;
 using Shared;
 using Shared.Config;
 using Shared.Controllers;
+using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using Web.Controllers;
@@ -17,7 +19,7 @@ namespace RemoteControlLinux
 {
     public class RemoteControlContainer : IContainer
     {
-        public IServer Server { get; }
+        public ICollection<IControlProcessor> ControlProcessors { get; } = new List<IControlProcessor>();
         public IConfigProvider ConfigProvider { get; }
         public IAutostartService AutostartService { get; }
         public ILogger Logger { get; }
@@ -46,10 +48,20 @@ namespace RemoteControlLinux
 
             var listener = new GenericListener(Logger);
 
-            Server = new SimpleServer(listener, staticMiddleware);
+            var server = new SimpleServer(listener, staticMiddleware);
             ConfigProvider = new LocalFileConfigProvider(Logger);
             AutostartService = new DummyAutostartService();
             UserInterface = new ConsoleUI();
+
+            var facade = new ControlFacade
+            {
+                AudioControlProvider = dummyWrapper,
+                DisplayControlProvider = dummyWrapper,
+                KeyboardControlProvider = ydotoolWrapper,
+                MouseControlProvider = ydotoolWrapper
+            };
+
+            ControlProcessors.Add(new ServerControlProcessor("webserver", server, facade, ConfigProvider.GetConfig(), Logger));
         }
     }
 }

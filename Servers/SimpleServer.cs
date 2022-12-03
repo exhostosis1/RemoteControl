@@ -1,5 +1,4 @@
-﻿using Shared.Config;
-using Shared.Server;
+﻿using Shared.Server;
 using Shared.Server.Interfaces;
 
 namespace Servers
@@ -14,7 +13,8 @@ namespace Servers
             _listener.OnRequest += middleware.ProcessRequest;
         }
 
-        public void Start(AppConfig config) => _listener.StartListen(config.ServerConfig.Uri);
+        public void Start(Uri uri) => _listener.StartListen(uri);
+
         public void Stop() => _listener.StopListen();
         public Uri? GetListeningUri() => _listener.ListeningUris.FirstOrDefault();
         public bool IsListening => _listener.IsListening;

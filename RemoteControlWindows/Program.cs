@@ -9,7 +9,7 @@ public static class Program
     {
         var container = new RemoteControlContainer();
 
-        Uri? listeningUri = null;
+        var config = container.ConfigProvider.GetConfig();
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
@@ -20,15 +20,19 @@ public static class Program
             {
                 case SessionSwitchReason.SessionLock:
                 {
-                    listeningUri = container.Server.IsListening ? container.Server.GetListeningUri() : null;
-                    if (listeningUri != null)
-                        container.Server.Stop();
+                    foreach (var containerControlProcessor in container.ControlProcessors)
+                    {
+                        containerControlProcessor.Stop();
+                    }
+
                     break;
                 }
                 case SessionSwitchReason.SessionUnlock:
                 {
-                    if (listeningUri != null)
-                        container.Server.Start(container.ConfigProvider.GetConfig());
+                    foreach (var containerControlProcessor in container.ControlProcessors)
+                    {
+                        containerControlProcessor.Start(config);
+                    }
                     break;
                 }
                 case SessionSwitchReason.ConsoleConnect:

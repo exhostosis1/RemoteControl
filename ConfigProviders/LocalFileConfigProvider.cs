@@ -14,6 +14,9 @@ public class LocalFileConfigProvider : BaseConfigProvider
 
     protected override AppConfig GetConfigInternal()
     {
+        if (!File.Exists(ConfigPath))
+            File.Create(ConfigPath);
+
         var result = new AppConfig();
 
         var lines = File.ReadAllLines(ConfigPath)

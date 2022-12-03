@@ -13,4 +13,7 @@ public class BotConfig
 
     [DisplayName("ApiKey")]
     public string ApiKey { get; set; } = "";
+
+    [DisplayName("ApiUri")]
+    public string ApiUri { get; set; } = "https://api.telegram.org/bot";
 }

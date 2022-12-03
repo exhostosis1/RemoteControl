@@ -1,6 +1,6 @@
 ﻿using Shared.Config;
 using Shared.Logging.Interfaces;
-using Shared.Server;
+using System.Collections.Generic;
 
 namespace Shared;
 
@@ -8,7 +8,7 @@ public interface IContainer
 {
     public IAutostartService AutostartService { get; }
     public IConfigProvider ConfigProvider { get; }
-    public IServer Server { get; }
+    public ICollection<IControlProcessor> ControlProcessors { get; }
     public IUserInterface UserInterface { get; }
     public ILogger Logger { get; }
 }

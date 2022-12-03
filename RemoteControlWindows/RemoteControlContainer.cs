@@ -1,5 +1,6 @@
 ﻿using Autostart;
 using ConfigProviders;
+using ControlProcessors;
 using ControlProviders;
 using Listeners;
 using Logging;
@@ -9,15 +10,15 @@ using Servers.Middleware;
 using Shared;
 using Shared.Config;
 using Shared.Controllers;
+using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
-using Shared.Server;
 using Web.Controllers;
 
 namespace RemoteControlWindows
 {
     public class RemoteControlContainer : IContainer
     {
-        public IServer Server { get; }
+        public ICollection<IControlProcessor> ControlProcessors { get; } = new List<IControlProcessor>();
         public IConfigProvider ConfigProvider { get; }
         public IAutostartService AutostartService { get; }
         public ILogger Logger { get; }
@@ -31,10 +32,11 @@ namespace RemoteControlWindows
             Logger = new FileLogger("error.log");
 #endif
             var user32Wrapper = new User32Provider(Logger);
-            
+            var audioProvider = new NAudioProvider(Logger);
+
             var controllers = new BaseController[]
             {
-                new AudioController(new NAudioProvider(Logger), Logger),
+                new AudioController(audioProvider, Logger),
                 new DisplayController(user32Wrapper, Logger),
                 new KeyboardController(user32Wrapper, Logger),
                 new MouseController(user32Wrapper, Logger)
@@ -45,10 +47,21 @@ namespace RemoteControlWindows
 
             var listener = new GenericListener(Logger);
 
-            Server = new SimpleServer(listener, staticMiddleware);
+            var server = new SimpleServer(listener, staticMiddleware);
+
             ConfigProvider = new LocalFileConfigProvider(Logger);
             AutostartService = new WinRegistryAutostartService();
             UserInterface = new WinFormsUI();
+
+            var facade = new ControlFacade
+            {
+                AudioControlProvider = audioProvider,
+                DisplayControlProvider = user32Wrapper,
+                KeyboardControlProvider = user32Wrapper,
+                MouseControlProvider = user32Wrapper
+            };
+
+            ControlProcessors.Add(new ServerControlProcessor("webserver", server, facade, ConfigProvider.GetConfig(), Logger));
         }
     }
 }
