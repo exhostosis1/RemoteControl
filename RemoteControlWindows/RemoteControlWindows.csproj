@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Autostart\Autostart.csproj" />
+    <ProjectReference Include="..\Bots\Bots.csproj" />
     <ProjectReference Include="..\ConfigProviders\ConfigProviders.csproj" />
     <ProjectReference Include="..\Controllers\Controllers.csproj" />
     <ProjectReference Include="..\ControlProcessors\ControlProcessors.csproj" />
