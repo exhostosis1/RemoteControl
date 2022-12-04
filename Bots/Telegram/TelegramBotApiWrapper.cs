@@ -6,7 +6,7 @@ using Bots.Telegram.ApiObjects.Response;
 
 namespace Bots.Telegram;
 
-internal class BotApiWrapper
+internal class TelegramBotApiWrapper
 {
     private readonly string _requestUri;
 
@@ -19,7 +19,7 @@ internal class BotApiWrapper
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    public BotApiWrapper(string uri, string apikey)
+    public TelegramBotApiWrapper(string uri, string apikey)
     {
         _requestUri = $"{uri}{apikey}";
     }

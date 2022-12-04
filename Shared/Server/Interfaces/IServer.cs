@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shared.Server;
+namespace Shared.Server.Interfaces;
 
 public interface IServer
 {

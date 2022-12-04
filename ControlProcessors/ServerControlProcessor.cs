@@ -1,8 +1,7 @@
 ﻿using Shared.Config;
-using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
-using Shared.Server;
+using Shared.Server.Interfaces;
 
 namespace ControlProcessors;
 
@@ -10,8 +9,9 @@ public class ServerControlProcessor: BaseControlProcessor
 {
     private readonly IServer _server;
 
-    public ServerControlProcessor(string name, IServer server, ControlFacade facade, AppConfig config, ILogger logger) : base(name,
-        facade, config, logger, ControlProcessorType.Server)
+    public override ControlPocessorEnum Status => _server.IsListening ? ControlPocessorEnum.Working : ControlPocessorEnum.Stopped;
+
+    public ServerControlProcessor(string name, IServer server, ILogger logger) : base(name, logger, ControlProcessorType.Server)
     {
         _server = server;
     }
@@ -21,7 +21,7 @@ public class ServerControlProcessor: BaseControlProcessor
         try
         {
             _server.Start(config.ServerConfig.Uri);
-            Status = ControlPocessorEnum.Working;
+            
             Info = _server.GetListeningUri()?.ToString() ?? string.Empty;
         }
         catch (Exception e)
@@ -33,6 +33,5 @@ public class ServerControlProcessor: BaseControlProcessor
     protected override void StopInternal()
     {
         _server.Stop();
-        Status = ControlPocessorEnum.Stopped;
     }
 }

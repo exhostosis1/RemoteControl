@@ -22,6 +22,9 @@ internal class Message
     [JsonPropertyName("date")]
     public int Date { get; set; }
 
+    [JsonIgnore] 
+    public DateTime ParsedDate => DateTimeOffset.FromUnixTimeSeconds(Date).LocalDateTime;
+
     [JsonPropertyName("forward_from")]
     public User? ForwardFrom { get; set; }
 

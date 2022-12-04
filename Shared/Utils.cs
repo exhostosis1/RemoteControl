@@ -17,6 +17,7 @@ namespace Shared;
 public static class Utils
 {
     private static readonly Regex CoordRegex = new("[-0-9]+", RegexOptions.Compiled);
+    private static readonly Regex ApiRegex = new("(?<=\\/api\\/v\\d+\\/).*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public static bool TryGetCoords(string input, out int x, out int y)
     {
@@ -41,10 +42,9 @@ public static class Utils
     public static string? GetActionName<T>(this T type) where T : MethodInfo =>
         type.GetCustomAttribute<ActionAttribute>()?.Name;
 
-    public static bool TryParsePath(this string path, string apiVersion, out string controller, out string action, out string? parameter)
+    public static bool TryParsePath(this string path, out string controller, out string action, out string? parameter)
     {
-        var split = path[(path.IndexOf(apiVersion, StringComparison.Ordinal) + apiVersion.Length)..]
-            .Split('/', StringSplitOptions.RemoveEmptyEntries);
+        var split = ApiRegex.Match(path).Value.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
         controller = string.Empty;
         action = string.Empty;
@@ -55,8 +55,8 @@ public static class Utils
 
         controller = split[0];
         action = split[1];
-            
-        if(split.Length > 2)
+
+        if (split.Length > 2)
             parameter = split[2];
 
         return true;
@@ -138,4 +138,20 @@ public static class Utils
     public static IEnumerable<PropertyInfo> GetPropertiesWithDisplayName(this object obj) => obj.GetType()
         .GetProperties(BindingFlags.Instance | BindingFlags.Public)
         .Where(x => !string.IsNullOrEmpty(x.GetDisplayName()));
+
+    public static ControllersWithMethods GetControllersMethods(IEnumerable<BaseController> controllers)
+    {
+        var result = new ControllersWithMethods();
+
+        foreach (var controller in controllers)
+        {
+            var controllerName = controller.GetControllerName();
+
+            if (string.IsNullOrEmpty(controllerName)) continue;
+
+            result.Add(controllerName, controller.GetMethods());
+        }
+
+        return result;
+    }
 }

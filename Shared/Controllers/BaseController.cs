@@ -29,7 +29,7 @@ public abstract class BaseController
 
             try
             {
-                var value = methodInfo.CreateDelegate<Func<string, string?>>(this);
+                var value = methodInfo.CreateDelegate<Func<string?, string?>>(this);
                 controllerMethods.Add(action, value);
             }
             catch (Exception e)

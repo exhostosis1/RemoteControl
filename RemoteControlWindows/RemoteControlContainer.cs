@@ -1,18 +1,19 @@
 ﻿using Autostart;
 using ConfigProviders;
+using Controllers;
 using ControlProcessors;
 using ControlProviders;
 using Listeners;
 using Logging;
 using RemoteControlWinForms;
 using Servers;
+using Servers.Endpoints;
 using Servers.Middleware;
 using Shared;
 using Shared.Config;
 using Shared.Controllers;
-using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
-using Web.Controllers;
+using Shared.Server;
 
 namespace RemoteControlWindows
 {
@@ -42,26 +43,20 @@ namespace RemoteControlWindows
                 new MouseController(user32Wrapper, Logger)
             };
 
-            var endPoint = new ApiMiddlewareV1(controllers);
-            var staticMiddleware = new StaticFilesMiddleware(endPoint.ProcessRequest);
+            var apiEndpoint = new ApiV1Endpoint(controllers, Logger);
+            var staticEndpoint = new StaticFilesEndpoint(Logger);
+
+            var router = new RoutingMiddleware(new AbstractEndpoint[] { apiEndpoint, staticEndpoint }, Logger);
 
             var listener = new GenericListener(Logger);
 
-            var server = new SimpleServer(listener, staticMiddleware);
+            var server = new SimpleServer(listener, router);
 
             ConfigProvider = new LocalFileConfigProvider(Logger);
             AutostartService = new WinRegistryAutostartService();
             UserInterface = new WinFormsUI();
 
-            var facade = new ControlFacade
-            {
-                AudioControlProvider = audioProvider,
-                DisplayControlProvider = user32Wrapper,
-                KeyboardControlProvider = user32Wrapper,
-                MouseControlProvider = user32Wrapper
-            };
-
-            ControlProcessors.Add(new ServerControlProcessor("webserver", server, facade, ConfigProvider.GetConfig(), Logger));
+            ControlProcessors.Add(new ServerControlProcessor("webserver", server, Logger));
         }
     }
 }

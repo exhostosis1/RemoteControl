@@ -7,7 +7,7 @@ namespace Servers
     {
         private readonly IListener _listener;
 
-        public SimpleServer(IListener listener, IMiddleware middleware)
+        public SimpleServer(IListener listener, AbstractMiddleware middleware)
         {
             _listener = listener;
             _listener.OnRequest += middleware.ProcessRequest;
