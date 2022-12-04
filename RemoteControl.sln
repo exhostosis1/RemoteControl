@@ -29,8 +29,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlWindows", "Rem
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RemoteControlMain", "RemoteControlMain\RemoteControlMain.csproj", "{797CADC6-06A9-4E50-86FF-E2993CFCF8E5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlProcessors", "ControlProcessors\ControlProcessors.csproj", "{32FA0B48-CBB7-4944-9309-CC44895F1A6D}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bots", "Bots\Bots.csproj", "{D1B77560-A340-41F2-9115-8D679ED4A9B3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Controllers", "Controllers\Controllers.csproj", "{69E017D4-88FD-4407-BDC5-1836D7525A3B}"
@@ -147,14 +145,6 @@ Global
 		{797CADC6-06A9-4E50-86FF-E2993CFCF8E5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{797CADC6-06A9-4E50-86FF-E2993CFCF8E5}.Release|x64.ActiveCfg = Release|Any CPU
 		{797CADC6-06A9-4E50-86FF-E2993CFCF8E5}.Release|x64.Build.0 = Release|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Debug|x64.Build.0 = Debug|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Release|Any CPU.Build.0 = Release|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Release|x64.ActiveCfg = Release|Any CPU
-		{32FA0B48-CBB7-4944-9309-CC44895F1A6D}.Release|x64.Build.0 = Release|Any CPU
 		{D1B77560-A340-41F2-9115-8D679ED4A9B3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D1B77560-A340-41F2-9115-8D679ED4A9B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D1B77560-A340-41F2-9115-8D679ED4A9B3}.Debug|x64.ActiveCfg = Debug|Any CPU

@@ -1,7 +1,6 @@
 ﻿using Autostart;
 using ConfigProviders;
 using Controllers;
-using ControlProcessors;
 using ControlProviders;
 using Listeners;
 using Logging;
@@ -54,7 +53,7 @@ namespace RemoteControlLinux
             AutostartService = new DummyAutostartService();
             UserInterface = new ConsoleUI();
 
-            ControlProcessors.Add(new ServerControlProcessor("webserver", server, Logger));
+            ControlProcessors.Add(server);
         }
     }
 }

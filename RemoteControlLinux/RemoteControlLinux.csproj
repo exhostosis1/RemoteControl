@@ -11,7 +11,6 @@
     <ProjectReference Include="..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\ConfigProviders\ConfigProviders.csproj" />
     <ProjectReference Include="..\Controllers\Controllers.csproj" />
-    <ProjectReference Include="..\ControlProcessors\ControlProcessors.csproj" />
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />

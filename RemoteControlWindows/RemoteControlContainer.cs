@@ -2,7 +2,6 @@
 using Bots;
 using ConfigProviders;
 using Controllers;
-using ControlProcessors;
 using ControlProviders;
 using Listeners;
 using Logging;
@@ -57,11 +56,11 @@ public class RemoteControlContainer : IContainer
         AutostartService = new WinRegistryAutostartService();
         UserInterface = new WinFormsUI();
 
-        ControlProcessors.Add(new ServerControlProcessor("webserver", server, Logger));
+        ControlProcessors.Add(server);
 
         var executor = new CommandsExecutor(controllers);
-        var bot = new TelegramBot(Logger, ConfigProvider.GetConfig(), executor);
+        var bot = new TelegramBot(Logger, executor);
 
-        ControlProcessors.Add(new BotControlProcessor("telegram bot", bot, Logger));
+        ControlProcessors.Add(bot);
     }
 }

@@ -1,18 +1,22 @@
 ﻿using Bots.Telegram;
 using Shared;
 using Shared.Config;
+using Shared.Enums;
 using Shared.Logging.Interfaces;
 
 namespace Bots;
 
-public class TelegramBot: IBot
+public class TelegramBot: IControlProcessor
 {
     private ILogger _logger;
+    public ControlPocessorEnum Status { get; private set; }= ControlPocessorEnum.Stopped;
+    public string Name { get; set; } = "telegram bot";
+    public ControlProcessorType Type => ControlProcessorType.Bot;
+    public string Info => _currentConfig.BotConfig.ChatId.ToString();
 
     private const int RefreshTime = 1_000;
     private AppConfig _currentConfig;
-
-    private TelegramBotApiWrapper _wrapper;
+    
     private readonly CommandsExecutor _executor;
 
     private readonly string[][] _buttons = {
@@ -23,30 +27,31 @@ public class TelegramBot: IBot
     private CancellationTokenSource _cts;
     private CancellationToken _token;
 
-    public TelegramBot(ILogger logger, AppConfig config, CommandsExecutor executor)
+    public TelegramBot(ILogger logger, CommandsExecutor executor)
     {
         _logger = logger;
         _executor = executor;
-        _currentConfig = config;
 
         _cts = new CancellationTokenSource();
         _token = _cts.Token;
     }
 
-    public void Start(int chatId)
+    public void Start(AppConfig config)
     {
-        _wrapper = new TelegramBotApiWrapper(_currentConfig.BotConfig.ApiUri, _currentConfig.BotConfig.ApiKey);
         _cts = new CancellationTokenSource();
         _token = _cts.Token;
 
-        Listen(chatId, _token);
+        Listen(config.BotConfig.ChatId, new TelegramBotApiWrapper(_currentConfig.BotConfig.ApiUri, _currentConfig.BotConfig.ApiKey), _token);
+
+        Status = ControlPocessorEnum.Working;
+        _currentConfig = config;
     }
 
-    private async void Listen(int chatId, CancellationToken token)
+    private async void Listen(int chatId, TelegramBotApiWrapper wrapper, CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
-            var response = await _wrapper.GetUpdates();
+            var response = await wrapper.GetUpdates();
 
             if(!response.Ok)
                 continue;
@@ -59,18 +64,30 @@ public class TelegramBot: IBot
 
             foreach (var res in responses.Where(x => !string.IsNullOrWhiteSpace(x)))
             {
-                await _wrapper.SendResponse(chatId, res!, _buttons);
+                await wrapper.SendResponse(chatId, res!, _buttons);
             }
 
             await Task.Delay(RefreshTime, token);
         }
     }
 
+    public void Restart(AppConfig config)
+    {
+        Stop();
+        Status = ControlPocessorEnum.Stopped;
+
+        Start(config);
+        Status = ControlPocessorEnum.Working;
+    }
+
+    public void Restart()
+    {
+        Restart(_currentConfig);
+    }
+
     public void Stop()
     {
         _cts.Cancel();
+        Status = ControlPocessorEnum.Stopped;
     }
-
-    public bool IsRunning => _cts.IsCancellationRequested;
-    public int GetChatId() => _currentConfig.BotConfig.ChatId;
 }
