@@ -1,11 +1,10 @@
 ﻿using Shared.Controllers;
-using Shared.Controllers.Attributes;
+using Shared.Controllers.Results;
 using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 
 namespace Controllers;
 
-[Controller(MethodNames.DisplayControllerName)]
 public class DisplayController: BaseController
 {
     private readonly IDisplayControlProvider _display;
@@ -15,11 +14,10 @@ public class DisplayController: BaseController
         _display = display;
     }
 
-    [Action(MethodNames.DisplayDarken)]
-    public string? DisplayControl(string? _)
+    public IActionResult Darken(string? _)
     {
         _display.Darken();
 
-        return "done";
+        return Ok();
     }
 }

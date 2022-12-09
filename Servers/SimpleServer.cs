@@ -8,13 +8,24 @@ namespace Servers;
 
 public class SimpleServer: IControlProcessor
 {
+    private static readonly ProcessorConfigItem DefaultConfig = new()
+    {
+        Scheme = "http",
+        Host = "localhost",
+        Port = 80
+    };
+
     private readonly IListener _listener;
-    private AppConfig _currentConfig;
+
+    private ProcessorConfigItem _currentConfig = DefaultConfig;
+    
     public string Name { get; set; } = "webserver";
+
     public ControlProcessorType Type => ControlProcessorType.Server;
 
-    public ControlPocessorEnum Status =>
-        _listener.IsListening ? ControlPocessorEnum.Working : ControlPocessorEnum.Stopped;
+    public ControlProcessorStatus Status =>
+        _listener.IsListening ? ControlProcessorStatus.Working : ControlProcessorStatus.Stopped;
+    
     public string Info => _listener.ListeningUris.FirstOrDefault()?.ToString() ?? string.Empty;
 
     public SimpleServer(IListener listener, AbstractMiddleware middleware)
@@ -23,23 +34,22 @@ public class SimpleServer: IControlProcessor
         _listener.OnRequest += middleware.ProcessRequest;
     }
 
-    public void Start(AppConfig config)
+    public void Start(ProcessorConfigItem? config)
     {
-        _listener.StartListen(config.ServerConfig.Uri);
-        _currentConfig = config;
+        var c = config ?? _currentConfig;
+
+        if (c.Uri == null)
+            throw new Exception("Wrong uri config");
+
+        _listener.StartListen(c.Uri);
+        _currentConfig = c;
     }
 
 
-    public void Restart(AppConfig config)
+    public void Restart(ProcessorConfigItem? config)
     {
         Stop();
-        Start(config);
-    }
-
-    public void Restart()
-    {
-        Stop();
-        Start(_currentConfig);
+        Start(config ?? _currentConfig);
     }
 
     public void Stop() => _listener.StopListen();

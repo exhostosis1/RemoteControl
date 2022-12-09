@@ -8,4 +8,7 @@ public enum KeysEnum
     MediaNext,
     MediaPrev,
     MediaPlayPause,
+    VolumeUp,
+    VolumeDown,
+    Mute
 }

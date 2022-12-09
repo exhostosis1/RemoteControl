@@ -611,7 +611,7 @@
 
             document.querySelector("meta[name=viewport]").setAttribute("content", "width=" + window.innerWidth + ", height=" + window.innerHeight + ", initial-scale=1.0, maximum-scale=1.0, user-scalable=0");
 
-            let devices = JSON.parse(await (await sendRequest('audio', 'getdevice')).text());
+            let devices = JSON.parse(await (await sendRequest('audio', 'getdevices')).text());
             let volume = await (await sendRequest('audio', 'getvolume')).text();
 
             initElements(volume, devices);

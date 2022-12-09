@@ -21,7 +21,7 @@ internal class TelegramBotApiWrapper
 
     public TelegramBotApiWrapper(string uri, string apikey)
     {
-        _requestUri = $"{uri}{apikey}";
+        _requestUri = $"{uri}{apikey}/";
     }
 
     private async Task<string> SendBotApiRequest(string method, object parameters)

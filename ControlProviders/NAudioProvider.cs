@@ -34,6 +34,8 @@ namespace ControlProviders
 
         public void Unmute() => _defaultDevice.AudioEndpointVolume.Mute = false;
 
+        public bool IsMuted => _defaultDevice.AudioEndpointVolume.Mute;
+
         public IReadOnlyCollection<IAudioDevice> GetDevices()
         {
             return _devices.Select(x =>

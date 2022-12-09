@@ -1,6 +1,6 @@
 ﻿namespace Shared.Enums;
 
-public enum ControlPocessorEnum
+public enum ControlProcessorStatus
 {
     Stopped,
     Working

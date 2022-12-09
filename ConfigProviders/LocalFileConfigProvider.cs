@@ -1,6 +1,7 @@
-﻿using Shared;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.Logging.Interfaces;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ConfigProviders;
 
@@ -17,72 +18,25 @@ public class LocalFileConfigProvider : BaseConfigProvider
         if (!File.Exists(ConfigPath))
             File.Create(ConfigPath);
 
-        var result = new AppConfig();
+        AppConfig? result = null;
 
-        var lines = File.ReadAllLines(ConfigPath)
-            .Select(x => x.Contains('#') ? x[..x.IndexOf('#')].Trim() : x.Trim())
-            .Where(x => !string.IsNullOrWhiteSpace(x));
-
-        object? configItem = null;
-
-        foreach (var line in lines)
+        try
         {
-            if (line.StartsWith('[') && line.EndsWith(']'))
-            {
-                var name = line[1..^1];
-
-                var configItemProp = result.GetPropertyByDisplayName(name);
-
-                configItem = configItemProp?.GetValue(result);
-            }
-            else if (line.Contains('=') && configItem != null)
-            {
-                try
-                {
-                    if (!line.TryParseConfig(out var param, out var value))
-                        continue;
-
-                    var prop = configItem.GetPropertyByDisplayName(param);
-
-                    if (prop == null) continue;
-                    
-                    var convertedValue = Convert.ChangeType(value, prop.PropertyType);
-
-                    prop.SetValue(configItem, convertedValue);
-                }
-                catch (Exception e)
-                {
-                    Logger.LogError(e.Message);
-                }
-            }
+            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(ConfigPath));
+        }
+        catch (JsonException e)
+        {
+            Logger.LogError(e.Message);
         }
 
-        return result;
+        return result ?? new AppConfig();
     }
 
     protected override void SetConfigInternal(AppConfig appConfig)
     {
-        var result = new List<string>();
-
-        var appConifigProps = appConfig.GetPropertiesWithDisplayName();
-
-        foreach (var appConfigProp in appConifigProps)
-        {
-            var appConfigItem = appConfigProp.GetValue(appConfig);
-            if (appConfigItem == null) continue;
-
-            result.Add($"[{appConfigProp.PropertyType.GetDisplayName()}]");
-
-            foreach (var configItemProp in appConfigItem.GetPropertiesWithDisplayName())
-            {
-                var name = configItemProp.GetDisplayName();
-                var value = configItemProp.GetValue(appConfigItem)?.ToString() ?? string.Empty;
-
-                result.Add($"{name} = {value}");
-            }
-            result.Add("");
-        }
-
-        File.WriteAllLines(ConfigPath, result);
+        File.WriteAllText(ConfigPath,
+            JsonSerializer.Serialize(appConfig,
+                new JsonSerializerOptions
+                    { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
     }
 }

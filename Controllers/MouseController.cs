@@ -1,13 +1,12 @@
 ﻿using Shared;
 using Shared.Controllers;
-using Shared.Controllers.Attributes;
+using Shared.Controllers.Results;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
 namespace Controllers;
 
-[Controller(MethodNames.MouseControllerName)]
 public class MouseController : BaseController
 {
     private readonly IMouseControlProvider _input;
@@ -17,48 +16,42 @@ public class MouseController : BaseController
         _input = input;
     }
 
-    [Action(MethodNames.MouseLeftButton)]
-    public string? Left(string? _)
+    public IActionResult Left(string? _)
     {
         _input.ButtonPress();
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseRightButton)]
-    public string? Right(string? _)
+    public IActionResult Right(string? _)
     {
         _input.ButtonPress(MouseButtons.Right);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseMiddleButton)]
-    public string? Middle(string? _)
+    public IActionResult Middle(string? _)
     {
         _input.ButtonPress(MouseButtons.Middle);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseWheelUp)]
-    public string? DragUp(string? _)
+    public IActionResult WheelUp(string? _)
     {
         _input.Wheel(true);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseWheelDown)]
-    public string? DragDown(string? _)
+    public IActionResult WheelDown(string? _)
     {
         _input.Wheel(false);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseDragStart)]
-    public string? DragStart(string? _)
+    public IActionResult DragStart(string? _)
     {
         _input.ButtonPress(MouseButtons.Left, KeyPressMode.Down);
         Task.Run(async () =>
@@ -67,25 +60,26 @@ public class MouseController : BaseController
             _input.ButtonPress(MouseButtons.Left, KeyPressMode.Up);
         });
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseDragStop)]
-    public string? DragStop(string? _)
+    public IActionResult DragStop(string? _)
     {
         _input.ButtonPress(MouseButtons.Left, KeyPressMode.Up);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.MouseMove)]
-    public string? Move(string? param)
+    public IActionResult Move(string? param)
     {
-        if (Utils.TryGetCoords(param ?? "", out var x, out var y))
+        if (param == null)
+            return Error("Empty coordinates");
+
+        if (Utils.TryGetCoords(param, out var x, out var y))
         {
             _input.Move(x, y);
         }
 
-        return null;
+        return Ok();
     }
 }

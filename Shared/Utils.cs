@@ -1,5 +1,4 @@
 ﻿using Shared.Controllers;
-using Shared.Controllers.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -36,12 +35,6 @@ public static class Utils
     public static string? GetDisplayName<T>(this T type) where T : MemberInfo => 
         type.GetCustomAttribute<DisplayNameAttribute>()?.DisplayName;
 
-    public static string? GetControllerName<T>(this T controller) where T : BaseController =>
-        controller.GetType().GetCustomAttribute<ControllerAttribute>()?.Name;
-
-    public static string? GetActionName<T>(this T type) where T : MethodInfo =>
-        type.GetCustomAttribute<ActionAttribute>()?.Name;
-
     public static bool TryParsePath(this string path, out string controller, out string action, out string? parameter)
     {
         var split = ApiRegex.Match(path).Value.Split('/', StringSplitOptions.RemoveEmptyEntries);
@@ -53,8 +46,8 @@ public static class Utils
         if (split.Length < 2)
             return false;
 
-        controller = split[0];
-        action = split[1];
+        controller = split[0].ToLower();
+        action = split[1].ToLower();
 
         if (split.Length > 2)
             parameter = split[2];
@@ -133,23 +126,28 @@ public static class Utils
     }
 
     public static PropertyInfo? GetPropertyByDisplayName(this object obj, string name) => obj.GetType()
-        .GetProperties(BindingFlags.Instance | BindingFlags.Public).SingleOrDefault(x => x.GetDisplayName() == name);
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public).FirstOrDefault(x =>
+            string.Equals(x.GetDisplayName(), name, StringComparison.OrdinalIgnoreCase));
+
+    public static PropertyInfo? GetPropertyByTypeDisplayName(this object obj, string name) => obj.GetType()
+        .GetProperties(BindingFlags.Instance | BindingFlags.Public)
+        .FirstOrDefault(x => string.Equals(x.PropertyType.GetDisplayName(), name, StringComparison.OrdinalIgnoreCase));
 
     public static IEnumerable<PropertyInfo> GetPropertiesWithDisplayName(this object obj) => obj.GetType()
         .GetProperties(BindingFlags.Instance | BindingFlags.Public)
         .Where(x => !string.IsNullOrEmpty(x.GetDisplayName()));
 
-    public static ControllersWithMethods GetControllersMethods(IEnumerable<BaseController> controllers)
+    public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<BaseController> controllers)
     {
+        var values = controllers.Select(x =>
+            new KeyValuePair<string, ControllerMethods>(x.GetType().Name.Replace("Controller", "").ToLower(),
+                x.GetMethods()));
+
         var result = new ControllersWithMethods();
 
-        foreach (var controller in controllers)
+        foreach (var value in values)
         {
-            var controllerName = controller.GetControllerName();
-
-            if (string.IsNullOrEmpty(controllerName)) continue;
-
-            result.Add(controllerName, controller.GetMethods());
+            result.Add(value.Key, value.Value);
         }
 
         return result;

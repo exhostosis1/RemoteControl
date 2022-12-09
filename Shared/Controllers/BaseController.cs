@@ -1,6 +1,6 @@
-﻿using Shared.Logging.Interfaces;
+﻿using Shared.Controllers.Results;
+using Shared.Logging.Interfaces;
 using System;
-using System.Linq;
 using System.Reflection;
 
 namespace Shared.Controllers;
@@ -14,31 +14,28 @@ public abstract class BaseController
         Logger = logger;
     }
 
+    protected static IActionResult Ok() => new OkResult();
+    protected static IActionResult Error(string? message) => new ErrorResult(message);
+    protected static IActionResult Json(object data) => new JsonResult(data);
+    protected static IActionResult Text(object data) => new StringResult(data);
+
     public ControllerMethods GetMethods()
     {
-        var controllerMethods = new ControllerMethods();
+        var values = GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public);
 
-        var methods = GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance).ToArray();
+        var result = new ControllerMethods();
 
-        if (methods.Length == 0) return controllerMethods;
-
-        foreach (var methodInfo in methods)
+        foreach (var method in values)
         {
-            var action = methodInfo.GetActionName();
-            if (string.IsNullOrEmpty(action)) continue;
+            var parameters = method.GetParameters();
 
-            try
-            {
-                var value = methodInfo.CreateDelegate<Func<string?, string?>>(this);
-                controllerMethods.Add(action, value);
-            }
-            catch (Exception e)
-            {
-                Logger.LogError(e.Message);
-                throw new Exception($"Action method must return 'string?' and contain 'string' parameter");
-            }
+            if (method.ReturnType != typeof(IActionResult) || parameters.Length != 1 ||
+                parameters[0].ParameterType != typeof(string))
+                continue;
+
+            result.Add(method.Name.ToLower(), method.CreateDelegate<Func<string?, IActionResult>>(this));
         }
 
-        return controllerMethods;
+        return result;
     }
 }

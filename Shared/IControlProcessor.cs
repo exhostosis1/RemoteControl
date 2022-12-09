@@ -7,10 +7,9 @@ public interface IControlProcessor
 {
     public string Name { get; set; }
     public ControlProcessorType Type { get; }
-    public ControlPocessorEnum Status { get; }
+    public ControlProcessorStatus Status { get; }
     public string Info { get; }
-    public void Start(AppConfig config);
-    public void Restart(AppConfig config);
-    public void Restart();
+    public void Start(ProcessorConfigItem? config = null);
+    public void Restart(ProcessorConfigItem? config = null);
     public void Stop();
 }

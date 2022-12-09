@@ -31,26 +31,12 @@ public static class Program
                 {
                     foreach (var containerControlProcessor in container.ControlProcessors)
                     {
-                        containerControlProcessor.Start(config);
+                        containerControlProcessor.Start(config.ProcessorConfigs.First(x => x.Name == containerControlProcessor.Name));
                     }
                     break;
                 }
-                case SessionSwitchReason.ConsoleConnect:
-                    break;
-                case SessionSwitchReason.ConsoleDisconnect:
-                    break;
-                case SessionSwitchReason.RemoteConnect:
-                    break;
-                case SessionSwitchReason.RemoteDisconnect:
-                    break;
-                case SessionSwitchReason.SessionLogon:
-                    break;
-                case SessionSwitchReason.SessionLogoff:
-                    break;
-                case SessionSwitchReason.SessionRemoteControl:
-                    break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    break;
             }
         };
 

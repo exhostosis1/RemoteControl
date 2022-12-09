@@ -10,6 +10,7 @@ public interface IAudioControlProvider
     public void SetVolume(int volume);
     void Mute();
     void Unmute();
+    bool IsMuted { get; }
     IReadOnlyCollection<IAudioDevice> GetDevices();
     IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id);
 }

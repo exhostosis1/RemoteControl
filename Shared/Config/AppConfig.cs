@@ -1,7 +1,12 @@
-﻿namespace Shared.Config;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+namespace Shared.Config;
 
 public class AppConfig
 {
-    public ServerConfig ServerConfig { get; set; } = new();
-    public BotConfig BotConfig { get; set; } = new();
+    public ICollection<ProcessorConfigItem> ProcessorConfigs { get; set; } = new List<ProcessorConfigItem>();
+
+    public ProcessorConfigItem? GetProcessorConfigByName(string name) =>
+        ProcessorConfigs.FirstOrDefault(x => x.Name == name);
 }

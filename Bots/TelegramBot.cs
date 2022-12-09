@@ -8,46 +8,64 @@ namespace Bots;
 
 public class TelegramBot: IControlProcessor
 {
-    private ILogger _logger;
-    public ControlPocessorEnum Status { get; private set; }= ControlPocessorEnum.Stopped;
+    private readonly ILogger _logger;
+
+    private static readonly ProcessorConfigItem DefaultConfig = new()
+    {
+        ApiKey = "",
+        ApiUri = "https://api.telegram.org/bot"
+    };
+
+    public ControlProcessorStatus Status => _task?.Status == TaskStatus.Running
+        ? ControlProcessorStatus.Working
+        : ControlProcessorStatus.Stopped;
+
     public string Name { get; set; } = "telegram bot";
+
     public ControlProcessorType Type => ControlProcessorType.Bot;
-    public string Info => _currentConfig.BotConfig.ChatId.ToString();
+
+    public string Info => string.Join(';', _currentConfig?.Usernames ?? Array.Empty<string>());
 
     private const int RefreshTime = 1_000;
-    private AppConfig _currentConfig;
-    
+
+    private ProcessorConfigItem _currentConfig = DefaultConfig;
+
     private readonly CommandsExecutor _executor;
 
     private readonly string[][] _buttons = {
         new[] { Buttons.MediaBack, Buttons.Pause, Buttons.MediaForth },
-        new[] { Buttons.VolumeDown, Buttons.Darken, Buttons.VolumeUp }
+        new[] { Buttons.VolumeDown, Buttons.Mute, Buttons.VolumeUp }
     };
 
-    private CancellationTokenSource _cts;
-    private CancellationToken _token;
+    private CancellationTokenSource? _cts;
+
+    private Task? _task;
 
     public TelegramBot(ILogger logger, CommandsExecutor executor)
     {
         _logger = logger;
         _executor = executor;
-
-        _cts = new CancellationTokenSource();
-        _token = _cts.Token;
     }
 
-    public void Start(AppConfig config)
+    public void Start(ProcessorConfigItem? config)
     {
         _cts = new CancellationTokenSource();
-        _token = _cts.Token;
+        var token = _cts.Token;
 
-        Listen(config.BotConfig.ChatId, new TelegramBotApiWrapper(_currentConfig.BotConfig.ApiUri, _currentConfig.BotConfig.ApiKey), _token);
+        var c = config ?? _currentConfig;
 
-        Status = ControlPocessorEnum.Working;
-        _currentConfig = config;
+        if(string.IsNullOrWhiteSpace(c.ApiUri) || string.IsNullOrWhiteSpace(c.ApiKey))
+        {
+            _logger.LogError("Wrong bot api configuration");
+            return;
+        }
+
+        _task = Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), token);
+
+        _currentConfig = c;
     }
 
-    private async void Listen(int chatId, TelegramBotApiWrapper wrapper, CancellationToken token)
+    private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
@@ -57,37 +75,41 @@ public class TelegramBot: IControlProcessor
                 continue;
 
             var messages = response.Result
-                .Where(x => x.Message?.Chat?.Id == chatId && (DateTime.Now - x.Message.ParsedDate).Minutes < 5)
-                .Select(x => x.Message?.Text).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+                .Where(x => usernames.Any(y => y == x.Message?.From?.Username) && (DateTime.Now - x.Message?.ParsedDate)?.Minutes < 5)
+                .Select(x => (x.Message?.Chat?.Id, x.Message?.Text)).Where(x => x.Id.HasValue && !string.IsNullOrWhiteSpace(x.Text));
 
-            var responses = _executor.Execute(messages);
-
-            foreach (var res in responses.Where(x => !string.IsNullOrWhiteSpace(x)))
+            foreach (var (id, command) in messages)
             {
-                await wrapper.SendResponse(chatId, res!, _buttons);
+                _executor.Execute(command!);
+                await wrapper.SendResponse(id!.Value, "", _buttons);
             }
 
-            await Task.Delay(RefreshTime, token);
+            try
+            {
+                await Task.Delay(RefreshTime, token);
+            }
+            catch
+            {
+                // catching and ignoring cancellation exception
+            }
         }
     }
 
-    public void Restart(AppConfig config)
+    public void Restart(ProcessorConfigItem? config)
     {
         Stop();
-        Status = ControlPocessorEnum.Stopped;
-
-        Start(config);
-        Status = ControlPocessorEnum.Working;
-    }
-
-    public void Restart()
-    {
-        Restart(_currentConfig);
+        Start(config ?? _currentConfig);
     }
 
     public void Stop()
     {
-        _cts.Cancel();
-        Status = ControlPocessorEnum.Stopped;
+        try
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 }

@@ -1,71 +1,75 @@
 ﻿using Shared;
+using Shared.Config;
+using Shared.Enums;
 
-namespace RemoteControlConsole
+namespace RemoteControlConsole;
+
+// ReSharper disable once InconsistentNaming
+public class ConsoleUI: IUserInterface
 {
+    public event StringEventHandler? StartEvent;
+    public event StringEventHandler? StopEvent;
+    public event EmptyEventHandler? CloseEvent;
+    public event BoolEventHandler? AutostartChangedEvent;
+    public event EmptyEventHandler? AddFirewallRuleEvent;
+    public event ConfigEventHandler? ConfigChangedEvent;
+
+    public IList<IControlProcessor> ControlProcessors { get; set; } = new List<IControlProcessor>();
+    public bool IsAutostart { get; set; }
+
     // ReSharper disable once InconsistentNaming
-    public class ConsoleUI: IUserInterface
+    public void RunUI(AppConfig config)
     {
-        public event EmptyEventHandler? StartEvent;
-        public event EmptyEventHandler? StopEvent;
-        public event BoolEventHandler? AutostartChangeEvent;
-        public event EmptyEventHandler? CloseEvent;
-        public event UriEventHandler? UriChangeEvent;
+        DisplayInfo(config);
 
-        public Uri? Uri { get; set; }
-        public bool IsListening { get; set; }
-        public bool IsAutostart { get; set; }
-
-        // ReSharper disable once InconsistentNaming
-        public void RunUI()
+        while (true)
         {
-            DisplayInfo();
+            var key = Console.ReadLine();
 
-            while (true)
+            if (key == "x")
             {
-                var key = Console.ReadLine();
-
-                if (key == "x")
-                {
-                    CloseEvent?.Invoke();
-                    return;
-                }
-
-                switch (key)
-                {
-                    case "s":
-                        if(IsListening)
-                            StopEvent?.Invoke();
-                        else
-                            StartEvent?.Invoke();
-                        break;
-                    case "a":
-                        AutostartChangeEvent?.Invoke(!IsAutostart);
-                        break;
-                    default:
-                        continue;
-                }
-
-                DisplayInfo();
+                CloseEvent?.Invoke();
+                return;
             }
-        }
 
-        public void ShowError(string message)
-        {
-            var color = Console.ForegroundColor;
-            Console.ForegroundColor = ConsoleColor.Red;
-            
-            Console.WriteLine(message);
-            
-            Console.ForegroundColor = color;
-        }
+            switch (key)
+            {
+                case "s":
+                    if(ControlProcessors.Any(x => x.Status == ControlProcessorStatus.Working))
+                        StopEvent?.Invoke(null);
+                    else
+                        StartEvent?.Invoke(null);
+                    break;
+                case "a":
+                    AutostartChangedEvent?.Invoke(!IsAutostart);
+                    break;
+                default:
+                    continue;
+            }
 
-        private void DisplayInfo()
+            DisplayInfo(config);
+        }
+    }
+
+    public void ShowError(string message)
+    {
+        var color = Console.ForegroundColor;
+        Console.ForegroundColor = ConsoleColor.Red;
+            
+        Console.WriteLine(message);
+            
+        Console.ForegroundColor = color;
+    }
+
+    private void DisplayInfo(AppConfig config)
+    {
+        foreach (var controlProcessor in ControlProcessors)
         {
-            Console.WriteLine(IsListening ? $"Server listening on {Uri}" : "Server stopped");
+            Console.WriteLine(controlProcessor.Status == ControlProcessorStatus.Working ? $"{(controlProcessor.Type == ControlProcessorType.Server ? "Server" : "Bot")} listening on {controlProcessor.Info}" : "Server stopped");
             Console.WriteLine($"Autostart {(IsAutostart ? "enabled" : "disabled")}");
             Console.WriteLine();
-
-            Console.Write($"{(IsListening ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
         }
+
+        Console.Write($"{(ControlProcessors.Any(x => x.Status == ControlProcessorStatus.Working) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
     }
 }

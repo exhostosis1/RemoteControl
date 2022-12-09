@@ -1,13 +1,12 @@
-﻿using System.Net;
-using Shared.Controllers;
-using Shared.Controllers.Attributes;
+﻿using Shared.Controllers;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
+using System.Net;
+using Shared.Controllers.Results;
 
 namespace Controllers;
 
-[Controller(MethodNames.KeyboardControllerName)]
 public class KeyboardController: BaseController
 {
     private readonly IKeyboardControlProvider _input;
@@ -17,52 +16,78 @@ public class KeyboardController: BaseController
         _input = input;
     }
 
-    [Action(MethodNames.KeyboardArrowBack)]
-    public string? Back(string? _)
+    public IActionResult Back(string? _)
     {
         _input.KeyPress(KeysEnum.ArrowLeft);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.KeyboardArrowForth)]
-    public string? Forth(string? _)
+    public IActionResult Forth(string? _)
     {
         _input.KeyPress(KeysEnum.ArrowRight);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.KeyboardMediaPause)]
-    public string? Pause(string? _)
+    public IActionResult Pause(string? _)
     {
         _input.KeyPress(KeysEnum.MediaPlayPause);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.KeyboardMediaBack)]
-    public string? MediaBack(string? _)
+    public IActionResult MediaBack(string? _)
     {
         _input.KeyPress(KeysEnum.MediaPrev);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.KeyboardMediaForth)]
-    public string? MediaForth(string? _)
+    public IActionResult MediaForth(string? _)
     {
         _input.KeyPress(KeysEnum.MediaNext);
 
-        return "done";
+        return Ok();
     }
 
-    [Action(MethodNames.KeyboardText)]
-    public string? TextInput(string? param)
+    public IActionResult MediaVolumeUp(string? _)
     {
-        _input.TextInput(WebUtility.UrlDecode(param ?? ""));
+        _input.KeyPress(KeysEnum.VolumeUp);
+
+        return Ok();
+    }
+
+    public IActionResult MediaVolumeDown(string? _)
+    {
+        _input.KeyPress(KeysEnum.VolumeDown);
+
+        return Ok();
+    }
+
+    public IActionResult MediaMute(string? _)
+    {
+        _input.KeyPress(KeysEnum.Mute);
+
+        return Ok();
+    }
+
+    public IActionResult Text(string? param)
+    {
+        string text;
+
+        try
+        {
+            text = WebUtility.UrlDecode(param) ?? throw new ArgumentNullException(nameof(param));
+        }
+        catch (Exception e)
+        {
+            return Error(e.Message);
+        }
+
+        _input.TextInput(text);
         _input.KeyPress(KeysEnum.Enter);
 
-        return "done";
+        return Ok();
     }
 }

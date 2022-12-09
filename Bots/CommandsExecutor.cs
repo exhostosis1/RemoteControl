@@ -1,61 +1,44 @@
-﻿using Shared;
-using Shared.Controllers;
+﻿using Shared.ControlProviders;
+using Shared.Enums;
 
 namespace Bots;
 
 public class CommandsExecutor
 {
-    private readonly ControllersWithMethods _methods;
-
-    public CommandsExecutor(IEnumerable<BaseController> controllers)
+    private readonly Dictionary<string, KeysEnum> _keys = new()
     {
-        _methods = Utils.GetControllersMethods(controllers);
+        {
+            Buttons.MediaBack, KeysEnum.MediaPrev
+        },
+        {
+            Buttons.MediaForth, KeysEnum.MediaNext
+        },
+        {
+            Buttons.Pause, KeysEnum.MediaPlayPause
+        },
+        {
+            Buttons.Mute, KeysEnum.Mute
+        },
+        {
+            Buttons.VolumeUp, KeysEnum.VolumeUp
+        },
+        {
+            Buttons.VolumeDown, KeysEnum.VolumeDown
+        }
+    };
+
+    private readonly IKeyboardControlProvider _keyboardControl;
+
+    public CommandsExecutor(IKeyboardControlProvider keyboardControl)
+    {
+        _keyboardControl = keyboardControl;
     }
 
-    public IEnumerable<string?> Execute(IEnumerable<string?> commands)
+    public void Execute(string command)
     {
-        foreach (var command in commands)
+        if (_keys.TryGetValue(command, out var key))
         {
-            switch (command)
-            {
-                case Buttons.MediaBack:
-                    yield return _methods[MethodNames.KeyboardControllerName][MethodNames.KeyboardMediaBack](null);
-                    break;
-                case Buttons.MediaForth:
-                    yield return _methods[MethodNames.KeyboardControllerName][MethodNames.KeyboardMediaForth](null);
-                    break;
-                case Buttons.Pause:
-                    yield return _methods[MethodNames.KeyboardControllerName][MethodNames.KeyboardMediaPause](null);
-                    break;
-                case Buttons.Darken:
-                    yield return _methods[MethodNames.DisplayControllerName][MethodNames.DisplayDarken](null);
-                    break;
-                case Buttons.VolumeUp:
-                    var volumeAdd = _methods[MethodNames.AudioControllerName][MethodNames.AudioGetVolume](null);
-                    if (int.TryParse(volumeAdd, out var volumeInt))
-                    {
-                        volumeInt += 5;
-                        volumeInt = volumeInt > 100 ? 100 : volumeInt;
-
-                        yield return _methods[MethodNames.AudioControllerName][MethodNames.AudioSetVolume](volumeInt.ToString());
-                    }
-
-                    break;
-                case Buttons.VolumeDown:
-                    var volumeSub = _methods[MethodNames.AudioControllerName][MethodNames.AudioGetVolume](null);
-                    if (int.TryParse(volumeSub, out var volumeSubInt))
-                    {
-                        volumeSubInt -= 5;
-                        volumeSubInt = volumeSubInt < 0 ? 0 : volumeSubInt;
-
-                        yield return _methods[MethodNames.AudioControllerName][MethodNames.AudioSetVolume](volumeSubInt.ToString());
-                    }
-
-                    break;
-                default:
-                    yield return _methods[MethodNames.AudioControllerName][MethodNames.AudioGetVolume](null);
-                    break;
-            }
+            _keyboardControl.KeyPress(key);
         }
     }
 }

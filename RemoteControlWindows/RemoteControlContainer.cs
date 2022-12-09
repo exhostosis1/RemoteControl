@@ -19,7 +19,7 @@ namespace RemoteControlWindows;
 
 public class RemoteControlContainer : IContainer
 {
-    public ICollection<IControlProcessor> ControlProcessors { get; } = new List<IControlProcessor>();
+    public IList<IControlProcessor> ControlProcessors { get; } = new List<IControlProcessor>();
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public ILogger Logger { get; }
@@ -58,7 +58,7 @@ public class RemoteControlContainer : IContainer
 
         ControlProcessors.Add(server);
 
-        var executor = new CommandsExecutor(controllers);
+        var executor = new CommandsExecutor(user32Wrapper);
         var bot = new TelegramBot(Logger, executor);
 
         ControlProcessors.Add(bot);
