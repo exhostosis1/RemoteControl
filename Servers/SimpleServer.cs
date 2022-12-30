@@ -1,6 +1,7 @@
 ﻿using Shared;
 using Shared.Config;
 using Shared.Enums;
+using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.Server.Interfaces;
 
@@ -8,7 +9,7 @@ namespace Servers;
 
 public class SimpleServer: IControlProcessor
 {
-    private static readonly ProcessorConfigItem DefaultConfig = new()
+    private static readonly ServerConfig DefaultConfig = new()
     {
         Scheme = "http",
         Host = "localhost",
@@ -17,9 +18,9 @@ public class SimpleServer: IControlProcessor
 
     private readonly IListener _listener;
 
-    private ProcessorConfigItem _currentConfig = DefaultConfig;
+    public CommonConfig CurrentConfig { get; private set; }
     
-    public string Name { get; set; } = "webserver";
+    public string Name { get; set; }
 
     public ControlProcessorType Type => ControlProcessorType.Server;
 
@@ -28,28 +29,35 @@ public class SimpleServer: IControlProcessor
     
     public string Info => _listener.ListeningUris.FirstOrDefault()?.ToString() ?? string.Empty;
 
-    public SimpleServer(IListener listener, AbstractMiddleware middleware)
+    private readonly ILogger _logger;
+
+    public SimpleServer(string name, IListener listener, AbstractMiddleware middleware, ILogger logger, ServerConfig? config = null)
     {
+        Name = name;
+
         _listener = listener;
         _listener.OnRequest += middleware.ProcessRequest;
+
+        _logger = logger;
+        CurrentConfig = config ?? DefaultConfig;
     }
 
-    public void Start(ProcessorConfigItem? config)
+    public void Start(CommonConfig? config)
     {
-        var c = config ?? _currentConfig;
+        var c = (ServerConfig)(config ?? CurrentConfig);
 
         if (c.Uri == null)
             throw new Exception("Wrong uri config");
 
         _listener.StartListen(c.Uri);
-        _currentConfig = c;
+        CurrentConfig = c;
     }
 
 
-    public void Restart(ProcessorConfigItem? config)
+    public void Restart(CommonConfig? config)
     {
         Stop();
-        Start(config ?? _currentConfig);
+        Start(config ?? CurrentConfig);
     }
 
     public void Stop() => _listener.StopListen();

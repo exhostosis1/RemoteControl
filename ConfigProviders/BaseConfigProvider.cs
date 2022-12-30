@@ -20,6 +20,7 @@ public abstract class BaseConfigProvider: IConfigProvider
             return _cachedConfig;
 
         var result = GetConfigInternal();
+
         _cachedConfig = result;
 
         return result;
@@ -42,5 +43,6 @@ public abstract class BaseConfigProvider: IConfigProvider
     }
 
     protected abstract AppConfig GetConfigInternal();
+
     protected abstract void SetConfigInternal(AppConfig config);
 }

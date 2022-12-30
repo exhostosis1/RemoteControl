@@ -1,5 +1,4 @@
 ﻿using Shared;
-using Shared.Config;
 using Shared.Enums;
 
 namespace RemoteControlConsole;
@@ -7,20 +6,30 @@ namespace RemoteControlConsole;
 // ReSharper disable once InconsistentNaming
 public class ConsoleUI: IUserInterface
 {
-    public event StringEventHandler? StartEvent;
-    public event StringEventHandler? StopEvent;
+    public event ProcessorEventHandler? StartEvent;
+    public event ProcessorEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
+    public void SetViewModel(IEnumerable<ControlProcessorDto> model)
+    {
+        Model = model.ToList();
+    }
 
-    public IList<IControlProcessor> ControlProcessors { get; set; } = new List<IControlProcessor>();
+    public void SetAutostartValue(bool value)
+    {
+        IsAutostart = value;
+    }
+
+    private List<ControlProcessorDto> Model { get; set; } = new();
+
     public bool IsAutostart { get; set; }
 
     // ReSharper disable once InconsistentNaming
-    public void RunUI(AppConfig config)
+    public void RunUI()
     {
-        DisplayInfo(config);
+        DisplayInfo(Model);
 
         while (true)
         {
@@ -35,10 +44,10 @@ public class ConsoleUI: IUserInterface
             switch (key)
             {
                 case "s":
-                    if(ControlProcessors.Any(x => x.Status == ControlProcessorStatus.Working))
-                        StopEvent?.Invoke(null);
+                    if(Model.Any(x => x.Running))
+                        StopEvent?.Invoke(null, ControlProcessorType.Common);
                     else
-                        StartEvent?.Invoke(null);
+                        StartEvent?.Invoke(null, ControlProcessorType.Common);
                     break;
                 case "a":
                     AutostartChangedEvent?.Invoke(!IsAutostart);
@@ -47,7 +56,7 @@ public class ConsoleUI: IUserInterface
                     continue;
             }
 
-            DisplayInfo(config);
+            DisplayInfo(Model);
         }
     }
 
@@ -61,15 +70,24 @@ public class ConsoleUI: IUserInterface
         Console.ForegroundColor = color;
     }
 
-    private void DisplayInfo(AppConfig config)
+    private void DisplayInfo(List<ControlProcessorDto> dtos)
     {
-        foreach (var controlProcessor in ControlProcessors)
+        foreach (var dto in dtos)
         {
-            Console.WriteLine(controlProcessor.Status == ControlProcessorStatus.Working ? $"{(controlProcessor.Type == ControlProcessorType.Server ? "Server" : "Bot")} listening on {controlProcessor.Info}" : "Server stopped");
+            switch (dto)
+            {
+                case ServerDto s:
+                    Console.WriteLine(s.Running ? $"Server {s.Name} listening on {s.ListeningUri}" : $"Server {s.Name} stopped");
+                    break;
+                case BotDto b:
+                    Console.WriteLine(b.Running ? $"Bot {b.Name} responds to {b.BotUsernames}" : $"Bot {b.Name} stopped");
+                    break;
+            }
+
             Console.WriteLine($"Autostart {(IsAutostart ? "enabled" : "disabled")}");
             Console.WriteLine();
         }
 
-        Console.Write($"{(ControlProcessors.Any(x => x.Status == ControlProcessorStatus.Working) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
+        Console.Write($"{(dtos.Any(x => x.Running) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
     }
 }

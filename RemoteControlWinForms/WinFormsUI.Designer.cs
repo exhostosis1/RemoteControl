@@ -46,8 +46,8 @@
             this.taskbarNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("taskbarNotify.Icon")));
             this.taskbarNotify.Text = "Remote Control";
             this.taskbarNotify.Visible = true;
-            this.taskbarNotify.Click += new System.EventHandler(this.taskbarNotify_Click);
-            this.taskbarNotify.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.taskbarNotify_MouseDoubleClick);
+            this.taskbarNotify.Click += new System.EventHandler(this.TaskbarNotify_Click);
+            this.taskbarNotify.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.TaskbarNotify_MouseDoubleClick);
             // 
             // contextMenuStrip
             // 
@@ -63,14 +63,14 @@
             this.autostartStripMenuItem.Name = "autostartStripMenuItem";
             this.autostartStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.autostartStripMenuItem.Text = "Autostart";
-            this.autostartStripMenuItem.Click += new System.EventHandler(this.autostartStripMenuItem_Click);
+            this.autostartStripMenuItem.Click += new System.EventHandler(this.AutostartStripMenuItem_Click);
             // 
             // addFirewallRuleToolStripMenuItem
             // 
             this.addFirewallRuleToolStripMenuItem.Name = "addFirewallRuleToolStripMenuItem";
             this.addFirewallRuleToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.addFirewallRuleToolStripMenuItem.Text = "Add firewall rule";
-            this.addFirewallRuleToolStripMenuItem.Click += new System.EventHandler(this.addFirewallRuleToolStripMenuItem_Click);
+            this.addFirewallRuleToolStripMenuItem.Click += new System.EventHandler(this.AddFirewallRuleToolStripMenuItem_Click);
             // 
             // closeToolStripMenuItem
             // 
@@ -92,7 +92,7 @@
             this.buttonOk.TabIndex = 1;
             this.buttonOk.Text = "OK";
             this.buttonOk.UseVisualStyleBackColor = true;
-            this.buttonOk.Click += new System.EventHandler(this.buttonOk_Click);
+            this.buttonOk.Click += new System.EventHandler(this.ButtonOk_Click);
             // 
             // WinFormsUI
             // 

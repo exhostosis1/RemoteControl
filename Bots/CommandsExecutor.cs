@@ -1,5 +1,6 @@
 ﻿using Shared.ControlProviders;
 using Shared.Enums;
+using Shared.Logging.Interfaces;
 
 namespace Bots;
 
@@ -27,10 +28,13 @@ public class CommandsExecutor
         }
     };
 
+    private readonly ILogger _logger;
+
     private readonly IKeyboardControlProvider _keyboardControl;
 
-    public CommandsExecutor(IKeyboardControlProvider keyboardControl)
+    public CommandsExecutor(IKeyboardControlProvider keyboardControl, ILogger logger)
     {
+        _logger = logger;
         _keyboardControl = keyboardControl;
     }
 

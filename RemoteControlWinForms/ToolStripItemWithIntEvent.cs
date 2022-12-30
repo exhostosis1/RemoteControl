@@ -1,14 +1,18 @@
-﻿namespace RemoteControlWinForms;
+﻿using Shared.Enums;
 
-internal class ToolStripItemWithIntEvent: ToolStripMenuItem
+namespace RemoteControlWinForms;
+
+internal sealed class MyToolStripMenuItem: ToolStripMenuItem
 {
-    public string? ClickStringValue { get; set; }
+    public string ProcessorName { get; set; } = string.Empty;
+    public ControlProcessorType ProcessorType { get; set; } = ControlProcessorType.Common;
 
     protected override void OnClick(EventArgs e)
     {
-        var args = new StringArgs()
+        var args = new MyEventArgs
         {
-            Value = ClickStringValue
+            ProcessorName = ProcessorName,
+            ProcessorType = ProcessorType
         };
 
         base.OnClick(args);

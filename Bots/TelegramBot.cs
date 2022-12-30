@@ -10,7 +10,7 @@ public class TelegramBot: IControlProcessor
 {
     private readonly ILogger _logger;
 
-    private static readonly ProcessorConfigItem DefaultConfig = new()
+    private static readonly BotConfig DefaultConfig = new()
     {
         ApiKey = "",
         ApiUri = "https://api.telegram.org/bot"
@@ -20,15 +20,15 @@ public class TelegramBot: IControlProcessor
         ? ControlProcessorStatus.Working
         : ControlProcessorStatus.Stopped;
 
-    public string Name { get; set; } = "telegram bot";
+    public string Name { get; set; }
 
     public ControlProcessorType Type => ControlProcessorType.Bot;
 
-    public string Info => string.Join(';', _currentConfig?.Usernames ?? Array.Empty<string>());
+    public string Info => string.Join(';', (CurrentConfig as BotConfig)?.Usernames ?? Enumerable.Empty<string>());
 
     private const int RefreshTime = 1_000;
 
-    private ProcessorConfigItem _currentConfig = DefaultConfig;
+    public CommonConfig CurrentConfig { get; private set; }
 
     private readonly CommandsExecutor _executor;
 
@@ -41,18 +41,20 @@ public class TelegramBot: IControlProcessor
 
     private Task? _task;
 
-    public TelegramBot(ILogger logger, CommandsExecutor executor)
+    public TelegramBot(string name, CommandsExecutor executor, ILogger logger, BotConfig? config = null)
     {
         _logger = logger;
         _executor = executor;
+        CurrentConfig = config ?? DefaultConfig;
+        Name = name;
     }
 
-    public void Start(ProcessorConfigItem? config)
+    public void Start(CommonConfig? config)
     {
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
-        var c = config ?? _currentConfig;
+        var c = (BotConfig)(config ?? CurrentConfig);
 
         if(string.IsNullOrWhiteSpace(c.ApiUri) || string.IsNullOrWhiteSpace(c.ApiKey))
         {
@@ -62,7 +64,7 @@ public class TelegramBot: IControlProcessor
 
         _task = Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), token);
 
-        _currentConfig = c;
+        CurrentConfig = c;
     }
 
     private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, CancellationToken token)
@@ -95,10 +97,10 @@ public class TelegramBot: IControlProcessor
         }
     }
 
-    public void Restart(ProcessorConfigItem? config)
+    public void Restart(CommonConfig? config)
     {
         Stop();
-        Start(config ?? _currentConfig);
+        Start(config ?? CurrentConfig);
     }
 
     public void Stop()
