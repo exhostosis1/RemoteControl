@@ -9,6 +9,7 @@ using Shared.Config;
 using Shared.Controllers;
 using Shared.Enums;
 using Shared.Server;
+using System.Reflection;
 
 namespace RemoteControlMain;
 
@@ -42,23 +43,19 @@ public static class Main
         return bot;
     }
 
-    public static IEnumerable<IControlProcessor> ControlProcessors { get; private set; } = Enumerable.Empty<IControlProcessor>();
-
-    public static void Run(IContainer container)
+    public static List<IControlProcessor> CreateProcessors(AppConfig config, IContainer container)
     {
-        var ui = container.UserInterface;
-        var config = container.ConfigProvider.GetConfig();
+        return config.Servers.Select(x => CreateServer(container, x.Key, x.Value))
+            .Concat(config.Bots.Select(x => CreateBot(container, x.Key, x.Value))).ToList();
+    }
 
-        var servers = config.Servers.Select(x => CreateServer(container, x.Key, x.Value)).ToList();
-        var bots = config.Bots.Select(x => CreateBot(container, x.Key, x.Value)).ToList();
-
-        ControlProcessors = servers.Concat(bots).ToList();
-
+    public static List<ControlProcessorDto> GetDtos()
+    {
         var dtos = new List<ControlProcessorDto>();
 
         foreach (var controlProcessor in ControlProcessors)
         {
-            if(controlProcessor.CurrentConfig.Autostart)
+            if (controlProcessor.CurrentConfig.Autostart)
                 controlProcessor.Start();
 
             switch (controlProcessor.Type)
@@ -88,17 +85,71 @@ public static class Main
             }
         }
 
-        ui.SetViewModel(dtos);
+        return dtos;
+    }
 
-        ui.StartEvent += (name, type) =>
-        {
-            throw new NotImplementedException();
-        };
+    public static IEnumerable<IControlProcessor> ControlProcessors { get; private set; } = Enumerable.Empty<IControlProcessor>();
 
-        ui.StopEvent += (name, type) =>
+    public static void Run(IContainer container)
+    {
+        var ui = container.UserInterface;
+        var config = container.ConfigProvider.GetConfig();
+
+        ControlProcessors = CreateProcessors(config, container);
+
+        ui.SetViewModel(GetDtos());
+
+        void StartOrStop(bool start, string? name, ControlProcessorType type)
         {
-            throw new NotImplementedException();
-        };
+            var methodName = start ? "Start" : "Stop";
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                var item = ControlProcessors.FirstOrDefault(x => x.Name == name && x.Type == type);
+                if (item == null)
+                    return;
+
+                var method = item?.GetType()
+                    .GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+
+                method?.Invoke(item, Array.Empty<object>());
+
+                if (type == ControlProcessorType.Bot)
+                {
+                    config.Bots[name].Autostart = true;
+                }
+                else if (type == ControlProcessorType.Server)
+                {
+                    config.Servers[name].Autostart = true;
+                }
+            }
+            else
+            {
+                foreach (var controlProcessor in ControlProcessors)
+                {
+                    var method = controlProcessor.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+                    method?.Invoke(controlProcessor, Array.Empty<object>());
+                }
+
+                foreach (var configServer in config.Servers)
+                {
+                    configServer.Value.Autostart = true;
+                }
+
+                foreach (var configBot in config.Bots)
+                {
+                    configBot.Value.Autostart = true;
+                }
+            }
+
+            container.ConfigProvider.SetConfig(config);
+
+            ui.SetViewModel(GetDtos());
+        }
+
+        ui.StartEvent += (name, type) => StartOrStop(true, name, type);
+
+        ui.StopEvent += (name, type) => StartOrStop(false, name, type);
 
         ui.AutostartChangedEvent += value =>
         {
@@ -108,12 +159,53 @@ public static class Main
 
         ui.ConfigChangedEvent += value =>
         {
-            throw new NotImplementedException();
+            config.Servers.Clear();
+            config.Bots.Clear();
+
+            foreach (var controlProcessor in ControlProcessors)
+            {
+                controlProcessor.Stop();
+            }
+
+            foreach (var controlProcessorDto in value)
+            {
+                switch (controlProcessorDto)
+                {
+                    case ServerDto s:
+                        config.Servers.Add(s.Name, new ServerConfig
+                        {
+                            Uri = new Uri(s.ListeningUri),
+                            Autostart = true
+                        }); 
+                        break;
+                    case BotDto b:
+                        config.Bots.Add(b.Name, new BotConfig
+                        {
+                            ApiKey = b.ApiKey,
+                            ApiUri = b.ApiUrl,
+                            Usernames = b.BotUsernames.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            container.ConfigProvider.SetConfig(config);
+
+            ControlProcessors = CreateProcessors(config, container);
+
+            foreach (var controlProcessor in ControlProcessors)
+            {
+                controlProcessor.Start();
+            }
+
+            ui.SetViewModel(GetDtos());
         };
 
         ui.AddFirewallRuleEvent += () =>
         {
-            foreach (var uri in servers)
+            foreach (var uri in ControlProcessors.Where(x => x.Type == ControlProcessorType.Server))
             {
                 var command =
                     $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={(uri.CurrentConfig as ServerConfig)?.Host} localport={(uri.CurrentConfig as ServerConfig)?.Port} protocol=tcp";
