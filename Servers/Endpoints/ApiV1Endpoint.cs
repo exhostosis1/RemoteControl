@@ -9,7 +9,7 @@ using System.Text;
 
 namespace Servers.Endpoints;
 
-public class ApiV1Endpoint : AbstractEndpoint
+public class ApiV1Endpoint : AbstractApiEndpoint
 {
     private readonly ControllersWithMethods _controllers;
 
@@ -18,7 +18,6 @@ public class ApiV1Endpoint : AbstractEndpoint
         _controllers = controllers.GetControllersWithMethods();
 
         ApiVersion = "v1";
-        IsStaticFiles = false;
     }
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);

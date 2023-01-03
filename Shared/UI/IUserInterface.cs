@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
+using Shared.ControlProcessor;
 
-namespace Shared;
+namespace Shared.UI;
 
 public interface IUserInterface
 {
-    public event ProcessorEventHandler? StartEvent;
-    public event ProcessorEventHandler? StopEvent;
+    public event IntEventHandler? StartEvent;
+    public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
+    public event ConfigEventHandler? ProcessorAddedEvent;
 
-    public void SetViewModel(IEnumerable<ControlProcessorDto> model);
+    public void SetViewModel(List<IControlProcessor> model);
 
     public void SetAutostartValue(bool value);
 

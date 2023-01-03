@@ -1,12 +1,12 @@
 ﻿using Bots.Telegram;
-using Shared;
+using Bots.Telegram.ApiObjects.Response;
 using Shared.Config;
-using Shared.Enums;
+using Shared.ControlProcessor;
 using Shared.Logging.Interfaces;
 
 namespace Bots;
 
-public class TelegramBot: IControlProcessor
+public class TelegramBot: IBotProcessor
 {
     private readonly ILogger _logger;
 
@@ -16,30 +16,32 @@ public class TelegramBot: IControlProcessor
         ApiUri = "https://api.telegram.org/bot"
     };
 
-    public ControlProcessorStatus Status => _task?.Status == TaskStatus.Running
-        ? ControlProcessorStatus.Working
-        : ControlProcessorStatus.Stopped;
+    public bool Working { get; private set; }
 
     public string Name { get; set; }
 
-    public ControlProcessorType Type => ControlProcessorType.Bot;
-
-    public string Info => string.Join(';', (CurrentConfig as BotConfig)?.Usernames ?? Enumerable.Empty<string>());
-
     private const int RefreshTime = 1_000;
 
-    public CommonConfig CurrentConfig { get; private set; }
+    public BotConfig CurrentConfig { get; set; }
+
+    CommonConfig IControlProcessor.CurrentConfig
+    {
+        get => CurrentConfig;
+        set => CurrentConfig = value as BotConfig ?? DefaultConfig;
+    }
 
     private readonly CommandsExecutor _executor;
 
     private readonly string[][] _buttons = {
         new[] { Buttons.MediaBack, Buttons.Pause, Buttons.MediaForth },
-        new[] { Buttons.VolumeDown, Buttons.Mute, Buttons.VolumeUp }
+        new[] { Buttons.VolumeDown, Buttons.Darken, Buttons.VolumeUp }
     };
 
     private CancellationTokenSource? _cts;
 
     private Task? _task;
+
+    private Progress<bool> _progress;
 
     public TelegramBot(string name, CommandsExecutor executor, ILogger logger, BotConfig? config = null)
     {
@@ -47,14 +49,16 @@ public class TelegramBot: IControlProcessor
         _executor = executor;
         CurrentConfig = config ?? DefaultConfig;
         Name = name;
+
+        _progress = new Progress<bool>(result => Working = result);
     }
 
-    public void Start(CommonConfig? config)
+    public async void Start(BotConfig? config)
     {
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
-        var c = (BotConfig)(config ?? CurrentConfig);
+        var c = config ?? CurrentConfig;
 
         if(string.IsNullOrWhiteSpace(c.ApiUri) || string.IsNullOrWhiteSpace(c.ApiKey))
         {
@@ -62,28 +66,48 @@ public class TelegramBot: IControlProcessor
             return;
         }
 
-        _task = Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), token);
-
         CurrentConfig = c;
+
+        Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), _progress, token);
     }
 
-    private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, CancellationToken token)
+    private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, IProgress<bool> progress, CancellationToken token)
     {
+        progress.Report(true);
+
         while (!token.IsCancellationRequested)
         {
-            var response = await wrapper.GetUpdates();
+            UpdateResponse response;
+
+            try
+            {
+                response = await wrapper.GetUpdates();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                continue;
+            }
 
             if(!response.Ok)
                 continue;
 
             var messages = response.Result
-                .Where(x => usernames.Any(y => y == x.Message?.From?.Username) && (DateTime.Now - x.Message?.ParsedDate)?.Minutes < 5)
+                .Where(x => usernames.Any(y => y == x.Message?.From?.Username) && (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10)
                 .Select(x => (x.Message?.Chat?.Id, x.Message?.Text)).Where(x => x.Id.HasValue && !string.IsNullOrWhiteSpace(x.Text));
 
             foreach (var (id, command) in messages)
             {
-                _executor.Execute(command!);
-                await wrapper.SendResponse(id!.Value, "", _buttons);
+                try
+                {
+                    var result = _executor.Execute(command!);
+                    await wrapper.SendResponse(id!.Value, result, _buttons);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e.Message);
+                    continue;
+                }
             }
 
             try
@@ -95,13 +119,18 @@ public class TelegramBot: IControlProcessor
                 // catching and ignoring cancellation exception
             }
         }
+
+        progress.Report(false);
     }
 
-    public void Restart(CommonConfig? config)
+    public void Restart(BotConfig? config)
     {
         Stop();
         Start(config ?? CurrentConfig);
     }
+
+    public void Start(CommonConfig? config) => Start(config as BotConfig ?? CurrentConfig);
+    public void Restart(CommonConfig? config) => Restart(config as BotConfig ?? CurrentConfig);
 
     public void Stop()
     {

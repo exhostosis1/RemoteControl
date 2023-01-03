@@ -7,9 +7,6 @@ public abstract class AbstractEndpoint
 {
     protected readonly ILogger Logger;
 
-    public string ApiVersion = "v1";
-    public bool IsStaticFiles = false;
-
     protected AbstractEndpoint(ILogger logger)
     {
         Logger = logger;

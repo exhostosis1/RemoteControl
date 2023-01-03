@@ -7,15 +7,13 @@ using Servers.Middleware;
 using Shared;
 using Shared.Config;
 using Shared.Controllers;
-using Shared.Enums;
-using Shared.Server;
-using System.Reflection;
+using Shared.ControlProcessor;
 
 namespace RemoteControlMain;
 
 public static class Main
 {
-    public static IControlProcessor CreateServer(IContainer container, string name, ServerConfig config)
+    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig config)
     {
         var controllers = new BaseController[]
         {
@@ -29,127 +27,70 @@ public static class Main
         var apiEndpoint = new ApiV1Endpoint(controllers, container.Logger);
 
         var listener = new GenericListener(container.Logger);
-        var middleware = new RoutingMiddleware(new AbstractEndpoint[] { staticFilesEndpoint, apiEndpoint }, container.Logger);
-        var server = new SimpleServer(name, listener, middleware, container.Logger, config);
+        var middleware = new RoutingMiddleware(new []{ apiEndpoint }, staticFilesEndpoint, container.Logger);
+        var server = new SimpleServer(config.Name, listener, middleware, container.Logger, config);
 
         return server;
     }
 
-    public static IControlProcessor CreateBot(IContainer container, string name, BotConfig config)
+    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig config)
     {
-        var executor = new CommandsExecutor(container.ControlProviders.Keyboard, container.Logger);
-        var bot = new TelegramBot(name, executor, container.Logger, config);
+        var executor = new CommandsExecutor(container.ControlProviders, container.Logger);
+        var bot = new TelegramBot(config.Name, executor, container.Logger, config);
 
         return bot;
     }
 
-    public static List<IControlProcessor> CreateProcessors(AppConfig config, IContainer container)
+    private static IEnumerable<IControlProcessor> CreateProcessors(AppConfig config, IContainer container)
     {
-        return config.Servers.Select(x => CreateServer(container, x.Key, x.Value))
-            .Concat(config.Bots.Select(x => CreateBot(container, x.Key, x.Value))).ToList();
+        return config.Servers.Select(x => CreateSimpleServer(container, x))
+            .Concat(config.Bots.Select(x => CreateTelegramBot(container, x)));
     }
 
-    public static List<ControlProcessorDto> GetDtos()
-    {
-        var dtos = new List<ControlProcessorDto>();
-
-        foreach (var controlProcessor in ControlProcessors)
-        {
-            if (controlProcessor.CurrentConfig.Autostart)
-                controlProcessor.Start();
-
-            switch (controlProcessor.Type)
-            {
-                case ControlProcessorType.Server:
-                    dtos.Add(new ServerDto
-                    {
-                        Name = controlProcessor.Name,
-                        Running = controlProcessor.Status == ControlProcessorStatus.Working,
-                        ListeningUri =
-                            (controlProcessor.CurrentConfig as ServerConfig)?.Uri?.ToString() ?? string.Empty,
-                    });
-                    break;
-                case ControlProcessorType.Bot:
-                    dtos.Add(new BotDto
-                    {
-                        Name = controlProcessor.Name,
-                        ApiKey = (controlProcessor.CurrentConfig as BotConfig)?.ApiKey ?? string.Empty,
-                        ApiUrl = (controlProcessor.CurrentConfig as BotConfig)?.ApiUri ?? string.Empty,
-                        BotUsernames = string.Join(';',
-                            (controlProcessor.CurrentConfig as BotConfig)?.Usernames ?? Enumerable.Empty<string>()),
-                        Running = controlProcessor.Status == ControlProcessorStatus.Working
-                    });
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        return dtos;
-    }
-
-    public static IEnumerable<IControlProcessor> ControlProcessors { get; private set; } = Enumerable.Empty<IControlProcessor>();
+    public static List<IControlProcessor> ControlProcessors { get; private set; } = new();
 
     public static void Run(IContainer container)
     {
         var ui = container.UserInterface;
         var config = container.ConfigProvider.GetConfig();
 
-        ControlProcessors = CreateProcessors(config, container);
+        ControlProcessors = CreateProcessors(config, container).ToList();
 
-        ui.SetViewModel(GetDtos());
-
-        void StartOrStop(bool start, string? name, ControlProcessorType type)
+        foreach (var controlProcessor in ControlProcessors.Where(x => x.CurrentConfig.Autostart))
         {
-            var methodName = start ? "Start" : "Stop";
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                var item = ControlProcessors.FirstOrDefault(x => x.Name == name && x.Type == type);
-                if (item == null)
-                    return;
-
-                var method = item?.GetType()
-                    .GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
-
-                method?.Invoke(item, Array.Empty<object>());
-
-                if (type == ControlProcessorType.Bot)
-                {
-                    config.Bots[name].Autostart = true;
-                }
-                else if (type == ControlProcessorType.Server)
-                {
-                    config.Servers[name].Autostart = true;
-                }
-            }
-            else
-            {
-                foreach (var controlProcessor in ControlProcessors)
-                {
-                    var method = controlProcessor.GetType().GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
-                    method?.Invoke(controlProcessor, Array.Empty<object>());
-                }
-
-                foreach (var configServer in config.Servers)
-                {
-                    configServer.Value.Autostart = true;
-                }
-
-                foreach (var configBot in config.Bots)
-                {
-                    configBot.Value.Autostart = true;
-                }
-            }
-
-            container.ConfigProvider.SetConfig(config);
-
-            ui.SetViewModel(GetDtos());
+            controlProcessor.Start();
         }
 
-        ui.StartEvent += (name, type) => StartOrStop(true, name, type);
+        ui.SetViewModel(ControlProcessors);
 
-        ui.StopEvent += (name, type) => StartOrStop(false, name, type);
+        ui.StartEvent += index =>
+        {
+            if (index.HasValue && index.Value < ControlProcessors.Count)
+            {
+                ControlProcessors[index.Value].Start();
+            }
+            else if(!index.HasValue)
+            {
+                ControlProcessors.ForEach(x => x.Start());
+            }
+        };
+
+        ui.StopEvent += index =>
+        {
+            if (index.HasValue && index.Value < ControlProcessors.Count)
+            {
+                ControlProcessors[index.Value].Stop();
+            }
+            else if (!index.HasValue)
+            {
+                ControlProcessors.ForEach(x => x.Stop());
+            }
+        };
+
+        ui.ProcessorAddedEvent += _ =>
+        {
+            throw new NotImplementedException();
+        };
 
         ui.AutostartChangedEvent += value =>
         {
@@ -162,50 +103,14 @@ public static class Main
             config.Servers.Clear();
             config.Bots.Clear();
 
-            foreach (var controlProcessor in ControlProcessors)
-            {
-                controlProcessor.Stop();
-            }
+            
 
-            foreach (var controlProcessorDto in value)
-            {
-                switch (controlProcessorDto)
-                {
-                    case ServerDto s:
-                        config.Servers.Add(s.Name, new ServerConfig
-                        {
-                            Uri = new Uri(s.ListeningUri),
-                            Autostart = true
-                        }); 
-                        break;
-                    case BotDto b:
-                        config.Bots.Add(b.Name, new BotConfig
-                        {
-                            ApiKey = b.ApiKey,
-                            ApiUri = b.ApiUrl,
-                            Usernames = b.BotUsernames.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
-                        });
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            container.ConfigProvider.SetConfig(config);
-
-            ControlProcessors = CreateProcessors(config, container);
-
-            foreach (var controlProcessor in ControlProcessors)
-            {
-                controlProcessor.Start();
-            }
-
-            ui.SetViewModel(GetDtos());
+            ui.SetViewModel(ControlProcessors);
         };
 
         ui.AddFirewallRuleEvent += () =>
         {
-            foreach (var uri in ControlProcessors.Where(x => x.Type == ControlProcessorType.Server))
+            foreach (var uri in ControlProcessors.Where(x => x is IServerProcessor))
             {
                 var command =
                     $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={(uri.CurrentConfig as ServerConfig)?.Host} localport={(uri.CurrentConfig as ServerConfig)?.Port} protocol=tcp";

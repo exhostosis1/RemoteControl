@@ -1,45 +1,47 @@
 ﻿using Shared.DataObjects.Interfaces;
 using Shared.Logging.Interfaces;
 using Shared.Server;
+using System.Net;
+using System.Text.RegularExpressions;
 
 namespace Servers.Middleware;
 
-public class RoutingMiddleware: AbstractMiddleware
+public partial class RoutingMiddleware: AbstractMiddleware
 {
-    private readonly IEnumerable<AbstractEndpoint> _endpoints;
+    private readonly IEnumerable<AbstractApiEndpoint> _apiEndpoints;
+    private readonly AbstractEndpoint _staticFilesEndpoint;
     private const string ApiString = "/api/";
 
-    public RoutingMiddleware(IEnumerable<AbstractEndpoint> endpoints, ILogger logger, HttpEventHandler? next = null) : base(logger, next)
+    [GeneratedRegex($"(?<={ApiString})v\\d+")]
+    private partial Regex ApiRegex();
+
+    public RoutingMiddleware(IEnumerable<AbstractApiEndpoint> apiEndpoints, AbstractEndpoint staticFilesEndpoint, ILogger logger,
+        HttpEventHandler? next = null) : base(logger, next)
     {
-        _endpoints = endpoints;
+        _apiEndpoints = apiEndpoints;
+        _staticFilesEndpoint = staticFilesEndpoint;
     }
 
     public override void ProcessRequest(IContext context)
     {
-        var path = context.Request.Path;
+        var match = ApiRegex().Match(context.Request.Path);
 
-        if (path.Contains(ApiString))
+        if (match.Success)
         {
-            var startIndex = path.IndexOf(ApiString, StringComparison.OrdinalIgnoreCase);
+            var endpoint = _apiEndpoints.FirstOrDefault(x => x.ApiVersion == match.Value);
 
-            if (startIndex != -1)
+            if (endpoint == null)
             {
-                startIndex += ApiString.Length;
-
-                var endIndex = path.IndexOf('/', startIndex + 1);
-
-                if (endIndex != -1)
-                {
-                    var version = path[startIndex..endIndex].ToLower();
-
-                    _endpoints.FirstOrDefault(x => x.ApiVersion == version)?.ProcessRequest(context);
-                }
+                context.Response.StatusCode = HttpStatusCode.NotFound;
             }
-                
+            else
+            {
+                endpoint.ProcessRequest(context);   
+            }
         }
         else
         {
-            _endpoints.FirstOrDefault(x => x.IsStaticFiles)?.ProcessRequest(context);
+            _staticFilesEndpoint.ProcessRequest(context);
         }
 
         Next?.Invoke(context);

@@ -1,6 +1,8 @@
 ﻿using Microsoft.Win32;
 using Shared;
-using Shared.Enums;
+using Shared.Config;
+using Shared.ControlProcessor;
+using Shared.UI;
 
 namespace RemoteControlWinForms;
 
@@ -9,23 +11,20 @@ public partial class WinFormsUI : Form, IUserInterface
 {
     private readonly ToolStripItem[] _commonMenuItems;
 
-    public event ProcessorEventHandler? StartEvent;
-    public event ProcessorEventHandler? StopEvent;
+    public event IntEventHandler? StartEvent;
+    public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
+    public event ConfigEventHandler? ProcessorAddedEvent;
 
-    private readonly List<MyGroupBox> _groups = new();
-    private const int GroupMargin = 5;
+    private const int GroupMargin = 6;
     public bool IsAutostart { get; set; }
-    private const char UsernamesSeparator = ';';
     private static bool IsDarkMode => Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1) as int? == 1;
-    private List<ControlProcessorDto> _model = new();
+    private List<IControlProcessor> _model = new();
 
-    public void SetViewModel(IEnumerable<ControlProcessorDto> model) => _model = model.ToList();
-
-    public void SetAutostartValue(bool value) => IsAutostart = value;
+    private List<MyPanel> _groups = new();
 
     public WinFormsUI()
     {
@@ -47,6 +46,9 @@ public partial class WinFormsUI : Form, IUserInterface
         };
 
         this.autostartStripMenuItem.Checked = IsAutostart;
+
+        this.Width = 550;
+        this.Height = 40;
     }
 
     public void RunUI()
@@ -54,6 +56,14 @@ public partial class WinFormsUI : Form, IUserInterface
         Application.EnableVisualStyles();
         Application.Run(this);
     }
+
+    public void SetViewModel(List<IControlProcessor> model)
+    {
+        _model = model;
+        RedrawWindow();
+    }
+
+    public void SetAutostartValue(bool value) => IsAutostart = value;
 
     public void ShowError(string message)
     {
@@ -64,22 +74,24 @@ public partial class WinFormsUI : Form, IUserInterface
     {
         this.contextMenuStrip.Items.Clear();
 
-        foreach (var processor in _model)
+        for (var i = 0; i < _model.Count; i++)
         {
+            var processor = _model[i];
+
             this.contextMenuStrip.Items.Add(new ToolStripMenuItem(processor.Name) { Enabled = false });
 
-            if (processor.Running)
+            if (processor.Working)
             {
                 var item = new ToolStripMenuItem();
                 
                 switch (processor)
                 {
-                    case ServerDto s:
-                        item.Text = s.ListeningUri;
+                    case IServerProcessor s:
+                        item.Text = s.CurrentConfig.Uri?.ToString();
                         item.Click += IpToolStripMenuItem_Click;
                         break;
-                    case BotDto b:
-                        item.Text = b.BotUsernames;
+                    case IBotProcessor b:
+                        item.Text = b.CurrentConfig.UsernamesString;
                         break;
                     default:
                         continue;
@@ -92,19 +104,13 @@ public partial class WinFormsUI : Form, IUserInterface
                 this.contextMenuStrip.Items.Add(new ToolStripMenuItem("Stopped") { Enabled = false });
             }
 
-            var startstopitem = new MyToolStripMenuItem
-                {
-                    Text = processor.Running ? @"Stop" : @"Start",
-                    ProcessorName = processor.Name,
-                    ProcessorType = processor switch
-                    {
-                        ServerDto => ControlProcessorType.Server,
-                        BotDto => ControlProcessorType.Bot,
-                        _ => ControlProcessorType.Common
-                    }
-                };
+            var startstopitem = new ToolStripMenuItemWithIndex
+            {
+                Text = processor.Working ? @"Stop" : @"Start",
+                Index = i
+            };
 
-            startstopitem.Click += processor.Running ? StartToolStripMenuItem_Click : StopToolStripMenuItem_Click;
+            startstopitem.Click += processor.Working ? StartToolStripMenuItem_Click : StopToolStripMenuItem_Click;
 
             this.contextMenuStrip.Items.Add(startstopitem);
             this.contextMenuStrip.Items.Add(new ToolStripSeparator());
@@ -129,27 +135,23 @@ public partial class WinFormsUI : Form, IUserInterface
 
     private void StartToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        if (e is not MyEventArgs a)
-            return;
-
-        StartEvent?.Invoke(a.ProcessorName, a.ProcessorType);
+        if (sender is ToolStripMenuItemWithIndex o)
+            StartEvent?.Invoke(o.Index);
     }
 
     private void StopToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        if (e is not MyEventArgs a)
-            return;
-
-        StopEvent?.Invoke(a.ProcessorName, a.ProcessorType);
+        if (sender is ToolStripMenuItemWithIndex o)
+            StopEvent?.Invoke(o.Index);
     }
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StartEvent?.Invoke(null, ControlProcessorType.Common);
+        StartEvent?.Invoke(null);
     }
 
     private void StopAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StopEvent?.Invoke(null, ControlProcessorType.Common);
+        StopEvent?.Invoke(null);
     }
 
     private void ConfigForm_Shown(object sender, EventArgs e)
@@ -171,31 +173,7 @@ public partial class WinFormsUI : Form, IUserInterface
     {
         try
         {
-            var result = new List<ControlProcessorDto>();
-
-            foreach (var group in _groups)
-            {
-                if (group.ProcessorType == ControlProcessorType.Server)
-                {
-                    var item = new ServerDto
-                    {
-                        ListeningUri = group.ProcessorText,
-                        Name = group.ProcessorName
-                    };
-
-                    result.Add(item);
-                }
-                else if (group.ProcessorType == ControlProcessorType.Bot)
-                {
-                    var botitem = new BotDto
-                    {
-                        BotUsernames = group.ProcessorText,
-                        Name = group.Name
-                    };
-
-                    result.Add(botitem);
-                }
-            }
+            var result = new List<CommonConfig>();
 
             ConfigChangedEvent?.Invoke(result);
         }
@@ -208,49 +186,48 @@ public partial class WinFormsUI : Form, IUserInterface
         Hide();
     }
 
-    private void SetWindow()
+    private void RedrawWindow()
     {
         var height = GroupMargin;
+
         _groups.Clear();
         this.Controls.Clear();
 
-        foreach (var processor in _model)
+        for (var i = 0; i < _model.Count; i++)
         {
-            var type = ControlProcessorType.Common;
-            var text = string.Empty;
+            var processor = _model[i];
+            MyPanel group;
 
             switch (processor)
             {
-                case ServerDto s:
-                    type = ControlProcessorType.Server;
-                    text = s.ListeningUri;
+                case IServerProcessor s:
+                    group = new ServerPanel(s, i)
+                    {
+                        Top = height
+                    };
                     break;
-                case BotDto b:
-                    type = ControlProcessorType.Bot;
-                    text = b.BotUsernames;
+                case IBotProcessor b:
+                    group = new BotPanel(b, i)
+                    {
+                        Top = height
+                    };
                     break;
                 default:
-                    break;
+                    continue;
             }
-
-            var group = new MyGroupBox(processor.Name, type, text);
-            group.Top = height;
-
+            
             _groups.Add(group);
+            this.Controls.Add(group);
 
             height += group.Height + GroupMargin;
         }
-
-        buttonOk.Top = height;
-        this.Height = height + 70;
-
-        this.Controls.AddRange(_groups.Select(x => x as Control).ToArray());
-        this.Controls.Add(buttonOk);
+        
+        this.Height = height + 40;
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-        SetWindow();
+        RedrawWindow();
         Show();
     }
 

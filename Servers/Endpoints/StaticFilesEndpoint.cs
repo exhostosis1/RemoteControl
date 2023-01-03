@@ -12,7 +12,6 @@ public class StaticFilesEndpoint : AbstractEndpoint
     public StaticFilesEndpoint(ILogger logger, string directory = "www") : base(logger)
     {
         _contentFolder = AppContext.BaseDirectory + directory;
-        IsStaticFiles = true;
     }
 
     private static readonly Dictionary<string, string> ContentTypes = new()
@@ -44,7 +43,7 @@ public class StaticFilesEndpoint : AbstractEndpoint
 
         var extension = Path.GetExtension(path);
 
-        context.Response.ContentType = ContentTypes.ContainsKey(extension) ? ContentTypes[extension] : "text/plain";
+        context.Response.ContentType = ContentTypes.TryGetValue(extension, out var value) ? value : "text/plain";
 
         if (File.Exists(path))
         {

@@ -37,7 +37,7 @@ internal class TelegramBotApiWrapper
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException($"{response.StatusCode} - {response.ReasonPhrase}");
+            throw new HttpRequestException("Error sending request to bot api", null, response.StatusCode);
         }
             
         return await response.Content.ReadAsStringAsync();

@@ -20,6 +20,7 @@
     <ProjectReference Include="..\RemoteControlWinForms\RemoteControlWinForms.csproj" />
     <ProjectReference Include="..\Servers\Servers.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Web\Web.csproj" />
   </ItemGroup>
 
 </Project>

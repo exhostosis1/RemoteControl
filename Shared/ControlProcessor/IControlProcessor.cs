@@ -1,15 +1,13 @@
 ﻿using Shared.Config;
-using Shared.Enums;
 
-namespace Shared;
+namespace Shared.ControlProcessor;
 
 public interface IControlProcessor
 {
     public string Name { get; set; }
-    public ControlProcessorType Type { get; }
-    public ControlProcessorStatus Status { get; }
+    public bool Working { get; }
+    public CommonConfig CurrentConfig { get; set; }
     public void Start(CommonConfig? config = null);
     public void Restart(CommonConfig? config = null);
     public void Stop();
-    public CommonConfig CurrentConfig { get; }
 }

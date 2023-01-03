@@ -1,28 +1,28 @@
 ﻿using Shared;
-using Shared.Enums;
+using Shared.ControlProcessor;
+using Shared.UI;
 
 namespace RemoteControlConsole;
 
 // ReSharper disable once InconsistentNaming
 public class ConsoleUI: IUserInterface
 {
-    public event ProcessorEventHandler? StartEvent;
-    public event ProcessorEventHandler? StopEvent;
+    public event IntEventHandler? StartEvent;
+    public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
-    public void SetViewModel(IEnumerable<ControlProcessorDto> model)
-    {
-        Model = model.ToList();
-    }
+    public event ConfigEventHandler? ProcessorAddedEvent;
+
+    public void SetViewModel(List<IControlProcessor> model) => Model = model;
 
     public void SetAutostartValue(bool value)
     {
         IsAutostart = value;
     }
 
-    private List<ControlProcessorDto> Model { get; set; } = new();
+    private List<IControlProcessor> Model { get; set; } = new();
 
     public bool IsAutostart { get; set; }
 
@@ -44,10 +44,10 @@ public class ConsoleUI: IUserInterface
             switch (key)
             {
                 case "s":
-                    if(Model.Any(x => x.Running))
-                        StopEvent?.Invoke(null, ControlProcessorType.Common);
+                    if(Model.Any(x => x.Working))
+                        StopEvent?.Invoke(null);
                     else
-                        StartEvent?.Invoke(null, ControlProcessorType.Common);
+                        StartEvent?.Invoke(null);
                     break;
                 case "a":
                     AutostartChangedEvent?.Invoke(!IsAutostart);
@@ -70,17 +70,17 @@ public class ConsoleUI: IUserInterface
         Console.ForegroundColor = color;
     }
 
-    private void DisplayInfo(List<ControlProcessorDto> dtos)
+    private void DisplayInfo(List<IControlProcessor> dtos)
     {
         foreach (var dto in dtos)
         {
             switch (dto)
             {
-                case ServerDto s:
-                    Console.WriteLine(s.Running ? $"Server {s.Name} listening on {s.ListeningUri}" : $"Server {s.Name} stopped");
+                case IServerProcessor s:
+                    Console.WriteLine(s.Working ? $"Server {s.Name} listening on {s.CurrentConfig.Uri}" : $"Server {s.Name} stopped");
                     break;
-                case BotDto b:
-                    Console.WriteLine(b.Running ? $"Bot {b.Name} responds to {b.BotUsernames}" : $"Bot {b.Name} stopped");
+                case IBotProcessor b:
+                    Console.WriteLine(b.Working ? $"Bot {b.Name} responds to {b.CurrentConfig.UsernamesString}" : $"Bot {b.Name} stopped");
                     break;
             }
 
@@ -88,6 +88,6 @@ public class ConsoleUI: IUserInterface
             Console.WriteLine();
         }
 
-        Console.Write($"{(dtos.Any(x => x.Running) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
+        Console.Write($"{(dtos.Any(x => x.Working) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
     }
 }

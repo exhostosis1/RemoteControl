@@ -1,6 +1,5 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.Win32;
-using Shared.Enums;
+﻿using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace RemoteControlWindows;
 
@@ -11,7 +10,7 @@ public static class Program
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
-        var processorNames = Enumerable.Empty<string>();
+        var indexes = new List<int>();
 
         SystemEvents.SessionSwitch += (_, args) =>
         {
@@ -19,21 +18,24 @@ public static class Program
             {
                 case SessionSwitchReason.SessionLock:
                 {
-                    processorNames = RemoteControlMain.Main.ControlProcessors
-                        .Where(x => x.Status == ControlProcessorStatus.Working).Select(x => x.Name);
+                    indexes.Clear();
 
-                    foreach (var containerControlProcessor in RemoteControlMain.Main.ControlProcessors)
+                    for (var i = 0; i < RemoteControlMain.Main.ControlProcessors.Count; i++)
                     {
-                        containerControlProcessor.Stop();
+                        if (RemoteControlMain.Main.ControlProcessors[i].Working)
+                        {
+                            indexes.Add(i);
+                            RemoteControlMain.Main.ControlProcessors[i].Stop();
+                        }
                     }
 
                     break;
                 }
                 case SessionSwitchReason.SessionUnlock:
                 {
-                    foreach (var containerControlProcessor in RemoteControlMain.Main.ControlProcessors.Where(x => processorNames.Contains(x.Name)))
+                    foreach (var index in indexes)
                     {
-                        containerControlProcessor.Start();
+                            RemoteControlMain.Main.ControlProcessors[index].Start();
                     }
                     break;
                 }

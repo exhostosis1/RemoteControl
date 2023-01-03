@@ -6,43 +6,50 @@ namespace Bots;
 
 public class CommandsExecutor
 {
-    private readonly Dictionary<string, KeysEnum> _keys = new()
-    {
-        {
-            Buttons.MediaBack, KeysEnum.MediaPrev
-        },
-        {
-            Buttons.MediaForth, KeysEnum.MediaNext
-        },
-        {
-            Buttons.Pause, KeysEnum.MediaPlayPause
-        },
-        {
-            Buttons.Mute, KeysEnum.Mute
-        },
-        {
-            Buttons.VolumeUp, KeysEnum.VolumeUp
-        },
-        {
-            Buttons.VolumeDown, KeysEnum.VolumeDown
-        }
-    };
-
     private readonly ILogger _logger;
 
-    private readonly IKeyboardControlProvider _keyboardControl;
+    private readonly ControlFacade _controlFacade;
 
-    public CommandsExecutor(IKeyboardControlProvider keyboardControl, ILogger logger)
+    public CommandsExecutor(ControlFacade controlFacade, ILogger logger)
     {
         _logger = logger;
-        _keyboardControl = keyboardControl;
+        _controlFacade = controlFacade;
     }
 
-    public void Execute(string command)
+    public string Execute(string command)
     {
-        if (_keys.TryGetValue(command, out var key))
+        int volume;
+
+        switch (command)
         {
-            _keyboardControl.KeyPress(key);
+            case Buttons.Pause:
+                _controlFacade.Keyboard.KeyPress(KeysEnum.MediaPlayPause);
+                break;
+            case Buttons.MediaBack:
+                _controlFacade.Keyboard.KeyPress(KeysEnum.MediaPrev);
+                break;
+            case Buttons.MediaForth:
+                _controlFacade.Keyboard.KeyPress(KeysEnum.MediaNext);
+                break;
+            case Buttons.VolumeUp:
+                volume = _controlFacade.Audio.GetVolume();
+                volume += 5;
+                volume = volume > 100 ? 100 : volume;
+                _controlFacade.Audio.SetVolume(volume);
+                return volume.ToString();
+            case Buttons.VolumeDown:
+                volume = _controlFacade.Audio.GetVolume();
+                volume -= 5;
+                volume = volume < 0 ? 0 : volume;
+                _controlFacade.Audio.SetVolume(volume);
+                return volume.ToString();
+            case Buttons.Darken:
+                _controlFacade.Display.Darken();
+                break;
+            default:
+                break;
         }
+
+        return "done";
     }
 }
