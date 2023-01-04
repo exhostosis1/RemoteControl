@@ -10,6 +10,8 @@ public static class Program
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
+        var container = new RemoteControlContainer();
+
         var indexes = new List<int>();
 
         SystemEvents.SessionSwitch += (_, args) =>
@@ -18,6 +20,8 @@ public static class Program
             {
                 case SessionSwitchReason.SessionLock:
                 {
+                    container.Logger.LogInfo("Stopping processords due to logout");
+
                     indexes.Clear();
 
                     for (var i = 0; i < RemoteControlMain.Main.ControlProcessors.Count; i++)
@@ -33,6 +37,8 @@ public static class Program
                 }
                 case SessionSwitchReason.SessionUnlock:
                 {
+                    container.Logger.LogInfo("Resoring processors");
+
                     foreach (var index in indexes)
                     { 
                         RemoteControlMain.Main.ControlProcessors[index].Start();
@@ -43,8 +49,6 @@ public static class Program
                     break;
             }
         };
-
-        var container = new RemoteControlContainer();
 
         try
         {

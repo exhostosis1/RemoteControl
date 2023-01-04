@@ -15,9 +15,8 @@ public partial class WinFormsUI : Form, IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
-    public event ConfigEventHandler? ProcessorAddedEvent;
+    public event ProcessorEventHandler? ProcessorAddedEvent;
 
     private const int GroupMargin = 6;
     public bool IsAutostart { get; set; }
@@ -78,7 +77,7 @@ public partial class WinFormsUI : Form, IUserInterface
         {
             var processor = _model[i];
 
-            this.contextMenuStrip.Items.Add(new ToolStripMenuItem(processor.Name) { Enabled = false });
+            this.contextMenuStrip.Items.Add(new ToolStripMenuItem(processor.CurrentConfig.Name) { Enabled = false });
 
             if (processor.Working)
             {
@@ -166,16 +165,22 @@ public partial class WinFormsUI : Form, IUserInterface
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        AddFirewallRuleEvent?.Invoke();
+        foreach (var uri in _model.Where(x => x is IServerProcessor))
+        {
+            var command =
+                $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={(uri.CurrentConfig as ServerConfig)?.Host} localport={(uri.CurrentConfig as ServerConfig)?.Port} protocol=tcp";
+
+            Utils.RunWindowsCommandAsAdmin(command);
+        }
     }
 
     private void ButtonOk_Click(object sender, EventArgs e)
     {
         try
         {
-            var result = new List<CommonConfig>();
+            var result = new ServerConfig();
 
-            ConfigChangedEvent?.Invoke(result);
+            ConfigChangedEvent?.Invoke(0, result);
         }
         catch (Exception ex)
         {

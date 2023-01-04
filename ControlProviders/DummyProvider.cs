@@ -15,13 +15,13 @@ public class DummyProvider: BaseProvider, IKeyboardControlProvider, IMouseContro
     {
         _dummyDevices = new IAudioDevice[]
         {
-            new AudioDevice()
+            new AudioDevice
             {
                 Id = new Guid(),
                 IsCurrentControlDevice = true,
                 Name = "device 1"
             },
-            new AudioDevice()
+            new AudioDevice
             {
                 Id = new Guid(),
                 IsCurrentControlDevice = false,

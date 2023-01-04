@@ -9,9 +9,8 @@ public interface IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
-    public event ConfigEventHandler? ProcessorAddedEvent;
+    public event ProcessorEventHandler? ProcessorAddedEvent;
 
     public void SetViewModel(List<IControlProcessor> model);
 

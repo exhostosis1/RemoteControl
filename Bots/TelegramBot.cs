@@ -18,8 +18,6 @@ public class TelegramBot: IBotProcessor
 
     public bool Working { get; private set; }
 
-    public string Name { get; set; }
-
     private const int RefreshTime = 1_000;
 
     public BotConfig CurrentConfig { get; set; }
@@ -41,12 +39,12 @@ public class TelegramBot: IBotProcessor
 
     private readonly Progress<bool> _progress;
 
-    public TelegramBot(string name, ICommandExecutor executor, ILogger logger, BotConfig? config = null)
+    public TelegramBot(ICommandExecutor executor, ILogger logger, BotConfig? config = null)
     {
+        CurrentConfig = config ?? DefaultConfig;
+
         _logger = logger;
         _executor = executor;
-        CurrentConfig = config ?? DefaultConfig;
-        Name = name;
 
         _progress = new Progress<bool>(result => Working = result);
     }

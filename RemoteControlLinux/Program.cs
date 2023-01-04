@@ -6,13 +6,20 @@ public static class Program
 {
     public static void Main()
     {
+        var container = new RemoteControlContainer();
+
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            throw new Exception("OS not supported");
+        {
+            container.Logger.LogError("OS not supported");
+            return;
+        }
 
         if (Environment.UserName != "root")
-            throw new Exception("Should run as root");
+        {
+            container.Logger.LogError("Should run as root");
+            return;
+        }
 
-        var container = new RemoteControlContainer();
         RemoteControlMain.Main.Run(container);
     }
 }

@@ -11,9 +11,8 @@ public class ConsoleUI: IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event EmptyEventHandler? AddFirewallRuleEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
-    public event ConfigEventHandler? ProcessorAddedEvent;
+    public event ProcessorEventHandler? ProcessorAddedEvent;
 
     public void SetViewModel(List<IControlProcessor> model) => Model = model;
 
@@ -77,10 +76,10 @@ public class ConsoleUI: IUserInterface
             switch (dto)
             {
                 case IServerProcessor s:
-                    Console.WriteLine(s.Working ? $"Server {s.Name} listening on {s.CurrentConfig.Uri}" : $"Server {s.Name} stopped");
+                    Console.WriteLine(s.Working ? $"Server {s.CurrentConfig.Name} listening on {s.CurrentConfig.Uri}" : $"Server {s.CurrentConfig.Name} stopped");
                     break;
                 case IBotProcessor b:
-                    Console.WriteLine(b.Working ? $"Bot {b.Name} responds to {b.CurrentConfig.UsernamesString}" : $"Bot {b.Name} stopped");
+                    Console.WriteLine(b.Working ? $"Bot {b.CurrentConfig.Name} responds to {b.CurrentConfig.UsernamesString}" : $"Bot {b.CurrentConfig.Name} stopped");
                     break;
             }
 

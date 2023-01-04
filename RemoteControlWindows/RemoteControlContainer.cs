@@ -11,7 +11,7 @@ using Shared.UI;
 
 namespace RemoteControlWindows;
 
-public class RemoteControlContainer : IContainer
+public class RemoteControlContainer : IPlatformDependantContainer
 {
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }

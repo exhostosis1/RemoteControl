@@ -1,95 +1,110 @@
 ﻿using Bots;
-using Controllers;
-using Listeners;
 using Servers;
-using Servers.Endpoints;
-using Servers.Middleware;
 using Shared;
 using Shared.Config;
-using Shared.Controllers;
 using Shared.ControlProcessor;
 
 namespace RemoteControlMain;
 
 public static class Main
 {
-    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig config)
+    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig config) =>
+        new SimpleServer(container.Listener, container.Middleware, container.Logger, config);
+
+    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig config) =>
+        new TelegramBot(container.CommandExecutor, container.Logger, config);
+
+    private static IEnumerable<IControlProcessor> CreateProcessors(AppConfig config, IContainer container) =>
+        config.All.Select(x =>
+            x switch
+            {
+                ServerConfig s => CreateSimpleServer(container, s),
+                BotConfig b => CreateTelegramBot(container, b),
+                _ => throw new NotSupportedException()
+            }
+        );
+
+    private static AppConfig GetConfig(IEnumerable<IControlProcessor> processors)
     {
-        var controllers = new BaseController[]
+        var result = new AppConfig();
+
+        foreach (var controlProcessor in processors)
         {
-            new AudioController(container.ControlProviders.Audio, container.Logger),
-            new DisplayController(container.ControlProviders.Display, container.Logger),
-            new KeyboardController(container.ControlProviders.Keyboard, container.Logger),
-            new MouseController(container.ControlProviders.Mouse, container.Logger)
-        };
+            switch (controlProcessor)
+            {
+                case IServerProcessor s:
+                    result.Servers.Add(s.CurrentConfig);
+                    break;
+                case IBotProcessor b:
+                    result.Bots.Add(b.CurrentConfig);
+                    break;
+            }
+        }
 
-        var staticFilesEndpoint = new StaticFilesEndpoint(container.Logger);
-        var apiEndpoint = new ApiV1Endpoint(controllers, container.Logger);
-
-        var listener = new GenericListener(container.Logger);
-        var middleware = new RoutingMiddleware(new []{ apiEndpoint }, staticFilesEndpoint, container.Logger);
-        var server = new SimpleServer(config.Name, listener, middleware, container.Logger, config);
-
-        return server;
-    }
-
-    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig config)
-    {
-        var executor = new CommandsExecutor(container.ControlProviders, container.Logger);
-        var bot = new TelegramBot(config.Name, executor, container.Logger, config);
-
-        return bot;
-    }
-
-    private static IEnumerable<IControlProcessor> CreateProcessors(AppConfig config, IContainer container)
-    {
-        return config.Servers.Select(x => CreateSimpleServer(container, x))
-            .Concat(config.Bots.Select(x => CreateTelegramBot(container, x)));
+        return result;
     }
 
     public static List<IControlProcessor> ControlProcessors { get; private set; } = new();
 
-    public static void Run(IContainer container)
+    public static void Run(IPlatformDependantContainer lesserContainer)
     {
+        var container = new Container(lesserContainer);
+
         var ui = container.UserInterface;
         var config = container.ConfigProvider.GetConfig();
 
         ControlProcessors = CreateProcessors(config, container).ToList();
 
-        foreach (var controlProcessor in ControlProcessors.Where(x => x.CurrentConfig.Autostart))
+        ControlProcessors.ForEach(x =>
         {
-            controlProcessor.Start();
-        }
+            if (x.CurrentConfig.Autostart)
+                x.Start();
+        });
 
         ui.SetViewModel(ControlProcessors);
 
         ui.StartEvent += index =>
         {
-            if (index.HasValue && index.Value < ControlProcessors.Count)
-            {
-                ControlProcessors[index.Value].Start();
-            }
-            else if(!index.HasValue)
+            if(!index.HasValue)
             {
                 ControlProcessors.ForEach(x => x.Start());
+            }
+            else if (index.Value < ControlProcessors.Count)
+            {
+                ControlProcessors[index.Value].Start();
             }
         };
 
         ui.StopEvent += index =>
         {
-            if (index.HasValue && index.Value < ControlProcessors.Count)
-            {
-                ControlProcessors[index.Value].Stop();
-            }
-            else if (!index.HasValue)
+            if (!index.HasValue)
             {
                 ControlProcessors.ForEach(x => x.Stop());
             }
+            else if (index.Value < ControlProcessors.Count)
+            {
+                ControlProcessors[index.Value].Stop();
+            }
         };
 
-        ui.ProcessorAddedEvent += _ =>
+        ui.ProcessorAddedEvent += c =>
         {
-            throw new NotImplementedException();
+            switch (c)
+            {
+                case ServerConfig s:
+                    ControlProcessors.Add(CreateSimpleServer(container, s));
+                    break;
+                case BotConfig b:
+                    ControlProcessors.Add(CreateTelegramBot(container, b));
+                    break;
+                default:
+                    return;
+            }
+
+            config = GetConfig(ControlProcessors);
+            container.ConfigProvider.SetConfig(config);
+
+            ui.SetViewModel(ControlProcessors);
         };
 
         ui.AutostartChangedEvent += value =>
@@ -98,25 +113,21 @@ public static class Main
             ui.SetAutostartValue(container.AutostartService.CheckAutostart());
         };
 
-        ui.ConfigChangedEvent += value =>
+        ui.ConfigChangedEvent += (index, c) =>
         {
-            config.Servers.Clear();
-            config.Bots.Clear();
+            if (ControlProcessors[index].Working)
+            {
+                ControlProcessors[index].Restart(c);
+            }
+            else
+            {
+                ControlProcessors[index].CurrentConfig = c;
+            }
 
-            
+            config = GetConfig(ControlProcessors);
+            container.ConfigProvider.SetConfig(config);
 
             ui.SetViewModel(ControlProcessors);
-        };
-
-        ui.AddFirewallRuleEvent += () =>
-        {
-            foreach (var uri in ControlProcessors.Where(x => x is IServerProcessor))
-            {
-                var command =
-                    $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={(uri.CurrentConfig as ServerConfig)?.Host} localport={(uri.CurrentConfig as ServerConfig)?.Port} protocol=tcp";
-
-                Utils.RunWindowsCommandAsAdmin(command);
-            }
         };
 
         ui.CloseEvent += () =>

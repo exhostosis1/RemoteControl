@@ -25,21 +25,18 @@ public class SimpleServer: IServerProcessor
         set => CurrentConfig = value as ServerConfig ?? DefaultConfig;
     }
 
-    public string Name { get; set; }
-
     public bool Working => _listener.IsListening;
     
     private readonly ILogger _logger;
 
-    public SimpleServer(string name, IListener listener, AbstractMiddleware middleware, ILogger logger, ServerConfig? config = null)
+    public SimpleServer(IListener listener, AbstractMiddleware middleware, ILogger logger, ServerConfig? config = null)
     {
-        Name = name;
+        CurrentConfig = config ?? DefaultConfig;
 
         _listener = listener;
         _listener.OnRequest += middleware.ProcessRequest;
 
         _logger = logger;
-        CurrentConfig = config ?? DefaultConfig;
     }
 
     public void Start(ServerConfig? config)

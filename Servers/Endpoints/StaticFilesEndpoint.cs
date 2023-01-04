@@ -28,6 +28,8 @@ public class StaticFilesEndpoint : AbstractEndpoint
     {
         var uriPath = context.Request.Path;
 
+        Logger.LogInfo($"Processing file request {uriPath}");
+
         if (uriPath.Contains(".."))
         {
             context.Response.StatusCode = HttpStatusCode.NotFound;
@@ -51,6 +53,7 @@ public class StaticFilesEndpoint : AbstractEndpoint
         }
         else
         {
+            Logger.LogError($"File not found {path}");
             context.Response.StatusCode = HttpStatusCode.NotFound;
         }
     }

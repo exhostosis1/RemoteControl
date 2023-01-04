@@ -4,7 +4,6 @@ namespace Shared.ControlProcessor;
 
 public interface IControlProcessor
 {
-    public string Name { get; set; }
     public bool Working { get; }
     public CommonConfig CurrentConfig { get; set; }
     public void Start(CommonConfig? config = null);

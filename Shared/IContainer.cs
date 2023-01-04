@@ -1,15 +1,12 @@
-﻿using Shared.Config;
-using Shared.ControlProviders;
-using Shared.Logging.Interfaces;
-using Shared.UI;
+﻿using Shared.Controllers;
+using Shared.Server;
+using Shared.Server.Interfaces;
 
 namespace Shared;
 
-public interface IContainer
+public interface IContainer: IPlatformDependantContainer
 {
-    public IConfigProvider ConfigProvider { get; }
-    public IAutostartService AutostartService { get; }
-    public ILogger Logger { get; }
-    public IUserInterface UserInterface { get; }
-    public ControlFacade ControlProviders { get; }
+    public ICommandExecutor CommandExecutor { get; }
+    public IListener Listener { get; }
+    public AbstractMiddleware Middleware { get; }
 }

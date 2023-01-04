@@ -20,21 +20,26 @@ public partial class RoutingMiddleware: AbstractMiddleware
 
     public override void ProcessRequest(IContext context)
     {
+        Logger.LogInfo($"Routing request {context.Request.Path}");
+
         if (Utils.TryGetApiVersion(context.Request.Path, out var version))
         {
             var endpoint = _apiEndpoints.FirstOrDefault(x => x.ApiVersion == version);
 
             if (endpoint == null)
             {
+                Logger.LogError($"Api endpoint not found for request {context.Request.Path}");
                 context.Response.StatusCode = HttpStatusCode.NotFound;
             }
             else
             {
+                Logger.LogInfo($"Passing request to api endpoint version {version}");
                 endpoint.ProcessRequest(context);   
             }
         }
         else
         {
+            Logger.LogInfo("Passing request to static files endpoint");
             _staticFilesEndpoint.ProcessRequest(context);
         }
 

@@ -58,7 +58,7 @@ internal abstract class MyPanel: Panel
         this.BorderStyle = BorderStyle.FixedSingle;
 
         ProcessorIndex = index;
-        _nameTextBox.Text = processor.Name;
+        _nameTextBox.Text = processor.CurrentConfig.Name;
 
         if (processor.Working)
         {

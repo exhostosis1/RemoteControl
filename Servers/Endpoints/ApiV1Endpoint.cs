@@ -24,10 +24,13 @@ public class ApiV1Endpoint : AbstractApiEndpoint
 
     public override void ProcessRequest(IContext context)
     {
+        Logger.LogInfo($"Processing api request {context.Request.Path}");
+
         if (!Utils.TryParsePath(context.Request.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
             || !_controllers[controller].ContainsKey(action))
         {
             context.Response.StatusCode = HttpStatusCode.NotFound;
+            Logger.LogError("Api method not found");
             return;
         }
 
@@ -43,6 +46,8 @@ public class ApiV1Endpoint : AbstractApiEndpoint
         }
         catch (Exception e)
         {
+            Logger.LogError(e.Message);
+
             context.Response.StatusCode = HttpStatusCode.InternalServerError;
             context.Response.Payload = Encoding.UTF8.GetBytes(e.Message);
         }
