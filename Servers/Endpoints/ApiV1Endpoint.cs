@@ -24,7 +24,7 @@ public class ApiV1Endpoint : AbstractApiEndpoint
 
     public override void ProcessRequest(IContext context)
     {
-        if (!context.Request.Path.TryParsePath(out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
+        if (!Utils.TryParsePath(context.Request.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
             || !_controllers[controller].ContainsKey(action))
         {
             context.Response.StatusCode = HttpStatusCode.NotFound;
@@ -38,22 +38,12 @@ public class ApiV1Endpoint : AbstractApiEndpoint
             context.Response.StatusCode = result.StatusCode;
             context.Response.Payload = GetBytes(result.Result);
 
-            switch (result)
-            {
-                case ErrorResult:
-                case StringResult:
-                case OkResult:
-                    context.Response.ContentType = "text/plain";
-                    break;
-                case JsonResult:
-                    context.Response.ContentType = "application/json";
-                    break;
-            }
+            if (result is JsonResult)
+                context.Response.ContentType = "application/json";
         }
         catch (Exception e)
         {
             context.Response.StatusCode = HttpStatusCode.InternalServerError;
-            context.Response.ContentType = "text/plain";
             context.Response.Payload = Encoding.UTF8.GetBytes(e.Message);
         }
     }

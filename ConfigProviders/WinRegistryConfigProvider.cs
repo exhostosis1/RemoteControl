@@ -25,6 +25,8 @@ public class WinRegistryConfigProvider: BaseConfigProvider
 
     protected override AppConfig GetConfigInternal()
     {
+        Logger.LogInfo($"Getting config from registry {_regKey}");
+
         var value = _regKey.GetValue(ValueName, null) as string;
 
         AppConfig? result = null;
@@ -46,6 +48,8 @@ public class WinRegistryConfigProvider: BaseConfigProvider
 
     protected override void SetConfigInternal(AppConfig config)
     {
+        Logger.LogInfo($"Writing config to registry {_regKey}");
+
         _regKey.SetValue(ValueName,
             JsonSerializer.Serialize(config,
                 new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),

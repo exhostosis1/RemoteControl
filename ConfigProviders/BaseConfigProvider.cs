@@ -19,14 +19,24 @@ public abstract class BaseConfigProvider: IConfigProvider
         if (_cachedConfig != null)
             return _cachedConfig;
 
-        var result = GetConfigInternal();
+        AppConfig? result;
+
+        try
+        {
+            result = GetConfigInternal();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e.Message);
+            throw;
+        }
 
         _cachedConfig = result;
 
         return result;
     }
 
-    public bool SetConfig(AppConfig config)
+    public void SetConfig(AppConfig config)
     {
         try
         {
@@ -35,11 +45,10 @@ public abstract class BaseConfigProvider: IConfigProvider
         catch (Exception e)
         {
             Logger.LogError(e.Message);
-            return false;
+            throw;
         }
 
         _cachedConfig = config;
-        return true;
     }
 
     protected abstract AppConfig GetConfigInternal();

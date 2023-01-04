@@ -16,6 +16,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <WarningLevel>9999</WarningLevel>
+    <DebugType>none</DebugType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -24,6 +25,7 @@
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <WarningLevel>9999</WarningLevel>
+    <DebugType>none</DebugType>
   </PropertyGroup>
 
   <ItemGroup>

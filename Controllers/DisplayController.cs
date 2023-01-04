@@ -16,6 +16,8 @@ public class DisplayController: BaseController
 
     public IActionResult Darken(string? _)
     {
+        Logger.LogInfo("Turning off display");
+
         _display.Darken();
 
         return Ok();

@@ -16,15 +16,15 @@ public class RemoteControlContainer : IContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public ILogger Logger { get; }
-    public IUserInterface UserInterface { get; set; }
-    public ControlFacade ControlProviders { get; set; }
+    public IUserInterface UserInterface { get; }
+    public ControlFacade ControlProviders { get; }
 
     public RemoteControlContainer()
     {
 #if DEBUG
         Logger = new TraceLogger();
 #else
-            Logger = new FileLogger("error.log");
+        Logger = new FileLogger("error.log");
 #endif
         var ydotoolWrapper = new YdotoolProvider(Logger);
         var dummyWrapper = new DummyProvider(Logger);
@@ -32,7 +32,7 @@ public class RemoteControlContainer : IContainer
         ControlProviders = new ControlFacade(dummyWrapper, ydotoolWrapper, ydotoolWrapper, dummyWrapper);
 
         ConfigProvider = new LocalFileConfigProvider(Logger);
-        AutostartService = new DummyAutostartService();
+        AutostartService = new DummyAutostartService(Logger);
         UserInterface = new ConsoleUI();
     }
 }

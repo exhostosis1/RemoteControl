@@ -1,19 +1,22 @@
-﻿using Shared;
+﻿using Shared.Logging.Interfaces;
 
-namespace Autostart
+namespace Autostart;
+
+public class DummyAutostartService: BaseAutostartService
 {
-    public class DummyAutostartService: IAutostartService
+    private bool _autostart;
+
+    public DummyAutostartService(ILogger logger): base(logger){}
+
+    public override bool CheckAutostart()
     {
-        private bool _autostart;
+        Logger.LogInfo("Checking dummy autostart");
+        return _autostart;
+    }
 
-        public bool CheckAutostart()
-        {
-            return _autostart;
-        }
-
-        public void SetAutostart(bool value)
-        {
-            _autostart = value;
-        }
+    public override void SetAutostart(bool value)
+    {
+        Logger.LogInfo($"Setting dummy autostart to {value}");
+        _autostart = value;
     }
 }

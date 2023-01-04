@@ -10,11 +10,11 @@ internal class TelegramBotApiWrapper
 {
     private readonly string _requestUri;
 
-    private static readonly HttpClient Client = new();
+    private readonly HttpClient _client = new();
 
-    private static int? _lastUpdateId = null;
+    private int? _lastUpdateId = null;
 
-    private static readonly JsonSerializerOptions JsonOptions = new()
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
@@ -26,14 +26,14 @@ internal class TelegramBotApiWrapper
 
     private async Task<string> SendBotApiRequest(string method, object parameters)
     {
-        var content = new StringContent(JsonSerializer.Serialize(parameters, JsonOptions), Encoding.UTF8, "application/json");
+        var content = new StringContent(JsonSerializer.Serialize(parameters, _jsonOptions), Encoding.UTF8, "application/json");
 
         var req = new HttpRequestMessage(HttpMethod.Post, _requestUri + method)
         {
             Content = content
         };
 
-        var response = await Client.SendAsync(req);
+        var response = await _client.SendAsync(req);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -43,9 +43,9 @@ internal class TelegramBotApiWrapper
         return await response.Content.ReadAsStringAsync();
     }
 
-    private static ReplyKeyboardMarkup? GenerateKeyboardMarkup(IEnumerable<string[]>? buttons)
+    private static ReplyKeyboardMarkup GenerateKeyboardMarkup(IEnumerable<IEnumerable<string>> buttons)
     {
-        return buttons == null ? null : new ReplyKeyboardMarkup
+        return new ReplyKeyboardMarkup
         {
             ResizeKeyboard = true,
             Keyboard = buttons.Select(x => x.Select(y => new KeyboardButton { Text = y }).ToArray()).ToArray()
@@ -61,24 +61,27 @@ internal class TelegramBotApiWrapper
             parameters.Offset = _lastUpdateId + 1;
         }
 
-        var responseString = await SendBotApiRequest("getUpdates", parameters);
+        var responseString = await SendBotApiRequest(ApiMethods.GetUpdates, parameters);
 
-        var parsedResponse = JsonSerializer.Deserialize<UpdateResponse>(responseString) ?? throw new JsonException();
+        var parsedResponse = JsonSerializer.Deserialize<UpdateResponse>(responseString) ?? throw new JsonException("Cannot parse api response");
 
         _lastUpdateId = parsedResponse.Result.LastOrDefault()?.UpdateId;
 
         return parsedResponse;
     }
 
-    public async Task<string> SendResponse(int chatId, string message, IEnumerable<string[]>? buttons = null)
+    public async Task<string> SendResponse(int chatId, string message, IEnumerable<IEnumerable<string>>? buttons = null)
     {
+        if (string.IsNullOrWhiteSpace(message))
+            throw new ArgumentException("Message can not be empty", nameof(message));
+
         var parameters = new SendMessageParameters
         {
             ChatId = chatId,
             Text = message,
-            ReplyMarkup = GenerateKeyboardMarkup(buttons)
+            ReplyMarkup = buttons == null ? null : GenerateKeyboardMarkup(buttons)
         };
 
-        return await SendBotApiRequest("sendMessage", parameters);
+        return await SendBotApiRequest(ApiMethods.SendMessage, parameters);
     }
 }

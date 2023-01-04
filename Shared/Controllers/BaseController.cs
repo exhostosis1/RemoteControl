@@ -1,6 +1,7 @@
 ﻿using Shared.Controllers.Results;
 using Shared.Logging.Interfaces;
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace Shared.Controllers;
@@ -21,21 +22,11 @@ public abstract class BaseController
 
     public ControllerMethods GetMethods()
     {
-        var values = GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public);
-
-        var result = new ControllerMethods();
-
-        foreach (var method in values)
+        return new ControllerMethods(GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(x =>
         {
-            var parameters = method.GetParameters();
-
-            if (method.ReturnType != typeof(IActionResult) || parameters.Length != 1 ||
-                parameters[0].ParameterType != typeof(string))
-                continue;
-
-            result.Add(method.Name.ToLower(), method.CreateDelegate<Func<string?, IActionResult>>(this));
-        }
-
-        return result;
+            var parameters = x.GetParameters();
+            return x.ReturnType == typeof(IActionResult) && parameters.Length == 1 &&
+                   parameters[0].ParameterType == typeof(string);
+        }).ToDictionary(x => x.Name.ToLower(), x => x.CreateDelegate<Func<string?, IActionResult>>(this)));
     }
 }

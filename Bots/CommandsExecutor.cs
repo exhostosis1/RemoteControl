@@ -1,10 +1,11 @@
-﻿using Shared.ControlProviders;
+﻿using Shared.Controllers;
+using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
 namespace Bots;
 
-public class CommandsExecutor
+public class CommandsExecutor: ICommandExecutor
 {
     private readonly ILogger _logger;
 
@@ -18,7 +19,9 @@ public class CommandsExecutor
 
     public string Execute(string command)
     {
-        int volume;
+        _logger.LogInfo($"Executing bot command {command}");
+
+        var volume = _controlFacade.Audio.GetVolume();
 
         switch (command)
         {
@@ -32,13 +35,11 @@ public class CommandsExecutor
                 _controlFacade.Keyboard.KeyPress(KeysEnum.MediaNext);
                 break;
             case Buttons.VolumeUp:
-                volume = _controlFacade.Audio.GetVolume();
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
                 _controlFacade.Audio.SetVolume(volume);
                 return volume.ToString();
             case Buttons.VolumeDown:
-                volume = _controlFacade.Audio.GetVolume();
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume;
                 _controlFacade.Audio.SetVolume(volume);
@@ -47,7 +48,12 @@ public class CommandsExecutor
                 _controlFacade.Display.Darken();
                 break;
             default:
-                break;
+                if (int.TryParse(command, out volume))
+                {
+                    volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
+                    _controlFacade.Audio.SetVolume(volume);
+                }
+                return volume.ToString();
         }
 
         return "done";

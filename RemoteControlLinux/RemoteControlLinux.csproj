@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,17 +7,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\ConfigProviders\ConfigProviders.csproj" />
-    <ProjectReference Include="..\Controllers\Controllers.csproj" />
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
-    <ProjectReference Include="..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\RemoteControlConsole\RemoteControlConsole.csproj" />
     <ProjectReference Include="..\RemoteControlMain\RemoteControlMain.csproj" />
-    <ProjectReference Include="..\Servers\Servers.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\Web\Web.csproj" />
   </ItemGroup>
 
 </Project>

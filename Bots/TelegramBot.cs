@@ -1,6 +1,6 @@
 ﻿using Bots.Telegram;
-using Bots.Telegram.ApiObjects.Response;
 using Shared.Config;
+using Shared.Controllers;
 using Shared.ControlProcessor;
 using Shared.Logging.Interfaces;
 
@@ -30,7 +30,7 @@ public class TelegramBot: IBotProcessor
         set => CurrentConfig = value as BotConfig ?? DefaultConfig;
     }
 
-    private readonly CommandsExecutor _executor;
+    private readonly ICommandExecutor _executor;
 
     private readonly string[][] _buttons = {
         new[] { Buttons.MediaBack, Buttons.Pause, Buttons.MediaForth },
@@ -39,11 +39,9 @@ public class TelegramBot: IBotProcessor
 
     private CancellationTokenSource? _cts;
 
-    private Task? _task;
+    private readonly Progress<bool> _progress;
 
-    private Progress<bool> _progress;
-
-    public TelegramBot(string name, CommandsExecutor executor, ILogger logger, BotConfig? config = null)
+    public TelegramBot(string name, ICommandExecutor executor, ILogger logger, BotConfig? config = null)
     {
         _logger = logger;
         _executor = executor;
@@ -53,7 +51,7 @@ public class TelegramBot: IBotProcessor
         _progress = new Progress<bool>(result => Working = result);
     }
 
-    public async void Start(BotConfig? config)
+    public void Start(BotConfig? config)
     {
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
@@ -68,58 +66,63 @@ public class TelegramBot: IBotProcessor
 
         CurrentConfig = c;
 
+#pragma warning disable CS4014
         Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), _progress, token);
+#pragma warning restore CS4014
     }
 
     private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, IProgress<bool> progress, CancellationToken token)
     {
+        _logger.LogInfo($"Telegram Bot starts responding to {string.Join(',', usernames)}");
         progress.Report(true);
 
         while (!token.IsCancellationRequested)
         {
-            UpdateResponse response;
-
             try
             {
-                response = await wrapper.GetUpdates();
+                var response = await wrapper.GetUpdates();
+
+                if (!response.Ok || response.Result.Length == 0)
+                    continue;
+
+                var messages = response.Result
+                    .Where(x => usernames.Any(y => y == x.Message?.From?.Username) &&
+                                (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10)
+                    .Select(x => (x.Message?.Chat?.Id, x.Message?.Text))
+                    .Where(x => x.Id.HasValue && !string.IsNullOrWhiteSpace(x.Text));
+
+                foreach (var (id, command) in messages)
+                {
+                    try
+                    {
+                        var result = _executor.Execute(command!);
+                        await wrapper.SendResponse(id!.Value, result, _buttons);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e.Message);
+                        continue;
+                    }
+                }
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
                 continue;
             }
-
-            if(!response.Ok)
-                continue;
-
-            var messages = response.Result
-                .Where(x => usernames.Any(y => y == x.Message?.From?.Username) && (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10)
-                .Select(x => (x.Message?.Chat?.Id, x.Message?.Text)).Where(x => x.Id.HasValue && !string.IsNullOrWhiteSpace(x.Text));
-
-            foreach (var (id, command) in messages)
+            finally
             {
                 try
                 {
-                    var result = _executor.Execute(command!);
-                    await wrapper.SendResponse(id!.Value, result, _buttons);
+                    await Task.Delay(RefreshTime, token);
                 }
-                catch (Exception e)
+                catch (TaskCanceledException)
                 {
-                    _logger.LogError(e.Message);
-                    continue;
                 }
-            }
-
-            try
-            {
-                await Task.Delay(RefreshTime, token);
-            }
-            catch
-            {
-                // catching and ignoring cancellation exception
             }
         }
 
+        _logger.LogInfo("Telegram Bot stopped");
         progress.Report(false);
     }
 

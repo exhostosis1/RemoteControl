@@ -3,27 +3,26 @@ using Shared.Enums;
 using Shared.Logging.Interfaces;
 using System.Diagnostics;
 
-namespace Logging
+namespace Logging;
+
+public class TraceLogger: AbstractLogger
 {
-    public class TraceLogger: AbstractLogger
+    public TraceLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level,
+        formatter)
+    { }
+
+    protected override void ProcessInfo(string message)
     {
-        public TraceLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level,
-            formatter)
-        { }
+        Trace.TraceInformation(message);
+    }
 
-        protected override void ProcessInfo(string message)
-        {
-            Trace.TraceInformation(message);
-        }
+    protected override void ProcessWarning(string message)
+    {
+        Trace.TraceWarning(message);
+    }
 
-        protected override void ProcessWarning(string message)
-        {
-            Trace.TraceWarning(message);
-        }
-
-        protected override void ProcessError(string message)
-        {
-            Trace.TraceError(message);
-        }
+    protected override void ProcessError(string message)
+    {
+        Trace.TraceError(message);
     }
 }

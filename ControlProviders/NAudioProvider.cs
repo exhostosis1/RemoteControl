@@ -6,51 +6,70 @@ using Shared.ControlProviders;
 using Shared.ControlProviders.Devices;
 using Shared.Logging.Interfaces;
 
-namespace ControlProviders
+namespace ControlProviders;
+
+public partial class NAudioProvider: BaseProvider, IAudioControlProvider
 {
-    public class NAudioProvider: BaseProvider, IAudioControlProvider
+    private MMDevice _defaultDevice;
+    private readonly IEnumerable<MMDevice> _devices;
+
+    [GeneratedRegex("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase)]
+    private static partial Regex GuidRegex();
+
+    public NAudioProvider(ILogger logger): base(logger)
     {
-        private MMDevice _defaultDevice;
-        private readonly IEnumerable<MMDevice> _devices;
+        var enumerator = new MMDeviceEnumerator();
 
-        private static readonly Regex GuidRegex =
-            new ("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        _devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
+        _defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+    }
 
-        public NAudioProvider(ILogger logger): base(logger)
-        {
-            var enumerator = new MMDeviceEnumerator();
+    private static Guid GetGuid(string input) => new(GuidRegex().Match(input).Value);
 
-            _devices = enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-            _defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-        }
+    public int GetVolume()
+    {
+        Logger.LogInfo("Getting volume");
+        return (int)(_defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+    }
 
-        private static Guid GetGuid(string input) => new(GuidRegex.Match(input).Value);
+    public void SetVolume(int volume)
+    {
+        Logger.LogInfo($"Setting volume to {volume}");
+        _defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar = (float)volume / 100;
+    }
 
-        public int GetVolume() => (int)(_defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar * 100);
+    public void Mute()
+    {
+        Logger.LogInfo("Muting device");
+        _defaultDevice.AudioEndpointVolume.Mute = true;
+    }
 
-        public void SetVolume(int volume) => _defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar = (float)volume / 100;
+    public void Unmute()
+    {
+        Logger.LogInfo("Unmuting device");
+        _defaultDevice.AudioEndpointVolume.Mute = false;
+    }
 
-        public void Mute() => _defaultDevice.AudioEndpointVolume.Mute = true;
+    public bool IsMuted => _defaultDevice.AudioEndpointVolume.Mute;
 
-        public void Unmute() => _defaultDevice.AudioEndpointVolume.Mute = false;
+    public IReadOnlyCollection<IAudioDevice> GetDevices()
+    {
+        Logger.LogInfo("Getting devices");
 
-        public bool IsMuted => _defaultDevice.AudioEndpointVolume.Mute;
+        return _devices.Select(x =>
+            new AudioDevice
+            {
+                Id = GetGuid(x.ID),
+                IsCurrentControlDevice = x.ID == _defaultDevice.ID,
+                Name = x.DeviceFriendlyName
+            }).ToList();
+    }
 
-        public IReadOnlyCollection<IAudioDevice> GetDevices()
-        {
-            return _devices.Select(x =>
-                new AudioDevice
-                {
-                    Id = GetGuid(x.ID),
-                    IsCurrentControlDevice = x.ID == _defaultDevice.ID,
-                    Name = x.DeviceFriendlyName
-                }).ToList();
-        }
+    public IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id)
+    {
+        Logger.LogInfo($"Setting device to {id}");
 
-        public IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id)
-        {
-            _defaultDevice = _devices.First(x => GetGuid(x.ID) == id);
-            return GetDevices();
-        }
+        _defaultDevice = _devices.First(x => GetGuid(x.ID) == id);
+        return GetDevices();
     }
 }

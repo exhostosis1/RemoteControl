@@ -6,11 +6,11 @@ using Shared.Logging.Interfaces;
 
 namespace ControlProviders;
 
-public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardControlProvider, IMouseControlProvider
+public partial class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardControlProvider, IMouseControlProvider
 {
-    public User32Provider(ILogger logger) : base(logger)
-    {
-    }
+    public User32Provider(ILogger logger) : base(logger){}
+
+    private const string User32LibraryName = "user32.dll";
 
     #region Enums
     private enum User32KeyCodes
@@ -169,14 +169,14 @@ public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardCo
     #region Structs
     private record struct MouseFlags(MouseFlag Up, MouseFlag Down);
 
-    private struct Input
+    private record struct Input
     {
         public uint Type;
         public UniversalInput Data;
     }
 
     [StructLayout(LayoutKind.Explicit)]
-    private struct UniversalInput
+    private record struct UniversalInput
     {
         [FieldOffset(0)]
         public Mouseinput Mouse;
@@ -185,7 +185,7 @@ public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardCo
         public KeyboardInput Keyboard;
     }
 #pragma warning disable CS0649
-    private struct KeyboardInput
+    private record struct KeyboardInput
     {
         public ushort KeyCode;
         public ushort Scan;
@@ -194,7 +194,7 @@ public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardCo
         public nint ExtraInfo;
     }
 
-    private struct Mouseinput
+    private record struct Mouseinput
     {
         public int X;
         public int Y;
@@ -208,14 +208,14 @@ public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardCo
 
     #region user32
 
-    [DllImport("user32.dll", SetLastError = true)]
-    private static extern uint SendInput(uint numberOfInputs, Input[] inputs, int sizeOfInputStructure);
+    [LibraryImport(User32LibraryName, SetLastError = true)]
+    private static partial uint SendInput(uint numberOfInputs, Input[] inputs, int sizeOfInputStructure);
 
-    [DllImport("user32.dll")]
-    private static extern uint MapVirtualKey(uint uCode, uint uMapType);
+    [LibraryImport(User32LibraryName)]
+    private static partial uint MapVirtualKey(uint uCode, uint uMapType);
 
-    [DllImport("user32.dll")]
-    private static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
+    [LibraryImport(User32LibraryName)]
+    private static partial int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
     #endregion
 
     #region Dictionaries
@@ -273,9 +273,17 @@ public class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardCo
     private readonly Input[] _buffer = new Input[Length];
     private readonly int _size = Marshal.SizeOf(typeof(Input));
 
-    private static void SetMonitorInState(MonitorState state) => SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
+    private int SetMonitorInState(MonitorState state)
+    {
+        Logger.LogInfo($"Setting monitor state {state}");
+        return SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
+    }
 
-    private void DispatchInput() => SendInput(Length, _buffer, _size);
+    private void DispatchInput()
+    {
+        Logger.LogInfo($"Sending input {_buffer[0]}");
+        SendInput(Length, _buffer, _size);
+    }
 
     private static bool IsExtendedKey(User32KeyCodes keyCode)
     {

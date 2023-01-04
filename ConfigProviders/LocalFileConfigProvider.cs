@@ -9,12 +9,12 @@ public class LocalFileConfigProvider : BaseConfigProvider
 {
     private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
 
-    public LocalFileConfigProvider(ILogger logger): base(logger)
-    {
-    }
+    public LocalFileConfigProvider(ILogger logger): base(logger){}
 
     protected override AppConfig GetConfigInternal()
     {
+        Logger.LogInfo($"Getting config from file {ConfigPath}");
+
         if (!File.Exists(ConfigPath))
             File.Create(ConfigPath);
 
@@ -34,6 +34,8 @@ public class LocalFileConfigProvider : BaseConfigProvider
 
     protected override void SetConfigInternal(AppConfig appConfig)
     {
+        Logger.LogInfo($"Writing config to file {ConfigPath}");
+
         File.WriteAllText(ConfigPath,
             JsonSerializer.Serialize(appConfig,
                 new JsonSerializerOptions

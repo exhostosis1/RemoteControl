@@ -16,9 +16,9 @@ public class RemoteControlContainer : IContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public ILogger Logger { get; }
-    public IUserInterface UserInterface { get; set; }
+    public IUserInterface UserInterface { get; }
 
-    public ControlFacade ControlProviders { get; set; }
+    public ControlFacade ControlProviders { get; }
 
     public RemoteControlContainer()
     {
@@ -33,7 +33,7 @@ public class RemoteControlContainer : IContainer
         ControlProviders = new ControlFacade(audioProvider, user32Wrapper, user32Wrapper, user32Wrapper);
 
         ConfigProvider = new LocalFileConfigProvider(Logger);
-        AutostartService = new WinRegistryAutostartService();
+        AutostartService = new WinRegistryAutostartService(Logger);
         UserInterface = new WinFormsUI();
     }
 }

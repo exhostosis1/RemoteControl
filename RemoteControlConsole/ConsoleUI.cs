@@ -24,7 +24,7 @@ public class ConsoleUI: IUserInterface
 
     private List<IControlProcessor> Model { get; set; } = new();
 
-    public bool IsAutostart { get; set; }
+    private bool IsAutostart { get; set; }
 
     // ReSharper disable once InconsistentNaming
     public void RunUI()

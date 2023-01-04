@@ -2,30 +2,29 @@
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Logging
+namespace Logging;
+
+public class ConsoleLogger : AbstractLogger
 {
-    public class ConsoleLogger : AbstractLogger
+    public ConsoleLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level, formatter)
+    {}
+
+    protected override void ProcessInfo(string message)
     {
-        public ConsoleLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level, formatter)
-        {}
+        Console.WriteLine(message);
+    }
 
-        protected override void ProcessInfo(string message)
-        {
-            Console.WriteLine(message);
-        }
+    protected override void ProcessWarning(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine(message);
+        Console.ResetColor();
+    }
 
-        protected override void ProcessWarning(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine(message);
-            Console.ResetColor();
-        }
-
-        protected override void ProcessError(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(message);
-            Console.ResetColor();
-        }
+    protected override void ProcessError(string message)
+    {
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.WriteLine(message);
+        Console.ResetColor();
     }
 }

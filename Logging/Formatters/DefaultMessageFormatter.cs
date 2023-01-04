@@ -1,10 +1,9 @@
 ﻿using Shared.Logging;
 using Shared.Logging.Interfaces;
 
-namespace Logging.Formatters
+namespace Logging.Formatters;
+
+public class DefaultMessageFormatter: IMessageFormatter
 {
-    public class DefaultMessageFormatter: IMessageFormatter
-    {
-        public string Format(LogMessage message) => $@"{message.Level} {message.Date:G} {message.Message}";
-    }
+    public string Format(LogMessage message) => $@"{message.Level} {message.Date:G} {message.Message}";
 }

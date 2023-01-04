@@ -8,6 +8,10 @@
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\Bots\Bots.csproj" />

@@ -34,8 +34,8 @@ public static class Program
                 case SessionSwitchReason.SessionUnlock:
                 {
                     foreach (var index in indexes)
-                    {
-                            RemoteControlMain.Main.ControlProcessors[index].Start();
+                    { 
+                        RemoteControlMain.Main.ControlProcessors[index].Start();
                     }
                     break;
                 }
