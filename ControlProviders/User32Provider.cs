@@ -211,10 +211,10 @@ public partial class User32Provider : BaseProvider, IDisplayControlProvider, IKe
     [LibraryImport(User32LibraryName, SetLastError = true)]
     private static partial uint SendInput(uint numberOfInputs, Input[] inputs, int sizeOfInputStructure);
 
-    [LibraryImport(User32LibraryName)]
+    [LibraryImport(User32LibraryName, EntryPoint = "MapVirtualKeyW")]
     private static partial uint MapVirtualKey(uint uCode, uint uMapType);
 
-    [LibraryImport(User32LibraryName)]
+    [LibraryImport(User32LibraryName, EntryPoint = "SendMessageW")]
     private static partial int SendMessage(int hWnd, int hMsg, int wParam, int lParam);
     #endregion
 
