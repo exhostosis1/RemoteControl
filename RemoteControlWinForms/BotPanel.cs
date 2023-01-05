@@ -1,4 +1,5 @@
-﻿using Shared.ControlProcessor;
+﻿using Shared.Config;
+using Shared.ControlProcessor;
 
 namespace RemoteControlWinForms;
 
@@ -37,19 +38,24 @@ internal sealed class BotPanel : MyPanel
         Size = new Size(50, 15)
     };
 
-    private readonly ListBox _userIdsListBox = new()
+    private readonly TextBox _userIdsListBox = new()
     {
         Location = new Point(276, 3),
-        Size = new Size(128, 49)
+        Size = new Size(128, 49),
+        Multiline = true
     };
 
     public BotPanel(IBotProcessor processor, int index) : base(processor, index)
     {
         _apiUrlTextBox.Text = processor.CurrentConfig.ApiUri;
         _apiKeyTextBox.Text = processor.CurrentConfig.ApiKey;
-        _userIdsListBox.DataSource = processor.CurrentConfig.Usernames;
+        _userIdsListBox.Text = string.Join(Environment.NewLine, processor.CurrentConfig.Usernames);
 
-        this.Controls.AddRange(new Control[]
+        _apiKeyTextBox.TextChanged += EnableUpdateButton;
+        _apiUrlTextBox.TextChanged += EnableUpdateButton;
+        _userIdsListBox.TextChanged += EnableUpdateButton;
+
+        Controls.AddRange(new Control[]
         {
             _apiUrlLabel,
             _apiUrlTextBox,
@@ -58,5 +64,49 @@ internal sealed class BotPanel : MyPanel
             _userIdsLabel,
             _userIdsListBox
         });
+    }
+
+    protected override void UpdateButtonClick(object? sender, EventArgs e)
+    {
+        _apiKeyTextBox.ResetBackColor();
+        _apiUrlTextBox.ResetBackColor();
+        NameTextBox.ResetBackColor();
+        _userIdsListBox.ResetBackColor();
+
+        if (string.IsNullOrWhiteSpace(NameTextBox.Text))
+        {
+            NameTextBox.BackColor = Color.OrangeRed;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_apiUrlTextBox.Text))
+        {
+            _apiUrlTextBox.BackColor = Color.OrangeRed;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_apiKeyTextBox.Text))
+        {
+            _apiKeyTextBox.BackColor = Color.OrangeRed;
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_userIdsListBox.Text))
+        {
+            _userIdsListBox.BackColor = Color.OrangeRed;
+        }
+
+        var config = new BotConfig
+        {
+            Autostart = AutostartBox.Checked,
+            ApiUri = _apiUrlTextBox.Text,
+            ApiKey = _apiKeyTextBox.Text,
+            Name = NameTextBox.Text,
+            Usernames = _userIdsListBox.Text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+        };
+
+        RaiseUpdateButtonClickedEvent(config);
+
+        UpdateButton.Enabled = false;
     }
 }

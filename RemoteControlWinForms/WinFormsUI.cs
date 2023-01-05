@@ -16,14 +16,12 @@ public partial class WinFormsUI : Form, IUserInterface
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
-    public event ProcessorEventHandler? ProcessorAddedEvent;
+    public event StringEventHandler? ProcessorAddedEvent;
 
     private const int GroupMargin = 6;
-    public bool IsAutostart { get; set; }
+    private bool IsAutostart { get; set; }
     private static bool IsDarkMode => Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1) as int? == 1;
     private List<IControlProcessor> _model = new();
-
-    private List<MyPanel> _groups = new();
 
     public WinFormsUI()
     {
@@ -32,22 +30,24 @@ public partial class WinFormsUI : Form, IUserInterface
         var icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
             IsDarkMode ? "Device.theme-light.ico" : "Device.theme-dark.ico"));
 
-        this.taskbarNotify.Icon = icon;
-        this.Icon = icon;
+        TaskbarNotifyIcon.Icon = icon;
+        Icon = icon;
 
         _commonMenuItems = new ToolStripItem[]
         {
             new ToolStripMenuItem("Start all", null, StartAllToolStripMenuItem_Click),
             new ToolStripMenuItem("Stop all", null, StopAllToolStripMenuItem_Click),
-            this.autostartStripMenuItem,
-            this.addFirewallRuleToolStripMenuItem,
-            this.closeToolStripMenuItem
+            AutostartStripMenuItem,
+            AddFirewallRuleToolStripMenuItem,
+            CloseToolStripMenuItem
         };
 
-        this.autostartStripMenuItem.Checked = IsAutostart;
+        AutostartStripMenuItem.Checked = IsAutostart;
 
-        this.Width = 550;
-        this.Height = 40;
+        Width = 550;
+        Height = 40;
+
+        MainContextMenuStrip.Items.AddRange(_commonMenuItems);
     }
 
     public void RunUI()
@@ -71,13 +71,13 @@ public partial class WinFormsUI : Form, IUserInterface
 
     private void SetContextMenu()
     {
-        this.contextMenuStrip.Items.Clear();
+        MainContextMenuStrip.Items.Clear();
 
         for (var i = 0; i < _model.Count; i++)
         {
             var processor = _model[i];
 
-            this.contextMenuStrip.Items.Add(new ToolStripMenuItem(processor.CurrentConfig.Name) { Enabled = false });
+            MainContextMenuStrip.Items.Add(new ToolStripMenuItem(processor.CurrentConfig.Name) { Enabled = false });
 
             if (processor.Working)
             {
@@ -96,11 +96,11 @@ public partial class WinFormsUI : Form, IUserInterface
                         continue;
                 }
 
-                this.contextMenuStrip.Items.Add(item);
+                MainContextMenuStrip.Items.Add(item);
             }
             else
             {
-                this.contextMenuStrip.Items.Add(new ToolStripMenuItem("Stopped") { Enabled = false });
+                MainContextMenuStrip.Items.Add(new ToolStripMenuItem("Stopped") { Enabled = false });
             }
 
             var startstopitem = new ToolStripMenuItemWithIndex
@@ -109,15 +109,15 @@ public partial class WinFormsUI : Form, IUserInterface
                 Index = i
             };
 
-            startstopitem.Click += processor.Working ? StartToolStripMenuItem_Click : StopToolStripMenuItem_Click;
+            startstopitem.Click += processor.Working ? StopToolStripMenuItem_Click : StartToolStripMenuItem_Click;
 
-            this.contextMenuStrip.Items.Add(startstopitem);
-            this.contextMenuStrip.Items.Add(new ToolStripSeparator());
+            MainContextMenuStrip.Items.Add(startstopitem);
+            MainContextMenuStrip.Items.Add(new ToolStripSeparator());
         }
 
-        this.contextMenuStrip.Items.AddRange(_commonMenuItems);
+        AutostartStripMenuItem.Checked = IsAutostart;
 
-        this.autostartStripMenuItem.Checked = IsAutostart;
+        MainContextMenuStrip.Items.AddRange(_commonMenuItems);
     }
 
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -174,29 +174,10 @@ public partial class WinFormsUI : Form, IUserInterface
         }
     }
 
-    private void ButtonOk_Click(object sender, EventArgs e)
-    {
-        try
-        {
-            var result = new ServerConfig();
-
-            ConfigChangedEvent?.Invoke(0, result);
-        }
-        catch (Exception ex)
-        {
-            ShowError(ex.Message);
-            return;
-        }
-
-        Hide();
-    }
-
     private void RedrawWindow()
     {
         var height = GroupMargin;
-
-        _groups.Clear();
-        this.Controls.Clear();
+        Controls.Clear();
 
         for (var i = 0; i < _model.Count; i++)
         {
@@ -220,20 +201,31 @@ public partial class WinFormsUI : Form, IUserInterface
                 default:
                     continue;
             }
-            
-            _groups.Add(group);
-            this.Controls.Add(group);
 
+            group.StartButtonClicked += x => StartEvent?.Invoke(x);
+            group.StopButtonClicked += x => StopEvent?.Invoke(x);
+            group.UpdateButtonClicked += (index, config) => ConfigChangedEvent?.Invoke(index, config);
+            
+            Controls.Add(group);
             height += group.Height + GroupMargin;
         }
+
+        AddServerButton.Top = height;
+        AddBotButton.Top = height;
+
+        Controls.Add(AddServerButton);
+        Controls.Add(AddBotButton);
         
-        this.Height = height + 40;
+        Height = height + AddServerButton.Height + GroupMargin + 40;
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-        RedrawWindow();
-        Show();
+        if (e.Button == MouseButtons.Left)
+        {
+            RedrawWindow();
+            Show();
+        }
     }
 
     private void WinFormsUI_FormClosing(object sender, FormClosingEventArgs e)
@@ -242,11 +234,21 @@ public partial class WinFormsUI : Form, IUserInterface
         Hide();
     }
 
-    private void TaskbarNotify_Click(object sender, EventArgs e)
+    private void taskbarNotify_MouseClick(object sender, MouseEventArgs e)
     {
-        if ((e as MouseEventArgs)?.Button == System.Windows.Forms.MouseButtons.Right)
+        if (e.Button == MouseButtons.Right)
         {
             SetContextMenu();
         }
+    }
+
+    private void AddServerButton_Click(object sender, EventArgs e)
+    {
+        ProcessorAddedEvent?.Invoke("server");
+    }
+
+    private void AddBotButton_Click(object sender, EventArgs e)
+    {
+        ProcessorAddedEvent?.Invoke("bot");
     }
 }

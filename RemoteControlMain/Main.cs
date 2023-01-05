@@ -8,10 +8,10 @@ namespace RemoteControlMain;
 
 public static class Main
 {
-    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig config) =>
+    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null) =>
         new SimpleServer(container.Listener, container.Middleware, container.Logger, config);
 
-    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig config) =>
+    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null) =>
         new TelegramBot(container.CommandExecutor, container.Logger, config);
 
     private static IEnumerable<IControlProcessor> CreateProcessors(AppConfig config, IContainer container) =>
@@ -87,22 +87,19 @@ public static class Main
             }
         };
 
-        ui.ProcessorAddedEvent += c =>
+        ui.ProcessorAddedEvent += mode =>
         {
-            switch (c)
+            switch (mode)
             {
-                case ServerConfig s:
-                    ControlProcessors.Add(CreateSimpleServer(container, s));
+                case "server":
+                    ControlProcessors.Add(CreateSimpleServer(container));
                     break;
-                case BotConfig b:
-                    ControlProcessors.Add(CreateTelegramBot(container, b));
+                case "bot":
+                    ControlProcessors.Add(CreateTelegramBot(container));
                     break;
                 default:
                     return;
             }
-
-            config = GetConfig(ControlProcessors);
-            container.ConfigProvider.SetConfig(config);
 
             ui.SetViewModel(ControlProcessors);
         };

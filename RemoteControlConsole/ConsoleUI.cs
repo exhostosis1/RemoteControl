@@ -12,7 +12,7 @@ public class ConsoleUI: IUserInterface
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event ConfigEventHandler? ConfigChangedEvent;
-    public event ProcessorEventHandler? ProcessorAddedEvent;
+    public event StringEventHandler? ProcessorAddedEvent;
 
     public void SetViewModel(List<IControlProcessor> model) => Model = model;
 

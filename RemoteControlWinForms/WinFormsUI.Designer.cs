@@ -30,53 +30,75 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WinFormsUI));
-            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.taskbarNotify = new System.Windows.Forms.NotifyIcon(this.components);
-            this.addFirewallRuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.autostartStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.closeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.MainContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.TaskbarNotifyIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.AddFirewallRuleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AutostartStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.CloseToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.StartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AddServerButton = new System.Windows.Forms.Button();
+            this.AddBotButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
-            // contextMenuStrip
+            // MainContextMenuStrip
             // 
-            this.contextMenuStrip.Name = "contextMenuStrip1";
-            this.contextMenuStrip.Size = new System.Drawing.Size(61, 4);
+            this.MainContextMenuStrip.Name = "contextMenuStrip1";
+            this.MainContextMenuStrip.Size = new System.Drawing.Size(61, 4);
             // 
-            // taskbarNotify
+            // TaskbarNotifyIcon
             // 
-            this.taskbarNotify.ContextMenuStrip = this.contextMenuStrip;
-            this.taskbarNotify.Icon = ((System.Drawing.Icon)(resources.GetObject("taskbarNotify.Icon")));
-            this.taskbarNotify.Text = "Remote Control";
-            this.taskbarNotify.Visible = true;
-            this.taskbarNotify.Click += new System.EventHandler(this.TaskbarNotify_Click);
-            this.taskbarNotify.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.TaskbarNotify_MouseDoubleClick);
+            this.TaskbarNotifyIcon.ContextMenuStrip = this.MainContextMenuStrip;
+            this.TaskbarNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("TaskbarNotifyIcon.Icon")));
+            this.TaskbarNotifyIcon.Text = "Remote Control";
+            this.TaskbarNotifyIcon.Visible = true;
+            this.TaskbarNotifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.taskbarNotify_MouseClick);
+            this.TaskbarNotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.TaskbarNotify_MouseDoubleClick);
             // 
-            // addFirewallRuleToolStripMenuItem
+            // AddFirewallRuleToolStripMenuItem
             // 
-            this.addFirewallRuleToolStripMenuItem.Name = "addFirewallRuleToolStripMenuItem";
-            this.addFirewallRuleToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.addFirewallRuleToolStripMenuItem.Text = "Add firewall rule";
-            this.addFirewallRuleToolStripMenuItem.Click += new System.EventHandler(this.AddFirewallRuleToolStripMenuItem_Click);
+            this.AddFirewallRuleToolStripMenuItem.Name = "AddFirewallRuleToolStripMenuItem";
+            this.AddFirewallRuleToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.AddFirewallRuleToolStripMenuItem.Text = "Add firewall rule";
+            this.AddFirewallRuleToolStripMenuItem.Click += new System.EventHandler(this.AddFirewallRuleToolStripMenuItem_Click);
             // 
-            // autostartStripMenuItem
+            // AutostartStripMenuItem
             // 
-            this.autostartStripMenuItem.Name = "autostartStripMenuItem";
-            this.autostartStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.autostartStripMenuItem.Text = "Autostart";
-            this.autostartStripMenuItem.Click += new System.EventHandler(this.AutostartStripMenuItem_Click);
+            this.AutostartStripMenuItem.Name = "AutostartStripMenuItem";
+            this.AutostartStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.AutostartStripMenuItem.Text = "Autostart";
+            this.AutostartStripMenuItem.Click += new System.EventHandler(this.AutostartStripMenuItem_Click);
             // 
-            // closeToolStripMenuItem
+            // CloseToolStripMenuItem
             // 
-            this.closeToolStripMenuItem.Name = "closeToolStripMenuItem";
-            this.closeToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
-            this.closeToolStripMenuItem.Text = "Close";
-            this.closeToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
+            this.CloseToolStripMenuItem.Name = "CloseToolStripMenuItem";
+            this.CloseToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.CloseToolStripMenuItem.Text = "Close";
+            this.CloseToolStripMenuItem.Click += new System.EventHandler(this.CloseToolStripMenuItem_Click);
             // 
-            // startToolStripMenuItem
+            // StartToolStripMenuItem
             // 
-            this.startToolStripMenuItem.Name = "startToolStripMenuItem";
-            this.startToolStripMenuItem.Size = new System.Drawing.Size(32, 19);
+            this.StartToolStripMenuItem.Name = "StartToolStripMenuItem";
+            this.StartToolStripMenuItem.Size = new System.Drawing.Size(32, 19);
+            // 
+            // AddServerButton
+            // 
+            this.AddServerButton.Location = new System.Drawing.Point(144, 163);
+            this.AddServerButton.Name = "AddServerButton";
+            this.AddServerButton.Size = new System.Drawing.Size(75, 23);
+            this.AddServerButton.TabIndex = 1;
+            this.AddServerButton.Text = "Add Server";
+            this.AddServerButton.UseVisualStyleBackColor = true;
+            this.AddServerButton.Click += new System.EventHandler(this.AddServerButton_Click);
+            // 
+            // AddBotButton
+            // 
+            this.AddBotButton.Location = new System.Drawing.Point(289, 163);
+            this.AddBotButton.Name = "AddBotButton";
+            this.AddBotButton.Size = new System.Drawing.Size(75, 23);
+            this.AddBotButton.TabIndex = 2;
+            this.AddBotButton.Text = "Add Bot";
+            this.AddBotButton.UseVisualStyleBackColor = true;
+            this.AddBotButton.Click += new System.EventHandler(this.AddBotButton_Click);
             // 
             // WinFormsUI
             // 
@@ -84,6 +106,8 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(532, 198);
+            this.Controls.Add(this.AddBotButton);
+            this.Controls.Add(this.AddServerButton);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -93,6 +117,7 @@
             this.Name = "WinFormsUI";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Remote Control";
+            this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.WinFormsUI_FormClosing);
             this.Shown += new System.EventHandler(this.ConfigForm_Shown);
             this.ResumeLayout(false);
@@ -101,12 +126,14 @@
 
         #endregion
 
-        private ContextMenuStrip contextMenuStrip;
-        private NotifyIcon taskbarNotify;
-        private ToolStripMenuItem addFirewallRuleToolStripMenuItem;
-        private ToolStripMenuItem autostartStripMenuItem;
-        private ToolStripMenuItem closeToolStripMenuItem;
-        private ToolStripMenuItem startToolStripMenuItem;
+        private ContextMenuStrip MainContextMenuStrip;
+        private NotifyIcon TaskbarNotifyIcon;
+        private ToolStripMenuItem AddFirewallRuleToolStripMenuItem;
+        private ToolStripMenuItem AutostartStripMenuItem;
+        private ToolStripMenuItem CloseToolStripMenuItem;
+        private ToolStripMenuItem StartToolStripMenuItem;
+        private Button AddServerButton;
+        private Button AddBotButton;
     }
 }
 

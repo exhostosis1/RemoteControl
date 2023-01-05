@@ -21,7 +21,9 @@ public static partial class Utils
     [GeneratedRegex("[-0-9]+")]
     private static partial Regex CoordRegex();
 
-    [GeneratedRegex($"(?<={ApiPath}v\\d+)\\/(?<{ControllerGroupName}>[a-z]+)\\/(?<{ActionGroupName}>[a-z]+)\\/?(?<{ParamGroupName}>.*)", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(
+        $"(?<={ApiPath}v\\d+)\\/(?<{ControllerGroupName}>[a-z]+)\\/(?<{ActionGroupName}>[a-z]+)\\/?(?<{ParamGroupName}>.*)",
+        RegexOptions.IgnoreCase)]
     private static partial Regex ApiRegex();
 
     [GeneratedRegex($"(?<={ApiPath})v\\d+", RegexOptions.IgnoreCase)]
@@ -55,13 +57,13 @@ public static partial class Utils
     public static bool TryParsePath(string path, out string controller, out string action, out string? parameter)
     {
         var match = ApiRegex().Match(path);
-        
+
         controller = string.Empty;
         action = string.Empty;
         parameter = null;
 
         if (!match.Success) return false;
-        
+
         controller = match.Groups[ControllerGroupName].Value.ToLower();
         action = match.Groups[ActionGroupName].Value.ToLower();
         parameter = match.Groups[ParamGroupName].Value;
@@ -118,7 +120,8 @@ public static partial class Utils
         proc.WaitForExit();
     }
 
-    public static IEnumerable<string> GetCurrentIPs() => Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
+    public static IEnumerable<string> GetCurrentIPs() =>
+        Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
 
     public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<BaseController> controllers)
     {

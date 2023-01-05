@@ -11,9 +11,9 @@ namespace Listeners;
 
 public class GenericListener : IListener
 {
-    private HttpListener _listener = new();
-    public bool IsListening => _listener.IsListening;
-    public IReadOnlyCollection<Uri> ListeningUris => _listener.Prefixes.Select(x => new Uri(x)).ToList();
+    private HttpListener? _listener;
+    public bool IsListening => _listener?.IsListening ?? false;
+    public IReadOnlyCollection<Uri> ListeningUris => _listener?.Prefixes.Select(x => new Uri(x)).ToList() ?? new List<Uri>();
 
     public event HttpEventHandler? OnRequest;
 
@@ -28,20 +28,12 @@ public class GenericListener : IListener
 
     public void StartListen(Uri url)
     {
-        try
+        if (_listener?.IsListening ?? false)
         {
-            if (_listener.IsListening)
-                _listener.Stop();
-        }
-        catch(ObjectDisposedException)
-        {
-
-        }
-        finally
-        {
-            _listener = new HttpListener();
+            StopListen();
         }
 
+        _listener = new HttpListener();
         _listener.Prefixes.Add(url.ToString());
 
         try
@@ -96,7 +88,7 @@ public class GenericListener : IListener
         {
             try
             {
-                var context = await _listener.GetContextAsync();
+                var context = await (_listener?.GetContextAsync() ?? throw new Exception("Listener is null"));
                 token.ThrowIfCancellationRequested();
 
                 var path = context.Request.RawUrl;
@@ -114,33 +106,26 @@ public class GenericListener : IListener
 
                 context.Response.Close();
             }
-            catch (OperationCanceledException)
+            catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException or HttpListenerException)
             {
-                if(_listener.IsListening)
-                    _listener.Stop();
-                return;
-            }
-            catch (ObjectDisposedException)
-            {
-                _listener = new HttpListener();
                 return;
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-
-                if (!_listener.IsListening)
-                    return;
+                return;
             }
         }
     }
 
     public void StopListen()
     {
-        if (_listener.IsListening)
+        if (_listener?.IsListening ?? false)
         {
             _cst?.Cancel();
+            _cst?.Dispose();
             _listener.Stop();
+            _listener = null;
         }
 
         _logger.LogInfo("Stopped listening");

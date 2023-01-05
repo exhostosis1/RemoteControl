@@ -1,19 +1,20 @@
-﻿using Shared.ControlProcessor;
+﻿using Shared.Config;
+using Shared.ControlProcessor;
 
 namespace RemoteControlWinForms;
 
-internal sealed class ServerPanel : MyPanel
+internal class ServerPanel : MyPanel
 {
     private readonly Label _schemeLabel = new()
     {
         Text = @"Scheme",
-        Location = new Point(3, 36),
-        Size = new Size(43, 15)
+        Location = new Point(6, 36),
+        Size = new Size(50, 15)
     };
 
     private readonly TextBox _schemeTextBox = new()
     {
-        Location = new Point(61, 32),
+        Location = new Point(60, 32),
         Size = new Size(53, 23)
     };
 
@@ -49,6 +50,10 @@ internal sealed class ServerPanel : MyPanel
         _hostTextBox.Text = processor.CurrentConfig.Host;
         _portTextBox.Text = processor.CurrentConfig.Port.ToString();
 
+        _schemeTextBox.TextChanged += EnableUpdateButton;
+        _hostTextBox.TextChanged += EnableUpdateButton;
+        _portTextBox.TextChanged += EnableUpdateButton;
+
         this.Controls.AddRange(new Control[]
         {
             _schemeLabel,
@@ -58,5 +63,50 @@ internal sealed class ServerPanel : MyPanel
             _portLabel,
             _portTextBox
         });
+    }
+
+    protected override void UpdateButtonClick(object? sender, EventArgs e)
+    {
+        _schemeTextBox.ResetBackColor();
+        _hostTextBox.ResetBackColor();
+        _portTextBox.ResetBackColor();
+        NameTextBox.ResetBackColor();
+
+        if (string.IsNullOrWhiteSpace(NameTextBox.Text))
+        {
+            NameTextBox.BackColor = Color.OrangeRed;
+            return;
+        }
+
+        if (!int.TryParse(_portTextBox.Text, out var port))
+        {
+            _portTextBox.BackColor = Color.OrangeRed;
+            return;
+        }
+
+        Uri? uri;
+        try
+        {
+            uri = new UriBuilder(_schemeTextBox.Text, _hostTextBox.Text, port).Uri;
+        }
+        catch
+        {
+            _schemeTextBox.BackColor = Color.OrangeRed;
+            _portTextBox.BackColor = Color.OrangeRed;
+            _hostTextBox.BackColor = Color.OrangeRed;
+
+            return;
+        }
+
+        var config = new ServerConfig
+        {
+            Autostart = AutostartBox.Checked,
+            Uri = uri,
+            Name = NameTextBox.Text
+        };
+
+        RaiseUpdateButtonClickedEvent(config);
+
+        UpdateButton.Enabled = false;
     }
 }

@@ -3,6 +3,7 @@ using Shared.Config;
 using Shared.Controllers;
 using Shared.ControlProcessor;
 using Shared.Logging.Interfaces;
+using System.Net.Sockets;
 
 namespace Bots;
 
@@ -25,7 +26,7 @@ public class TelegramBot: IBotProcessor
     CommonConfig IControlProcessor.CurrentConfig
     {
         get => CurrentConfig;
-        set => CurrentConfig = value as BotConfig ?? DefaultConfig;
+        set => CurrentConfig = value as BotConfig ?? CurrentConfig;
     }
 
     private readonly ICommandExecutor _executor;
@@ -46,11 +47,17 @@ public class TelegramBot: IBotProcessor
         _logger = logger;
         _executor = executor;
 
-        _progress = new Progress<bool>(result => Working = result);
+        _progress = new Progress<bool>(result =>
+        {
+            _logger.LogInfo(result ? $"Telegram Bot starts responding to {CurrentConfig.UsernamesString}" : "Telegram bot stopped");
+            Working = result;
+        });
     }
 
     public void Start(BotConfig? config)
     {
+        if (Working) Stop();
+
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
@@ -69,58 +76,76 @@ public class TelegramBot: IBotProcessor
 #pragma warning restore CS4014
     }
 
-    private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, IProgress<bool> progress, CancellationToken token)
+    private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, IProgress<bool> progress,
+        CancellationToken token)
     {
-        _logger.LogInfo($"Telegram Bot starts responding to {string.Join(',', usernames)}");
         progress.Report(true);
+        var internetMessageShown = false;
 
         while (!token.IsCancellationRequested)
         {
             try
             {
-                var response = await wrapper.GetUpdates();
+                var response = await wrapper.GetUpdates(token);
+                token.ThrowIfCancellationRequested();
+
+                internetMessageShown = false;
 
                 if (!response.Ok || response.Result.Length == 0)
                     continue;
 
                 var messages = response.Result
-                    .Where(x => usernames.Any(y => y == x.Message?.From?.Username) &&
-                                (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10)
-                    .Select(x => (x.Message?.Chat?.Id, x.Message?.Text))
-                    .Where(x => x.Id.HasValue && !string.IsNullOrWhiteSpace(x.Text));
+                    .Where(x =>
+                        usernames.Any(y => y == x.Message?.From?.Username) &&
+                        (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10 &&
+                        x.Message?.Chat?.Id != null &&
+                        !string.IsNullOrWhiteSpace(x.Message?.Text))
+                    .Select(x => (x.Message!.Chat!.Id, x.Message.Text!));
 
                 foreach (var (id, command) in messages)
                 {
                     try
                     {
-                        var result = _executor.Execute(command!);
-                        await wrapper.SendResponse(id!.Value, result, _buttons);
+                        var result = _executor.Execute(command);
+                        await wrapper.SendResponse(id, result, token, _buttons);
+                    }
+                    catch (Exception e) when (e is OperationCanceledException or TaskCanceledException)
+                    {
+                        throw;
                     }
                     catch (Exception e)
                     {
                         _logger.LogError(e.Message);
-                        continue;
                     }
+                }
+            }
+            catch (Exception e) when (e is TaskCanceledException or OperationCanceledException)
+            {
+                break;
+            }
+            catch (Exception e) when (e is TimeoutException || e.InnerException is SocketException)
+            {
+                if (!internetMessageShown)
+                {
+                    _logger.LogError("Internet seems off");
+                    internetMessageShown = true;
                 }
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                continue;
             }
-            finally
+
+            try
             {
-                try
-                {
-                    await Task.Delay(RefreshTime, token);
-                }
-                catch (TaskCanceledException)
-                {
-                }
+                await Task.Delay(RefreshTime, token);
+            }
+            catch (TaskCanceledException)
+            {
+                break;
             }
         }
 
-        _logger.LogInfo("Telegram Bot stopped");
         progress.Report(false);
     }
 
@@ -135,6 +160,8 @@ public class TelegramBot: IBotProcessor
 
     public void Stop()
     {
+        if (!Working) return;
+
         try
         {
             _cts?.Cancel();
