@@ -42,8 +42,6 @@ public partial class WinFormsUI : Form, IUserInterface
             CloseToolStripMenuItem
         };
 
-        AutostartStripMenuItem.Checked = IsAutostart;
-
         Width = 550;
         Height = 40;
 

@@ -62,6 +62,7 @@ public static class Main
         });
 
         ui.SetViewModel(ControlProcessors);
+        ui.SetAutostartValue(container.AutostartService.CheckAutostart());
 
         ui.StartEvent += index =>
         {
