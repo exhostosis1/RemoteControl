@@ -65,6 +65,7 @@ public sealed partial class MainForm : Form, IUserInterface
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
         
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
+        ApplyTheme();
     }
 
     public void RunUI()
@@ -79,14 +80,19 @@ public sealed partial class MainForm : Form, IUserInterface
         var theme = darkMode ? _darkTheme : _lightTheme;
 
         TaskbarNotifyIcon.Icon = darkMode ? _lightIcon : _darkIcon;
-        
+
         if (InvokeRequired)
         {
-            Invoke(() => Icon = darkMode ? _lightIcon : _darkIcon);
+            Invoke(() =>
+            {
+                Icon = darkMode ? _lightIcon : _darkIcon;
+                DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
+            });
         }
         else
         {
             Icon = darkMode ? _lightIcon : _darkIcon;
+            DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
         }
 
         theme.ApplyTheme(this);
@@ -104,7 +110,6 @@ public sealed partial class MainForm : Form, IUserInterface
     public void SetViewModel(List<IControlProcessor> model)
     {
         _model = model;
-        RedrawWindow();
     }
 
     public void SetAutostartValue(bool value) => IsAutostart = value;
@@ -112,6 +117,56 @@ public sealed partial class MainForm : Form, IUserInterface
     public void ShowError(string message)
     {
         MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
+    }
+
+    private void RedrawWindow()
+    {
+        var height = GroupMargin;
+        Controls.Clear();
+
+        for (var i = 0; i < _model.Count; i++)
+        {
+            var processor = _model[i];
+            MyPanel group;
+
+            switch (processor)
+            {
+                case IServerProcessor s:
+                    group = new ServerPanel(s, i)
+                    {
+                        Top = height
+                    };
+                    break;
+                case IBotProcessor b:
+                    group = new BotPanel(b, i)
+                    {
+                        Top = height
+                    };
+                    break;
+                default:
+                    continue;
+            }
+
+            group.StartButtonClicked += x => StartEvent?.Invoke(x);
+            group.StopButtonClicked += x => StopEvent?.Invoke(x);
+            group.UpdateButtonClicked += (index, config) => ConfigChangedEvent?.Invoke(index, config);
+
+            Controls.Add(group);
+            height += group.Height + GroupMargin;
+        }
+
+        AddServerButton.Top = height;
+        AddBotButton.Top = height;
+
+        Controls.Add(AddServerButton);
+        Controls.Add(AddBotButton);
+
+        Height = height + AddServerButton.Height + GroupMargin + 40;
+
+        Location = new Point(Screen.PrimaryScreen?.WorkingArea.Width / 2 - Width / 2 ?? 0,
+            Screen.PrimaryScreen?.WorkingArea.Height / 2 - Height / 2 ?? 0);
+
+        ApplyTheme();
     }
 
     private void SetContextMenu()
@@ -219,53 +274,6 @@ public sealed partial class MainForm : Form, IUserInterface
         }
     }
 
-    private void RedrawWindow()
-    {
-        var height = GroupMargin;
-        Controls.Clear();
-
-        for (var i = 0; i < _model.Count; i++)
-        {
-            var processor = _model[i];
-            MyPanel group;
-
-            switch (processor)
-            {
-                case IServerProcessor s:
-                    group = new ServerPanel(s, i)
-                    {
-                        Top = height
-                    };
-                    break;
-                case IBotProcessor b:
-                    group = new BotPanel(b, i)
-                    {
-                        Top = height
-                    };
-                    break;
-                default:
-                    continue;
-            }
-
-            group.StartButtonClicked += x => StartEvent?.Invoke(x);
-            group.StopButtonClicked += x => StopEvent?.Invoke(x);
-            group.UpdateButtonClicked += (index, config) => ConfigChangedEvent?.Invoke(index, config);
-            
-            Controls.Add(group);
-            height += group.Height + GroupMargin;
-        }
-
-        AddServerButton.Top = height;
-        AddBotButton.Top = height;
-
-        Controls.Add(AddServerButton);
-        Controls.Add(AddBotButton);
-        
-        Height = height + AddServerButton.Height + GroupMargin + 40;
-
-        ApplyTheme();
-    }
-
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
     {
         if (e.Button == MouseButtons.Left)
@@ -281,14 +289,6 @@ public sealed partial class MainForm : Form, IUserInterface
         Hide();
     }
 
-    private void taskbarNotify_MouseClick(object sender, MouseEventArgs e)
-    {
-        if (e.Button == MouseButtons.Right)
-        {
-            SetContextMenu();
-        }
-    }
-
     private void AddServerButton_Click(object sender, EventArgs e)
     {
         ProcessorAddedEvent?.Invoke("server");
@@ -297,5 +297,14 @@ public sealed partial class MainForm : Form, IUserInterface
     private void AddBotButton_Click(object sender, EventArgs e)
     {
         ProcessorAddedEvent?.Invoke("bot");
+    }
+
+    private void TaskbarNotifyIcon_MouseClick(object sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Right)
+        {
+            SetContextMenu();
+            MainContextMenuStrip.Location = new Point(MousePosition.X - MainContextMenuStrip.Width, MousePosition.Y - MainContextMenuStrip.Height);
+        }
     }
 }

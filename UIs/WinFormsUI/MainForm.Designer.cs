@@ -52,7 +52,7 @@
             this.TaskbarNotifyIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("TaskbarNotifyIcon.Icon")));
             this.TaskbarNotifyIcon.Text = "Remote Control";
             this.TaskbarNotifyIcon.Visible = true;
-            this.TaskbarNotifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.taskbarNotify_MouseClick);
+            this.TaskbarNotifyIcon.MouseClick += new System.Windows.Forms.MouseEventHandler(this.TaskbarNotifyIcon_MouseClick);
             this.TaskbarNotifyIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.TaskbarNotify_MouseDoubleClick);
             // 
             // AddFirewallRuleToolStripMenuItem
