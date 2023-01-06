@@ -57,6 +57,16 @@ internal class ServerPanel : MyPanel
         _hostTextBox.TextChanged += EnableUpdateButton;
         _portTextBox.TextChanged += EnableUpdateButton;
 
+        _portTextBox.TextChanged += (sender, args) =>
+        {
+            _portTextBox.Text = new string(_portTextBox.Text.ToCharArray().Where(char.IsDigit).ToArray());
+            if (_portTextBox.Text.Length > 5)
+                _portTextBox.Text = _portTextBox.Text[..5];
+
+            _portTextBox.SelectionStart = _portTextBox.Text.Length;
+            _portTextBox.SelectionLength = 0;
+        };
+
         Controls.AddRange(new Control[]
         {
             _schemeLabel,

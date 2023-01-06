@@ -19,7 +19,7 @@ internal abstract class MyPanel : Panel
 
     protected readonly TextBox NameTextBox = new()
     {
-        Location = new Point(60, 3),
+        Location = new Point(60, 6),
         Size = new Size(155, 23),
         BorderStyle = BorderStyle.FixedSingle
     };
@@ -27,14 +27,14 @@ internal abstract class MyPanel : Panel
     protected readonly CheckBox AutostartBox = new()
     {
         Text = @"Autostart",
-        Location = new Point(419, 28),
+        Location = new Point(419, 34),
         Size = new Size(75, 19),
     };
 
     protected readonly Button StartButton = new()
     {
         Text = @"Start",
-        Location = new Point(419, 2),
+        Location = new Point(419, 5),
         Size = new Size(75, 23),
         Visible = false,
         FlatStyle = FlatStyle.Flat,
@@ -44,7 +44,7 @@ internal abstract class MyPanel : Panel
     protected readonly Button StopButton = new()
     {
         Text = @"Stop",
-        Location = new Point(419, 2),
+        Location = new Point(419, 5),
         Size = new Size(75, 23),
         Visible = false,
         FlatStyle = FlatStyle.Flat,
@@ -53,7 +53,7 @@ internal abstract class MyPanel : Panel
     protected readonly Button UpdateButton = new()
     {
         Text = @"Update",
-        Location = new Point(419, 53),
+        Location = new Point(419, 57),
         Size = new Size(75, 23),
         Enabled = false,
         FlatStyle = FlatStyle.Flat

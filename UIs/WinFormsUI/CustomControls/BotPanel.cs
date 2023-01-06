@@ -36,13 +36,13 @@ internal sealed class BotPanel : MyPanel
     private readonly Label _userIdsLabel = new()
     {
         Text = @"User IDs",
-        Location = new Point(221, 3),
+        Location = new Point(221, 6),
         Size = new Size(50, 15)
     };
 
     private readonly TextBox _userIdsListBox = new()
     {
-        Location = new Point(276, 3),
+        Location = new Point(276, 6),
         Size = new Size(128, 49),
         Multiline = true,
         BorderStyle = BorderStyle.FixedSingle
