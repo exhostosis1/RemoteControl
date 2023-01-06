@@ -1,14 +1,14 @@
-﻿using Microsoft.Win32;
-using Shared;
+﻿using Shared;
 using Shared.Config;
 using Shared.ControlProcessor;
 using Shared.UI;
+using Windows.UI.ViewManagement;
 using WinFormsUI.CustomControls;
 
 namespace WinFormsUI;
 
 // ReSharper disable once InconsistentNaming
-public partial class MainForm : Form, IUserInterface
+public sealed partial class MainForm : Form, IUserInterface
 {
     private readonly ToolStripItem[] _commonMenuItems;
 
@@ -21,18 +21,34 @@ public partial class MainForm : Form, IUserInterface
 
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
-    private static bool IsDarkMode => Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", "AppsUseLightTheme", -1) as int? == 1;
+    
     private List<IControlProcessor> _model = new();
+
+    private readonly Theme _lightTheme = new()
+    {
+        BackgroundColor = SystemColors.Control,
+        ForegroundColor = SystemColors.ControlText,
+        TextBoxBackgroundColor = SystemColors.ControlLightLight
+    };
+
+    private readonly Theme _darkTheme = new()
+    {
+        BackgroundColor = Color.FromArgb(40, 40, 40),
+        ForegroundColor = SystemColors.Control,
+        TextBoxBackgroundColor = Color.FromArgb(45, 45, 45)
+    };
+
+    private readonly Windows.UI.Color _colorBlack = Windows.UI.Color.FromArgb(255, 0, 0, 0);
+
+    private readonly UISettings _settings = new();
+    private bool IsDarkMode => _settings.GetColorValue(UIColorType.Background) == _colorBlack;
+
+    private readonly Icon _darkIcon = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Icons\\Device.theme-light.ico"));
+    private readonly Icon _lightIcon = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Icons\\Device.theme-dark.ico"));
 
     public MainForm()
     {
         InitializeComponent();
-
-        var icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory,
-            IsDarkMode ? "Icons\\Device.theme-light.ico" : "Icons\\Device.theme-dark.ico"));
-
-        TaskbarNotifyIcon.Icon = icon;
-        Icon = icon;
 
         _commonMenuItems = new ToolStripItem[]
         {
@@ -47,12 +63,42 @@ public partial class MainForm : Form, IUserInterface
         Height = 40;
 
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
+        
+        _settings.ColorValuesChanged += (_, _) => ApplyTheme();
     }
 
     public void RunUI()
     {
         Application.EnableVisualStyles();
         Application.Run(this);
+    }
+
+    private void ApplyTheme()
+    {
+        var darkMode = IsDarkMode;
+        var theme = darkMode ? _darkTheme : _lightTheme;
+
+        TaskbarNotifyIcon.Icon = darkMode ? _lightIcon : _darkIcon;
+        
+        if (InvokeRequired)
+        {
+            Invoke(() => Icon = darkMode ? _lightIcon : _darkIcon);
+        }
+        else
+        {
+            Icon = darkMode ? _lightIcon : _darkIcon;
+        }
+
+        theme.ApplyTheme(this);
+        theme.ApplyTheme(MainContextMenuStrip);
+
+        var textBoxes =
+            (from Control control in Controls
+                where control is MyPanel
+                from Control controlControl in control.Controls
+                select controlControl).OfType<TextBox>().Cast<Control>().ToList();
+
+        textBoxes.ForEach(x => theme.ApplyTheme(x));
     }
 
     public void SetViewModel(List<IControlProcessor> model)
@@ -216,6 +262,8 @@ public partial class MainForm : Form, IUserInterface
         Controls.Add(AddBotButton);
         
         Height = height + AddServerButton.Height + GroupMargin + 40;
+
+        ApplyTheme();
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)

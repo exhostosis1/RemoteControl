@@ -15,7 +15,8 @@ internal sealed class BotPanel : MyPanel
     private readonly TextBox _apiUrlTextBox = new()
     {
         Location = new Point(60, 32),
-        Size = new Size(155, 23)
+        Size = new Size(155, 23),
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     private readonly Label _apiKeyLabel = new()
@@ -28,7 +29,8 @@ internal sealed class BotPanel : MyPanel
     private readonly TextBox _apiKeyTextBox = new()
     {
         Location = new Point(60, 58),
-        Size = new Size(344, 23)
+        Size = new Size(344, 23),
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     private readonly Label _userIdsLabel = new()
@@ -42,7 +44,8 @@ internal sealed class BotPanel : MyPanel
     {
         Location = new Point(276, 3),
         Size = new Size(128, 49),
-        Multiline = true
+        Multiline = true,
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     public BotPanel(IBotProcessor processor, int index) : base(processor, index)

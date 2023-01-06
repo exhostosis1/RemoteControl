@@ -43,6 +43,7 @@
             // MainContextMenuStrip
             // 
             this.MainContextMenuStrip.Name = "contextMenuStrip1";
+            this.MainContextMenuStrip.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
             this.MainContextMenuStrip.Size = new System.Drawing.Size(61, 4);
             // 
             // TaskbarNotifyIcon
@@ -82,39 +83,40 @@
             // 
             // AddServerButton
             // 
+            this.AddServerButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.AddServerButton.Location = new System.Drawing.Point(144, 163);
             this.AddServerButton.Name = "AddServerButton";
             this.AddServerButton.Size = new System.Drawing.Size(75, 23);
             this.AddServerButton.TabIndex = 1;
             this.AddServerButton.Text = "Add Server";
-            this.AddServerButton.UseVisualStyleBackColor = true;
+            this.AddServerButton.UseVisualStyleBackColor = false;
             this.AddServerButton.Click += new System.EventHandler(this.AddServerButton_Click);
             // 
             // AddBotButton
             // 
+            this.AddBotButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.AddBotButton.Location = new System.Drawing.Point(289, 163);
             this.AddBotButton.Name = "AddBotButton";
             this.AddBotButton.Size = new System.Drawing.Size(75, 23);
             this.AddBotButton.TabIndex = 2;
             this.AddBotButton.Text = "Add Bot";
-            this.AddBotButton.UseVisualStyleBackColor = true;
+            this.AddBotButton.UseVisualStyleBackColor = false;
             this.AddBotButton.Click += new System.EventHandler(this.AddBotButton_Click);
             // 
-            // WinFormsUI
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.ClientSize = new System.Drawing.Size(532, 198);
+            this.ContextMenuStrip = this.MainContextMenuStrip;
             this.Controls.Add(this.AddBotButton);
             this.Controls.Add(this.AddServerButton);
-            this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.KeyPreview = true;
             this.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
             this.MaximizeBox = false;
-            this.Name = "WinFormsUI";
+            this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Remote Control";
             this.TopMost = true;

@@ -7,9 +7,7 @@ namespace WinFormsUI.CustomControls;
 internal abstract class MyPanel : Panel
 {
     public int ProcessorIndex { get; init; }
-
     protected readonly IControlProcessor ControlProcessor;
-
     protected readonly SynchronizationContext? SynchronizationContext;
 
     protected readonly Label NameLabel = new()
@@ -22,14 +20,15 @@ internal abstract class MyPanel : Panel
     protected readonly TextBox NameTextBox = new()
     {
         Location = new Point(60, 3),
-        Size = new Size(155, 23)
+        Size = new Size(155, 23),
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     protected readonly CheckBox AutostartBox = new()
     {
         Text = @"Autostart",
         Location = new Point(419, 28),
-        Size = new Size(75, 19)
+        Size = new Size(75, 19),
     };
 
     protected readonly Button StartButton = new()
@@ -37,7 +36,9 @@ internal abstract class MyPanel : Panel
         Text = @"Start",
         Location = new Point(419, 2),
         Size = new Size(75, 23),
-        Visible = false
+        Visible = false,
+        FlatStyle = FlatStyle.Flat,
+        
     };
 
     protected readonly Button StopButton = new()
@@ -45,7 +46,8 @@ internal abstract class MyPanel : Panel
         Text = @"Stop",
         Location = new Point(419, 2),
         Size = new Size(75, 23),
-        Visible = false
+        Visible = false,
+        FlatStyle = FlatStyle.Flat,
     };
 
     protected readonly Button UpdateButton = new()
@@ -53,7 +55,8 @@ internal abstract class MyPanel : Panel
         Text = @"Update",
         Location = new Point(419, 53),
         Size = new Size(75, 23),
-        Enabled = false
+        Enabled = false,
+        FlatStyle = FlatStyle.Flat
     };
 
     public event IntEventHandler? StartButtonClicked;
@@ -109,59 +112,57 @@ internal abstract class MyPanel : Panel
 
     protected abstract void UpdateButtonClick(object? sender, EventArgs e);
 
-    protected void StartButtonClick(object? sender, EventArgs args)
+    protected async void StartButtonClick(object? sender, EventArgs args)
     {
         StartButtonClicked?.Invoke(ProcessorIndex);
 
         StartButton.Enabled = false;
 
-        Task.Run(async () =>
-        {
-            while (true)
-            {
-                if (!ControlProcessor.Working)
-                {
-                    await Task.Delay(100);
-                    continue;
-                }
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var token = cts.Token;
 
-                SynchronizationContext?.Post(_ =>
-                {
-                    StartButton.Visible = false;
-                    StopButton.Visible = true;
-                    StopButton.Enabled = true;
-                }, null);
-
-                return;
-            }
-        });
+        await WaitForWork(true, token);
     }
 
-    protected void StopButtonClick(object? sender, EventArgs args)
+    protected async void StopButtonClick(object? sender, EventArgs args)
     {
         StopButtonClicked?.Invoke(ProcessorIndex);
 
         StopButton.Enabled = false;
 
-        Task.Run(async () =>
+        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var token = cts.Token;
+
+        await WaitForWork(false, token);
+    }
+
+    private async Task WaitForWork(bool started, CancellationToken token)
+    {
+        var buttonToDisable = started ? StartButton : StopButton;
+        var buttonToEnable = started ? StopButton : StartButton;
+
+        while (!token.IsCancellationRequested)
         {
-            while (true)
+            if (started ? !ControlProcessor.Working : ControlProcessor.Working)
             {
-                if (ControlProcessor.Working)
+                try
                 {
-                    await Task.Delay(100);
-                    continue;
+                    await Task.Delay(100, token);
                 }
-
-                SynchronizationContext?.Post(_ =>
+                catch (TaskCanceledException)
                 {
-                    StopButton.Visible = false;
-                    StartButton.Visible = true;
-                    StartButton.Enabled = true;
-                }, null);
-
-                return;
+                    return;
+                }
             }
-        });
+
+            SynchronizationContext?.Post(_ =>
+            {
+                buttonToDisable.Visible = false;
+                buttonToEnable.Visible = true;
+                buttonToEnable.Enabled = true;
+            }, null);
+
+            return;
+        }
     }
 }

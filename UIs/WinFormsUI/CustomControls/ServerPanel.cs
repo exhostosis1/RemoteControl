@@ -15,7 +15,8 @@ internal class ServerPanel : MyPanel
     private readonly TextBox _schemeTextBox = new()
     {
         Location = new Point(60, 32),
-        Size = new Size(53, 23)
+        Size = new Size(53, 23),
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     private readonly Label _hostLabel = new()
@@ -28,7 +29,8 @@ internal class ServerPanel : MyPanel
     private readonly TextBox _hostTextBox = new()
     {
         Location = new Point(155, 32),
-        Size = new Size(143, 23)
+        Size = new Size(143, 23),
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     private readonly Label _portLabel = new()
@@ -41,7 +43,8 @@ internal class ServerPanel : MyPanel
     private readonly TextBox _portTextBox = new()
     {
         Location = new Point(338, 32),
-        Size = new Size(35, 23)
+        Size = new Size(35, 23),
+        BorderStyle = BorderStyle.FixedSingle
     };
 
     public ServerPanel(IServerProcessor processor, int index) : base(processor, index)
