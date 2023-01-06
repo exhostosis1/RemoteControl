@@ -9,6 +9,7 @@ public interface IListener
     public IReadOnlyCollection<Uri> ListeningUris { get; }
 
     public event HttpEventHandler? OnRequest;
+    public event BoolEventHandler? OnStatusChange;
 
     public void StartListen(Uri url);
 

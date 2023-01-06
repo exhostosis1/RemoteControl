@@ -76,6 +76,16 @@ internal class ServerPanel : MyPanel
             _portLabel,
             _portTextBox
         });
+
+        processor.ConfigChanged += config =>
+        {
+            var c = (ServerConfig)config;
+            NameTextBox.Text = c.Name;
+            AutostartBox.Checked = c.Autostart;
+            _schemeTextBox.Text = c.Scheme;
+            _hostTextBox.Text = c.Host;
+            _portTextBox.Text = c.Port.ToString();
+        };
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)

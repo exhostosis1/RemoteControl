@@ -60,8 +60,7 @@ public static class Program
             if (x.CurrentConfig.Autostart)
                 x.Start();
         });
-
-        ui.SetViewModel(ControlProcessors);
+        
         ui.SetAutostartValue(container.AutostartService.CheckAutostart());
 
         ui.StartEvent += index =>
@@ -101,8 +100,6 @@ public static class Program
                 default:
                     return;
             }
-
-            ui.SetViewModel(ControlProcessors);
         };
 
         ui.AutostartChangedEvent += value =>
@@ -124,8 +121,6 @@ public static class Program
 
             config = GetConfig(ControlProcessors);
             container.ConfigProvider.SetConfig(config);
-
-            ui.SetViewModel(ControlProcessors);
         };
 
         ui.CloseEvent += () =>
@@ -133,6 +128,6 @@ public static class Program
             Environment.Exit(0);
         };
 
-        ui.RunUI();
+        ui.RunUI(ControlProcessors);
     }
 }

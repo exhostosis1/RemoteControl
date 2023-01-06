@@ -11,10 +11,8 @@ public class MainConsole: IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigEventHandler? ConfigChangedEvent;
+    public event ConfigWithIndexEventHandler? ConfigChangedEvent;
     public event StringEventHandler? ProcessorAddedEvent;
-
-    public void SetViewModel(List<IControlProcessor> model) => Model = model;
 
     public void SetAutostartValue(bool value)
     {
@@ -26,8 +24,9 @@ public class MainConsole: IUserInterface
     private bool IsAutostart { get; set; }
 
     // ReSharper disable once InconsistentNaming
-    public void RunUI()
+    public void RunUI(IEnumerable<IControlProcessor> processors)
     {
+        Model = processors.ToList();
         DisplayInfo(Model);
 
         while (true)

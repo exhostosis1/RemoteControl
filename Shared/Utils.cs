@@ -1,4 +1,4 @@
-﻿using Shared.Controllers;
+﻿using Shared.ApiControllers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,7 +8,6 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using Shared.ApiControllers;
 
 namespace Shared;
 
@@ -129,5 +128,13 @@ public static partial class Utils
         return new ControllersWithMethods(controllers.ToDictionary(
             x => x.GetType().Name.Replace("Controller", "").ToLower(),
             x => x.GetMethods()));
+    }
+
+    public static void AddFirewallRule(Uri uri)
+    {
+        var command =
+            $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
+
+        RunWindowsCommandAsAdmin(command);
     }
 }

@@ -1,10 +1,10 @@
 ﻿using Bots.Telegram;
+using Shared.ApiControllers;
 using Shared.Config;
-using Shared.Controllers;
 using Shared.ControlProcessor;
 using Shared.Logging.Interfaces;
 using System.Net.Sockets;
-using Shared.ApiControllers;
+using Shared;
 
 namespace Bots;
 
@@ -18,16 +18,27 @@ public class TelegramBot: IBotProcessor
         ApiUri = "https://api.telegram.org/bot"
     };
 
+    public event ConfigEventHandler? ConfigChanged;
     public bool Working { get; private set; }
 
     private const int RefreshTime = 1_000;
 
-    public BotConfig CurrentConfig { get; set; }
+    public BotConfig CurrentConfig
+    {
+        get => _currentConfig;
+        set
+        {
+            _currentConfig = value;
+            ConfigChanged?.Invoke(value);
+        }
+    }
+
+    private BotConfig _currentConfig;
 
     CommonConfig IControlProcessor.CurrentConfig
     {
-        get => CurrentConfig;
-        set => CurrentConfig = value as BotConfig ?? CurrentConfig;
+        get => _currentConfig;
+        set => _currentConfig = value as BotConfig ?? _currentConfig;
     }
 
     private readonly ICommandExecutor _executor;
@@ -38,31 +49,35 @@ public class TelegramBot: IBotProcessor
     };
 
     private CancellationTokenSource? _cts;
-
     private readonly Progress<bool> _progress;
+    private readonly List<IObserver<bool>> _observers = new();
 
     public TelegramBot(ICommandExecutor executor, ILogger logger, BotConfig? config = null)
     {
-        CurrentConfig = config ?? DefaultConfig;
+        _currentConfig = config ?? DefaultConfig;
 
         _logger = logger;
         _executor = executor;
 
         _progress = new Progress<bool>(result =>
         {
-            _logger.LogInfo(result ? $"Telegram Bot starts responding to {CurrentConfig.UsernamesString}" : "Telegram bot stopped");
+            _logger.LogInfo(result ? $"Telegram Bot starts responding to {_currentConfig.UsernamesString}" : "Telegram bot stopped");
             Working = result;
+            _observers.ForEach(x => x.OnNext(result));
         });
     }
 
     public void Start(BotConfig? config)
     {
+        if(config != null)
+            ConfigChanged?.Invoke(config);
+
         if (Working) Stop();
 
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
-        var c = config ?? CurrentConfig;
+        var c = config ?? _currentConfig;
 
         if(string.IsNullOrWhiteSpace(c.ApiUri) || string.IsNullOrWhiteSpace(c.ApiKey))
         {
@@ -70,7 +85,7 @@ public class TelegramBot: IBotProcessor
             return;
         }
 
-        CurrentConfig = c;
+        _currentConfig = c;
 
 #pragma warning disable CS4014
         Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), _progress, token);
@@ -80,9 +95,9 @@ public class TelegramBot: IBotProcessor
     private async Task Listen(ICollection<string> usernames, TelegramBotApiWrapper wrapper, IProgress<bool> progress,
         CancellationToken token)
     {
-        progress.Report(true);
         var internetMessageShown = false;
 
+        progress.Report(true);
         while (!token.IsCancellationRequested)
         {
             try
@@ -153,11 +168,11 @@ public class TelegramBot: IBotProcessor
     public void Restart(BotConfig? config)
     {
         Stop();
-        Start(config ?? CurrentConfig);
+        Start(config ?? _currentConfig);
     }
 
-    public void Start(CommonConfig? config) => Start(config as BotConfig ?? CurrentConfig);
-    public void Restart(CommonConfig? config) => Restart(config as BotConfig ?? CurrentConfig);
+    public void Start(CommonConfig? config) => Start(config as BotConfig ?? _currentConfig);
+    public void Restart(CommonConfig? config) => Restart(config as BotConfig ?? _currentConfig);
 
     public void Stop()
     {
@@ -171,5 +186,11 @@ public class TelegramBot: IBotProcessor
         catch (ObjectDisposedException)
         {
         }
+    }
+
+    public IDisposable Subscribe(IObserver<bool> observer)
+    {
+        _observers.Add(observer);
+        return new Unsubscriber<bool>(_observers, observer);
     }
 }

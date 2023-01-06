@@ -16,15 +16,18 @@ public class GenericListener : IListener
     public IReadOnlyCollection<Uri> ListeningUris => _listener?.Prefixes.Select(x => new Uri(x)).ToList() ?? new List<Uri>();
 
     public event HttpEventHandler? OnRequest;
+    public event BoolEventHandler? OnStatusChange;
 
     private readonly ILogger _logger;
+
+    private CancellationTokenSource? _cst;
+    private readonly Progress<bool> _progress;
 
     public GenericListener(ILogger logger)
     {
         _logger = logger;
+        _progress = new Progress<bool>(status => OnStatusChange?.Invoke(status));
     }
-
-    private CancellationTokenSource? _cst;
 
     public void StartListen(Uri url)
     {
@@ -75,15 +78,17 @@ public class GenericListener : IListener
         }
 
         _cst = new CancellationTokenSource();
+
 #pragma warning disable CS4014
-        ProcessRequest(_cst.Token);
+        ProcessRequest(_progress, _cst.Token);
 #pragma warning restore CS4014
 
         _logger.LogInfo($"Started listening on {url}");
     }
 
-    private async Task ProcessRequest(CancellationToken token)
+    private async Task ProcessRequest(IProgress<bool> progress, CancellationToken token)
     {
+        progress.Report(true);
         while (!token.IsCancellationRequested)
         {
             try
@@ -108,14 +113,16 @@ public class GenericListener : IListener
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException or HttpListenerException)
             {
-                return;
+                break;
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-                return;
+                break;
             }
         }
+
+        progress.Report(false);
     }
 
     public void StopListen()

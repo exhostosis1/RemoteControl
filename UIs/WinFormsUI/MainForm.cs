@@ -16,7 +16,7 @@ public sealed partial class MainForm : Form, IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigEventHandler? ConfigChangedEvent;
+    public event ConfigWithIndexEventHandler? ConfigChangedEvent;
     public event StringEventHandler? ProcessorAddedEvent;
 
     private const int GroupMargin = 6;
@@ -62,14 +62,15 @@ public sealed partial class MainForm : Form, IUserInterface
         Width = 550;
         Height = 40;
 
-        MainContextMenuStrip.Items.AddRange(_commonMenuItems);
-        
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
-        ApplyTheme();
     }
 
-    public void RunUI()
+    public void RunUI(IEnumerable<IControlProcessor> processors)
     {
+        _model = processors.ToList();
+        DrawWindow();
+        SetContextMenu();
+
         Application.EnableVisualStyles();
         Application.Run(this);
     }
@@ -107,11 +108,6 @@ public sealed partial class MainForm : Form, IUserInterface
         textBoxes.ForEach(x => theme.ApplyTheme(x));
     }
 
-    public void SetViewModel(List<IControlProcessor> model)
-    {
-        _model = model;
-    }
-
     public void SetAutostartValue(bool value) => IsAutostart = value;
 
     public void ShowError(string message)
@@ -119,10 +115,17 @@ public sealed partial class MainForm : Form, IUserInterface
         MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
     }
 
-    private void RedrawWindow()
+    private void DrawWindow()
     {
         var height = GroupMargin;
-        Controls.Clear();
+
+        AddServerButton.Top = height;
+        AddBotButton.Top = height;
+
+        Controls.Add(AddServerButton);
+        Controls.Add(AddBotButton);
+
+        height += AddServerButton.Height + GroupMargin;
 
         for (var i = 0; i < _model.Count; i++)
         {
@@ -155,13 +158,7 @@ public sealed partial class MainForm : Form, IUserInterface
             height += group.Height + GroupMargin;
         }
 
-        AddServerButton.Top = height;
-        AddBotButton.Top = height;
-
-        Controls.Add(AddServerButton);
-        Controls.Add(AddBotButton);
-
-        Height = height + AddServerButton.Height + GroupMargin + 40;
+        Height = height + 40;
 
         Location = new Point(Screen.PrimaryScreen?.WorkingArea.Width / 2 - Width / 2 ?? 0,
             Screen.PrimaryScreen?.WorkingArea.Height / 2 - Height / 2 ?? 0);
@@ -171,52 +168,21 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void SetContextMenu()
     {
-        MainContextMenuStrip.Items.Clear();
+        var groups = new List<ToolStripMenuItemGroup>();
 
         for (var i = 0; i < _model.Count; i++)
         {
-            var processor = _model[i];
+            var group = new ToolStripMenuItemGroup(i, _model[i]);
+            group.OnDescriptionClick += IpToolStripMenuItem_Click;
+            group.OnStartClick += StartToolStripMenuItem_Click;
+            group.OnStopClick += StopToolStripMenuItem_Click;
 
-            MainContextMenuStrip.Items.Add(new ToolStripMenuItem(processor.CurrentConfig.Name) { Enabled = false });
-
-            if (processor.Working)
-            {
-                var item = new ToolStripMenuItem();
-                
-                switch (processor)
-                {
-                    case IServerProcessor s:
-                        item.Text = s.CurrentConfig.Uri?.ToString();
-                        item.Click += IpToolStripMenuItem_Click;
-                        break;
-                    case IBotProcessor b:
-                        item.Text = b.CurrentConfig.UsernamesString;
-                        break;
-                    default:
-                        continue;
-                }
-
-                MainContextMenuStrip.Items.Add(item);
-            }
-            else
-            {
-                MainContextMenuStrip.Items.Add(new ToolStripMenuItem("Stopped") { Enabled = false });
-            }
-
-            var startstopitem = new ToolStripMenuItemWithIndex
-            {
-                Text = processor.Working ? @"Stop" : @"Start",
-                Index = i
-            };
-
-            startstopitem.Click += processor.Working ? StopToolStripMenuItem_Click : StartToolStripMenuItem_Click;
-
-            MainContextMenuStrip.Items.Add(startstopitem);
-            MainContextMenuStrip.Items.Add(new ToolStripSeparator());
+            groups.Add(group);
         }
 
-        AutostartStripMenuItem.Checked = IsAutostart;
+        MainContextMenuStrip.Items.AddRange(groups.SelectMany(x => x.ItemsArray).ToArray());
 
+        AutostartStripMenuItem.Checked = IsAutostart;
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
     }
 
@@ -234,13 +200,13 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void StartToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        if (sender is ToolStripMenuItemWithIndex o)
+        if (sender is ToolStripMenuItemGroup o)
             StartEvent?.Invoke(o.Index);
     }
 
     private void StopToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        if (sender is ToolStripMenuItemWithIndex o)
+        if (sender is ToolStripMenuItemGroup o)
             StopEvent?.Invoke(o.Index);
     }
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -265,20 +231,17 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        foreach (var uri in _model.Where(x => x is IServerProcessor))
-        {
-            var command =
-                $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={(uri.CurrentConfig as ServerConfig)?.Host} localport={(uri.CurrentConfig as ServerConfig)?.Port} protocol=tcp";
-
-            Utils.RunWindowsCommandAsAdmin(command);
-        }
+        _model.Where(x => x.Working && x is IServerProcessor)
+            .Select(x => ((ServerConfig)x.CurrentConfig).Uri)
+            .Where(x => x != null)
+            .Cast<Uri>().ToList()
+            .ForEach(Utils.AddFirewallRule);
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
     {
         if (e.Button == MouseButtons.Left)
         {
-            RedrawWindow();
             Show();
         }
     }
@@ -303,7 +266,6 @@ public sealed partial class MainForm : Form, IUserInterface
     {
         if (e.Button == MouseButtons.Right)
         {
-            SetContextMenu();
             MainContextMenuStrip.Location = new Point(MousePosition.X - MainContextMenuStrip.Width, MousePosition.Y - MainContextMenuStrip.Height);
         }
     }

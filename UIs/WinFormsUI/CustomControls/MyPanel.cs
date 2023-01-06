@@ -61,7 +61,7 @@ internal abstract class MyPanel : Panel
 
     public event IntEventHandler? StartButtonClicked;
     public event IntEventHandler? StopButtonClicked;
-    public event ConfigEventHandler? UpdateButtonClicked;
+    public event ConfigWithIndexEventHandler? UpdateButtonClicked;
 
     protected MyPanel(IControlProcessor processor, int index)
     {
@@ -103,6 +103,8 @@ internal abstract class MyPanel : Panel
             StopButton,
             UpdateButton
         });
+
+        ControlProcessor.Subscribe(new Observer<bool>(SetButtons));
     }
 
     protected void EnableUpdateButton(object? sender, EventArgs e) => UpdateButton.Enabled = true;
@@ -115,54 +117,25 @@ internal abstract class MyPanel : Panel
     protected async void StartButtonClick(object? sender, EventArgs args)
     {
         StartButtonClicked?.Invoke(ProcessorIndex);
-
         StartButton.Enabled = false;
-
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var token = cts.Token;
-
-        await WaitForWork(true, token);
     }
 
     protected async void StopButtonClick(object? sender, EventArgs args)
     {
         StopButtonClicked?.Invoke(ProcessorIndex);
-
         StopButton.Enabled = false;
-
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-        var token = cts.Token;
-
-        await WaitForWork(false, token);
     }
 
-    private async Task WaitForWork(bool started, CancellationToken token)
+    private void SetButtons(bool working)
     {
-        var buttonToDisable = started ? StartButton : StopButton;
-        var buttonToEnable = started ? StopButton : StartButton;
+        var buttonToDisable = working ? StartButton : StopButton;
+        var buttonToEnable = working ? StopButton : StartButton;
 
-        while (!token.IsCancellationRequested)
+        SynchronizationContext?.Post(_ =>
         {
-            if (started ? !ControlProcessor.Working : ControlProcessor.Working)
-            {
-                try
-                {
-                    await Task.Delay(100, token);
-                }
-                catch (TaskCanceledException)
-                {
-                    return;
-                }
-            }
-
-            SynchronizationContext?.Post(_ =>
-            {
-                buttonToDisable.Visible = false;
-                buttonToEnable.Visible = true;
-                buttonToEnable.Enabled = true;
-            }, null);
-
-            return;
-        }
+            buttonToDisable.Visible = false;
+            buttonToEnable.Visible = true;
+            buttonToEnable.Enabled = true;
+        }, null);
     }
 }

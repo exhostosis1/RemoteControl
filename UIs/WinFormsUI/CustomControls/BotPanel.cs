@@ -67,6 +67,17 @@ internal sealed class BotPanel : MyPanel
             _userIdsLabel,
             _userIdsListBox
         });
+
+        processor.ConfigChanged += config =>
+        {
+            var c = (BotConfig)config;
+
+            NameTextBox.Text = c.Name;
+            AutostartBox.Checked = c.Autostart;
+            _apiUrlTextBox.Text = c.ApiUri;
+            _apiKeyTextBox.Text = c.ApiKey;
+            _userIdsListBox.Text = string.Join(Environment.NewLine, c.Usernames);
+        };
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)
