@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows10.0.22621.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PlatformTarget>x64</PlatformTarget>
+    <ApplicationIcon>Device.theme-dark.ico</ApplicationIcon>
+    <AssemblyName>RemoteControl</AssemblyName>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Device.theme-dark.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Autostart\Autostart.csproj" />
+    <ProjectReference Include="..\..\ConfigProviders\ConfigProviders.csproj" />
+    <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
+    <ProjectReference Include="..\..\Logging\Logging.csproj" />
+    <ProjectReference Include="..\..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\..\UIs\WinFormsUI\WinFormsUI.csproj" />
+    <ProjectReference Include="..\..\Web\Web.csproj" />
+    <ProjectReference Include="..\RemoteControl\RemoteControl.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -11,15 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="www\favicon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="www\favicon.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="www\index.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <ProjectReference Include="..\..\ApiControllers\ApiControllers.csproj" />
+    <ProjectReference Include="..\..\ControlProcessors\Bots\Bots.csproj" />
+    <ProjectReference Include="..\..\ControlProcessors\Servers\Servers.csproj" />
+    <ProjectReference Include="..\..\Listeners\Listeners.csproj" />
+    <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

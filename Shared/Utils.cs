@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using Shared.ApiControllers;
 
 namespace Shared;
 
@@ -123,7 +124,7 @@ public static partial class Utils
     public static IEnumerable<string> GetCurrentIPs() =>
         Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
 
-    public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<BaseController> controllers)
+    public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<BaseApiController> controllers)
     {
         return new ControllersWithMethods(controllers.ToDictionary(
             x => x.GetType().Name.Replace("Controller", "").ToLower(),

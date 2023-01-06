@@ -1,4 +1,5 @@
-﻿using Shared.Controllers;
+﻿using Shared.ApiControllers;
+using Shared.Controllers;
 using Shared.Server;
 using Shared.Server.Interfaces;
 
