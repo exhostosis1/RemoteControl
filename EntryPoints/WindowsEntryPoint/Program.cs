@@ -1,7 +1,8 @@
 ﻿using System.Runtime.InteropServices;
+using Windows;
 using Microsoft.Win32;
 
-namespace Windows;
+namespace WindowsEntryPoint;
 
 public static class Program
 {
@@ -24,12 +25,12 @@ public static class Program
 
                     indexes.Clear();
 
-                    for (var i = 0; i < RemoteControl.Main.ControlProcessors.Count; i++)
+                    for (var i = 0; i < RemoteControlMain.Program.ControlProcessors.Count; i++)
                     {
-                        if (RemoteControl.Main.ControlProcessors[i].Working)
+                        if (RemoteControlMain.Program.ControlProcessors[i].Working)
                         {
                             indexes.Add(i);
-                            RemoteControl.Main.ControlProcessors[i].Stop();
+                            RemoteControlMain.Program.ControlProcessors[i].Stop();
                         }
                     }
 
@@ -41,7 +42,7 @@ public static class Program
 
                     foreach (var index in indexes)
                     {
-                        RemoteControl.Main.ControlProcessors[index].Start();
+                        RemoteControlMain.Program.ControlProcessors[index].Start();
                     }
                     break;
                 }
@@ -52,7 +53,7 @@ public static class Program
 
         try
         {
-            RemoteControl.Main.Run(container);
+            RemoteControlMain.Program.Run(container);
         }
         catch (Exception e)
         {

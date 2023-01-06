@@ -16,7 +16,10 @@ public class LocalFileConfigProvider : BaseConfigProvider
         Logger.LogInfo($"Getting config from file {ConfigPath}");
 
         if (!File.Exists(ConfigPath))
-            File.Create(ConfigPath);
+        {
+            Logger.LogWarn("No config file");
+            return new AppConfig();
+        }
 
         AppConfig? result = null;
 

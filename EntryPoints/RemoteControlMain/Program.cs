@@ -4,9 +4,9 @@ using Shared;
 using Shared.Config;
 using Shared.ControlProcessor;
 
-namespace RemoteControl;
+namespace RemoteControlMain;
 
-public static class Main
+public static class Program
 {
     private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null) =>
         new SimpleServer(container.Listener, container.Middleware, container.Logger, config);

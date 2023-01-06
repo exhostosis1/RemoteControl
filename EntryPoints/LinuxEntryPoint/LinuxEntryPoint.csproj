@@ -20,7 +20,7 @@
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
     <ProjectReference Include="..\..\UIs\ConsoleUI\ConsoleUI.csproj" />
     <ProjectReference Include="..\..\Web\Web.csproj" />
-    <ProjectReference Include="..\RemoteControl\RemoteControl.csproj" />
+    <ProjectReference Include="..\RemoteControlMain\RemoteControlMain.csproj" />
   </ItemGroup>
 
 </Project>

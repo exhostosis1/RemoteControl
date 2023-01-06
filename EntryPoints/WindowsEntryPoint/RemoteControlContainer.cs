@@ -1,6 +1,5 @@
 ﻿using Autostart;
 using ConfigProviders;
-using ConsoleUI;
 using ControlProviders;
 using Logging;
 using Shared;
@@ -8,8 +7,9 @@ using Shared.Config;
 using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 using Shared.UI;
+using WinFormsUI;
 
-namespace Linux;
+namespace WindowsEntryPoint;
 
 public class RemoteControlContainer : IPlatformDependantContainer
 {
@@ -17,6 +17,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IAutostartService AutostartService { get; }
     public ILogger Logger { get; }
     public IUserInterface UserInterface { get; }
+
     public ControlFacade ControlProviders { get; }
 
     public RemoteControlContainer()
@@ -26,13 +27,13 @@ public class RemoteControlContainer : IPlatformDependantContainer
 #else
         Logger = new FileLogger("error.log");
 #endif
-        var ydotoolWrapper = new YdotoolProvider(Logger);
-        var dummyWrapper = new DummyProvider(Logger);
+        var user32Wrapper = new User32Provider(Logger);
+        var audioProvider = new NAudioProvider(Logger);
 
-        ControlProviders = new ControlFacade(dummyWrapper, ydotoolWrapper, ydotoolWrapper, dummyWrapper);
+        ControlProviders = new ControlFacade(audioProvider, user32Wrapper, user32Wrapper, user32Wrapper);
 
         ConfigProvider = new LocalFileConfigProvider(Logger);
-        AutostartService = new DummyAutostartService(Logger);
-        UserInterface = new MainConsole();
+        AutostartService = new WinRegistryAutostartService(Logger);
+        UserInterface = new MainForm();
     }
 }

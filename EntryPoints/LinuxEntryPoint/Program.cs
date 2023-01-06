@@ -1,6 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 
-namespace Linux;
+namespace LinuxEntryPoint;
 
 public static class Program
 {
@@ -20,6 +20,6 @@ public static class Program
             return;
         }
 
-        RemoteControl.Main.Run(container);
+        RemoteControlMain.Program.Run(container);
     }
 }

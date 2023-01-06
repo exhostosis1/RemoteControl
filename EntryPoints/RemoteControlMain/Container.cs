@@ -12,7 +12,7 @@ using Shared.Server;
 using Shared.Server.Interfaces;
 using Shared.UI;
 
-namespace RemoteControl;
+namespace RemoteControlMain;
 
 internal class Container : IContainer
 {
