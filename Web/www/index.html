@@ -535,7 +535,7 @@
                     oneFingerMove: (x, y) => sendRequest("mouse", "move", `${x},${y}`),
                     oneFingerDrag: e => sendRequest("mouse", e ? 'dragstart' : 'dragstop'),
                     twoFingersClick: () => sendRequest("mouse", 'right'),
-                    twoFingersMove: (x, y) => sendRequest("mouse", y > 0 ? "up" : "down"),
+                    twoFingersMove: (x, y) => sendRequest("mouse", y > 0 ? "wheelup" : "wheeldown"),
                     threeFingersClick: () => sendRequest("mouse", 'middle')
                 });
             }
