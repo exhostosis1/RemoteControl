@@ -14,6 +14,11 @@ public class WinRegistryConfigProvider: BaseConfigProvider
     private readonly RegistryKey _regKey;
     private const string ValueName = "Config";
 
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+
     public WinRegistryConfigProvider(ILogger logger): base(logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -23,19 +28,19 @@ public class WinRegistryConfigProvider: BaseConfigProvider
                   Registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
     }
 
-    protected override AppConfig GetConfigInternal()
+    protected override SerializableAppConfig GetConfigInternal()
     {
         Logger.LogInfo($"Getting config from registry {_regKey}");
 
         var value = _regKey.GetValue(ValueName, null) as string;
 
-        AppConfig? result = null;
+        SerializableAppConfig? result = null;
 
         if (!string.IsNullOrWhiteSpace(value))
         {
             try
             {
-                result = JsonSerializer.Deserialize<AppConfig>(value);
+                result = JsonSerializer.Deserialize<SerializableAppConfig>(value);
             }
             catch (JsonException e)
             {
@@ -43,16 +48,13 @@ public class WinRegistryConfigProvider: BaseConfigProvider
             }
         }
 
-        return result ?? new AppConfig();
+        return result ?? new SerializableAppConfig();
     }
 
-    protected override void SetConfigInternal(AppConfig config)
+    protected override void SetConfigInternal(SerializableAppConfig config)
     {
         Logger.LogInfo($"Writing config to registry {_regKey}");
 
-        _regKey.SetValue(ValueName,
-            JsonSerializer.Serialize(config,
-                new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }),
-            RegistryValueKind.String);
+        _regKey.SetValue(ValueName, JsonSerializer.Serialize(config, _jsonOptions), RegistryValueKind.String);
     }
 }

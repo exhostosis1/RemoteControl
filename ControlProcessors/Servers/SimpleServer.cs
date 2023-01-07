@@ -35,6 +35,8 @@ public class SimpleServer: IServerProcessor
         set => _currentConfig = value as ServerConfig ?? _currentConfig;
     }
 
+    public int Id { get; set; } = -1;
+
     public event ConfigEventHandler? ConfigChanged;
     public bool Working => _listener.IsListening;
     
@@ -54,28 +56,23 @@ public class SimpleServer: IServerProcessor
 
     public void Start(ServerConfig? config)
     {
-        if(config != null)
-            ConfigChanged?.Invoke(config);
+        CurrentConfig = config ?? CurrentConfig;
 
-        var c = config ?? _currentConfig;
-
-        if (c.Uri == null)
+        if (CurrentConfig.Uri == null)
             throw new Exception("Wrong uri config");
 
-        _listener.StartListen(c.Uri);
-
-        _currentConfig = c;
+        _listener.StartListen(CurrentConfig.Uri);
     }
 
 
     public void Restart(ServerConfig? config)
     {
         Stop();
-        Start(config ?? _currentConfig);
+        Start(config ?? CurrentConfig);
     }
 
-    public void Start(CommonConfig? config) => Start(config as ServerConfig ?? _currentConfig);
-    public void Restart(CommonConfig? config) => Restart(config as ServerConfig ?? _currentConfig);
+    public void Start(CommonConfig? config) => Start(config as ServerConfig ?? CurrentConfig);
+    public void Restart(CommonConfig? config) => Restart(config as ServerConfig ?? CurrentConfig);
 
     public void Stop() => _listener.StopListen();
 

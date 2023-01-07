@@ -47,7 +47,7 @@ internal class ServerPanel : MyPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    public ServerPanel(IServerProcessor processor, int index) : base(processor, index)
+    public ServerPanel(IServerProcessor processor) : base(processor)
     {
         _schemeTextBox.Text = processor.CurrentConfig.Scheme;
         _hostTextBox.Text = processor.CurrentConfig.Host;
@@ -77,33 +77,35 @@ internal class ServerPanel : MyPanel
             _portTextBox
         });
 
-        processor.ConfigChanged += config =>
-        {
-            var c = (ServerConfig)config;
-            NameTextBox.Text = c.Name;
-            AutostartBox.Checked = c.Autostart;
-            _schemeTextBox.Text = c.Scheme;
-            _hostTextBox.Text = c.Host;
-            _portTextBox.Text = c.Port.ToString();
-        };
+        processor.ConfigChanged += ConfigChanged;
+
+        Disposed += LocalDispose;
+    }
+
+    private void ConfigChanged(CommonConfig config)
+    {
+        var c = (ServerConfig)config;
+
+        NameTextBox.Text = c.Name;
+        AutostartBox.Checked = c.Autostart;
+        _schemeTextBox.Text = c.Scheme;
+        _hostTextBox.Text = c.Host;
+        _portTextBox.Text = c.Port.ToString();
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)
     {
-        _schemeTextBox.ResetBackColor();
-        _hostTextBox.ResetBackColor();
-        _portTextBox.ResetBackColor();
-        NameTextBox.ResetBackColor();
+        ApplyTheme(Theme);
 
         if (string.IsNullOrWhiteSpace(NameTextBox.Text))
         {
-            NameTextBox.BackColor = Color.OrangeRed;
+            NameLabel.ForeColor = Color.OrangeRed;
             return;
         }
 
         if (!int.TryParse(_portTextBox.Text, out var port))
         {
-            _portTextBox.BackColor = Color.OrangeRed;
+            _portLabel.ForeColor = Color.OrangeRed;
             return;
         }
 
@@ -114,9 +116,9 @@ internal class ServerPanel : MyPanel
         }
         catch
         {
-            _schemeTextBox.BackColor = Color.OrangeRed;
-            _portTextBox.BackColor = Color.OrangeRed;
-            _hostTextBox.BackColor = Color.OrangeRed;
+            _schemeLabel.ForeColor = Color.OrangeRed;
+            _portLabel.ForeColor = Color.OrangeRed;
+            _hostLabel.ForeColor = Color.OrangeRed;
 
             return;
         }
@@ -131,5 +133,11 @@ internal class ServerPanel : MyPanel
         RaiseUpdateButtonClickedEvent(config);
 
         UpdateButton.Enabled = false;
+    }
+
+    private void LocalDispose(object? sender, EventArgs e)
+    {
+        ControlProcessor.ConfigChanged -= ConfigChanged;
+        Unsubscriber.Dispose();
     }
 }

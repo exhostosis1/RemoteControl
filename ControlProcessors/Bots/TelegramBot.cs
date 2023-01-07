@@ -18,6 +18,8 @@ public class TelegramBot: IBotProcessor
         ApiUri = "https://api.telegram.org/bot"
     };
 
+    public int Id { get; set; } = -1;
+
     public event ConfigEventHandler? ConfigChanged;
     public bool Working { get; private set; }
 
@@ -37,8 +39,8 @@ public class TelegramBot: IBotProcessor
 
     CommonConfig IControlProcessor.CurrentConfig
     {
-        get => _currentConfig;
-        set => _currentConfig = value as BotConfig ?? _currentConfig;
+        get => CurrentConfig;
+        set => CurrentConfig = value as BotConfig ?? CurrentConfig;
     }
 
     private readonly ICommandExecutor _executor;
@@ -69,26 +71,21 @@ public class TelegramBot: IBotProcessor
 
     public void Start(BotConfig? config)
     {
-        if(config != null)
-            ConfigChanged?.Invoke(config);
+        CurrentConfig = config ?? CurrentConfig;
 
         if (Working) Stop();
 
         _cts = new CancellationTokenSource();
         var token = _cts.Token;
 
-        var c = config ?? _currentConfig;
-
-        if(string.IsNullOrWhiteSpace(c.ApiUri) || string.IsNullOrWhiteSpace(c.ApiKey))
+        if(string.IsNullOrWhiteSpace(CurrentConfig.ApiUri) || string.IsNullOrWhiteSpace(CurrentConfig.ApiKey))
         {
             _logger.LogError("Wrong bot api configuration");
             return;
         }
 
-        _currentConfig = c;
-
 #pragma warning disable CS4014
-        Listen(c.Usernames, new TelegramBotApiWrapper(c.ApiUri, c.ApiKey), _progress, token);
+        Listen(CurrentConfig.Usernames, new TelegramBotApiWrapper(CurrentConfig.ApiUri, CurrentConfig.ApiKey), _progress, token);
 #pragma warning restore CS4014
     }
 
@@ -168,11 +165,11 @@ public class TelegramBot: IBotProcessor
     public void Restart(BotConfig? config)
     {
         Stop();
-        Start(config ?? _currentConfig);
+        Start(config ?? CurrentConfig);
     }
 
-    public void Start(CommonConfig? config) => Start(config as BotConfig ?? _currentConfig);
-    public void Restart(CommonConfig? config) => Restart(config as BotConfig ?? _currentConfig);
+    public void Start(CommonConfig? config) => Start(config as BotConfig ?? CurrentConfig);
+    public void Restart(CommonConfig? config) => Restart(config as BotConfig ?? CurrentConfig);
 
     public void Stop()
     {

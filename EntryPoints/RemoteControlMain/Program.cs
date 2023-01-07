@@ -8,14 +8,30 @@ namespace RemoteControlMain;
 
 public static class Program
 {
-    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null) =>
-        new SimpleServer(container.Listener, container.Middleware, container.Logger, config);
+    private static int Id;
 
-    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null) =>
-        new TelegramBot(container.CommandExecutor, container.Logger, config);
+    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
+    {
+        var result = new SimpleServer(container.Listener, container.Middleware, container.Logger, config)
+        {
+            Id = Id++
+        };
+
+        return result;
+    }
+
+    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null)
+    {
+        var result = new TelegramBot(container.CommandExecutor, container.Logger, config)
+        {
+            Id = Id++
+        };
+
+        return result;
+    }
 
     private static IEnumerable<IControlProcessor> CreateProcessors(AppConfig config, IContainer container) =>
-        config.All.Select(x =>
+        config.Items.Select(x =>
             x switch
             {
                 ServerConfig s => CreateSimpleServer(container, s),
@@ -24,25 +40,8 @@ public static class Program
             }
         );
 
-    private static AppConfig GetConfig(IEnumerable<IControlProcessor> processors)
-    {
-        var result = new AppConfig();
-
-        foreach (var controlProcessor in processors)
-        {
-            switch (controlProcessor)
-            {
-                case IServerProcessor s:
-                    result.Servers.Add(s.CurrentConfig);
-                    break;
-                case IBotProcessor b:
-                    result.Bots.Add(b.CurrentConfig);
-                    break;
-            }
-        }
-
-        return result;
-    }
+    private static AppConfig GetConfig(IEnumerable<IControlProcessor> processors) =>
+        new(processors.Select(x => x.CurrentConfig));
 
     public static List<IControlProcessor> ControlProcessors { get; private set; } = new();
 
@@ -63,43 +62,53 @@ public static class Program
         
         ui.SetAutostartValue(container.AutostartService.CheckAutostart());
 
-        ui.StartEvent += index =>
+        ui.StartEvent += id =>
         {
-            if(!index.HasValue)
+            if(!id.HasValue)
             {
                 ControlProcessors.ForEach(x => x.Start());
             }
-            else if (index.Value < ControlProcessors.Count)
+            else
             {
-                ControlProcessors[index.Value].Start();
+                ControlProcessors.FirstOrDefault(x => x.Id == id)?.Start();
             }
         };
 
-        ui.StopEvent += index =>
+        ui.StopEvent += id =>
         {
-            if (!index.HasValue)
+            if (!id.HasValue)
             {
                 ControlProcessors.ForEach(x => x.Stop());
             }
-            else if (index.Value < ControlProcessors.Count)
+            else
             {
-                ControlProcessors[index.Value].Stop();
+                ControlProcessors.FirstOrDefault(x => x.Id == id)?.Stop();
             }
         };
 
         ui.ProcessorAddedEvent += mode =>
         {
-            switch (mode)
+            var processor = mode switch
             {
-                case "server":
-                    ControlProcessors.Add(CreateSimpleServer(container));
-                    break;
-                case "bot":
-                    ControlProcessors.Add(CreateTelegramBot(container));
-                    break;
-                default:
-                    return;
-            }
+                "server" => CreateSimpleServer(container),
+                "bot" => CreateTelegramBot(container),
+                _ => throw new NotSupportedException()
+            };
+
+            ControlProcessors.Add(processor);
+            ui.AddProcessor(processor);
+        };
+
+        ui.ProcessorRemovedEvent += id =>
+        {
+            var processor = ControlProcessors.FirstOrDefault(x => x.Id == id);
+            if (processor == null)
+                return;
+
+            processor.Stop();
+            ControlProcessors.Remove(processor);
+
+            container.ConfigProvider.SetConfig(GetConfig(ControlProcessors));
         };
 
         ui.AutostartChangedEvent += value =>
@@ -108,15 +117,19 @@ public static class Program
             ui.SetAutostartValue(container.AutostartService.CheckAutostart());
         };
 
-        ui.ConfigChangedEvent += (index, c) =>
+        ui.ConfigChangedEvent += (id, c) =>
         {
-            if (ControlProcessors[index].Working)
+            var processor = ControlProcessors.FirstOrDefault(x => x.Id == id);
+            if (processor == null)
+                return;
+
+            if (processor.Working)
             {
-                ControlProcessors[index].Restart(c);
+                processor.Restart(c);
             }
             else
             {
-                ControlProcessors[index].CurrentConfig = c;
+                processor.CurrentConfig = c;
             }
 
             config = GetConfig(ControlProcessors);

@@ -11,8 +11,9 @@ public class MainConsole: IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigWithIndexEventHandler? ConfigChangedEvent;
+    public event ConfigWithIdEventHandler? ConfigChangedEvent;
     public event StringEventHandler? ProcessorAddedEvent;
+    public event IntEventHandler? ProcessorRemovedEvent;
 
     public void SetAutostartValue(bool value)
     {
@@ -24,9 +25,9 @@ public class MainConsole: IUserInterface
     private bool IsAutostart { get; set; }
 
     // ReSharper disable once InconsistentNaming
-    public void RunUI(IEnumerable<IControlProcessor> processors)
+    public void RunUI(List<IControlProcessor> processors)
     {
-        Model = processors.ToList();
+        Model = processors;
         DisplayInfo(Model);
 
         while (true)
@@ -66,6 +67,11 @@ public class MainConsole: IUserInterface
         Console.WriteLine(message);
             
         Console.ForegroundColor = color;
+    }
+
+    public void AddProcessor(IControlProcessor processor)
+    {
+        throw new NotImplementedException();
     }
 
     private void DisplayInfo(List<IControlProcessor> dtos)

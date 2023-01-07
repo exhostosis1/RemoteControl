@@ -48,7 +48,7 @@ internal sealed class BotPanel : MyPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    public BotPanel(IBotProcessor processor, int index) : base(processor, index)
+    public BotPanel(IBotProcessor processor) : base(processor)
     {
         _apiUrlTextBox.Text = processor.CurrentConfig.ApiUri;
         _apiKeyTextBox.Text = processor.CurrentConfig.ApiKey;
@@ -68,46 +68,47 @@ internal sealed class BotPanel : MyPanel
             _userIdsListBox
         });
 
-        processor.ConfigChanged += config =>
-        {
-            var c = (BotConfig)config;
+        processor.ConfigChanged += ConfigChanged;
 
-            NameTextBox.Text = c.Name;
-            AutostartBox.Checked = c.Autostart;
-            _apiUrlTextBox.Text = c.ApiUri;
-            _apiKeyTextBox.Text = c.ApiKey;
-            _userIdsListBox.Text = string.Join(Environment.NewLine, c.Usernames);
-        };
+        Disposed += LocalDispose;
+    }
+
+    private void ConfigChanged(CommonConfig config)
+    {
+        var c = (BotConfig)config;
+
+        NameTextBox.Text = c.Name;
+        AutostartBox.Checked = c.Autostart;
+        _apiUrlTextBox.Text = c.ApiUri;
+        _apiKeyTextBox.Text = c.ApiKey;
+        _userIdsListBox.Text = string.Join(Environment.NewLine, c.Usernames);
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)
     {
-        _apiKeyTextBox.ResetBackColor();
-        _apiUrlTextBox.ResetBackColor();
-        NameTextBox.ResetBackColor();
-        _userIdsListBox.ResetBackColor();
+        ApplyTheme(Theme);
 
         if (string.IsNullOrWhiteSpace(NameTextBox.Text))
         {
-            NameTextBox.BackColor = Color.OrangeRed;
+            NameLabel.ForeColor = Color.OrangeRed;
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_apiUrlTextBox.Text))
         {
-            _apiUrlTextBox.BackColor = Color.OrangeRed;
+            _apiUrlLabel.ForeColor = Color.OrangeRed;
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_apiKeyTextBox.Text))
         {
-            _apiKeyTextBox.BackColor = Color.OrangeRed;
+            _apiKeyLabel.ForeColor = Color.OrangeRed;
             return;
         }
 
         if (string.IsNullOrWhiteSpace(_userIdsListBox.Text))
         {
-            _userIdsListBox.BackColor = Color.OrangeRed;
+            _userIdsLabel.ForeColor = Color.OrangeRed;
         }
 
         var config = new BotConfig
@@ -122,5 +123,11 @@ internal sealed class BotPanel : MyPanel
         RaiseUpdateButtonClickedEvent(config);
 
         UpdateButton.Enabled = false;
+    }
+
+    private void LocalDispose(object? sender, EventArgs args)
+    {
+        Unsubscriber.Dispose();
+        ControlProcessor.ConfigChanged -= ConfigChanged;
     }
 }

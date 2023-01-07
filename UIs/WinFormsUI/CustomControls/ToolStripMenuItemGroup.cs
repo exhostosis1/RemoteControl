@@ -4,9 +4,10 @@ using Shared.ControlProcessor;
 
 namespace WinFormsUI.CustomControls;
 
-internal class ToolStripMenuItemGroup
+internal class ToolStripMenuItemGroup: IDisposable
 {
-    public int Index { get; set; }
+    public int Id { get; set; }
+    private readonly IControlProcessor _processor;
 
     private readonly ToolStripMenuItem _nameItem = new()
     {
@@ -17,14 +18,17 @@ internal class ToolStripMenuItemGroup
     private readonly ToolStripMenuItem _startStopItem = new();
 
     public event EventHandler? OnDescriptionClick;
-    public event EventHandler? OnStartClick;
-    public event EventHandler? OnStopClick;
+    public event IntEventHandler? OnStartClick;
+    public event IntEventHandler? OnStopClick;
 
     public readonly ToolStripItem[] ItemsArray = new ToolStripItem[4];
 
-    public ToolStripMenuItemGroup(int index, IControlProcessor processor)
+    private readonly IDisposable _unsubscriber;
+
+    public ToolStripMenuItemGroup(IControlProcessor processor)
     {
-        Index = index;
+        Id = processor.Id;
+        _processor = processor;
 
         _nameItem.Text = processor.CurrentConfig.Name;
 
@@ -58,15 +62,18 @@ internal class ToolStripMenuItemGroup
         ItemsArray[2] = _startStopItem;
         ItemsArray[3] = new ToolStripSeparator();
 
-        processor.Subscribe(new Observer<bool>(working =>
+        _unsubscriber = processor.Subscribe(new Observer<bool>(working =>
         {
             _descriptionItem.Text = working ? description : @"Stopped";
             _descriptionItem.Enabled = working;
             _startStopItem.Text = working ? @"Stop" : @"Start";
         }));
 
-        processor.ConfigChanged += config =>
-        {
+        processor.ConfigChanged += ConfigChanged;
+    }
+
+    private void ConfigChanged(CommonConfig config)
+    {
             _nameItem.Text = config.Name;
             _descriptionItem.Text = config switch
             {
@@ -74,18 +81,27 @@ internal class ToolStripMenuItemGroup
                 BotConfig b => b.UsernamesString,
                 _ => _descriptionItem.Text
             };
-        };
     }
 
     private void StartStopClicked(object? _, EventArgs args)
     {
         if(_startStopItem.Text == @"Start")
         {
-            OnStartClick?.Invoke(this, args);
+            OnStartClick?.Invoke(Id);
         }
         else
         {
-            OnStopClick?.Invoke(this, args);
+            OnStopClick?.Invoke(Id);
         }
+    }
+
+    public void Dispose()
+    {
+        _unsubscriber.Dispose();
+        _processor.ConfigChanged -= ConfigChanged;
+
+        _nameItem.Dispose();
+        _descriptionItem.Dispose();
+        _startStopItem.Dispose();
     }
 }

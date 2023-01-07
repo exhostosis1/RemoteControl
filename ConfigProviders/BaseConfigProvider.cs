@@ -5,7 +5,7 @@ namespace ConfigProviders;
 
 public abstract class BaseConfigProvider: IConfigProvider
 {
-    private AppConfig? _cachedConfig;
+    private SerializableAppConfig? _cachedConfig;
 
     protected readonly ILogger Logger;
 
@@ -14,12 +14,12 @@ public abstract class BaseConfigProvider: IConfigProvider
         Logger = logger;
     }
 
-    public AppConfig GetConfig()
+    public SerializableAppConfig GetSerializableConfig()
     {
         if (_cachedConfig != null)
             return _cachedConfig;
 
-        AppConfig? result;
+        SerializableAppConfig? result;
 
         try
         {
@@ -36,7 +36,9 @@ public abstract class BaseConfigProvider: IConfigProvider
         return result;
     }
 
-    public void SetConfig(AppConfig config)
+    public AppConfig GetConfig() => new(GetSerializableConfig());
+
+    public void SetSerializableConfig(SerializableAppConfig config)
     {
         try
         {
@@ -51,7 +53,9 @@ public abstract class BaseConfigProvider: IConfigProvider
         _cachedConfig = config;
     }
 
-    protected abstract AppConfig GetConfigInternal();
+    public void SetConfig(AppConfig config) => SetSerializableConfig(new SerializableAppConfig(config));
 
-    protected abstract void SetConfigInternal(AppConfig config);
+    protected abstract SerializableAppConfig GetConfigInternal();
+
+    protected abstract void SetConfigInternal(SerializableAppConfig config);
 }

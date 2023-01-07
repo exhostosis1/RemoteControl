@@ -6,9 +6,11 @@ namespace WinFormsUI.CustomControls;
 
 internal abstract class MyPanel : Panel
 {
-    public int ProcessorIndex { get; init; }
+    public int Id { get; init; }
     protected readonly IControlProcessor ControlProcessor;
     protected readonly SynchronizationContext? SynchronizationContext;
+    protected readonly IDisposable Unsubscriber;
+    protected Theme Theme { get; set; } = new();
 
     protected readonly Label NameLabel = new()
     {
@@ -61,16 +63,16 @@ internal abstract class MyPanel : Panel
 
     public event IntEventHandler? StartButtonClicked;
     public event IntEventHandler? StopButtonClicked;
-    public event ConfigWithIndexEventHandler? UpdateButtonClicked;
+    public event ConfigWithIdEventHandler? UpdateButtonClicked;
 
-    protected MyPanel(IControlProcessor processor, int index)
+    protected MyPanel(IControlProcessor processor)
     {
         Width = 508;
         Height = 90;
         Left = 12;
         BorderStyle = BorderStyle.FixedSingle;
 
-        ProcessorIndex = index;
+        Id = processor.Id;
         ControlProcessor = processor;
         NameTextBox.Text = processor.CurrentConfig.Name;
 
@@ -104,25 +106,37 @@ internal abstract class MyPanel : Panel
             UpdateButton
         });
 
-        ControlProcessor.Subscribe(new Observer<bool>(SetButtons));
+        Unsubscriber = ControlProcessor.Subscribe(new Observer<bool>(SetButtons));
+    }
+
+    public void ApplyTheme(Theme theme)
+    {
+        Theme = theme;
+        foreach (Control control in Controls)
+        {
+            theme.ApplyTheme(control);
+        }
+
+        if(ContextMenuStrip != null)
+            theme.ApplyTheme(ContextMenuStrip);
     }
 
     protected void EnableUpdateButton(object? sender, EventArgs e) => UpdateButton.Enabled = true;
 
     protected void RaiseUpdateButtonClickedEvent(CommonConfig config) =>
-        UpdateButtonClicked?.Invoke(ProcessorIndex, config);
+        UpdateButtonClicked?.Invoke(Id, config);
 
     protected abstract void UpdateButtonClick(object? sender, EventArgs e);
 
-    protected async void StartButtonClick(object? sender, EventArgs args)
+    protected void StartButtonClick(object? sender, EventArgs args)
     {
-        StartButtonClicked?.Invoke(ProcessorIndex);
+        StartButtonClicked?.Invoke(Id);
         StartButton.Enabled = false;
     }
 
-    protected async void StopButtonClick(object? sender, EventArgs args)
+    protected void StopButtonClick(object? sender, EventArgs args)
     {
-        StopButtonClicked?.Invoke(ProcessorIndex);
+        StopButtonClicked?.Invoke(Id);
         StopButton.Enabled = false;
     }
 

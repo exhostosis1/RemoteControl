@@ -10,38 +10,41 @@ public class LocalFileConfigProvider : BaseConfigProvider
     private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
 
     public LocalFileConfigProvider(ILogger logger): base(logger){}
+    private readonly JsonSerializerOptions _jsonOptions = new()
+    { 
+        WriteIndented = true, 
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
-    protected override AppConfig GetConfigInternal()
+    protected override SerializableAppConfig GetConfigInternal()
     {
         Logger.LogInfo($"Getting config from file {ConfigPath}");
 
         if (!File.Exists(ConfigPath))
         {
             Logger.LogWarn("No config file");
-            return new AppConfig();
+            return new SerializableAppConfig();
         }
 
-        AppConfig? result = null;
+        SerializableAppConfig? result = null;
 
         try
         {
-            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(ConfigPath));
+            result = JsonSerializer.Deserialize<SerializableAppConfig>(File.ReadAllText(ConfigPath));
         }
         catch (JsonException e)
         {
             Logger.LogError(e.Message);
         }
 
-        return result ?? new AppConfig();
+        return result ?? new SerializableAppConfig();
     }
 
-    protected override void SetConfigInternal(AppConfig appConfig)
+    protected override void SetConfigInternal(SerializableAppConfig appConfig)
     {
         Logger.LogInfo($"Writing config to file {ConfigPath}");
 
         File.WriteAllText(ConfigPath,
-            JsonSerializer.Serialize(appConfig,
-                new JsonSerializerOptions
-                    { WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull }));
+            JsonSerializer.Serialize(appConfig, _jsonOptions));
     }
 }

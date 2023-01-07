@@ -1,14 +1,18 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
 public class AppConfig
 {
-    public List<ServerConfig> Servers { get; set; } = new();
-    public List<BotConfig> Bots { get; set; } = new();
+    public List<CommonConfig> Items { get; set; } = new();
 
-    [JsonIgnore]
-    public IEnumerable<CommonConfig> All => Servers.Concat<CommonConfig>(Bots);
+    public AppConfig(){}
+
+    public AppConfig(SerializableAppConfig config)
+    {
+        Items = config.Servers.Concat<CommonConfig>(config.Bots).ToList();
+    }
+
+    public AppConfig(IEnumerable<CommonConfig> items) => Items = items.ToList();
 }

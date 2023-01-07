@@ -16,13 +16,16 @@ public sealed partial class MainForm : Form, IUserInterface
     public event IntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigWithIndexEventHandler? ConfigChangedEvent;
+    public event ConfigWithIdEventHandler? ConfigChangedEvent;
     public event StringEventHandler? ProcessorAddedEvent;
+    public event IntEventHandler? ProcessorRemovedEvent;
 
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
     
     private List<IControlProcessor> _model = new();
+    private List<ToolStripMenuItemGroup> _toolStripGroups = new();
+    private List<MyPanel> _windowPanels = new();
 
     private readonly Theme _lightTheme = new()
     {
@@ -65,14 +68,81 @@ public sealed partial class MainForm : Form, IUserInterface
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
     }
 
-    public void RunUI(IEnumerable<IControlProcessor> processors)
+    public void RunUI(List<IControlProcessor> processors)
     {
-        _model = processors.ToList();
+        _model = processors;
+
+        PopulateWindowPanels();
+        PopulateContextMenuGroups();
+
         DrawWindow();
         SetContextMenu();
 
+        ApplyTheme();
+
         Application.EnableVisualStyles();
         Application.Run(this);
+    }
+
+    private void PopulateWindowPanels()
+    {
+        foreach (var processor in _model)
+        {
+            MyPanel panel = processor switch
+            {
+                IServerProcessor s => new ServerPanel(s),
+                IBotProcessor b => new BotPanel(b),
+                _ => throw new NotSupportedException()
+            };
+
+            panel.StartButtonClicked += id => StartEvent?.Invoke(id);
+            panel.StopButtonClicked += id => StopEvent?.Invoke(id);
+            panel.UpdateButtonClicked += (id, config) => ConfigChangedEvent?.Invoke(id, config);
+
+            var contextMenu = new ContextMenuStrip
+            {
+                RenderMode = ToolStripRenderMode.System
+            };
+            contextMenu.Items.Add("Remove", null, (_, _) => RemoveClicked(processor.Id));
+
+            panel.ContextMenuStrip = contextMenu;
+
+            _windowPanels.Add(panel);
+        }
+    }
+
+    private void RemoveClicked(int id)
+    {
+        ProcessorRemovedEvent?.Invoke(id);
+
+        var p = _windowPanels.Find(x => x.Id == id);
+        if (p != null)
+        {
+            p.Dispose();
+            _windowPanels.Remove(p);
+        }
+
+        var t = _toolStripGroups.Find(x => x.Id == id);
+        if (t != null)
+        {
+            t.Dispose();
+            _toolStripGroups.Remove(t);
+        }
+
+        DrawWindow();
+        SetContextMenu();
+    }
+
+    private void PopulateContextMenuGroups()
+    {
+        foreach (var group in _model.Select(processor => new ToolStripMenuItemGroup(processor)))
+        {
+            group.OnDescriptionClick += IpToolStripMenuItem_Click;
+            group.OnStartClick += id => StartEvent?.Invoke(id);
+            group.OnStopClick += id => StopEvent?.Invoke(id);
+
+            _toolStripGroups.Add(group);
+        }
     }
 
     private void ApplyTheme()
@@ -99,13 +169,11 @@ public sealed partial class MainForm : Form, IUserInterface
         theme.ApplyTheme(this);
         theme.ApplyTheme(MainContextMenuStrip);
 
-        var textBoxes =
-            (from Control control in Controls
-                where control is MyPanel
-                from Control controlControl in control.Controls
-                select controlControl).OfType<TextBox>().Cast<Control>().ToList();
-
-        textBoxes.ForEach(x => theme.ApplyTheme(x));
+        foreach (Control control in Controls)
+        {
+            if(control is MyPanel panel)
+                panel.ApplyTheme(theme);
+        }
     }
 
     public void SetAutostartValue(bool value) => IsAutostart = value;
@@ -115,8 +183,29 @@ public sealed partial class MainForm : Form, IUserInterface
         MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
     }
 
+    public void AddProcessor(IControlProcessor processor)
+    {
+        MyPanel panel = processor switch
+        {
+            IServerProcessor s => new ServerPanel(s),
+            IBotProcessor b => new BotPanel(b),
+            _ => throw new ArgumentOutOfRangeException(nameof(processor), processor, null)
+        };
+
+        var menuGroup = new ToolStripMenuItemGroup(processor);
+        _toolStripGroups.Add(menuGroup);
+        _windowPanels.Add(panel);
+
+        DrawWindow();
+        SetContextMenu();
+
+        ApplyTheme();
+    }
+
     private void DrawWindow()
     {
+        Controls.Clear();
+
         var height = GroupMargin;
 
         AddServerButton.Top = height;
@@ -127,60 +216,25 @@ public sealed partial class MainForm : Form, IUserInterface
 
         height += AddServerButton.Height + GroupMargin;
 
-        for (var i = 0; i < _model.Count; i++)
+        foreach (var panel in _windowPanels)
         {
-            var processor = _model[i];
-            MyPanel group;
+            panel.Top = height;
+            Controls.Add(panel);
 
-            switch (processor)
-            {
-                case IServerProcessor s:
-                    group = new ServerPanel(s, i)
-                    {
-                        Top = height
-                    };
-                    break;
-                case IBotProcessor b:
-                    group = new BotPanel(b, i)
-                    {
-                        Top = height
-                    };
-                    break;
-                default:
-                    continue;
-            }
-
-            group.StartButtonClicked += x => StartEvent?.Invoke(x);
-            group.StopButtonClicked += x => StopEvent?.Invoke(x);
-            group.UpdateButtonClicked += (index, config) => ConfigChangedEvent?.Invoke(index, config);
-
-            Controls.Add(group);
-            height += group.Height + GroupMargin;
+            height += panel.Height + GroupMargin;
         }
 
         Height = height + 40;
-
-        Location = new Point(Screen.PrimaryScreen?.WorkingArea.Width / 2 - Width / 2 ?? 0,
-            Screen.PrimaryScreen?.WorkingArea.Height / 2 - Height / 2 ?? 0);
-
-        ApplyTheme();
     }
 
     private void SetContextMenu()
     {
-        var groups = new List<ToolStripMenuItemGroup>();
+        MainContextMenuStrip.Items.Clear();
 
-        for (var i = 0; i < _model.Count; i++)
+        foreach (var toolStripMenuItemGroup in _toolStripGroups)
         {
-            var group = new ToolStripMenuItemGroup(i, _model[i]);
-            group.OnDescriptionClick += IpToolStripMenuItem_Click;
-            group.OnStartClick += StartToolStripMenuItem_Click;
-            group.OnStopClick += StopToolStripMenuItem_Click;
-
-            groups.Add(group);
+            MainContextMenuStrip.Items.AddRange(toolStripMenuItemGroup.ItemsArray);
         }
-
-        MainContextMenuStrip.Items.AddRange(groups.SelectMany(x => x.ItemsArray).ToArray());
 
         AutostartStripMenuItem.Checked = IsAutostart;
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
@@ -198,17 +252,6 @@ public sealed partial class MainForm : Form, IUserInterface
         Utils.RunWindowsCommand($"start {address}", out _, out _);
     }
 
-    private void StartToolStripMenuItem_Click(object? sender, EventArgs e)
-    {
-        if (sender is ToolStripMenuItemGroup o)
-            StartEvent?.Invoke(o.Index);
-    }
-
-    private void StopToolStripMenuItem_Click(object? sender, EventArgs e)
-    {
-        if (sender is ToolStripMenuItemGroup o)
-            StopEvent?.Invoke(o.Index);
-    }
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
         StartEvent?.Invoke(null);
@@ -260,13 +303,5 @@ public sealed partial class MainForm : Form, IUserInterface
     private void AddBotButton_Click(object sender, EventArgs e)
     {
         ProcessorAddedEvent?.Invoke("bot");
-    }
-
-    private void TaskbarNotifyIcon_MouseClick(object sender, MouseEventArgs e)
-    {
-        if (e.Button == MouseButtons.Right)
-        {
-            MainContextMenuStrip.Location = new Point(MousePosition.X - MainContextMenuStrip.Width, MousePosition.Y - MainContextMenuStrip.Height);
-        }
     }
 }
