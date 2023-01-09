@@ -7,7 +7,7 @@ namespace WinFormsUI.CustomControls;
 internal class ToolStripMenuItemGroup: IDisposable
 {
     public int Id { get; set; }
-    private readonly IControlProcessor _processor;
+    private readonly AbstractControlProcessor _processor;
 
     private readonly ToolStripMenuItem _nameItem = new()
     {
@@ -23,14 +23,15 @@ internal class ToolStripMenuItemGroup: IDisposable
 
     public readonly ToolStripItem[] ItemsArray = new ToolStripItem[4];
 
-    private readonly IDisposable _unsubscriber;
+    private readonly IDisposable _statusUnsubscriber;
+    private readonly IDisposable _configUnsubscriber;
 
-    public ToolStripMenuItemGroup(IControlProcessor processor)
+    public ToolStripMenuItemGroup(AbstractControlProcessor processor)
     {
         Id = processor.Id;
         _processor = processor;
 
-        _nameItem.Text = processor.CurrentConfig.Name;
+        _nameItem.Text = processor.Config.Name;
 
         ItemsArray[0] = _nameItem;
 
@@ -40,11 +41,11 @@ internal class ToolStripMenuItemGroup: IDisposable
         {
             switch (processor)
             {
-                case IServerProcessor s:
+                case ServerProcessor s:
                     _descriptionItem.Text = description = s.CurrentConfig.Uri?.ToString();
                     _descriptionItem.Click += (sender, args) => OnDescriptionClick?.Invoke(sender, args);
                     break;
-                case IBotProcessor b:
+                case BotProcessor b:
                     _descriptionItem.Text = description = b.CurrentConfig.UsernamesString;
                     break;
             }
@@ -62,14 +63,14 @@ internal class ToolStripMenuItemGroup: IDisposable
         ItemsArray[2] = _startStopItem;
         ItemsArray[3] = new ToolStripSeparator();
 
-        _unsubscriber = processor.Subscribe(new Observer<bool>(working =>
+        _statusUnsubscriber = processor.Subscribe(new Observer<bool>(working =>
         {
             _descriptionItem.Text = working ? description : @"Stopped";
             _descriptionItem.Enabled = working;
             _startStopItem.Text = working ? @"Stop" : @"Start";
         }));
 
-        processor.ConfigChanged += ConfigChanged;
+        _configUnsubscriber = processor.Subscribe(new Observer<CommonConfig>(ConfigChanged));
     }
 
     private void ConfigChanged(CommonConfig config)
@@ -97,8 +98,8 @@ internal class ToolStripMenuItemGroup: IDisposable
 
     public void Dispose()
     {
-        _unsubscriber.Dispose();
-        _processor.ConfigChanged -= ConfigChanged;
+        _statusUnsubscriber.Dispose();
+        _configUnsubscriber.Dispose();
 
         _nameItem.Dispose();
         _descriptionItem.Dispose();

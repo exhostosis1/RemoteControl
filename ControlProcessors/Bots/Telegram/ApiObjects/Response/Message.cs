@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using Shared.Bot;
 
 namespace Bots.Telegram.ApiObjects.Response;
 
-internal class Message
+internal class Message: IMessage
 {
     [JsonPropertyName("message_id")]
     public int MessageId { get; set; }
@@ -11,13 +12,13 @@ internal class Message
     public int? MessageThreadId { get; set; }
 
     [JsonPropertyName("from")]
-    public User? From { get; set; }
+    public IUser? From { get; set; }
 
     [JsonPropertyName("sender_chat")]
     public User? SenderChat { get; set; }
 
     [JsonPropertyName("chat")]
-    public Chat? Chat { get; set; }
+    public IChat? Chat { get; set; }
 
     [JsonPropertyName("date")]
     public int Date { get; set; }

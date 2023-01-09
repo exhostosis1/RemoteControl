@@ -15,25 +15,28 @@ public class RemoteControlContainer : IPlatformDependantContainer
 {
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
-    public ILogger Logger { get; }
     public IUserInterface UserInterface { get; }
 
     public ControlFacade ControlProviders { get; }
 
-    public RemoteControlContainer()
+    public ILogger GetLogger(Type type)
     {
 #if DEBUG
-        Logger = new TraceLogger();
+        return new TraceLogger(type);
 #else
-        Logger = new FileLogger("error.log");
+        return new FileLogger(type, "error.log")
 #endif
-        var user32Wrapper = new User32Provider(Logger);
-        var audioProvider = new NAudioProvider(Logger);
+    }
+
+    public RemoteControlContainer()
+    {
+        var user32Wrapper = new User32Provider(GetLogger(typeof(User32Provider)));
+        var audioProvider = new NAudioProvider(GetLogger(typeof(NAudioProvider)));
 
         ControlProviders = new ControlFacade(audioProvider, user32Wrapper, user32Wrapper, user32Wrapper);
 
-        ConfigProvider = new LocalFileConfigProvider(Logger);
-        AutostartService = new WinRegistryAutostartService(Logger);
+        ConfigProvider = new LocalFileConfigProvider(GetLogger(typeof(LocalFileConfigProvider)));
+        AutostartService = new WinRegistryAutostartService(GetLogger(typeof(WinRegistryAutostartService)));
         UserInterface = new MainForm();
     }
 }

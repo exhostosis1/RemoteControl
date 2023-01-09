@@ -1,5 +1,5 @@
 ﻿using Shared.ApiControllers;
-using Shared.Controllers;
+using Shared.Bot;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;

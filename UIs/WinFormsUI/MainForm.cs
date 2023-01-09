@@ -1,5 +1,4 @@
 ﻿using Shared;
-using Shared.Config;
 using Shared.ControlProcessor;
 using Shared.UI;
 using Windows.UI.ViewManagement;
@@ -23,9 +22,9 @@ public sealed partial class MainForm : Form, IUserInterface
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
     
-    private List<IControlProcessor> _model = new();
-    private List<ToolStripMenuItemGroup> _toolStripGroups = new();
-    private List<MyPanel> _windowPanels = new();
+    private List<AbstractControlProcessor> _model = new();
+    private readonly List<ToolStripMenuItemGroup> _toolStripGroups = new();
+    private readonly List<MyPanel> _windowPanels = new();
 
     private readonly Theme _lightTheme = new()
     {
@@ -68,7 +67,7 @@ public sealed partial class MainForm : Form, IUserInterface
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
     }
 
-    public void RunUI(List<IControlProcessor> processors)
+    public void RunUI(List<AbstractControlProcessor> processors)
     {
         _model = processors;
 
@@ -90,8 +89,8 @@ public sealed partial class MainForm : Form, IUserInterface
         {
             MyPanel panel = processor switch
             {
-                IServerProcessor s => new ServerPanel(s),
-                IBotProcessor b => new BotPanel(b),
+                ServerProcessor s => new ServerPanel(s),
+                BotProcessor b => new BotPanel(b),
                 _ => throw new NotSupportedException()
             };
 
@@ -183,12 +182,12 @@ public sealed partial class MainForm : Form, IUserInterface
         MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
     }
 
-    public void AddProcessor(IControlProcessor processor)
+    public void AddProcessor(AbstractControlProcessor processor)
     {
         MyPanel panel = processor switch
         {
-            IServerProcessor s => new ServerPanel(s),
-            IBotProcessor b => new BotPanel(b),
+            ServerProcessor s => new ServerPanel(s),
+            BotProcessor b => new BotPanel(b),
             _ => throw new ArgumentOutOfRangeException(nameof(processor), processor, null)
         };
 
@@ -274,8 +273,8 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        _model.Where(x => x.Working && x is IServerProcessor)
-            .Select(x => ((ServerConfig)x.CurrentConfig).Uri)
+        _model.Where(x => x.Working && x is ServerProcessor)
+            .Select(x => ((ServerProcessor)x).CurrentConfig.Uri)
             .Where(x => x != null)
             .Cast<Uri>().ToList()
             .ForEach(Utils.AddFirewallRule);

@@ -11,6 +11,7 @@ public static class Program
             return;
 
         var container = new RemoteControlContainer();
+        var logger = container.GetLogger(typeof(Program));
 
         var indexes = new List<int>();
 
@@ -20,7 +21,7 @@ public static class Program
             {
                 case SessionSwitchReason.SessionLock:
                 {
-                    container.Logger.LogInfo("Stopping processords due to logout");
+                    logger.LogInfo("Stopping processords due to logout");
 
                     indexes.Clear();
 
@@ -37,7 +38,7 @@ public static class Program
                 }
                 case SessionSwitchReason.SessionUnlock:
                 {
-                    container.Logger.LogInfo("Resoring processors");
+                    logger.LogInfo("Resoring processors");
 
                     foreach (var index in indexes)
                     {
@@ -56,7 +57,7 @@ public static class Program
         }
         catch (Exception e)
         {
-            container.Logger.LogError(e.Message);
+            logger.LogError(e.Message);
         }
     }
 }

@@ -1,15 +1,15 @@
 ﻿using Shared;
 using Shared.DataObjects;
+using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using Shared.Server;
-using Shared.Server.Interfaces;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
 namespace Listeners;
 
-public class GenericListener : IListener
+public class SimpleHttpListener : IHttpListener
 {
     private HttpListener? _listener;
     public bool IsListening => _listener?.IsListening ?? false;
@@ -23,7 +23,7 @@ public class GenericListener : IListener
     private CancellationTokenSource? _cst;
     private readonly Progress<bool> _progress;
 
-    public GenericListener(ILogger logger)
+    public SimpleHttpListener(ILogger logger)
     {
         _logger = logger;
         _progress = new Progress<bool>(status => OnStatusChange?.Invoke(status));

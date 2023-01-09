@@ -1,8 +1,9 @@
 ﻿using System.Text.Json.Serialization;
+using Shared.Bot;
 
 namespace Bots.Telegram.ApiObjects.Response;
 
-internal class User
+internal class User: IUser
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }

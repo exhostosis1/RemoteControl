@@ -10,7 +10,7 @@ public class FileLogger : AbstractLogger
 
     private static readonly object FileLock = new();
 
-    public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
+    public FileLogger(Type callerType, string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(callerType, level, formatter)
     {
         _path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
 

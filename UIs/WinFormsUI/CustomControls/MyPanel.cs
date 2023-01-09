@@ -7,7 +7,7 @@ namespace WinFormsUI.CustomControls;
 internal abstract class MyPanel : Panel
 {
     public int Id { get; init; }
-    protected readonly IControlProcessor ControlProcessor;
+    protected readonly AbstractControlProcessor ControlProcessor;
     protected readonly SynchronizationContext? SynchronizationContext;
     protected readonly IDisposable Unsubscriber;
     protected Theme Theme { get; set; } = new();
@@ -65,7 +65,7 @@ internal abstract class MyPanel : Panel
     public event IntEventHandler? StopButtonClicked;
     public event ConfigWithIdEventHandler? UpdateButtonClicked;
 
-    protected MyPanel(IControlProcessor processor)
+    protected MyPanel(AbstractControlProcessor processor)
     {
         Width = 508;
         Height = 90;
@@ -74,7 +74,7 @@ internal abstract class MyPanel : Panel
 
         Id = processor.Id;
         ControlProcessor = processor;
-        NameTextBox.Text = processor.CurrentConfig.Name;
+        NameTextBox.Text = processor.Config.Name;
 
         SynchronizationContext = SynchronizationContext.Current;
 
@@ -91,7 +91,7 @@ internal abstract class MyPanel : Panel
         StopButton.Click += StopButtonClick;
         UpdateButton.Click += UpdateButtonClick;
 
-        AutostartBox.Checked = processor.CurrentConfig.Autostart;
+        AutostartBox.Checked = processor.Config.Autostart;
 
         NameTextBox.TextChanged += EnableUpdateButton;
         AutostartBox.CheckedChanged += EnableUpdateButton;

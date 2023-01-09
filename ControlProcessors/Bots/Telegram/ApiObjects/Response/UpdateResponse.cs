@@ -1,12 +1,13 @@
 ﻿using System.Text.Json.Serialization;
+using Shared.Bot;
 
 namespace Bots.Telegram.ApiObjects.Response;
 
-internal class UpdateResponse
+internal class UpdateResponse: IUpdateResponse
 {
     [JsonPropertyName("ok")]
     public bool Ok { get; set; }
 
     [JsonPropertyName("result")]
-    public Update[] Result { get; set; } = Array.Empty<Update>();
+    public IUpdate[] Result { get; set; } = Array.Empty<IUpdate>();
 }

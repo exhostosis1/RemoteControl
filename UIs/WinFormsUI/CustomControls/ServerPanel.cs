@@ -1,4 +1,5 @@
-﻿using Shared.Config;
+﻿using Shared;
+using Shared.Config;
 using Shared.ControlProcessor;
 
 namespace WinFormsUI.CustomControls;
@@ -47,7 +48,9 @@ internal class ServerPanel : MyPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    public ServerPanel(IServerProcessor processor) : base(processor)
+    private readonly IDisposable _unsubscriber;
+
+    public ServerPanel(ServerProcessor processor) : base(processor)
     {
         _schemeTextBox.Text = processor.CurrentConfig.Scheme;
         _hostTextBox.Text = processor.CurrentConfig.Host;
@@ -77,20 +80,18 @@ internal class ServerPanel : MyPanel
             _portTextBox
         });
 
-        processor.ConfigChanged += ConfigChanged;
+        _unsubscriber = processor.Subscribe(new Observer<ServerConfig>(ConfigChanged));
 
         Disposed += LocalDispose;
     }
 
-    private void ConfigChanged(CommonConfig config)
+    private void ConfigChanged(ServerConfig config)
     {
-        var c = (ServerConfig)config;
-
-        NameTextBox.Text = c.Name;
-        AutostartBox.Checked = c.Autostart;
-        _schemeTextBox.Text = c.Scheme;
-        _hostTextBox.Text = c.Host;
-        _portTextBox.Text = c.Port.ToString();
+        NameTextBox.Text = config.Name;
+        AutostartBox.Checked = config.Autostart;
+        _schemeTextBox.Text = config.Scheme;
+        _hostTextBox.Text = config.Host;
+        _portTextBox.Text = config.Port.ToString();
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)
@@ -137,7 +138,7 @@ internal class ServerPanel : MyPanel
 
     private void LocalDispose(object? sender, EventArgs e)
     {
-        ControlProcessor.ConfigChanged -= ConfigChanged;
+        _unsubscriber.Dispose();
         Unsubscriber.Dispose();
     }
 }
