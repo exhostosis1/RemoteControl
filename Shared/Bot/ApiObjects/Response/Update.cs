@@ -1,15 +1,14 @@
 ﻿using System.Text.Json.Serialization;
-using Shared.Bot;
 
-namespace Bots.Telegram.ApiObjects.Response;
+namespace Shared.Bot.ApiObjects.Response;
 
-internal class Update: IUpdate
+public class Update
 {
     [JsonPropertyName("update_id")]
     public int UpdateId { get; set; }
 
     [JsonPropertyName("message")]
-    public IMessage? Message { get; set; }
+    public Message? Message { get; set; }
 
     [JsonPropertyName("edited_message")]
     public Message? EditedMessage { get; set; }

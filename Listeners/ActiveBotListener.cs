@@ -11,7 +11,7 @@ public class ActiveBotListener: IBotListener
 {
     public bool IsListening { get; private set; }
 
-    public IReadOnlyCollection<string> Usernames { get; } = new List<string>();
+    public List<string> Usernames { get; private set; } = new();
     public event BoolEventHandler? OnStatusChange;
 
     private readonly ILogger _logger;
@@ -42,9 +42,11 @@ public class ActiveBotListener: IBotListener
         });
     }
 
-    public void StartListen(string apiUri, string apiKey, IEnumerable<string> usernames)
+    public void StartListen(string apiUri, string apiKey, List<string> usernames)
     {
         if (IsListening) return;
+
+        Usernames = usernames;
 
         _cst = new CancellationTokenSource();
 

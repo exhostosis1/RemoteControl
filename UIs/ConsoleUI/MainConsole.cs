@@ -7,8 +7,8 @@ namespace ConsoleUI;
 // ReSharper disable once InconsistentNaming
 public class MainConsole: IUserInterface
 {
-    public event IntEventHandler? StartEvent;
-    public event IntEventHandler? StopEvent;
+    public event NullableIntEventHandler? StartEvent;
+    public event NullableIntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event ConfigWithIdEventHandler? ConfigChangedEvent;

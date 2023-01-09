@@ -12,8 +12,8 @@ public sealed partial class MainForm : Form, IUserInterface
 {
     private readonly ToolStripItem[] _commonMenuItems;
 
-    public event IntEventHandler? StartEvent;
-    public event IntEventHandler? StopEvent;
+    public event NullableIntEventHandler? StartEvent;
+    public event NullableIntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event ConfigWithIdEventHandler? ConfigChangedEvent;

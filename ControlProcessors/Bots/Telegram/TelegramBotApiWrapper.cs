@@ -1,10 +1,10 @@
-﻿using Bots.Telegram.ApiObjects.Request;
-using Bots.Telegram.ApiObjects.Response;
+﻿using Shared.Bot;
+using Shared.Logging.Interfaces;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Shared.Bot;
-using Shared.Logging.Interfaces;
+using Shared.Bot.ApiObjects.Request;
+using Shared.Bot.ApiObjects.Response;
 
 namespace Bots.Telegram;
 
@@ -71,7 +71,7 @@ public class TelegramBotApiWrapper: IApiWrapper
         };
     }
 
-    public async Task<IUpdateResponse> GetUpdates(string apiUrl, string apiKey, CancellationToken token)
+    public async Task<UpdateResponse> GetUpdates(string apiUrl, string apiKey, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
 

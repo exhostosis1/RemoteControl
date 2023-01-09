@@ -12,6 +12,8 @@ public class TelegramBot: BotProcessor
     public TelegramBot(IBotListener listener, ILogger logger, BotConfig? config = null) : base(logger, config)
     {
         _listener = listener;
+
+        _listener.OnStatusChange += status => StatusObservers.ForEach(x => x.OnNext(status));
     }
 
     protected override void StartInternal(BotConfig config)
