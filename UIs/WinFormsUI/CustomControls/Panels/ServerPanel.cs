@@ -2,9 +2,9 @@
 using Shared.Config;
 using Shared.ControlProcessor;
 
-namespace WinFormsUI.CustomControls;
+namespace WinFormsUI.CustomControls.Panels;
 
-internal class ServerPanel : MyPanel
+internal class ServerPanel : ProcessorPanel
 {
     private readonly Label _schemeLabel = new()
     {
@@ -139,6 +139,5 @@ internal class ServerPanel : MyPanel
     private void LocalDispose(object? sender, EventArgs e)
     {
         _unsubscriber.Dispose();
-        Unsubscriber.Dispose();
     }
 }

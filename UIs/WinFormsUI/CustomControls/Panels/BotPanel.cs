@@ -2,9 +2,9 @@
 using Shared.Config;
 using Shared.ControlProcessor;
 
-namespace WinFormsUI.CustomControls;
+namespace WinFormsUI.CustomControls.Panels;
 
-internal sealed class BotPanel : MyPanel
+internal sealed class BotPanel : ProcessorPanel
 {
     private readonly Label _apiUrlLabel = new()
     {
@@ -129,6 +129,5 @@ internal sealed class BotPanel : MyPanel
     private void LocalDispose(object? sender, EventArgs args)
     {
         _unsubscriber.Dispose();
-        Unsubscriber.Dispose();
     }
 }

@@ -2,7 +2,8 @@
 using Shared.ControlProcessor;
 using Shared.UI;
 using Windows.UI.ViewManagement;
-using WinFormsUI.CustomControls;
+using WinFormsUI.CustomControls.MenuItems;
+using WinFormsUI.CustomControls.Panels;
 
 namespace WinFormsUI;
 
@@ -23,8 +24,8 @@ public sealed partial class MainForm : Form, IUserInterface
     private bool IsAutostart { get; set; }
     
     private List<AbstractControlProcessor> _model = new();
-    private readonly List<ToolStripMenuItemGroup> _toolStripGroups = new();
-    private readonly List<MyPanel> _windowPanels = new();
+    private readonly List<ProcessorMenuItemGroup> _toolStripGroups = new();
+    private readonly List<ProcessorPanel> _windowPanels = new();
 
     private readonly Theme _lightTheme = new()
     {
@@ -87,7 +88,7 @@ public sealed partial class MainForm : Form, IUserInterface
     {
         foreach (var processor in _model)
         {
-            MyPanel panel = processor switch
+            ProcessorPanel panel = processor switch
             {
                 ServerProcessor s => new ServerPanel(s),
                 BotProcessor b => new BotPanel(b),
@@ -134,8 +135,15 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void PopulateContextMenuGroups()
     {
-        foreach (var group in _model.Select(processor => new ToolStripMenuItemGroup(processor)))
+        foreach (var processor in _model)
         {
+            ProcessorMenuItemGroup group = processor switch
+            {
+                ServerProcessor s => new ServerMenuItemGroup(s),
+                BotProcessor b => new BotMenuItemGroup(b),
+                _ => throw new NotSupportedException()
+            };
+
             group.OnDescriptionClick += IpToolStripMenuItem_Click;
             group.OnStartClick += id => StartEvent?.Invoke(id);
             group.OnStopClick += id => StopEvent?.Invoke(id);
@@ -170,7 +178,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
         foreach (Control control in Controls)
         {
-            if(control is MyPanel panel)
+            if(control is ProcessorPanel panel)
                 panel.ApplyTheme(theme);
         }
     }
@@ -184,14 +192,23 @@ public sealed partial class MainForm : Form, IUserInterface
 
     public void AddProcessor(AbstractControlProcessor processor)
     {
-        MyPanel panel = processor switch
+        ProcessorPanel panel;
+        ProcessorMenuItemGroup menuGroup;
+
+        switch (processor)
         {
-            ServerProcessor s => new ServerPanel(s),
-            BotProcessor b => new BotPanel(b),
-            _ => throw new ArgumentOutOfRangeException(nameof(processor), processor, null)
+            case ServerProcessor s:
+                panel = new ServerPanel(s);
+                menuGroup = new ServerMenuItemGroup(s);
+                break;
+            case BotProcessor b:
+                panel = new BotPanel(b);
+                menuGroup = new BotMenuItemGroup(b);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(processor), processor, null);
         };
 
-        var menuGroup = new ToolStripMenuItemGroup(processor);
         _toolStripGroups.Add(menuGroup);
         _windowPanels.Add(panel);
 
@@ -244,9 +261,9 @@ public sealed partial class MainForm : Form, IUserInterface
         CloseEvent?.Invoke();
     }
 
-    private static void IpToolStripMenuItem_Click(object? sender, EventArgs e)
+    private static void IpToolStripMenuItem_Click(string input)
     {
-        var address = (sender as ToolStripMenuItem)?.Text?.Replace("&", "^&") ?? string.Empty;
+        var address = input.Replace("&", "^&");
 
         Utils.RunWindowsCommand($"start {address}", out _, out _);
     }

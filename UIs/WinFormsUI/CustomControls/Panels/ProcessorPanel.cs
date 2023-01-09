@@ -2,9 +2,9 @@
 using Shared.Config;
 using Shared.ControlProcessor;
 
-namespace WinFormsUI.CustomControls;
+namespace WinFormsUI.CustomControls.Panels;
 
-internal abstract class MyPanel : Panel
+internal abstract class ProcessorPanel : Panel
 {
     public int Id { get; init; }
     protected readonly AbstractControlProcessor ControlProcessor;
@@ -40,7 +40,7 @@ internal abstract class MyPanel : Panel
         Size = new Size(75, 23),
         Visible = false,
         FlatStyle = FlatStyle.Flat,
-        
+
     };
 
     protected readonly Button StopButton = new()
@@ -65,7 +65,7 @@ internal abstract class MyPanel : Panel
     public event IntEventHandler? StopButtonClicked;
     public event ConfigWithIdEventHandler? UpdateButtonClicked;
 
-    protected MyPanel(AbstractControlProcessor processor)
+    protected ProcessorPanel(AbstractControlProcessor processor)
     {
         Width = 508;
         Height = 90;
@@ -107,6 +107,7 @@ internal abstract class MyPanel : Panel
         });
 
         Unsubscriber = ControlProcessor.Subscribe(new Observer<bool>(SetButtons));
+        Disposed += (_, _) => Unsubscriber.Dispose();
     }
 
     public void ApplyTheme(Theme theme)
@@ -117,7 +118,7 @@ internal abstract class MyPanel : Panel
             theme.ApplyTheme(control);
         }
 
-        if(ContextMenuStrip != null)
+        if (ContextMenuStrip != null)
             theme.ApplyTheme(ContextMenuStrip);
     }
 
