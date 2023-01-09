@@ -1,8 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
-namespace Bots.Telegram.ApiObjects.Response;
+namespace Shared.Bot.ApiObjects.Response;
 
-internal class Message
+public class Message
 {
     [JsonPropertyName("message_id")]
     public int MessageId { get; set; }

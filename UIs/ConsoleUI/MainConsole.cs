@@ -7,8 +7,8 @@ namespace ConsoleUI;
 // ReSharper disable once InconsistentNaming
 public class MainConsole: IUserInterface
 {
-    public event IntEventHandler? StartEvent;
-    public event IntEventHandler? StopEvent;
+    public event NullableIntEventHandler? StartEvent;
+    public event NullableIntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event ConfigWithIdEventHandler? ConfigChangedEvent;
@@ -20,12 +20,12 @@ public class MainConsole: IUserInterface
         IsAutostart = value;
     }
 
-    private List<IControlProcessor> Model { get; set; } = new();
+    private List<AbstractControlProcessor> Model { get; set; } = new();
 
     private bool IsAutostart { get; set; }
 
     // ReSharper disable once InconsistentNaming
-    public void RunUI(List<IControlProcessor> processors)
+    public void RunUI(List<AbstractControlProcessor> processors)
     {
         Model = processors;
         DisplayInfo(Model);
@@ -69,21 +69,21 @@ public class MainConsole: IUserInterface
         Console.ForegroundColor = color;
     }
 
-    public void AddProcessor(IControlProcessor processor)
+    public void AddProcessor(AbstractControlProcessor processor)
     {
         throw new NotImplementedException();
     }
 
-    private void DisplayInfo(List<IControlProcessor> dtos)
+    private void DisplayInfo(List<AbstractControlProcessor> dtos)
     {
         foreach (var dto in dtos)
         {
             switch (dto)
             {
-                case IServerProcessor s:
+                case ServerProcessor s:
                     Console.WriteLine(s.Working ? $"Server {s.CurrentConfig.Name} listening on {s.CurrentConfig.Uri}" : $"Server {s.CurrentConfig.Name} stopped");
                     break;
-                case IBotProcessor b:
+                case BotProcessor b:
                     Console.WriteLine(b.Working ? $"Bot {b.CurrentConfig.Name} responds to {b.CurrentConfig.UsernamesString}" : $"Bot {b.CurrentConfig.Name} stopped");
                     break;
             }

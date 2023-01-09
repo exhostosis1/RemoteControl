@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Bots.Telegram.ApiObjects.Request;
+namespace Shared.Bot.ApiObjects.Request;
 
-internal class GetUpdatesParameters
+public class GetUpdatesParameters
 {
     [JsonPropertyName("offset")]
     public int? Offset { get; set; }

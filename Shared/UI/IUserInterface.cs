@@ -5,8 +5,8 @@ namespace Shared.UI;
 
 public interface IUserInterface
 {
-    public event IntEventHandler? StartEvent;
-    public event IntEventHandler? StopEvent;
+    public event NullableIntEventHandler? StartEvent;
+    public event NullableIntEventHandler? StopEvent;
     public event EmptyEventHandler? CloseEvent;
     public event BoolEventHandler? AutostartChangedEvent;
     public event ConfigWithIdEventHandler? ConfigChangedEvent;
@@ -16,7 +16,7 @@ public interface IUserInterface
     public void SetAutostartValue(bool value);
 
     // ReSharper disable once InconsistentNaming
-    public void RunUI(List<IControlProcessor> processors);
+    public void RunUI(List<AbstractControlProcessor> processors);
     public void ShowError(string message);
-    public void AddProcessor(IControlProcessor processor);
+    public void AddProcessor(AbstractControlProcessor processor);
 }

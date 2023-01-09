@@ -15,24 +15,28 @@ public class RemoteControlContainer : IPlatformDependantContainer
 {
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
-    public ILogger Logger { get; }
     public IUserInterface UserInterface { get; }
     public ControlFacade ControlProviders { get; }
 
-    public RemoteControlContainer()
+    public ILogger GetLogger(Type type)
     {
 #if DEBUG
-        Logger = new TraceLogger();
+        return new TraceLogger(type);
 #else
-        Logger = new FileLogger("error.log");
+        return new FileLogger(type, "error.log")
 #endif
-        var ydotoolWrapper = new YdotoolProvider(Logger);
-        var dummyWrapper = new DummyProvider(Logger);
+    }
+
+    public RemoteControlContainer()
+    {
+
+        var ydotoolWrapper = new YdotoolProvider(GetLogger(typeof(YdotoolProvider)));
+        var dummyWrapper = new DummyProvider(GetLogger(typeof(DummyProvider)));
 
         ControlProviders = new ControlFacade(dummyWrapper, ydotoolWrapper, ydotoolWrapper, dummyWrapper);
 
-        ConfigProvider = new LocalFileConfigProvider(Logger);
-        AutostartService = new DummyAutostartService(Logger);
+        ConfigProvider = new LocalFileConfigProvider(GetLogger(typeof(LocalFileConfigProvider)));
+        AutostartService = new DummyAutostartService(GetLogger(typeof(DummyAutostartService)));
         UserInterface = new MainConsole();
     }
 }

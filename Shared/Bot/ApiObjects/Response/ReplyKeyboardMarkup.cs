@@ -1,8 +1,9 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
-namespace Bots.Telegram.ApiObjects.Response;
+namespace Shared.Bot.ApiObjects.Response;
 
-internal class ReplyKeyboardMarkup
+public class ReplyKeyboardMarkup
 {
     [JsonPropertyName("keyboard")] 
     public KeyboardButton[][] Keyboard { get; set; } = Array.Empty<KeyboardButton[]>();

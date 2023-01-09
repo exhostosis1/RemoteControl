@@ -7,16 +7,17 @@ public static class Program
     public static void Main()
     {
         var container = new RemoteControlContainer();
+        var logger = container.GetLogger(typeof(Program));
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            container.Logger.LogError("OS not supported");
+            logger.LogError("OS not supported");
             return;
         }
 
         if (Environment.UserName != "root")
         {
-            container.Logger.LogError("Should run as root");
+            logger.LogError("Should run as root");
             return;
         }
 

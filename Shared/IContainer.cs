@@ -1,13 +1,11 @@
-﻿using Shared.ApiControllers;
-using Shared.Controllers;
+﻿using Shared.Listeners;
 using Shared.Server;
-using Shared.Server.Interfaces;
 
 namespace Shared;
 
 public interface IContainer: IPlatformDependantContainer
 {
-    public ICommandExecutor CommandExecutor { get; }
-    public IListener Listener { get; }
+    public IHttpListener HttpListener { get; }
+    public IBotListener BotListener { get; }
     public AbstractMiddleware Middleware { get; }
 }

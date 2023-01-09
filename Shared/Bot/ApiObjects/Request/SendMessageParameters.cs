@@ -1,9 +1,9 @@
 ﻿using System.Text.Json.Serialization;
-using Bots.Telegram.ApiObjects.Response;
+using Shared.Bot.ApiObjects.Response;
 
-namespace Bots.Telegram.ApiObjects.Request;
+namespace Shared.Bot.ApiObjects.Request;
 
-internal class SendMessageParameters
+public class SendMessageParameters
 {
     [JsonPropertyName("chat_id")]
     public int ChatId { get; set; }

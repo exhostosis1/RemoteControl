@@ -1,15 +1,15 @@
-﻿using Bots.Telegram.ApiObjects.Request;
-using Bots.Telegram.ApiObjects.Response;
+﻿using Shared.Bot;
+using Shared.Logging.Interfaces;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Shared.Bot.ApiObjects.Request;
+using Shared.Bot.ApiObjects.Response;
 
 namespace Bots.Telegram;
 
-internal class TelegramBotApiWrapper
+public class TelegramBotApiWrapper: IApiWrapper
 {
-    private readonly string _requestUri;
-
     private readonly HttpClient _client = new()
     {
         Timeout = TimeSpan.FromSeconds(15),
@@ -22,18 +22,20 @@ internal class TelegramBotApiWrapper
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    public TelegramBotApiWrapper(string uri, string apikey)
+    private readonly ILogger _logger;
+
+    public TelegramBotApiWrapper(ILogger logger)
     {
-        _requestUri = $"{uri}{apikey}/";
+        _logger = logger;
     }
 
-    private async Task<string> SendBotApiRequest(string method, object parameters, CancellationToken token)
+    private async Task<string> SendBotApiRequest(string apiUrl, string apiKey, string method, object parameters, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
 
         var content = new StringContent(JsonSerializer.Serialize(parameters, _jsonOptions), Encoding.UTF8, "application/json");
 
-        var req = new HttpRequestMessage(HttpMethod.Post, _requestUri + method)
+        var req = new HttpRequestMessage(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {
             Content = content
         };
@@ -69,7 +71,7 @@ internal class TelegramBotApiWrapper
         };
     }
 
-    public async Task<UpdateResponse> GetUpdates(CancellationToken token)
+    public async Task<UpdateResponse> GetUpdates(string apiUrl, string apiKey, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
 
@@ -80,7 +82,7 @@ internal class TelegramBotApiWrapper
             parameters.Offset = _lastUpdateId + 1;
         }
 
-        var responseString = await SendBotApiRequest(ApiMethods.GetUpdates, parameters, token);
+        var responseString = await SendBotApiRequest(apiUrl, apiKey, ApiMethods.GetUpdates, parameters, token);
 
         var parsedResponse = JsonSerializer.Deserialize<UpdateResponse>(responseString) ?? throw new JsonException("Cannot parse api response");
 
@@ -89,7 +91,7 @@ internal class TelegramBotApiWrapper
         return parsedResponse;
     }
 
-    public async Task<string> SendResponse(int chatId, string message, CancellationToken token, IEnumerable<IEnumerable<string>>? buttons = null)
+    public async Task<string> SendResponse(string apiUrl, string apiKey, int chatId, string message, CancellationToken token, IEnumerable<IEnumerable<string>>? buttons = null)
     {
         token.ThrowIfCancellationRequested();
 
@@ -103,6 +105,6 @@ internal class TelegramBotApiWrapper
             ReplyMarkup = buttons == null ? null : GenerateKeyboardMarkup(buttons)
         };
 
-        return await SendBotApiRequest(ApiMethods.SendMessage, parameters, token);
+        return await SendBotApiRequest(apiUrl, apiKey, ApiMethods.SendMessage, parameters, token);
     }
 }

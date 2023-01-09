@@ -1,9 +1,10 @@
-﻿using Shared.Config;
+﻿using Shared;
+using Shared.Config;
 using Shared.ControlProcessor;
 
-namespace WinFormsUI.CustomControls;
+namespace WinFormsUI.CustomControls.Panels;
 
-internal sealed class BotPanel : MyPanel
+internal sealed class BotPanel : ProcessorPanel
 {
     private readonly Label _apiUrlLabel = new()
     {
@@ -48,7 +49,9 @@ internal sealed class BotPanel : MyPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    public BotPanel(IBotProcessor processor) : base(processor)
+    private readonly IDisposable _unsubscriber;
+
+    public BotPanel(BotProcessor processor) : base(processor)
     {
         _apiUrlTextBox.Text = processor.CurrentConfig.ApiUri;
         _apiKeyTextBox.Text = processor.CurrentConfig.ApiKey;
@@ -68,20 +71,18 @@ internal sealed class BotPanel : MyPanel
             _userIdsListBox
         });
 
-        processor.ConfigChanged += ConfigChanged;
+        _unsubscriber = processor.Subscribe(new Observer<BotConfig>(ConfigChanged));
 
         Disposed += LocalDispose;
     }
 
-    private void ConfigChanged(CommonConfig config)
+    private void ConfigChanged(BotConfig config)
     {
-        var c = (BotConfig)config;
-
-        NameTextBox.Text = c.Name;
-        AutostartBox.Checked = c.Autostart;
-        _apiUrlTextBox.Text = c.ApiUri;
-        _apiKeyTextBox.Text = c.ApiKey;
-        _userIdsListBox.Text = string.Join(Environment.NewLine, c.Usernames);
+        NameTextBox.Text = config.Name;
+        AutostartBox.Checked = config.Autostart;
+        _apiUrlTextBox.Text = config.ApiUri;
+        _apiKeyTextBox.Text = config.ApiKey;
+        _userIdsListBox.Text = string.Join(Environment.NewLine, config.Usernames);
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)
@@ -127,7 +128,6 @@ internal sealed class BotPanel : MyPanel
 
     private void LocalDispose(object? sender, EventArgs args)
     {
-        Unsubscriber.Dispose();
-        ControlProcessor.ConfigChanged -= ConfigChanged;
+        _unsubscriber.Dispose();
     }
 }

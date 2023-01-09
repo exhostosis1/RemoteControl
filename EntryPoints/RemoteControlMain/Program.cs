@@ -8,42 +8,45 @@ namespace RemoteControlMain;
 
 public static class Program
 {
-    private static int Id;
+    private static int _id;
 
-    private static IControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
+    private static AbstractControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
     {
-        var result = new SimpleServer(container.Listener, container.Middleware, container.Logger, config)
+        var result = new SimpleServer(container.HttpListener, container.Middleware, container.GetLogger(typeof(SimpleServer)), config)
         {
-            Id = Id++
+            Id = _id++
         };
 
         return result;
     }
 
-    private static IControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null)
+    private static AbstractControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null)
     {
-        var result = new TelegramBot(container.CommandExecutor, container.Logger, config)
+        var result = new TelegramBot(container.BotListener, container.GetLogger(typeof(TelegramBot)), config)
         {
-            Id = Id++
+            Id = _id++
         };
 
         return result;
     }
 
-    private static IEnumerable<IControlProcessor> CreateProcessors(AppConfig config, IContainer container) =>
-        config.Items.Select(x =>
-            x switch
-            {
-                ServerConfig s => CreateSimpleServer(container, s),
-                BotConfig b => CreateTelegramBot(container, b),
-                _ => throw new NotSupportedException()
-            }
-        );
+    private static IEnumerable<AbstractControlProcessor> CreateProcessors(AppConfig config, IContainer container)
+    {
+        foreach (var configServer in config.Servers)
+        {
+            yield return CreateSimpleServer(container, configServer);
+        }
 
-    private static AppConfig GetConfig(IEnumerable<IControlProcessor> processors) =>
-        new(processors.Select(x => x.CurrentConfig));
+        foreach (var configBot in config.Bots)
+        {
+            yield return CreateTelegramBot(container, configBot);
+        }
+    }
 
-    public static List<IControlProcessor> ControlProcessors { get; private set; } = new();
+    private static AppConfig GetConfig(IEnumerable<AbstractControlProcessor> processors) =>
+        new(processors.Select(x => x.Config));
+
+    public static List<AbstractControlProcessor> ControlProcessors { get; private set; } = new();
 
     public static void Run(IPlatformDependantContainer lesserContainer)
     {
@@ -56,7 +59,7 @@ public static class Program
 
         ControlProcessors.ForEach(x =>
         {
-            if (x.CurrentConfig.Autostart)
+            if (x.Config.Autostart)
                 x.Start();
         });
         
@@ -129,7 +132,7 @@ public static class Program
             }
             else
             {
-                processor.CurrentConfig = c;
+                processor.Config = c;
             }
 
             config = GetConfig(ControlProcessors);

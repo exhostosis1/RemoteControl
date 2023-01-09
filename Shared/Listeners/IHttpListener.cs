@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using Shared.Server;
 
-namespace Shared.Server.Interfaces;
+namespace Shared.Listeners;
 
-public interface IListener
+public interface IHttpListener
 {
     public bool IsListening { get; }
     public IReadOnlyCollection<Uri> ListeningUris { get; }
@@ -12,6 +13,5 @@ public interface IListener
     public event BoolEventHandler? OnStatusChange;
 
     public void StartListen(Uri url);
-
     public void StopListen();
 }

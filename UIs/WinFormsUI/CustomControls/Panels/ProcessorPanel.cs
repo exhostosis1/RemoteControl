@@ -2,12 +2,12 @@
 using Shared.Config;
 using Shared.ControlProcessor;
 
-namespace WinFormsUI.CustomControls;
+namespace WinFormsUI.CustomControls.Panels;
 
-internal abstract class MyPanel : Panel
+internal abstract class ProcessorPanel : Panel
 {
     public int Id { get; init; }
-    protected readonly IControlProcessor ControlProcessor;
+    protected readonly AbstractControlProcessor ControlProcessor;
     protected readonly SynchronizationContext? SynchronizationContext;
     protected readonly IDisposable Unsubscriber;
     protected Theme Theme { get; set; } = new();
@@ -40,7 +40,7 @@ internal abstract class MyPanel : Panel
         Size = new Size(75, 23),
         Visible = false,
         FlatStyle = FlatStyle.Flat,
-        
+
     };
 
     protected readonly Button StopButton = new()
@@ -65,7 +65,7 @@ internal abstract class MyPanel : Panel
     public event IntEventHandler? StopButtonClicked;
     public event ConfigWithIdEventHandler? UpdateButtonClicked;
 
-    protected MyPanel(IControlProcessor processor)
+    protected ProcessorPanel(AbstractControlProcessor processor)
     {
         Width = 508;
         Height = 90;
@@ -74,7 +74,7 @@ internal abstract class MyPanel : Panel
 
         Id = processor.Id;
         ControlProcessor = processor;
-        NameTextBox.Text = processor.CurrentConfig.Name;
+        NameTextBox.Text = processor.Config.Name;
 
         SynchronizationContext = SynchronizationContext.Current;
 
@@ -91,7 +91,7 @@ internal abstract class MyPanel : Panel
         StopButton.Click += StopButtonClick;
         UpdateButton.Click += UpdateButtonClick;
 
-        AutostartBox.Checked = processor.CurrentConfig.Autostart;
+        AutostartBox.Checked = processor.Config.Autostart;
 
         NameTextBox.TextChanged += EnableUpdateButton;
         AutostartBox.CheckedChanged += EnableUpdateButton;
@@ -107,6 +107,7 @@ internal abstract class MyPanel : Panel
         });
 
         Unsubscriber = ControlProcessor.Subscribe(new Observer<bool>(SetButtons));
+        Disposed += (_, _) => Unsubscriber.Dispose();
     }
 
     public void ApplyTheme(Theme theme)
@@ -117,7 +118,7 @@ internal abstract class MyPanel : Panel
             theme.ApplyTheme(control);
         }
 
-        if(ContextMenuStrip != null)
+        if (ContextMenuStrip != null)
             theme.ApplyTheme(ContextMenuStrip);
     }
 
