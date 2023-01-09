@@ -24,7 +24,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
 #if DEBUG
         return new TraceLogger(type);
 #else
-        return new FileLogger(type, "error.log")
+        return new FileLogger(type, "error.log");
 #endif
     }
 
