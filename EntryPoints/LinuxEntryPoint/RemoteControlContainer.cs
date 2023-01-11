@@ -55,14 +55,20 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public RemoteControlContainer()
     {
         Logger = NewLogger();
-        ConfigProvider = NewConfigProvider(Logger);
-        AutostartService = NewAutostartService(Logger);
-        AudioProvider = NewAudioProvider(Logger);
-        KeyboardProvider = NewKeyboardProvider(Logger);
-        MouseProvider = NewMouseProvider(Logger);
-        DisplayProvider = NewDisplayProvider(Logger);
-        UserInterface = NewUserInterface();
+
+        var ydoToolProvider = new YdotoolProvider(new LogWrapper<YdotoolProvider>(Logger));
+        var dummyProvider = new DummyProvider(new LogWrapper<DummyProvider>(Logger));
+        
+        AudioProvider = dummyProvider;
+        KeyboardProvider = ydoToolProvider;
+        MouseProvider = ydoToolProvider;
+        DisplayProvider = dummyProvider;
 
         ControlProviders = new ControlFacade(AudioProvider, KeyboardProvider, MouseProvider, DisplayProvider);
+
+        ConfigProvider = NewConfigProvider(Logger);
+        AutostartService = NewAutostartService(Logger);
+        
+        UserInterface = NewUserInterface();
     }
 }
