@@ -1,14 +1,15 @@
-﻿using Shared.Bot;
-using Shared.Logging.Interfaces;
+﻿using Shared.Logging.Interfaces;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Shared.Bot.ApiObjects.Request;
 using Shared.Bot.ApiObjects.Response;
+using Shared.DataObjects.Bot;
+using Shared.Listeners;
 
-namespace Bots.Telegram;
+namespace Listeners.Wrappers.Telegram;
 
-public class TelegramBotApiWrapper: IApiWrapper
+public class TelegramBotApiWrapper : IActiveApiWrapper
 {
     private readonly HttpClient _client = new()
     {
@@ -22,9 +23,9 @@ public class TelegramBotApiWrapper: IApiWrapper
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
     };
 
-    private readonly ILogger _logger;
+    private readonly ILogger<TelegramBotApiWrapper> _logger;
 
-    public TelegramBotApiWrapper(ILogger logger)
+    public TelegramBotApiWrapper(ILogger<TelegramBotApiWrapper> logger)
     {
         _logger = logger;
     }
@@ -58,7 +59,7 @@ public class TelegramBotApiWrapper: IApiWrapper
         {
             throw new HttpRequestException("Error sending request to bot api", null, response.StatusCode);
         }
-            
+
         return await response.Content.ReadAsStringAsync(token);
     }
 
@@ -71,7 +72,7 @@ public class TelegramBotApiWrapper: IApiWrapper
         };
     }
 
-    public async Task<UpdateResponse> GetUpdates(string apiUrl, string apiKey, CancellationToken token)
+    public async Task<UpdateResponse> GetContextAsync(string apiUrl, string apiKey, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
 
@@ -91,7 +92,27 @@ public class TelegramBotApiWrapper: IApiWrapper
         return parsedResponse;
     }
 
-    public async Task<string> SendResponse(string apiUrl, string apiKey, int chatId, string message, CancellationToken token, IEnumerable<IEnumerable<string>>? buttons = null)
+    public async Task<IEnumerable<BotContext>> GetContextAsync(string apiUrl, string apiKey, IEnumerable<string> usernames, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+
+        var response = await GetContextAsync(apiUrl, apiKey, token);
+
+        if (response is { Ok: true, Result.Length: > 0 })
+        {
+            return response.Result
+                .Where(x =>
+                    usernames.Any(y => y == x.Message?.From?.Username) &&
+                    (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10 &&
+                    x.Message?.Chat?.Id != null &&
+                    !string.IsNullOrWhiteSpace(x.Message?.Text))
+                .Select(x => new BotContext(x.Message!.Chat!.Id, x.Message.Text!));
+        }
+
+        return Enumerable.Empty<BotContext>();
+    }
+
+    public async Task<string> SendResponseAsync(string apiUrl, string apiKey, int chatId, string message, CancellationToken token, IEnumerable<IEnumerable<string>>? buttons = null)
     {
         token.ThrowIfCancellationRequested();
 

@@ -137,4 +137,12 @@ public static partial class Utils
 
         RunWindowsCommandAsAdmin(command);
     }
+
+    public static void AddFirewallRule(IEnumerable<Uri> uris)
+    {
+        foreach (var uri in uris)
+        {
+            AddFirewallRule(uri);
+        }
+    }
 }

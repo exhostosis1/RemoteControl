@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 
-namespace Shared.Controllers.Results;
+namespace Shared.ApiControllers.Results;
 
 public class JsonResult : IActionResult
 {

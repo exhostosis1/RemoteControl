@@ -6,26 +6,24 @@ using Shared.Logging;
 
 namespace Logging.Abstract;
 
-public abstract class AbstractLogger : ILogger
+public abstract class AbstractLogger: ILogger
 {
     private readonly BlockingCollection<LogMessage> _messages = new();
     private readonly IMessageFormatter _formatter;
     private readonly LoggingLevel _currentLoggingLevel;
-    private readonly Type _callerType;
 
-    protected AbstractLogger(Type callerType, LoggingLevel level, IMessageFormatter? formatter)
+    protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
     {
         _formatter = formatter ?? new DefaultMessageFormatter();
         _currentLoggingLevel = level;
-        _callerType = callerType;
 
         new TaskFactory().StartNew(WriteMessages, TaskCreationOptions.LongRunning);
     }
 
-    public void Log(string message, LoggingLevel level = LoggingLevel.Error)
+    public void Log(Type type, string message, LoggingLevel level = LoggingLevel.Error)
     {
         if(level >= _currentLoggingLevel)
-            _messages.Add(new LogMessage(_callerType, level, DateTime.UtcNow, message));
+            _messages.Add(new LogMessage(type, level, DateTime.UtcNow, message));
     }
 
     private void WriteMessages()

@@ -7,7 +7,7 @@ namespace Logging;
 
 public class TraceLogger: AbstractLogger
 {
-    public TraceLogger(Type callerType, LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(callerType, level,
+    public TraceLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level,
         formatter)
     { }
 

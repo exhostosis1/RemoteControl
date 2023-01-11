@@ -1,18 +1,21 @@
-﻿using System.Diagnostics;
-using ControlProviders.Abstract;
-using Shared.ControlProviders;
+﻿using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
+using System.Diagnostics;
 
 // ReSharper disable UnusedMember.Local
 // ReSharper disable InconsistentNaming
 
 namespace ControlProviders;
 
-public class YdotoolProvider : BaseProvider, IKeyboardControlProvider, IMouseControlProvider
+public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
 {
-    public YdotoolProvider(ILogger logger) : base(logger)
-    { }
+    private readonly ILogger<YdotoolProvider> _logger;
+
+    public YdotoolProvider(ILogger<YdotoolProvider> logger)
+    {
+        _logger = logger;
+    }
 
     #region Enums
     private enum YdotoolKey: byte
@@ -178,7 +181,7 @@ public class YdotoolProvider : BaseProvider, IKeyboardControlProvider, IMouseCon
 
     private void FastRunLinuxCommand(string command)
     {
-        Logger.LogInfo($"Running linux command {command}");
+        _logger.LogInfo($"Running linux command {command}");
 
         _proc.StartInfo.Arguments = $"-c \" {command} \"";
         _proc.Start();
@@ -238,6 +241,6 @@ public class YdotoolProvider : BaseProvider, IKeyboardControlProvider, IMouseCon
     public void Wheel(bool up)
     {
         //TODO: add mouse scroll functionality
-        Logger.LogInfo($"scroll {(up ? "up" : "down")}");
+        _logger.LogInfo($"scroll {(up ? "up" : "down")}");
     }
 }

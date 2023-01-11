@@ -10,24 +10,14 @@ public class ServerConfig: CommonConfig
     public int Port { get; set; }
 
     [JsonIgnore]
-    public Uri? Uri
+    public Uri Uri
     {
-        get
-        {
-            try
-            {
-                return new UriBuilder(Scheme, Host, Port).Uri;
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        get => new UriBuilder(Scheme, Host, Port).Uri;
         set
         {
-            Scheme = value?.Scheme ?? string.Empty;
-            Host = value?.Host ?? string.Empty;
-            Port = value?.Port ?? 0;
+            Scheme = value.Scheme;
+            Host = value.Host;
+            Port = value.Port;
         }
     }
 }

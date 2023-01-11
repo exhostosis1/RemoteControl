@@ -1,16 +1,18 @@
-﻿using System.Net;
-using Shared.DataObjects.Interfaces;
-using Shared.Logging.Interfaces;
+﻿using Shared.Logging.Interfaces;
 using Shared.Server;
+using System.Net;
+using Shared.DataObjects.Http;
 
 namespace Servers.Endpoints;
 
 public class StaticFilesEndpoint : AbstractEndpoint
 {
     private readonly string _contentFolder;
+    private readonly ILogger<StaticFilesEndpoint> _logger;
 
-    public StaticFilesEndpoint(ILogger logger, string directory = "www") : base(logger)
+    public StaticFilesEndpoint(ILogger<StaticFilesEndpoint> logger, string directory = "www")
     {
+        _logger = logger;
         _contentFolder = AppContext.BaseDirectory + directory;
     }
 
@@ -24,11 +26,11 @@ public class StaticFilesEndpoint : AbstractEndpoint
         { ".css", "text/css" }
     };
 
-    public override void ProcessRequest(IContext context)
+    public override void ProcessRequest(Context context)
     {
         var uriPath = context.Request.Path;
 
-        Logger.LogInfo($"Processing file request {uriPath}");
+        _logger.LogInfo($"Processing file request {uriPath}");
 
         if (uriPath.Contains(".."))
         {
@@ -53,7 +55,7 @@ public class StaticFilesEndpoint : AbstractEndpoint
         }
         else
         {
-            Logger.LogError($"File not found {path}");
+            _logger.LogError($"File not found {path}");
             context.Response.StatusCode = HttpStatusCode.NotFound;
         }
     }

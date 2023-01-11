@@ -9,11 +9,13 @@ namespace Servers;
 public class SimpleServer: ServerProcessor
 {
     private readonly IHttpListener _listener;
+    private readonly ILogger<SimpleServer> _logger;
 
-    public SimpleServer(IHttpListener listener, AbstractMiddleware middleware, ILogger logger, ServerConfig? config = null): base(logger, config)
+    public SimpleServer(IHttpListener listener, AbstractMiddleware middleware, ILogger<SimpleServer> logger, ServerConfig? config = null): base(config)
     {
         _listener = listener;
         _listener.OnRequest += middleware.ProcessRequest;
+        _logger = logger;
 
         _listener.OnStatusChange += status => StatusObservers.ForEach(x => x.OnNext(status));
     }

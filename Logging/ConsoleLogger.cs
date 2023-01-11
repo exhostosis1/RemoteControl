@@ -4,9 +4,9 @@ using Shared.Logging.Interfaces;
 
 namespace Logging;
 
-public class ConsoleLogger : AbstractLogger
+public class ConsoleLogger: AbstractLogger
 {
-    public ConsoleLogger(Type callerType, LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(callerType, level, formatter)
+    public ConsoleLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level, formatter)
     {}
 
     protected override void ProcessInfo(string message)

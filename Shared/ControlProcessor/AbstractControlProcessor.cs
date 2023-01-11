@@ -1,7 +1,6 @@
 ﻿using Shared.Config;
 using System;
 using System.Collections.Generic;
-using Shared.Logging.Interfaces;
 
 namespace Shared.ControlProcessor;
 
@@ -18,13 +17,6 @@ public abstract class AbstractControlProcessor: IObservable<bool>, IObservable<C
 
     protected readonly List<IObserver<bool>> StatusObservers = new();
     protected readonly List<IObserver<CommonConfig>> ConfigObservers = new();
-
-    protected readonly ILogger Logger;
-
-    protected AbstractControlProcessor(ILogger logger)
-    {
-        Logger = logger;
-    }
 
     protected abstract CommonConfig GetCurrentConfig();
     protected abstract void SetCurrentConfig(CommonConfig config);

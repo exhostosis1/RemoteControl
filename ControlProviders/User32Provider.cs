@@ -1,14 +1,18 @@
-﻿using System.Runtime.InteropServices;
-using ControlProviders.Abstract;
-using Shared.ControlProviders;
+﻿using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace ControlProviders;
 
-public partial class User32Provider : BaseProvider, IDisplayControlProvider, IKeyboardControlProvider, IMouseControlProvider
+public partial class User32Provider : IDisplayControlProvider, IKeyboardControlProvider, IMouseControlProvider
 {
-    public User32Provider(ILogger logger) : base(logger){}
+    private readonly ILogger<User32Provider> _logger;
+
+    public User32Provider(ILogger<User32Provider> logger)
+    {
+        _logger = logger;
+    }
 
     private const string User32LibraryName = "user32.dll";
 
@@ -275,13 +279,13 @@ public partial class User32Provider : BaseProvider, IDisplayControlProvider, IKe
 
     private int SetMonitorInState(MonitorState state)
     {
-        Logger.LogInfo($"Setting monitor state {state}");
+        _logger.LogInfo($"Setting monitor state {state}");
         return SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
     }
 
     private void DispatchInput()
     {
-        Logger.LogInfo($"Sending input {_buffer[0]}");
+        _logger.LogInfo($"Sending input {_buffer[0]}");
         SendInput(Length, _buffer, _size);
     }
 

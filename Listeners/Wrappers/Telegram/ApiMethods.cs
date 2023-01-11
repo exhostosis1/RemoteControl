@@ -1,4 +1,4 @@
-﻿namespace Bots.Telegram;
+﻿namespace Listeners.Wrappers.Telegram;
 
 internal static class ApiMethods
 {

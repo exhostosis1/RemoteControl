@@ -43,7 +43,7 @@ public abstract class GenericControlProcessor<T> : AbstractControlProcessor, IOb
     protected abstract void StartInternal(T config);
     protected abstract void RestartInternal(T config);
 
-    protected GenericControlProcessor(ILogger logger, T? config = null) : base(logger)
+    protected GenericControlProcessor(T? config = null)
     {
         _currentConfig = config ?? DefaultConfig;
     }

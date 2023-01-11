@@ -1,7 +1,6 @@
 ﻿using Shared;
 using Shared.ApiControllers;
-using Shared.Controllers;
-using Shared.Controllers.Results;
+using Shared.ApiControllers.Results;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
@@ -11,15 +10,17 @@ namespace ApiControllers;
 public class MouseController : BaseApiController
 {
     private readonly IMouseControlProvider _input;
+    private readonly ILogger<MouseController> _logger;
 
-    public MouseController(IMouseControlProvider input, ILogger logger) : base(logger)
+    public MouseController(IMouseControlProvider input, ILogger<MouseController> logger) : base(logger)
     {
+        _logger = logger;
         _input = input;
     }
 
     public IActionResult Left(string? _)
     {
-        Logger.LogInfo("Pressing left mouse button");
+        _logger.LogInfo("Pressing left mouse button");
 
         _input.ButtonPress();
 
@@ -28,7 +29,7 @@ public class MouseController : BaseApiController
 
     public IActionResult Right(string? _)
     {
-        Logger.LogInfo("Pressing right mouse button");
+        _logger.LogInfo("Pressing right mouse button");
 
         _input.ButtonPress(MouseButtons.Right);
 
@@ -37,7 +38,7 @@ public class MouseController : BaseApiController
 
     public IActionResult Middle(string? _)
     {
-        Logger.LogInfo("Pressing middle mouse button");
+        _logger.LogInfo("Pressing middle mouse button");
 
         _input.ButtonPress(MouseButtons.Middle);
 
@@ -46,7 +47,7 @@ public class MouseController : BaseApiController
 
     public IActionResult WheelUp(string? _)
     {
-        Logger.LogInfo("Turning wheel up");
+        _logger.LogInfo("Turning wheel up");
 
         _input.Wheel(true);
 
@@ -55,7 +56,7 @@ public class MouseController : BaseApiController
 
     public IActionResult WheelDown(string? _)
     {
-        Logger.LogInfo("Turning wheel down");
+        _logger.LogInfo("Turning wheel down");
 
         _input.Wheel(false);
 
@@ -64,14 +65,14 @@ public class MouseController : BaseApiController
 
     public IActionResult DragStart(string? _)
     {
-        Logger.LogInfo("Starting drag");
+        _logger.LogInfo("Starting drag");
 
         _input.ButtonPress(MouseButtons.Left, KeyPressMode.Down);
         Task.Run(async () =>
         {
             await Task.Delay(5_000);
 
-            Logger.LogInfo("Stopping drag");
+            _logger.LogInfo("Stopping drag");
             _input.ButtonPress(MouseButtons.Left, KeyPressMode.Up);
         });
 
@@ -80,7 +81,7 @@ public class MouseController : BaseApiController
 
     public IActionResult DragStop(string? _)
     {
-        Logger.LogInfo("Stopping drag");
+        _logger.LogInfo("Stopping drag");
 
         _input.ButtonPress(MouseButtons.Left, KeyPressMode.Up);
 
@@ -91,11 +92,11 @@ public class MouseController : BaseApiController
     {
         if (string.IsNullOrWhiteSpace(param))
         {
-            Logger.LogError($"Cannot move mouse by {param}");
+            _logger.LogError($"Cannot move mouse by {param}");
             return Error("Empty coordinates");
         }
 
-        Logger.LogInfo($"Moving mouse by {param}");
+        _logger.LogInfo($"Moving mouse by {param}");
 
         if (Utils.TryGetCoords(param, out var x, out var y))
         {

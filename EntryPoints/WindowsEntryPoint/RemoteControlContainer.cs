@@ -5,6 +5,7 @@ using Logging;
 using Shared;
 using Shared.Config;
 using Shared.ControlProviders;
+using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.UI;
 using WinFormsUI;
@@ -18,11 +19,12 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IUserInterface UserInterface { get; }
 
     public ControlFacade ControlProviders { get; }
+    public ILogger Logger => GetLogger();
 
-    public ILogger GetLogger(Type type)
+    public ILogger GetLogger()
     {
 #if DEBUG
-        return new TraceLogger(type);
+        return new TraceLogger();
 #else
         return new FileLogger(type, "error.log");
 #endif
@@ -30,13 +32,13 @@ public class RemoteControlContainer : IPlatformDependantContainer
 
     public RemoteControlContainer()
     {
-        var user32Wrapper = new User32Provider(GetLogger(typeof(User32Provider)));
-        var audioProvider = new NAudioProvider(GetLogger(typeof(NAudioProvider)));
+        var user32Wrapper = new User32Provider(new LogWrapper<User32Provider>(Logger));
+        var audioProvider = new NAudioProvider(new LogWrapper<NAudioProvider>(Logger));
 
         ControlProviders = new ControlFacade(audioProvider, user32Wrapper, user32Wrapper, user32Wrapper);
 
-        ConfigProvider = new LocalFileConfigProvider(GetLogger(typeof(LocalFileConfigProvider)));
-        AutostartService = new WinRegistryAutostartService(GetLogger(typeof(WinRegistryAutostartService)));
+        ConfigProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(Logger));
+        AutostartService = new WinRegistryAutostartService(new LogWrapper<WinRegistryAutostartService>(Logger));
         UserInterface = new MainForm();
     }
 }

@@ -1,11 +1,10 @@
 ﻿using Shared.Config;
-using Shared.Logging.Interfaces;
 
 namespace Shared.ControlProcessor;
 
 public abstract class BotProcessor : GenericControlProcessor<BotConfig>
 {
-    protected BotProcessor(ILogger logger, BotConfig? config = null) : base(logger, config)
+    protected BotProcessor(BotConfig? config = null): base(config)
     {
         DefaultConfig = new BotConfig
         {

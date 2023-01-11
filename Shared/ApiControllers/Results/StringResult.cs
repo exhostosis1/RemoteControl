@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Shared.Controllers.Results;
+namespace Shared.ApiControllers.Results;
 
 public class StringResult : IActionResult
 {

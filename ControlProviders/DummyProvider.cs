@@ -1,5 +1,4 @@
-﻿using ControlProviders.Abstract;
-using ControlProviders.Devices;
+﻿using ControlProviders.Devices;
 using Shared.ControlProviders;
 using Shared.ControlProviders.Devices;
 using Shared.Enums;
@@ -7,12 +6,15 @@ using Shared.Logging.Interfaces;
 
 namespace ControlProviders;
 
-public class DummyProvider: BaseProvider, IKeyboardControlProvider, IMouseControlProvider, IDisplayControlProvider, IAudioControlProvider
+public class DummyProvider: IKeyboardControlProvider, IMouseControlProvider, IDisplayControlProvider, IAudioControlProvider
 {
     private readonly IAudioDevice[] _dummyDevices;
+    private readonly ILogger<DummyProvider> _logger;
 
-    public DummyProvider(ILogger logger) : base(logger)
+    public DummyProvider(ILogger<DummyProvider> logger)
     {
+        _logger = logger;
+
         _dummyDevices = new IAudioDevice[]
         {
             new AudioDevice
@@ -32,68 +34,68 @@ public class DummyProvider: BaseProvider, IKeyboardControlProvider, IMouseContro
 
     public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
     {
-        Logger.LogInfo($"Dummy KeyPress {key}");
+        _logger.LogInfo($"Dummy KeyPress {key}");
     }
 
     public void TextInput(string text)
     {
-        Logger.LogInfo($"Dummy Text '{text}'");
+        _logger.LogInfo($"Dummy Text '{text}'");
     }
 
     public void Move(int x, int y)
     {
-        Logger.LogInfo($"Dummy MouseMove {x} {y}");
+        _logger.LogInfo($"Dummy MouseMove {x} {y}");
     }
 
     public void ButtonPress(MouseButtons key = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
     {
-        Logger.LogInfo($"Dummy MouseButtonPress {key}");
+        _logger.LogInfo($"Dummy MouseButtonPress {key}");
     }
 
     public void Wheel(bool up)
     {
-        Logger.LogInfo($"Dummy MouseWheel {(up ? "up" : "down")}");
+        _logger.LogInfo($"Dummy MouseWheel {(up ? "up" : "down")}");
     }
 
     public void Darken()
     {
-        Logger.LogInfo($"Dummy DisplayDarken");
+        _logger.LogInfo($"Dummy DisplayDarken");
     }
         
     public int GetVolume()
     {
-        Logger.LogInfo($"Dummy GetVolume");
+        _logger.LogInfo($"Dummy GetVolume");
         return 56;
     }
 
     public void SetVolume(int volume)
     {
-        Logger.LogInfo($"Dummy SetVolume {volume}");
+        _logger.LogInfo($"Dummy SetVolume {volume}");
     }
 
     public void Mute()
     {
         IsMuted = true;
-        Logger.LogInfo($"Dummy Mute");
+        _logger.LogInfo($"Dummy Mute");
     }
 
     public void Unmute()
     {
         IsMuted = false;
-        Logger.LogInfo("Dummy Unmute");
+        _logger.LogInfo("Dummy Unmute");
     }
 
     public bool IsMuted { get; private set; } = false;
 
     public IReadOnlyCollection<IAudioDevice> GetDevices()
     {
-        Logger.LogInfo($"Dummy GetDevices");
+        _logger.LogInfo($"Dummy GetDevices");
         return _dummyDevices;
     }
 
     public IReadOnlyCollection<IAudioDevice> SetCurrentControlDevice(Guid id)
     {
-        Logger.LogInfo($"Dummy SetDevice {id}");
+        _logger.LogInfo($"Dummy SetDevice {id}");
         return _dummyDevices;
     }
 }

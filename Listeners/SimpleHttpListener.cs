@@ -1,8 +1,6 @@
 ﻿using Shared;
-using Shared.DataObjects;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
-using Shared.Server;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
@@ -11,37 +9,34 @@ namespace Listeners;
 
 public class SimpleHttpListener : IHttpListener
 {
-    private HttpListener? _listener;
-    public bool IsListening => _listener?.IsListening ?? false;
-    public IReadOnlyCollection<Uri> ListeningUris => _listener?.Prefixes.Select(x => new Uri(x)).ToList() ?? new List<Uri>();
+    public bool IsListening => _wrapper.IsListening;
 
     public event HttpEventHandler? OnRequest;
     public event BoolEventHandler? OnStatusChange;
 
-    private readonly ILogger _logger;
+    private readonly ILogger<SimpleHttpListener> _logger;
+    private readonly IHttpListenerWrapper _wrapper;
 
     private CancellationTokenSource? _cst;
     private readonly Progress<bool> _progress;
 
-    public SimpleHttpListener(ILogger logger)
+    public SimpleHttpListener(IHttpListenerWrapper wrapper, ILogger<SimpleHttpListener> logger)
     {
         _logger = logger;
+        _wrapper = wrapper;
         _progress = new Progress<bool>(status => OnStatusChange?.Invoke(status));
     }
 
     public void StartListen(Uri url)
     {
-        if (_listener?.IsListening ?? false)
+        if (_wrapper.IsListening)
         {
             StopListen();
         }
 
-        _listener = new HttpListener();
-        _listener.Prefixes.Add(url.ToString());
-
         try
         {
-            _listener.Start();
+            _wrapper.Start(url);
         }
         catch (HttpListenerException e)
         {
@@ -69,7 +64,7 @@ public class SimpleHttpListener : IHttpListener
 
             Utils.RunWindowsCommandAsAdmin(command);
 
-            _listener.Start();
+            _wrapper.Start(url);
         }
         catch (Exception e)
         {
@@ -80,34 +75,23 @@ public class SimpleHttpListener : IHttpListener
         _cst = new CancellationTokenSource();
 
 #pragma warning disable CS4014
-        ProcessRequest(_progress, _cst.Token);
+        ProcessRequestAsync(_progress, _cst.Token);
 #pragma warning restore CS4014
 
         _logger.LogInfo($"Started listening on {url}");
     }
 
-    private async Task ProcessRequest(IProgress<bool> progress, CancellationToken token)
+    private async Task ProcessRequestAsync(IProgress<bool> progress, CancellationToken token)
     {
         progress.Report(true);
         while (!token.IsCancellationRequested)
         {
             try
             {
-                var context = await (_listener?.GetContextAsync() ?? throw new Exception("Listener is null"));
+                var context = await _wrapper.GetContextAsync();
                 token.ThrowIfCancellationRequested();
 
-                var path = context.Request.RawUrl;
-                if (path == null) return;
-
-                var dto = new Context(path);
-
-                OnRequest?.Invoke(dto);
-
-                context.Response.StatusCode = (int)dto.Response.StatusCode;
-                context.Response.ContentType = dto.Response.ContentType;
-
-                if (dto.Response.Payload.Length > 0)
-                    context.Response.OutputStream.Write(dto.Response.Payload);
+                OnRequest?.Invoke(context);
 
                 context.Response.Close();
             }
@@ -127,12 +111,11 @@ public class SimpleHttpListener : IHttpListener
 
     public void StopListen()
     {
-        if (_listener?.IsListening ?? false)
+        if (_wrapper.IsListening)
         {
             _cst?.Cancel();
             _cst?.Dispose();
-            _listener.Stop();
-            _listener = null;
+            _wrapper.Stop();
         }
 
         _logger.LogInfo("Stopped listening");

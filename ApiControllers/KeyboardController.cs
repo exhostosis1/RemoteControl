@@ -1,25 +1,26 @@
-﻿using System.Net;
-using Shared.ApiControllers;
-using Shared.Controllers;
-using Shared.Controllers.Results;
+﻿using Shared.ApiControllers;
+using Shared.ApiControllers.Results;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
+using System.Net;
 
 namespace ApiControllers;
 
 public class KeyboardController: BaseApiController
 {
     private readonly IKeyboardControlProvider _input;
+    private readonly ILogger<KeyboardController> _logger;
 
-    public KeyboardController(IKeyboardControlProvider input, ILogger logger) : base(logger)
+    public KeyboardController(IKeyboardControlProvider input, ILogger<KeyboardController> logger) : base(logger)
     {
+        _logger = logger;
         _input = input;
     }
 
     public IActionResult Back(string? _)
     {
-        Logger.LogInfo("Pressing arrow left");
+        _logger.LogInfo("Pressing arrow left");
 
         _input.KeyPress(KeysEnum.ArrowLeft);
 
@@ -28,7 +29,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult Forth(string? _)
     {
-        Logger.LogInfo("Pressing arrow right");
+        _logger.LogInfo("Pressing arrow right");
 
         _input.KeyPress(KeysEnum.ArrowRight);
 
@@ -37,7 +38,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult Pause(string? _)
     {
-        Logger.LogInfo("Pressing pause");
+        _logger.LogInfo("Pressing pause");
 
         _input.KeyPress(KeysEnum.MediaPlayPause);
 
@@ -46,7 +47,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult MediaBack(string? _)
     {
-        Logger.LogInfo("Pressing previous");
+        _logger.LogInfo("Pressing previous");
 
         _input.KeyPress(KeysEnum.MediaPrev);
 
@@ -55,7 +56,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult MediaForth(string? _)
     {
-        Logger.LogInfo("Pressing next");
+        _logger.LogInfo("Pressing next");
 
         _input.KeyPress(KeysEnum.MediaNext);
 
@@ -64,7 +65,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult MediaVolumeUp(string? _)
     {
-        Logger.LogInfo("Pressing volume up");
+        _logger.LogInfo("Pressing volume up");
 
         _input.KeyPress(KeysEnum.VolumeUp);
 
@@ -73,7 +74,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult MediaVolumeDown(string? _)
     {
-        Logger.LogInfo("Pressing volume down");
+        _logger.LogInfo("Pressing volume down");
 
         _input.KeyPress(KeysEnum.VolumeDown);
 
@@ -82,7 +83,7 @@ public class KeyboardController: BaseApiController
 
     public IActionResult MediaMute(string? _)
     {
-        Logger.LogInfo("Pressing mute");
+        _logger.LogInfo("Pressing mute");
 
         _input.KeyPress(KeysEnum.Mute);
 
@@ -99,11 +100,11 @@ public class KeyboardController: BaseApiController
         }
         catch (Exception e)
         {
-            Logger.LogError($"Cannot decode text {param}");
+            _logger.LogError($"Cannot decode text {param}");
             return Error(e.Message);
         }
 
-        Logger.LogInfo($"Inputing text {text}");
+        _logger.LogInfo($"Inputing text {text}");
 
         _input.TextInput(text);
         _input.KeyPress(KeysEnum.Enter);

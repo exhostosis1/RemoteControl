@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Shared.Controllers.Results;
+using Shared.ApiControllers.Results;
 
 namespace Shared.ApiControllers;
 

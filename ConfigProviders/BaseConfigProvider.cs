@@ -7,11 +7,11 @@ public abstract class BaseConfigProvider: IConfigProvider
 {
     private SerializableAppConfig? _cachedConfig;
 
-    protected readonly ILogger Logger;
+    private readonly ILogger _logger;
 
     protected BaseConfigProvider(ILogger logger)
     {
-        Logger = logger;
+        _logger = logger;
     }
 
     public SerializableAppConfig GetSerializableConfig()
@@ -27,7 +27,7 @@ public abstract class BaseConfigProvider: IConfigProvider
         }
         catch (Exception e)
         {
-            Logger.LogError(e.Message);
+            _logger.LogError(GetType(), e.Message);
             throw;
         }
 
@@ -46,7 +46,7 @@ public abstract class BaseConfigProvider: IConfigProvider
         }
         catch (Exception e)
         {
-            Logger.LogError(e.Message);
+            _logger.LogError(GetType(),e.Message);
             throw;
         }
 

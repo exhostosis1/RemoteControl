@@ -4,13 +4,13 @@ using Shared.Logging.Interfaces;
 
 namespace Logging;
 
-public class FileLogger : AbstractLogger
+public class FileLogger: AbstractLogger
 {
     private readonly string _path;
 
     private static readonly object FileLock = new();
 
-    public FileLogger(Type callerType, string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(callerType, level, formatter)
+    public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
     {
         _path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
 

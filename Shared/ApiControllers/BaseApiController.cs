@@ -1,19 +1,18 @@
-﻿using System;
+﻿using Shared.Logging.Interfaces;
+using System;
 using System.Linq;
 using System.Reflection;
-using Shared.Controllers;
-using Shared.Controllers.Results;
-using Shared.Logging.Interfaces;
+using Shared.ApiControllers.Results;
 
 namespace Shared.ApiControllers;
 
 public abstract class BaseApiController
 {
-    protected readonly ILogger Logger;
+    private readonly ILogger _logger;
 
     protected BaseApiController(ILogger logger)
     {
-        Logger = logger;
+        _logger = logger;
     }
 
     protected static IActionResult Ok() => new OkResult();

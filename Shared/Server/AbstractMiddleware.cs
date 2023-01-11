@@ -1,18 +1,15 @@
-﻿using Shared.DataObjects.Interfaces;
-using Shared.Logging.Interfaces;
+﻿using Shared.DataObjects.Http;
 
 namespace Shared.Server;
 
 public abstract class AbstractMiddleware
 {
     protected readonly HttpEventHandler? Next;
-    protected readonly ILogger Logger;
 
-    protected AbstractMiddleware(ILogger logger, HttpEventHandler? next = null)
+    protected AbstractMiddleware(HttpEventHandler? next = null)
     {
-        Logger = logger;
         Next = next;
     }
 
-    public abstract void ProcessRequest(IContext context);
+    public abstract void ProcessRequest(Context context);
 }

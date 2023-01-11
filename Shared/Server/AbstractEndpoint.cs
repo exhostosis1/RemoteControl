@@ -1,16 +1,8 @@
-﻿using Shared.DataObjects.Interfaces;
-using Shared.Logging.Interfaces;
+﻿using Shared.DataObjects.Http;
 
 namespace Shared.Server;
 
 public abstract class AbstractEndpoint
 {
-    protected readonly ILogger Logger;
-
-    protected AbstractEndpoint(ILogger logger)
-    {
-        Logger = logger;
-    }
-
-    public abstract void ProcessRequest(IContext context);
+    public abstract void ProcessRequest(Context context);
 }

@@ -12,11 +12,14 @@ public class WinRegistryAutostartService : BaseAutostartService
     private readonly RegistryKey _regKey;
     private const string RegName = "Remote Control";
     private readonly string _regValue = $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? throw new NullReferenceException()}\"";
+    private readonly ILogger<WinRegistryAutostartService> _logger;
 
-    public WinRegistryAutostartService(ILogger logger): base(logger)
+    public WinRegistryAutostartService(ILogger<WinRegistryAutostartService> logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
+
+        _logger = logger;
 
         _regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey("Microsoft")?.OpenSubKey("Windows")
             ?.OpenSubKey("CurrentVersion")?.OpenSubKey("Run", true) ?? throw new NullReferenceException("Cannot open autorun registry key");
@@ -24,13 +27,13 @@ public class WinRegistryAutostartService : BaseAutostartService
 
     public override bool CheckAutostart()
     {
-        Logger.LogInfo("Checking win registry autorun");
+        _logger.LogInfo("Checking win registry autorun");
         return _regKey.GetValue(RegName, "") as string == _regValue;
     }
 
     public override void SetAutostart(bool value)
     {
-        Logger.LogInfo("Setting win registry autorun");
+        _logger.LogInfo("Setting win registry autorun");
 
         _regKey.DeleteValue(RegName, false);
 
@@ -42,7 +45,7 @@ public class WinRegistryAutostartService : BaseAutostartService
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message);
+                _logger.LogError(e.Message);
             }
         }
     }

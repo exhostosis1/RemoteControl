@@ -13,16 +13,19 @@ public class WinRegistryConfigProvider: BaseConfigProvider
 {
     private readonly RegistryKey _regKey;
     private const string ValueName = "Config";
+    private readonly ILogger<WinRegistryConfigProvider> _logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public WinRegistryConfigProvider(ILogger logger): base(logger)
+    public WinRegistryConfigProvider(ILogger<WinRegistryConfigProvider> logger): base(logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
+
+        _logger = logger;
 
         _regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ?? 
                   Registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
@@ -30,7 +33,7 @@ public class WinRegistryConfigProvider: BaseConfigProvider
 
     protected override SerializableAppConfig GetConfigInternal()
     {
-        Logger.LogInfo($"Getting config from registry {_regKey}");
+        _logger.LogInfo($"Getting config from registry {_regKey}");
 
         var value = _regKey.GetValue(ValueName, null) as string;
 
@@ -44,7 +47,7 @@ public class WinRegistryConfigProvider: BaseConfigProvider
             }
             catch (JsonException e)
             {
-                Logger.LogError(e.Message);
+                _logger.LogError(e.Message);
             }
         }
 
@@ -53,7 +56,7 @@ public class WinRegistryConfigProvider: BaseConfigProvider
 
     protected override void SetConfigInternal(SerializableAppConfig config)
     {
-        Logger.LogInfo($"Writing config to registry {_regKey}");
+        _logger.LogInfo($"Writing config to registry {_regKey}");
 
         _regKey.SetValue(ValueName, JsonSerializer.Serialize(config, _jsonOptions), RegistryValueKind.String);
     }

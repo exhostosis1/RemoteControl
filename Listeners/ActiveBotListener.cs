@@ -1,9 +1,7 @@
 ﻿using Shared;
-using Shared.Bot;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using System.Net.Sockets;
-using Shared.ApiControllers;
 
 namespace Listeners;
 
@@ -11,32 +9,27 @@ public class ActiveBotListener: IBotListener
 {
     public bool IsListening { get; private set; }
 
-    public List<string> Usernames { get; private set; } = new();
+    private List<string> _usernames = new();
+
     public event BoolEventHandler? OnStatusChange;
+    public event BotEventHandler? OnRequest;
 
-    private readonly ILogger _logger;
-
-    private readonly IApiWrapper _wrapper;
-    private readonly ICommandExecutor _executor;
+    private readonly ILogger<ActiveBotListener> _logger;
+    private readonly IActiveApiWrapper _wrapper;
 
     private CancellationTokenSource? _cst;
     private readonly IProgress<bool> _progress;
-    private const int RefreshTime = 1000;
 
-    private readonly string[][] _buttons = {
-        new[] { Buttons.MediaBack, Buttons.Pause, Buttons.MediaForth },
-        new[] { Buttons.VolumeDown, Buttons.Darken, Buttons.VolumeUp }
-    };
+    private const int Delay = 1_000;
 
-    public ActiveBotListener(IApiWrapper wrapper, ICommandExecutor executor, ILogger logger)
+    public ActiveBotListener(IActiveApiWrapper wrapper, ILogger<ActiveBotListener> logger)
     {
         _logger = logger;
         _wrapper = wrapper;
-        _executor = executor;
         
         _progress = new Progress<bool>(result =>
         {
-            _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', Usernames)}" : "Telegram bot stopped");
+            _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
             IsListening = result;
             OnStatusChange?.Invoke(result);
         });
@@ -46,12 +39,12 @@ public class ActiveBotListener: IBotListener
     {
         if (IsListening) return;
 
-        Usernames = usernames;
+        _usernames = usernames;
 
         _cst = new CancellationTokenSource();
 
 #pragma warning disable CS4014
-        Listen(apiUri, apiKey, _cst.Token);
+        ListenAsync(apiUri, apiKey, _cst.Token);
 #pragma warning restore CS4014
     }
 
@@ -69,7 +62,7 @@ public class ActiveBotListener: IBotListener
         }
     }
 
-    private async Task Listen(string apiUrl, string apiKey, CancellationToken token)
+    private async Task ListenAsync(string apiUrl, string apiKey, CancellationToken token)
     {
         var internetMessageShown = false;
 
@@ -78,28 +71,19 @@ public class ActiveBotListener: IBotListener
         {
             try
             {
-                var response = await _wrapper.GetUpdates(apiUrl, apiKey, token);
+                var response = await _wrapper.GetContextAsync(apiUrl, apiKey, _usernames, token);
                 token.ThrowIfCancellationRequested();
 
                 internetMessageShown = false;
 
-                if (!response.Ok || response.Result.Length == 0)
-                    continue;
-
-                var messages = response.Result
-                    .Where(x =>
-                        Usernames.Any(y => y == x.Message?.From?.Username) &&
-                        (DateTime.Now - x.Message?.ParsedDate)?.Seconds < 10 &&
-                        x.Message?.Chat?.Id != null &&
-                        !string.IsNullOrWhiteSpace(x.Message?.Text))
-                    .Select(x => (x.Message!.Chat!.Id, x.Message.Text!));
-
-                foreach (var (id, command) in messages)
+                foreach (var context in response)
                 {
                     try
                     {
-                        var result = _executor.Execute(command);
-                        await _wrapper.SendResponse(apiUrl, apiKey, id, result, token, _buttons);
+                        OnRequest?.Invoke(context);
+                        
+                        if(!string.IsNullOrWhiteSpace(context.Result))
+                            await _wrapper.SendResponseAsync(apiUrl, apiKey, context.Id, context.Result, token, context.Buttons);
                     }
                     catch (Exception e) when (e is OperationCanceledException or TaskCanceledException)
                     {
@@ -110,6 +94,8 @@ public class ActiveBotListener: IBotListener
                         _logger.LogError(e.Message);
                     }
                 }
+
+                await Task.Delay(Delay, token);
             }
             catch (Exception e) when (e is TaskCanceledException or OperationCanceledException)
             {
@@ -126,15 +112,6 @@ public class ActiveBotListener: IBotListener
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
-            }
-
-            try
-            {
-                await Task.Delay(RefreshTime, token);
-            }
-            catch (TaskCanceledException)
-            {
-                break;
             }
         }
 

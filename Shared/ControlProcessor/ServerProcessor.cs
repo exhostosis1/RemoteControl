@@ -1,11 +1,10 @@
 ﻿using Shared.Config;
-using Shared.Logging.Interfaces;
 
 namespace Shared.ControlProcessor;
 
 public abstract class ServerProcessor : GenericControlProcessor<ServerConfig>
 {
-    protected ServerProcessor(ILogger logger, ServerConfig? config = null) : base(logger, config)
+    protected ServerProcessor(ServerConfig? config = null) : base(config)
     {
         DefaultConfig.Scheme = "http";
         DefaultConfig.Host = "localhost";

@@ -12,11 +12,14 @@ public class WinTaskAutostartService : BaseAutostartService
     private readonly string _taskName;
     private readonly TaskDefinition _td;
     private readonly string _filename = AppContext.BaseDirectory + "run.bat";
+    private readonly ILogger<WinTaskAutostartService> _logger;
 
-    public WinTaskAutostartService(ILogger logger): base(logger)
+    public WinTaskAutostartService(ILogger<WinTaskAutostartService> logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
+
+        _logger = logger;
 
         var userName = WindowsIdentity.GetCurrent().Name;
         _taskName =
@@ -30,13 +33,13 @@ public class WinTaskAutostartService : BaseAutostartService
 
     public override bool CheckAutostart()
     {
-        Logger.LogInfo("Checking win task autostart");
+        _logger.LogInfo("Checking win task autostart");
         return (_ts.FindTask(_taskName)?.Enabled ?? false) && File.Exists(_filename);
     }
 
     public override void SetAutostart(bool value)
     {
-        Logger.LogInfo($"Setting win task autostart to {value}");
+        _logger.LogInfo($"Setting win task autostart to {value}");
 
         _ts.RootFolder.DeleteTask(_taskName, false);
 
@@ -54,15 +57,15 @@ public class WinTaskAutostartService : BaseAutostartService
             }
             catch (UnauthorizedAccessException)
             {
-                Logger.LogError($"Cannot write {_filename} due to access restrictions");
+                _logger.LogError($"Cannot write {_filename} due to access restrictions");
             }
             catch (DirectoryNotFoundException)
             {
-                Logger.LogError($"Cannot find directory to write {_filename}");
+                _logger.LogError($"Cannot find directory to write {_filename}");
             }
             catch (Exception e)
             {
-                Logger.LogError(e.Message);
+                _logger.LogError(e.Message);
             }
         }
     }

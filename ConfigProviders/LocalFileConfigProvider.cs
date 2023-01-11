@@ -8,8 +8,13 @@ namespace ConfigProviders;
 public class LocalFileConfigProvider : BaseConfigProvider
 {
     private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
+    private readonly ILogger<LocalFileConfigProvider> _logger;
 
-    public LocalFileConfigProvider(ILogger logger): base(logger){}
+    public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger) : base(logger)
+    {
+        _logger = logger;
+    }
+
     private readonly JsonSerializerOptions _jsonOptions = new()
     { 
         WriteIndented = true, 
@@ -18,11 +23,11 @@ public class LocalFileConfigProvider : BaseConfigProvider
 
     protected override SerializableAppConfig GetConfigInternal()
     {
-        Logger.LogInfo($"Getting config from file {ConfigPath}");
+        _logger.LogInfo($"Getting config from file {ConfigPath}");
 
         if (!File.Exists(ConfigPath))
         {
-            Logger.LogWarn("No config file");
+            _logger.LogWarn("No config file");
             return new SerializableAppConfig();
         }
 
@@ -34,7 +39,7 @@ public class LocalFileConfigProvider : BaseConfigProvider
         }
         catch (JsonException e)
         {
-            Logger.LogError(e.Message);
+            _logger.LogError(e.Message);
         }
 
         return result ?? new SerializableAppConfig();
@@ -42,7 +47,7 @@ public class LocalFileConfigProvider : BaseConfigProvider
 
     protected override void SetConfigInternal(SerializableAppConfig appConfig)
     {
-        Logger.LogInfo($"Writing config to file {ConfigPath}");
+        _logger.LogInfo($"Writing config to file {ConfigPath}");
 
         File.WriteAllText(ConfigPath,
             JsonSerializer.Serialize(appConfig, _jsonOptions));

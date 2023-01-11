@@ -3,6 +3,7 @@ using Servers;
 using Shared;
 using Shared.Config;
 using Shared.ControlProcessor;
+using Shared.Logging;
 
 namespace RemoteControlMain;
 
@@ -12,7 +13,7 @@ public static class Program
 
     private static AbstractControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
     {
-        var result = new SimpleServer(container.HttpListener, container.Middleware, container.GetLogger(typeof(SimpleServer)), config)
+        var result = new SimpleServer(container.HttpListener, container.Middleware, new LogWrapper<SimpleServer>(container.Logger), config)
         {
             Id = _id++
         };
@@ -22,7 +23,7 @@ public static class Program
 
     private static AbstractControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null)
     {
-        var result = new TelegramBot(container.BotListener, container.GetLogger(typeof(TelegramBot)), config)
+        var result = new TelegramBot(container.BotListener, container.Executor, new LogWrapper<TelegramBot>(container.Logger), config)
         {
             Id = _id++
         };

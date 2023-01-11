@@ -6,6 +6,7 @@ using Logging;
 using Shared;
 using Shared.Config;
 using Shared.ControlProviders;
+using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.UI;
 
@@ -17,26 +18,33 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
     public ControlFacade ControlProviders { get; }
+    public ILogger Logger { get; }
 
-    public ILogger GetLogger(Type type)
+    public IConfigProvider NewConfigProvider() => new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(Logger));
+    public IAutostartService NewAutostartService() => new DummyAutostartService(new LogWrapper<DummyAutostartService>(Logger));
+    public IUserInterface NewUserInterface() => new MainConsole();
+    public ControlFacade NewControlFacade()
     {
+        var ydoToolProvider = new YdotoolProvider(new LogWrapper<YdotoolProvider>(Logger));
+        var dummy = new DummyProvider(new LogWrapper<DummyProvider>(Logger));
+
+        return new ControlFacade(dummy, ydoToolProvider, ydoToolProvider, dummy);
+    }
+
+    public ILogger NewLogger()    {
 #if DEBUG
-        return new TraceLogger(type);
+        return new TraceLogger();
 #else
-        return new FileLogger(type, "error.log");
+        return new FileLogger(typeof(T), "error.log");
 #endif
     }
 
     public RemoteControlContainer()
     {
-
-        var ydotoolWrapper = new YdotoolProvider(GetLogger(typeof(YdotoolProvider)));
-        var dummyWrapper = new DummyProvider(GetLogger(typeof(DummyProvider)));
-
-        ControlProviders = new ControlFacade(dummyWrapper, ydotoolWrapper, ydotoolWrapper, dummyWrapper);
-
-        ConfigProvider = new LocalFileConfigProvider(GetLogger(typeof(LocalFileConfigProvider)));
-        AutostartService = new DummyAutostartService(GetLogger(typeof(DummyAutostartService)));
-        UserInterface = new MainConsole();
+        Logger = NewLogger();
+        ConfigProvider = NewConfigProvider();
+        AutostartService = NewAutostartService();
+        UserInterface = NewUserInterface();
+        ControlProviders = NewControlFacade();
     }
 }

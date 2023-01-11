@@ -1,5 +1,4 @@
-﻿using System;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 using Shared.UI;
@@ -12,6 +11,5 @@ public interface IPlatformDependantContainer
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
     public ControlFacade ControlProviders { get; }
-
-    public ILogger GetLogger(Type type);
+    public ILogger Logger { get; }
 }

@@ -84,133 +84,51 @@ public sealed partial class MainForm : Form, IUserInterface
         Application.Run(this);
     }
 
-    private void PopulateWindowPanels()
+    private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
+    private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGrup));
+
+    private ProcessorPanel CreatePanel(AbstractControlProcessor processor)
     {
-        foreach (var processor in _model)
+        ProcessorPanel panel = processor switch
         {
-            ProcessorPanel panel = processor switch
-            {
-                ServerProcessor s => new ServerPanel(s),
-                BotProcessor b => new BotPanel(b),
-                _ => throw new NotSupportedException()
-            };
+            ServerProcessor s => new ServerPanel(s),
+            BotProcessor b => new BotPanel(b),
+            _ => throw new NotSupportedException()
+        };
 
-            panel.StartButtonClicked += id => StartEvent?.Invoke(id);
-            panel.StopButtonClicked += id => StopEvent?.Invoke(id);
-            panel.UpdateButtonClicked += (id, config) => ConfigChangedEvent?.Invoke(id, config);
+        panel.StartButtonClicked += id => StartEvent?.Invoke(id);
+        panel.StopButtonClicked += id => StopEvent?.Invoke(id);
+        panel.UpdateButtonClicked += (id, config) => ConfigChangedEvent?.Invoke(id, config);
 
-            var contextMenu = new ContextMenuStrip
-            {
-                RenderMode = ToolStripRenderMode.System
-            };
-            contextMenu.Items.Add("Remove", null, (_, _) => RemoveClicked(processor.Id));
+        var menu = new ContextMenuStrip();
+        menu.RenderMode = ToolStripRenderMode.System;
+        menu.Items.Add(new ToolStripMenuItem("Remove", null, (_, _) => RemoveClicked(processor.Id)));
 
-            panel.ContextMenuStrip = contextMenu;
+        panel.ContextMenuStrip = menu;
 
-            _windowPanels.Add(panel);
-        }
+        return panel;
     }
 
-    private void RemoveClicked(int id)
+    private ProcessorMenuItemGroup CreateMenuItemGrup(AbstractControlProcessor processor)
     {
-        ProcessorRemovedEvent?.Invoke(id);
-
-        var p = _windowPanels.Find(x => x.Id == id);
-        if (p != null)
+        ProcessorMenuItemGroup group = processor switch
         {
-            p.Dispose();
-            _windowPanels.Remove(p);
-        }
+            ServerProcessor s => new ServerMenuItemGroup(s),
+            BotProcessor b => new BotMenuItemGroup(b),
+            _ => throw new NotSupportedException()
+        };
 
-        var t = _toolStripGroups.Find(x => x.Id == id);
-        if (t != null)
-        {
-            t.Dispose();
-            _toolStripGroups.Remove(t);
-        }
+        group.OnDescriptionClick += IpToolStripMenuItem_Click;
+        group.OnStartClick += id => StartEvent?.Invoke(id);
+        group.OnStopClick += id => StopEvent?.Invoke(id);
 
-        DrawWindow();
-        SetContextMenu();
-    }
-
-    private void PopulateContextMenuGroups()
-    {
-        foreach (var processor in _model)
-        {
-            ProcessorMenuItemGroup group = processor switch
-            {
-                ServerProcessor s => new ServerMenuItemGroup(s),
-                BotProcessor b => new BotMenuItemGroup(b),
-                _ => throw new NotSupportedException()
-            };
-
-            group.OnDescriptionClick += IpToolStripMenuItem_Click;
-            group.OnStartClick += id => StartEvent?.Invoke(id);
-            group.OnStopClick += id => StopEvent?.Invoke(id);
-
-            _toolStripGroups.Add(group);
-        }
-    }
-
-    private void ApplyTheme()
-    {
-        var darkMode = IsDarkMode;
-        var theme = darkMode ? _darkTheme : _lightTheme;
-
-        TaskbarNotifyIcon.Icon = darkMode ? _lightIcon : _darkIcon;
-
-        if (InvokeRequired)
-        {
-            Invoke(() =>
-            {
-                Icon = darkMode ? _lightIcon : _darkIcon;
-                DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
-            });
-        }
-        else
-        {
-            Icon = darkMode ? _lightIcon : _darkIcon;
-            DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
-        }
-
-        theme.ApplyTheme(this);
-        theme.ApplyTheme(MainContextMenuStrip);
-
-        foreach (Control control in Controls)
-        {
-            if(control is ProcessorPanel panel)
-                panel.ApplyTheme(theme);
-        }
-    }
-
-    public void SetAutostartValue(bool value) => IsAutostart = value;
-
-    public void ShowError(string message)
-    {
-        MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
+        return group;
     }
 
     public void AddProcessor(AbstractControlProcessor processor)
     {
-        ProcessorPanel panel;
-        ProcessorMenuItemGroup menuGroup;
-
-        switch (processor)
-        {
-            case ServerProcessor s:
-                panel = new ServerPanel(s);
-                menuGroup = new ServerMenuItemGroup(s);
-                break;
-            case BotProcessor b:
-                panel = new BotPanel(b);
-                menuGroup = new BotMenuItemGroup(b);
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(processor), processor, null);
-        };
-
-        _toolStripGroups.Add(menuGroup);
-        _windowPanels.Add(panel);
+        _windowPanels.Add(CreatePanel(processor));
+        _toolStripGroups.Add(CreateMenuItemGrup(processor));
 
         DrawWindow();
         SetContextMenu();
@@ -256,6 +174,28 @@ public sealed partial class MainForm : Form, IUserInterface
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
     }
 
+    private void RemoveClicked(int id)
+    {
+        ProcessorRemovedEvent?.Invoke(id);
+
+        var p = _windowPanels.FirstOrDefault(x => x.Id == id);
+        if (p != null)
+        {
+            _windowPanels.Remove(p);
+            p.Dispose();
+        }
+
+        var t = _toolStripGroups.FirstOrDefault(x => x.Id == id);
+        if (t != null)
+        {
+            _toolStripGroups.Remove(t);
+            t.Dispose();
+        }
+
+        DrawWindow();
+        SetContextMenu();
+    }
+
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
         CloseEvent?.Invoke();
@@ -290,11 +230,9 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        _model.Where(x => x.Working && x is ServerProcessor)
-            .Select(x => ((ServerProcessor)x).CurrentConfig.Uri)
-            .Where(x => x != null)
-            .Cast<Uri>().ToList()
-            .ForEach(Utils.AddFirewallRule);
+        var uris = _model.Where(x => x.Working && x is ServerProcessor)
+            .Select(x => ((ServerProcessor)x).CurrentConfig.Uri);
+        Utils.AddFirewallRule(uris);
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -319,5 +257,44 @@ public sealed partial class MainForm : Form, IUserInterface
     private void AddBotButton_Click(object sender, EventArgs e)
     {
         ProcessorAddedEvent?.Invoke("bot");
+    }
+
+    private void ApplyTheme()
+    {
+        var darkMode = IsDarkMode;
+        var theme = darkMode ? _darkTheme : _lightTheme;
+
+        TaskbarNotifyIcon.Icon = darkMode ? _lightIcon : _darkIcon;
+
+        if (InvokeRequired)
+        {
+            Invoke(SetIconAndBarLocal);
+        }
+        else
+        {
+            SetIconAndBarLocal();
+        }
+
+        void SetIconAndBarLocal()
+        {
+            Icon = darkMode ? _lightIcon : _darkIcon;
+            DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
+        }
+
+        theme.ApplyTheme(this);
+        theme.ApplyTheme(MainContextMenuStrip);
+
+        foreach (Control control in Controls)
+        {
+            if (control is ProcessorPanel panel)
+                panel.ApplyTheme(theme);
+        }
+    }
+
+    public void SetAutostartValue(bool value) => IsAutostart = value;
+
+    public void ShowError(string message)
+    {
+        MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
     }
 }

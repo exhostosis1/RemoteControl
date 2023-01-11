@@ -1,4 +1,5 @@
-﻿using Shared.DataObjects.Interfaces;
+﻿using Shared;
+using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 
@@ -6,16 +7,19 @@ namespace Servers.Middleware;
 
 public class LoggingMiddleware : AbstractMiddleware
 {
-    public LoggingMiddleware(ILogger logger, HttpEventHandler? next = null) : base(logger, next)
+    private readonly ILogger<LoggingMiddleware> _logger;
+
+    public LoggingMiddleware(ILogger<LoggingMiddleware> logger, HttpEventHandler? next = null) : base(next)
     {
+        _logger = logger;
     }
 
-    public override void ProcessRequest(IContext context)
+    public override void ProcessRequest(Context context)
     {
-        Logger.LogInfo(context.Request.Path);
+        _logger.LogInfo(context.Request.Path);
 
         Next?.Invoke(context);
 
-        Logger.LogInfo($"{context.Response.StatusCode}\n{context.Response.ContentType}\n{context.Response.Payload}");
+        _logger.LogInfo($"{context.Response.StatusCode}\n{context.Response.ContentType}\n{context.Response.Payload}");
     }
 }

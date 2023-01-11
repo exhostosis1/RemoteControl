@@ -8,11 +8,11 @@ namespace Bots;
 
 public class CommandsExecutor: ICommandExecutor
 {
-    private readonly ILogger _logger;
+    private readonly ILogger<CommandsExecutor> _logger;
 
     private readonly ControlFacade _controlFacade;
 
-    public CommandsExecutor(ControlFacade controlFacade, ILogger logger)
+    public CommandsExecutor(ControlFacade controlFacade, ILogger<CommandsExecutor> logger)
     {
         _logger = logger;
         _controlFacade = controlFacade;
