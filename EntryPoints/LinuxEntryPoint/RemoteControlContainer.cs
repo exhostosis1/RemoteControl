@@ -17,34 +17,52 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
+    public IAudioControlProvider AudioProvider { get; }
+    public IDisplayControlProvider DisplayProvider { get; }
+    public IKeyboardControlProvider KeyboardProvider { get; }
+    public IMouseControlProvider MouseProvider { get; }
     public ControlFacade ControlProviders { get; }
     public ILogger Logger { get; }
-
-    public IConfigProvider NewConfigProvider() => new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(Logger));
-    public IAutostartService NewAutostartService() => new DummyAutostartService(new LogWrapper<DummyAutostartService>(Logger));
-    public IUserInterface NewUserInterface() => new MainConsole();
-    public ControlFacade NewControlFacade()
+    public ILogger NewLogger()
     {
-        var ydoToolProvider = new YdotoolProvider(new LogWrapper<YdotoolProvider>(Logger));
-        var dummy = new DummyProvider(new LogWrapper<DummyProvider>(Logger));
-
-        return new ControlFacade(dummy, ydoToolProvider, ydoToolProvider, dummy);
-    }
-
-    public ILogger NewLogger()    {
 #if DEBUG
         return new TraceLogger();
 #else
-        return new FileLogger(typeof(T), "error.log");
+        return new FileLogger(type, "error.log");
 #endif
     }
+
+    public IConfigProvider NewConfigProvider(ILogger logger) =>
+        new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger));
+
+    public IAutostartService NewAutostartService(ILogger logger) =>
+        new DummyAutostartService(new LogWrapper<DummyAutostartService>(logger));
+
+    public IUserInterface NewUserInterface() => new MainConsole();
+
+    public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) =>
+        new YdotoolProvider(new LogWrapper<YdotoolProvider>(Logger));
+
+    public IMouseControlProvider NewMouseProvider(ILogger logger) =>
+        new YdotoolProvider(new LogWrapper<YdotoolProvider>(logger));
+
+    public IDisplayControlProvider NewDisplayProvider(ILogger logger) =>
+        new DummyProvider(new LogWrapper<DummyProvider>(logger));
+
+    public IAudioControlProvider NewAudioProvider(ILogger logger) =>
+        new DummyProvider(new LogWrapper<DummyProvider>(logger));
 
     public RemoteControlContainer()
     {
         Logger = NewLogger();
-        ConfigProvider = NewConfigProvider();
-        AutostartService = NewAutostartService();
+        ConfigProvider = NewConfigProvider(Logger);
+        AutostartService = NewAutostartService(Logger);
+        AudioProvider = NewAudioProvider(Logger);
+        KeyboardProvider = NewKeyboardProvider(Logger);
+        MouseProvider = NewMouseProvider(Logger);
+        DisplayProvider = NewDisplayProvider(Logger);
         UserInterface = NewUserInterface();
-        ControlProviders = NewControlFacade();
+
+        ControlProviders = new ControlFacade(AudioProvider, KeyboardProvider, MouseProvider, DisplayProvider);
     }
 }

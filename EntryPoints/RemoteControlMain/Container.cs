@@ -19,43 +19,100 @@ namespace RemoteControlMain;
 
 internal class Container : IContainer
 {
-    public IConfigProvider ConfigProvider { get; }
-    public IAutostartService AutostartService { get; }
-    public IUserInterface UserInterface { get; }
-    public ControlFacade ControlProviders { get; }
+    private readonly IPlatformDependantContainer _container;
+
+    public IConfigProvider ConfigProvider => _container.ConfigProvider;
+    public IAutostartService AutostartService => _container.AutostartService;
+    public IUserInterface UserInterface => _container.UserInterface;
+    public IAudioControlProvider AudioProvider => _container.AudioProvider;
+    public IDisplayControlProvider DisplayProvider => _container.DisplayProvider;
+    public IKeyboardControlProvider KeyboardProvider => _container.KeyboardProvider;
+    public IMouseControlProvider MouseProvider => _container.MouseProvider;
+    public ControlFacade ControlProviders => _container.ControlProviders;
     public IHttpListener HttpListener { get; }
     public IBotListener BotListener { get; }
+    public IHttpListenerWrapper HttpWrapper { get; }
+    public IActiveApiWrapper ActiveBotWrapper { get; }
     public AbstractMiddleware Middleware { get; }
     public ICommandExecutor Executor { get; }
+    public BaseApiController AudioController { get; }
+    public BaseApiController MouseController { get; }
+    public BaseApiController KeyboardController { get; }
+    public BaseApiController DisplayController { get; }
 
-    public ILogger Logger { get; }
+    public AbstractApiEndpoint ApiEndpoint { get; }
+    public AbstractEndpoint StaticEndpoint { get; }
+
+    public ILogger Logger => _container.Logger;
+    public ILogger NewLogger() => _container.NewLogger();
+
+    public IHttpListener NewHttpListener(IHttpListenerWrapper wrapper, ILogger logger) =>
+        new SimpleHttpListener(wrapper, new LogWrapper<SimpleHttpListener>(logger));
+
+    public IBotListener NewBotListener(IActiveApiWrapper wrapper, ILogger logger) =>
+        new ActiveBotListener(wrapper, new LogWrapper<ActiveBotListener>(logger));
+
+    public IActiveApiWrapper NewBotWrapper(ILogger logger) =>
+        new TelegramBotApiWrapper(new LogWrapper<TelegramBotApiWrapper>(logger));
+
+    public IHttpListenerWrapper NewHttpWrapper() =>
+        new HttpListenerWrapper();
+
+    public ICommandExecutor NewExecutor(ControlFacade facade, ILogger logger) =>
+        new CommandsExecutor(facade, new LogWrapper<CommandsExecutor>(logger));
+
+    public BaseApiController NewAudioController(IAudioControlProvider provider, ILogger logger) =>
+        new AudioController(provider, new LogWrapper<AudioController>(logger));
+    public BaseApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger) =>
+        new KeyboardController(provider, new LogWrapper<KeyboardController>(logger));
+    public BaseApiController NewMouseController(IMouseControlProvider provider, ILogger logger) =>
+        new MouseController(provider, new LogWrapper<MouseController>(logger));
+    public BaseApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger) =>
+        new DisplayController(provider, new LogWrapper<DisplayController>(logger));
+
+    public AbstractApiEndpoint NewApiEndpoint(IEnumerable<BaseApiController> controllers, ILogger logger) =>
+        new ApiV1Endpoint(controllers, new LogWrapper<ApiV1Endpoint>(logger));
+
+    public AbstractEndpoint NewStaticEndpoint(ILogger logger, string directory = "www") =>
+        new StaticFilesEndpoint(new LogWrapper<StaticFilesEndpoint>(logger), directory);
+
+    public AbstractMiddleware NewMiddleware(IEnumerable<AbstractApiEndpoint> apiEndpoints,
+        AbstractEndpoint staticEndpoint, ILogger logger, HttpEventHandler? next = null) =>
+        new RoutingMiddleware(apiEndpoints, staticEndpoint, new LogWrapper<RoutingMiddleware>(logger), next);
+
+    public IConfigProvider NewConfigProvider(ILogger logger) => _container.NewConfigProvider(logger);
+
+    public IAutostartService NewAutostartService(ILogger logger) => _container.NewAutostartService(logger);
+
+    public IUserInterface NewUserInterface() => _container.NewUserInterface();
+
+    public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) => _container.NewKeyboardProvider(logger);
+
+    public IMouseControlProvider NewMouseProvider(ILogger logger) => _container.NewMouseProvider(logger);
+
+    public IDisplayControlProvider NewDisplayProvider(ILogger logger) => _container.NewDisplayProvider(logger);
+
+    public IAudioControlProvider NewAudioProvider(ILogger logger) => _container.NewAudioProvider(logger);
 
     public Container(IPlatformDependantContainer input)
     {
-        ConfigProvider = input.ConfigProvider;
-        AutostartService = input.AutostartService;
-        UserInterface = input.UserInterface;
-        ControlProviders = input.ControlProviders;
-        Logger = input.Logger;
+        _container = input;
 
-        var httpWrapper = new HttpListenerWrapper();
+        AudioController = NewAudioController(AudioProvider, Logger);
+        DisplayController = NewDisplayController(DisplayProvider, Logger);
+        MouseController = NewMouseController(MouseProvider, Logger);
+        KeyboardController = NewKeyboardController(KeyboardProvider, Logger);
 
-        HttpListener = new SimpleHttpListener(httpWrapper, new LogWrapper<SimpleHttpListener>(Logger));
+        ApiEndpoint = NewApiEndpoint(new[] { AudioController, DisplayController, MouseController, KeyboardController }, Logger);
+        StaticEndpoint = NewStaticEndpoint(Logger);
 
-        var controllers = new BaseApiController[]
-        {
-            new AudioController(ControlProviders.Audio, new LogWrapper<AudioController>(Logger)),
-            new DisplayController(ControlProviders.Display, new LogWrapper<DisplayController>(Logger)),
-            new KeyboardController(ControlProviders.Keyboard, new LogWrapper<KeyboardController>(Logger)),
-            new MouseController(ControlProviders.Mouse, new LogWrapper<MouseController>(Logger))
-        };
-        var apiEndpoint = new ApiV1Endpoint(controllers, new LogWrapper<ApiV1Endpoint>(Logger));
-        var staticEndpoint = new StaticFilesEndpoint(new LogWrapper<StaticFilesEndpoint>(Logger));
+        Middleware = NewMiddleware(new[] { ApiEndpoint }, StaticEndpoint, Logger);
+        Executor = NewExecutor(ControlProviders, Logger);
 
-        Middleware = new RoutingMiddleware(new[] { apiEndpoint }, staticEndpoint, new LogWrapper<RoutingMiddleware>(Logger));
-        var wrapper = new TelegramBotApiWrapper(new LogWrapper<TelegramBotApiWrapper>(Logger));
-        Executor = new CommandsExecutor(ControlProviders, new LogWrapper<CommandsExecutor>(Logger));
+        HttpWrapper = NewHttpWrapper();
+        ActiveBotWrapper = NewBotWrapper(Logger);
 
-        BotListener = new ActiveBotListener(wrapper,new LogWrapper<ActiveBotListener>(Logger));
+        HttpListener = NewHttpListener(HttpWrapper, Logger);
+        BotListener = NewBotListener(ActiveBotWrapper, Logger);
     }
 }

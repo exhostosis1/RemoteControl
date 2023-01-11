@@ -13,7 +13,7 @@ public static class Program
 
     private static AbstractControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
     {
-        var result = new SimpleServer(container.HttpListener, container.Middleware, new LogWrapper<SimpleServer>(container.Logger), config)
+        var result = new SimpleServer(container.NewHttpListener(container.HttpWrapper, container.Logger), container.Middleware, new LogWrapper<SimpleServer>(container.Logger), config)
         {
             Id = _id++
         };
@@ -23,7 +23,7 @@ public static class Program
 
     private static AbstractControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null)
     {
-        var result = new TelegramBot(container.BotListener, container.Executor, new LogWrapper<TelegramBot>(container.Logger), config)
+        var result = new TelegramBot(container.NewBotListener(container.ActiveBotWrapper, container.Logger), container.Executor, new LogWrapper<TelegramBot>(container.Logger), config)
         {
             Id = _id++
         };

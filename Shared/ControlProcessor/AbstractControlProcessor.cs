@@ -12,7 +12,11 @@ public abstract class AbstractControlProcessor: IObservable<bool>, IObservable<C
     public CommonConfig Config
     {
         get => GetCurrentConfig();
-        set => SetCurrentConfig(value);
+        set
+        {
+            ConfigObservers.ForEach(x => x.OnNext(value));
+            SetCurrentConfig(value);
+        }
     }
 
     protected readonly List<IObserver<bool>> StatusObservers = new();

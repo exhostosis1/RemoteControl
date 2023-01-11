@@ -1,5 +1,4 @@
 ﻿using Shared;
-using Shared.Config;
 using Shared.ControlProcessor;
 
 namespace WinFormsUI.CustomControls.MenuItems;
@@ -21,7 +20,6 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
 
     public ToolStripItem[] ItemsArray => Items.ToArray();
     
-    protected readonly IDisposable ConfigUnsubscriber;
     protected readonly IDisposable StatusUnsubscriber;
 
     public event StringEventHandler? OnDescriptionClick;
@@ -37,8 +35,7 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
 
         NameItem.Text = processor.Config.Name;
         Items.Add(NameItem);
-
-        SetDescriptionText(processor.Config);
+        
         DescriptionItem.Enabled = processor.Working;
         Items.Add(DescriptionItem);
 
@@ -48,22 +45,11 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
 
         Items.Add(new ToolStripSeparator());
 
-        ConfigUnsubscriber = processor.Subscribe(new Observer<CommonConfig>(ConfigChanged));
         StatusUnsubscriber = processor.Subscribe(new Observer<bool>(working =>
         {
             StartStopItem.Text = working ? @"Stop" : @"Start";
             DescriptionItem.Enabled = working;
         }));
-    }
-
-    protected void SetDescriptionText(CommonConfig config)
-    {
-        DescriptionItem.Text = config switch
-        {
-            ServerConfig s => s.Uri?.ToString(),
-            BotConfig b => b.UsernamesString,
-            _ => throw new NotSupportedException()
-        };
     }
 
     private void StartStopClicked(object? _, EventArgs args)
@@ -80,15 +66,10 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
     
     protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(value);
 
-    private void ConfigChanged(CommonConfig config)
-    {
-        NameItem.Text = config.Name;
-        SetDescriptionText(config);
-    }
+    
 
     public void Dispose()
     {
-        ConfigUnsubscriber.Dispose();
         StatusUnsubscriber.Dispose();
 
         NameItem.Dispose();

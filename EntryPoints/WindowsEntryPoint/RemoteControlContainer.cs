@@ -17,11 +17,13 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
-
+    public IAudioControlProvider AudioProvider { get; }
+    public IDisplayControlProvider DisplayProvider { get; }
+    public IKeyboardControlProvider KeyboardProvider { get; }
+    public IMouseControlProvider MouseProvider { get; }
     public ControlFacade ControlProviders { get; }
-    public ILogger Logger => GetLogger();
-
-    public ILogger GetLogger()
+    public ILogger Logger { get; }
+    public ILogger NewLogger()
     {
 #if DEBUG
         return new TraceLogger();
@@ -30,15 +32,37 @@ public class RemoteControlContainer : IPlatformDependantContainer
 #endif
     }
 
+    public IConfigProvider NewConfigProvider(ILogger logger) =>
+        new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger));
+
+    public IAutostartService NewAutostartService(ILogger logger) =>
+        new WinRegistryAutostartService(new LogWrapper<WinRegistryAutostartService>(logger));
+
+    public IUserInterface NewUserInterface() => new MainForm();
+
+    public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) =>
+        new User32Provider(new LogWrapper<User32Provider>(Logger));
+
+    public IMouseControlProvider NewMouseProvider(ILogger logger) =>
+        new User32Provider(new LogWrapper<User32Provider>(logger));
+
+    public IDisplayControlProvider NewDisplayProvider(ILogger logger) =>
+        new User32Provider(new LogWrapper<User32Provider>(logger));
+
+    public IAudioControlProvider NewAudioProvider(ILogger logger) =>
+        new NAudioProvider(new LogWrapper<NAudioProvider>(logger));
+
     public RemoteControlContainer()
     {
-        var user32Wrapper = new User32Provider(new LogWrapper<User32Provider>(Logger));
-        var audioProvider = new NAudioProvider(new LogWrapper<NAudioProvider>(Logger));
+        Logger = NewLogger();
+        ConfigProvider = NewConfigProvider(Logger);
+        AutostartService = NewAutostartService(Logger);
+        AudioProvider = NewAudioProvider(Logger);
+        KeyboardProvider = NewKeyboardProvider(Logger);
+        MouseProvider = NewMouseProvider(Logger);
+        DisplayProvider = NewDisplayProvider(Logger);
+        UserInterface = NewUserInterface();
 
-        ControlProviders = new ControlFacade(audioProvider, user32Wrapper, user32Wrapper, user32Wrapper);
-
-        ConfigProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(Logger));
-        AutostartService = new WinRegistryAutostartService(new LogWrapper<WinRegistryAutostartService>(Logger));
-        UserInterface = new MainForm();
+        ControlProviders = new ControlFacade(AudioProvider, KeyboardProvider, MouseProvider, DisplayProvider);
     }
 }
