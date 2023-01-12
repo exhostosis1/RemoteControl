@@ -1,13 +1,13 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Shared.Bot.ApiObjects.Response;
+namespace Listeners.Wrappers.Telegram.ApiObjects.Response;
 
 public class Chat
 {
     [JsonPropertyName("id")]
     public int Id { get; set; }
 
-    [JsonPropertyName("type")] 
+    [JsonPropertyName("type")]
     public string Type { get; set; } = "private";
 
     [JsonPropertyName("title")]

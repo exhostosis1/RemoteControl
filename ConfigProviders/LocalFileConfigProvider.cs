@@ -1,7 +1,7 @@
-﻿using Shared.Config;
-using Shared.Logging.Interfaces;
+﻿using Shared.Logging.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Shared.Config;
 
 namespace ConfigProviders;
 
@@ -21,31 +21,31 @@ public class LocalFileConfigProvider : BaseConfigProvider
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    protected override SerializableAppConfig GetConfigInternal()
+    protected override AppConfig GetConfigInternal()
     {
         _logger.LogInfo($"Getting config from file {ConfigPath}");
 
         if (!File.Exists(ConfigPath))
         {
             _logger.LogWarn("No config file");
-            return new SerializableAppConfig();
+            return new AppConfig();
         }
 
-        SerializableAppConfig? result = null;
+        AppConfig? result = null;
 
         try
         {
-            result = JsonSerializer.Deserialize<SerializableAppConfig>(File.ReadAllText(ConfigPath));
+            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(ConfigPath));
         }
         catch (JsonException e)
         {
             _logger.LogError(e.Message);
         }
 
-        return result ?? new SerializableAppConfig();
+        return result ?? new AppConfig();
     }
 
-    protected override void SetConfigInternal(SerializableAppConfig appConfig)
+    protected override void SetConfigInternal(AppConfig appConfig)
     {
         _logger.LogInfo($"Writing config to file {ConfigPath}");
 

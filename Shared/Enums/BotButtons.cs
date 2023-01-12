@@ -1,6 +1,6 @@
-﻿namespace Shared.Bot;
+﻿namespace Shared.Enums;
 
-public static class Buttons
+public static class BotButtons
 {
     public const string MediaBack = "<<";
     public const string MediaForth = ">>";

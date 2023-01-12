@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Shared.Bot.ApiObjects.Response;
+namespace Listeners.Wrappers.Telegram.ApiObjects.Response;
 
 public class UpdateResponse
 {

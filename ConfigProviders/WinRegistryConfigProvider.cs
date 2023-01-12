@@ -31,19 +31,19 @@ public class WinRegistryConfigProvider: BaseConfigProvider
                   Registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
     }
 
-    protected override SerializableAppConfig GetConfigInternal()
+    protected override AppConfig GetConfigInternal()
     {
         _logger.LogInfo($"Getting config from registry {_regKey}");
 
         var value = _regKey.GetValue(ValueName, null) as string;
 
-        SerializableAppConfig? result = null;
+        AppConfig? result = null;
 
         if (!string.IsNullOrWhiteSpace(value))
         {
             try
             {
-                result = JsonSerializer.Deserialize<SerializableAppConfig>(value);
+                result = JsonSerializer.Deserialize<AppConfig>(value);
             }
             catch (JsonException e)
             {
@@ -51,10 +51,10 @@ public class WinRegistryConfigProvider: BaseConfigProvider
             }
         }
 
-        return result ?? new SerializableAppConfig();
+        return result ?? new AppConfig();
     }
 
-    protected override void SetConfigInternal(SerializableAppConfig config)
+    protected override void SetConfigInternal(AppConfig config)
     {
         _logger.LogInfo($"Writing config to registry {_regKey}");
 

@@ -1,7 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using Shared.Bot.ApiObjects.Response;
+using Listeners.Wrappers.Telegram.ApiObjects.Response;
+using Listeners.Wrappers.Telegram.ApiObjects.Response.Keyboard;
 
-namespace Shared.Bot.ApiObjects.Request;
+namespace Listeners.Wrappers.Telegram.ApiObjects.Request;
 
 public class SendMessageParameters
 {
@@ -36,5 +37,5 @@ public class SendMessageParameters
     public bool? AllowSendingWithoutReply { get; set; }
 
     [JsonPropertyName("reply_markup")]
-    public ReplyKeyboardMarkup? ReplyMarkup { get; set; }
+    public KeyboardMarkup? ReplyMarkup { get; set; }
 }

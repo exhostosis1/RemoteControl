@@ -1,12 +1,14 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace Shared.Bot.ApiObjects.Response;
+namespace Listeners.Wrappers.Telegram.ApiObjects.Response.Keyboard;
 
-public class ReplyKeyboardMarkup
+public class ReplyKeyboardMarkup: KeyboardMarkup
 {
-    [JsonPropertyName("keyboard")] 
+    [JsonPropertyName("keyboard")]
     public KeyboardButton[][] Keyboard { get; set; } = Array.Empty<KeyboardButton[]>();
+
+    [JsonPropertyName("is_persistent")]
+    public bool? Persistent { get; set; }
 
     [JsonPropertyName("resize_keyboard")]
     public bool? ResizeKeyboard { get; set; }

@@ -9,6 +9,6 @@ public interface IActiveApiWrapper
 {
     public Task<IEnumerable<BotContext>> GetContextAsync(string apiUrl, string apiKey, IEnumerable<string> usernames, CancellationToken token);
 
-    public Task<string> SendResponseAsync(string apiUrl, string apiKey, int chatId, string message, CancellationToken token,
-        IEnumerable<IEnumerable<string>>? buttons = null);
+    public Task SendResponseAsync(string apiUrl, string apiKey, int chatId, string message, CancellationToken token,
+        ButtonsMarkup? buttons = null);
 }

@@ -1,7 +1,8 @@
 ﻿using Shared.ApiControllers;
-using Shared.Bot;
 using Shared.Config;
 using Shared.ControlProcessor;
+using Shared.DataObjects.Bot;
+using Shared.Enums;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 
@@ -12,9 +13,24 @@ public class TelegramBot: BotProcessor
     private readonly IBotListener _listener;
     private readonly ILogger<TelegramBot> _logger;
 
-    private readonly string[][] _buttons = {
-        new[] { Buttons.MediaBack, Buttons.Pause, Buttons.MediaForth },
-        new[] { Buttons.VolumeDown, Buttons.Darken, Buttons.VolumeUp }
+    private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
+    {
+        new()
+        {
+            new SingleButton(BotButtons.MediaBack),
+            new SingleButton(BotButtons.Pause),
+            new SingleButton(BotButtons.MediaForth)
+        },
+        new()
+        {
+            new SingleButton(BotButtons.VolumeDown),
+            new SingleButton(BotButtons.Darken),
+            new SingleButton(BotButtons.VolumeUp)
+        }
+    })
+    {
+        Resize = true,
+        Persistent = true
     };
 
     public TelegramBot(IBotListener listener, ICommandExecutor executor, ILogger<TelegramBot> logger, BotConfig? config = null) : base(config)

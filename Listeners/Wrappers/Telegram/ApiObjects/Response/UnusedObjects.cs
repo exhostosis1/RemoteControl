@@ -1,4 +1,4 @@
-﻿namespace Shared.Bot.ApiObjects.Response;
+﻿namespace Listeners.Wrappers.Telegram.ApiObjects.Response;
 
 public class ChatJoinRequest
 {
@@ -157,7 +157,7 @@ public class ForumTopicReopened
 
 public class VideoChatScheduled
 {
-    
+
 }
 
 public class VideoChatStarted

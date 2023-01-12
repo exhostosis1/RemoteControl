@@ -1,5 +1,4 @@
 ﻿using Shared.ApiControllers;
-using Shared.Bot;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
@@ -26,26 +25,26 @@ public class CommandsExecutor: ICommandExecutor
 
         switch (command)
         {
-            case Buttons.Pause:
+            case BotButtons.Pause:
                 _controlFacade.Keyboard.KeyPress(KeysEnum.MediaPlayPause);
                 break;
-            case Buttons.MediaBack:
+            case BotButtons.MediaBack:
                 _controlFacade.Keyboard.KeyPress(KeysEnum.MediaPrev);
                 break;
-            case Buttons.MediaForth:
+            case BotButtons.MediaForth:
                 _controlFacade.Keyboard.KeyPress(KeysEnum.MediaNext);
                 break;
-            case Buttons.VolumeUp:
+            case BotButtons.VolumeUp:
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
                 _controlFacade.Audio.SetVolume(volume);
                 return volume.ToString();
-            case Buttons.VolumeDown:
+            case BotButtons.VolumeDown:
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume;
                 _controlFacade.Audio.SetVolume(volume);
                 return volume.ToString();
-            case Buttons.Darken:
+            case BotButtons.Darken:
                 _controlFacade.Display.Darken();
                 break;
             default:
@@ -54,7 +53,7 @@ public class CommandsExecutor: ICommandExecutor
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                     _controlFacade.Audio.SetVolume(volume);
                 }
-                return volume.ToString();
+                return "done";
         }
 
         return "done";

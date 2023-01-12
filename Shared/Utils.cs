@@ -4,10 +4,15 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Shared;
 
@@ -144,5 +149,30 @@ public static partial class Utils
         {
             AddFirewallRule(uri);
         }
+    }
+
+    public static async Task<T> PostAsJsonAndGetResultAsync<T>(this HttpClient client, string? uri, object content, CancellationToken token,
+        JsonSerializerOptions? options = null)
+    {
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await client.PostAsJsonAsync(uri, content, options, token);
+        }
+        catch (TaskCanceledException e)
+        {
+            if (e.InnerException is TimeoutException)
+                throw e.InnerException;
+
+            throw;
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException("Error sending request to bot api", null, response.StatusCode);
+        }
+
+        return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse api response");
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace Shared.Bot.ApiObjects.Response;
+namespace Listeners.Wrappers.Telegram.ApiObjects.Response;
 
 public class Message
 {
@@ -23,7 +23,7 @@ public class Message
     [JsonPropertyName("date")]
     public int Date { get; set; }
 
-    [JsonIgnore] 
+    [JsonIgnore]
     public DateTime ParsedDate => DateTimeOffset.FromUnixTimeSeconds(Date).LocalDateTime;
 
     [JsonPropertyName("forward_from")]

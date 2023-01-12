@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Shared.Bot.ApiObjects.Request;
+namespace Listeners.Wrappers.Telegram.ApiObjects.Request;
 
 public class GetUpdatesParameters
 {

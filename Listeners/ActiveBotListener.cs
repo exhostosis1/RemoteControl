@@ -73,17 +73,18 @@ public class ActiveBotListener: IBotListener
             {
                 var response = await _wrapper.GetContextAsync(apiUrl, apiKey, _usernames, token);
                 token.ThrowIfCancellationRequested();
-
-                internetMessageShown = false;
-
+                
                 foreach (var context in response)
                 {
                     try
                     {
                         OnRequest?.Invoke(context);
-                        
-                        if(!string.IsNullOrWhiteSpace(context.Result))
-                            await _wrapper.SendResponseAsync(apiUrl, apiKey, context.Id, context.Result, token, context.Buttons);
+
+                        if (!string.IsNullOrWhiteSpace(context.Result))
+                        {
+                            await _wrapper.SendResponseAsync(apiUrl, apiKey, context.Id, context.Result, token,
+                                context.Buttons);
+                        }
                     }
                     catch (Exception e) when (e is OperationCanceledException or TaskCanceledException)
                     {
@@ -95,11 +96,9 @@ public class ActiveBotListener: IBotListener
                     }
                 }
 
+                internetMessageShown = false;
+
                 await Task.Delay(Delay, token);
-            }
-            catch (Exception e) when (e is TaskCanceledException or OperationCanceledException)
-            {
-                break;
             }
             catch (Exception e) when (e is TimeoutException || e.InnerException is SocketException)
             {
@@ -108,10 +107,17 @@ public class ActiveBotListener: IBotListener
                     _logger.LogError("Internet seems off");
                     internetMessageShown = true;
                 }
+
+                await Task.Delay(Delay, token);
+            }
+            catch (Exception e) when (e is TaskCanceledException or OperationCanceledException)
+            {
+                break;
             }
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
+                break;
             }
         }
 

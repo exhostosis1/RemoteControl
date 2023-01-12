@@ -1,20 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
 public class AppConfig
 {
-    public List<CommonConfig> Items { get; set; } = new();
-    public IEnumerable<ServerConfig> Servers => Items.Where(x => x is ServerConfig).Cast<ServerConfig>();
-    public IEnumerable<BotConfig> Bots => Items.Where(x => x is BotConfig).Cast<BotConfig>();
+    public List<CommonConfig> ProcessorConfigs { get; set; } = new();
+    
+    [JsonIgnore]
+    public IEnumerable<ServerConfig> Servers => ProcessorConfigs.Where(x => x is ServerConfig).Cast<ServerConfig>();
+    
+    [JsonIgnore]
+    public IEnumerable<BotConfig> Bots => ProcessorConfigs.Where(x => x is BotConfig).Cast<BotConfig>();
 
     public AppConfig(){}
 
-    public AppConfig(SerializableAppConfig config)
-    {
-        Items = config.Servers.Concat<CommonConfig>(config.Bots).ToList();
-    }
-
-    public AppConfig(IEnumerable<CommonConfig> items) => Items = items.ToList();
+    public AppConfig(IEnumerable<CommonConfig> items) => ProcessorConfigs = items.ToList();
 }
