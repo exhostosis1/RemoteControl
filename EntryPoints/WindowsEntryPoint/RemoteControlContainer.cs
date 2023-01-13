@@ -28,7 +28,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
 #if DEBUG
         return new TraceLogger();
 #else
-        return new FileLogger("error.log");
+        return new FileLogger(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log"));
 #endif
     }
 

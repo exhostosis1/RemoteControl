@@ -1,5 +1,4 @@
 ﻿using Shared.Config;
-using Shared.Logging.Interfaces;
 using System;
 using System.Collections.Generic;
 

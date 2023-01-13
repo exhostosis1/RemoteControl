@@ -38,7 +38,11 @@ public class TelegramBot: BotProcessor
         _listener = listener;
         _logger = logger;
 
-        _listener.OnStatusChange += status => StatusObservers.ForEach(x => x.OnNext(status));
+        _listener.OnStatusChange += status =>
+        {
+            Working = status;
+            StatusObservers.ForEach(x => x.OnNext(status));
+        };
         _listener.OnRequest += context =>
         {
             context.Result = executor.Execute(context.Message);
@@ -62,7 +66,7 @@ public class TelegramBot: BotProcessor
     protected override void RestartInternal(BotConfig config)
     {
         Stop();
-        Start(config);
+        StartInternal(config);
     }
 
     public override void Stop()

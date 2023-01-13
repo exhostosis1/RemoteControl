@@ -17,7 +17,11 @@ public class SimpleServer: ServerProcessor
         _listener.OnRequest += middleware.ProcessRequest;
         _logger = logger;
 
-        _listener.OnStatusChange += status => StatusObservers.ForEach(x => x.OnNext(status));
+        _listener.OnStatusChange += status =>
+        {
+            Working = status;
+            StatusObservers.ForEach(x => x.OnNext(status));
+        };
     }
 
     protected override void StartInternal(ServerConfig config)
@@ -31,7 +35,7 @@ public class SimpleServer: ServerProcessor
     protected override void RestartInternal(ServerConfig config)
     {
         Stop();
-        Start(config);
+        StartInternal(config);
     }
 
     public override void Stop()

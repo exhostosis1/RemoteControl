@@ -23,7 +23,7 @@ public abstract class AbstractLogger: ILogger
     public void Log(Type type, string message, LoggingLevel level = LoggingLevel.Error)
     {
         if(level >= _currentLoggingLevel)
-            _messages.Add(new LogMessage(type, level, DateTime.UtcNow, message));
+            _messages.Add(new LogMessage(type, level, DateTime.Now, message));
     }
 
     private void WriteMessages()

@@ -12,20 +12,17 @@ public class FileLogger: AbstractLogger
 
     public FileLogger(string filePath, LoggingLevel level = LoggingLevel.Error, IMessageFormatter? formatter = null) : base(level, formatter)
     {
-        _path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
+        _path = filePath;
 
         if (string.IsNullOrWhiteSpace(_path))
             throw new ArgumentException(nameof(_path));
-
-        if (!File.Exists(_path))
-            File.Create(_path);
     }
 
     protected override void ProcessInfo(string message)
     {
         lock (FileLock)
         {
-            File.AppendAllText(_path, message + "\n");
+            File.AppendAllText(_path, message + Environment.NewLine);
         }
     }
 
