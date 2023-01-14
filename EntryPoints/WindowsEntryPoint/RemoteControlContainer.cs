@@ -1,4 +1,5 @@
 ﻿using Autostart;
+using Autostart.Registry;
 using ConfigProviders;
 using ControlProviders;
 using Logging;
@@ -7,6 +8,7 @@ using Shared.Config;
 using Shared.ControlProviders;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
+using Shared.RegistryWrapper;
 using Shared.UI;
 using WinFormsUI;
 
@@ -36,7 +38,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
         new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger));
 
     public IAutostartService NewAutostartService(ILogger logger) =>
-        new WinRegistryAutostartService(new LogWrapper<WinRegistryAutostartService>(logger));
+        new WinRegistryAutostartService(new RegistryWrapper(), new LogWrapper<WinRegistryAutostartService>(logger));
 
     public IUserInterface NewUserInterface() => new MainForm();
 

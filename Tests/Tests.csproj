@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiControllers\ApiControllers.csproj" />
+    <ProjectReference Include="..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\ControlProcessors\Bots\Bots.csproj" />
     <ProjectReference Include="..\ControlProcessors\Servers\Servers.csproj" />
     <ProjectReference Include="..\Logging\Logging.csproj" />
