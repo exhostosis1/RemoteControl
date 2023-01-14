@@ -9,22 +9,21 @@ using Shared.DataObjects.Http;
 
 namespace Servers.Endpoints;
 
-public class ApiV1Endpoint : AbstractApiEndpoint
+public class ApiV1Endpoint : IApiEndpoint
 {
     private readonly ControllersWithMethods _controllers;
     private readonly ILogger<ApiV1Endpoint> _logger;
+    public string ApiVersion => "v1";
 
-    public ApiV1Endpoint(IEnumerable<BaseApiController> controllers, ILogger<ApiV1Endpoint> logger)
+    public ApiV1Endpoint(IEnumerable<IApiController> controllers, ILogger<ApiV1Endpoint> logger)
     {
         _logger = logger;
         _controllers = controllers.GetControllersWithMethods();
-
-        ApiVersion = "v1";
     }
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
 
-    public override void ProcessRequest(Context context)
+    public void ProcessRequest(Context context)
     {
         _logger.LogInfo($"Processing api request {context.Request.Path}");
 

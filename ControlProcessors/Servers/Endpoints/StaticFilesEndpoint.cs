@@ -5,7 +5,7 @@ using Shared.DataObjects.Http;
 
 namespace Servers.Endpoints;
 
-public class StaticFilesEndpoint : AbstractEndpoint
+public class StaticFilesEndpoint : IEndpoint
 {
     private readonly string _contentFolder;
     private readonly ILogger<StaticFilesEndpoint> _logger;
@@ -26,7 +26,7 @@ public class StaticFilesEndpoint : AbstractEndpoint
         { ".css", "text/css" }
     };
 
-    public override void ProcessRequest(Context context)
+    public void ProcessRequest(Context context)
     {
         var uriPath = context.Request.Path;
 

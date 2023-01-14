@@ -63,12 +63,6 @@ public class TelegramBot: BotProcessor
         _listener.StartListen(CurrentConfig.ApiUri, CurrentConfig.ApiKey, config.Usernames);
     }
 
-    protected override void RestartInternal(BotConfig config)
-    {
-        Stop();
-        StartInternal(config);
-    }
-
     public override void Stop()
     {
         if (!_listener.IsListening) return;

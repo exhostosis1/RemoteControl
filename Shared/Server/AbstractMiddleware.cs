@@ -2,9 +2,9 @@
 
 namespace Shared.Server;
 
-public abstract class AbstractMiddleware
+public abstract class AbstractMiddleware: IMiddleware
 {
-    protected readonly HttpEventHandler? Next;
+    public HttpEventHandler? Next { get; set; }
 
     protected AbstractMiddleware(HttpEventHandler? next = null)
     {
@@ -12,4 +12,4 @@ public abstract class AbstractMiddleware
     }
 
     public abstract void ProcessRequest(Context context);
-}
+} 

@@ -13,25 +13,24 @@ public interface IContainer: IPlatformDependantContainer
     public IBotListener BotListener { get; }
     public IHttpListenerWrapper HttpWrapper { get; }
     public IActiveApiWrapper ActiveBotWrapper { get; }
-    public AbstractMiddleware Middleware { get; }
+    public IMiddleware Middleware { get; }
     public ICommandExecutor Executor { get; }
-    public BaseApiController AudioController { get; }
-    public BaseApiController MouseController { get; }
-    public BaseApiController KeyboardController { get; }
-    public BaseApiController DisplayController { get; }
-    public AbstractApiEndpoint ApiEndpoint { get; }
-    public AbstractEndpoint StaticEndpoint { get; }
+    public IApiController AudioController { get; }
+    public IApiController MouseController { get; }
+    public IApiController KeyboardController { get; }
+    public IApiController DisplayController { get; }
+    public IEndpoint ApiEndpoint { get; }
+    public IEndpoint StaticEndpoint { get; }
     public IHttpListener NewHttpListener(IHttpListenerWrapper wrapper, ILogger logger);
     public IBotListener NewBotListener(IActiveApiWrapper wrapper, ILogger logger);
     public IActiveApiWrapper NewBotWrapper(ILogger logger);
     public IHttpListenerWrapper NewHttpWrapper();
     public ICommandExecutor NewExecutor(ControlFacade facade, ILogger logger);
-    public BaseApiController NewAudioController(IAudioControlProvider provider, ILogger logger);
-    public BaseApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger);
-    public BaseApiController NewMouseController(IMouseControlProvider provider, ILogger logger);
-    public BaseApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger);
-    public AbstractApiEndpoint NewApiEndpoint(IEnumerable<BaseApiController> controllers, ILogger logger);
-    public AbstractEndpoint NewStaticEndpoint(ILogger logger, string directory = "www");
-    public AbstractMiddleware NewMiddleware(IEnumerable<AbstractApiEndpoint> apiEndpoints,
-        AbstractEndpoint staticEndpoint, ILogger logger, HttpEventHandler? next = null);
+    public IApiController NewAudioController(IAudioControlProvider provider, ILogger logger);
+    public IApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger);
+    public IApiController NewMouseController(IMouseControlProvider provider, ILogger logger);
+    public IApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger);
+    public IEndpoint NewApiEndpoint(IEnumerable<IApiController> controllers, ILogger logger);
+    public IEndpoint NewStaticEndpoint(ILogger logger, string directory = "www");
+    public IMiddleware NewMiddleware(IEnumerable<IEndpoint> endpoints, ILogger logger, HttpEventHandler? next = null);
 }

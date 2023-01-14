@@ -6,7 +6,7 @@ using Shared.ApiControllers.Results;
 
 namespace Shared.ApiControllers;
 
-public abstract class BaseApiController
+public abstract class BaseApiController: IApiController
 {
     private readonly ILogger _logger;
 

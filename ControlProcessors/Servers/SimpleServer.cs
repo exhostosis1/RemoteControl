@@ -11,7 +11,7 @@ public class SimpleServer: ServerProcessor
     private readonly IHttpListener _listener;
     private readonly ILogger<SimpleServer> _logger;
 
-    public SimpleServer(IHttpListener listener, AbstractMiddleware middleware, ILogger<SimpleServer> logger, ServerConfig? config = null): base(config)
+    public SimpleServer(IHttpListener listener, IMiddleware middleware, ILogger<SimpleServer> logger, ServerConfig? config = null): base(config)
     {
         _listener = listener;
         _listener.OnRequest += middleware.ProcessRequest;
@@ -30,12 +30,6 @@ public class SimpleServer: ServerProcessor
             throw new Exception("Wrong uri config");
 
         _listener.StartListen(config.Uri);
-    }
-
-    protected override void RestartInternal(ServerConfig config)
-    {
-        Stop();
-        StartInternal(config);
     }
 
     public override void Stop()

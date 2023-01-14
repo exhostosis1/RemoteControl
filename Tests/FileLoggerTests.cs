@@ -32,7 +32,6 @@ public class FileLoggerTests : IDisposable
 
         var loggedText = "";
 
-
         try
         {
             loggedText = await File.ReadAllTextAsync(_filePath);

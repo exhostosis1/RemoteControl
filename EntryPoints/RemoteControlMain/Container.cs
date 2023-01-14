@@ -33,15 +33,15 @@ internal class Container : IContainer
     public IBotListener BotListener { get; }
     public IHttpListenerWrapper HttpWrapper { get; }
     public IActiveApiWrapper ActiveBotWrapper { get; }
-    public AbstractMiddleware Middleware { get; }
+    public IMiddleware Middleware { get; }
     public ICommandExecutor Executor { get; }
-    public BaseApiController AudioController { get; }
-    public BaseApiController MouseController { get; }
-    public BaseApiController KeyboardController { get; }
-    public BaseApiController DisplayController { get; }
+    public IApiController AudioController { get; }
+    public IApiController MouseController { get; }
+    public IApiController KeyboardController { get; }
+    public IApiController DisplayController { get; }
 
-    public AbstractApiEndpoint ApiEndpoint { get; }
-    public AbstractEndpoint StaticEndpoint { get; }
+    public IEndpoint ApiEndpoint { get; }
+    public IEndpoint StaticEndpoint { get; }
 
     public ILogger Logger => _container.Logger;
     public ILogger NewLogger() => _container.NewLogger();
@@ -61,24 +61,23 @@ internal class Container : IContainer
     public ICommandExecutor NewExecutor(ControlFacade facade, ILogger logger) =>
         new CommandsExecutor(facade, new LogWrapper<CommandsExecutor>(logger));
 
-    public BaseApiController NewAudioController(IAudioControlProvider provider, ILogger logger) =>
+    public IApiController NewAudioController(IAudioControlProvider provider, ILogger logger) =>
         new AudioController(provider, new LogWrapper<AudioController>(logger));
-    public BaseApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger) =>
+    public IApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger) =>
         new KeyboardController(provider, new LogWrapper<KeyboardController>(logger));
-    public BaseApiController NewMouseController(IMouseControlProvider provider, ILogger logger) =>
+    public IApiController NewMouseController(IMouseControlProvider provider, ILogger logger) =>
         new MouseController(provider, new LogWrapper<MouseController>(logger));
-    public BaseApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger) =>
+    public IApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger) =>
         new DisplayController(provider, new LogWrapper<DisplayController>(logger));
 
-    public AbstractApiEndpoint NewApiEndpoint(IEnumerable<BaseApiController> controllers, ILogger logger) =>
+    public IEndpoint NewApiEndpoint(IEnumerable<IApiController> controllers, ILogger logger) =>
         new ApiV1Endpoint(controllers, new LogWrapper<ApiV1Endpoint>(logger));
 
-    public AbstractEndpoint NewStaticEndpoint(ILogger logger, string directory = "www") =>
+    public IEndpoint NewStaticEndpoint(ILogger logger, string directory = "www") =>
         new StaticFilesEndpoint(new LogWrapper<StaticFilesEndpoint>(logger), directory);
 
-    public AbstractMiddleware NewMiddleware(IEnumerable<AbstractApiEndpoint> apiEndpoints,
-        AbstractEndpoint staticEndpoint, ILogger logger, HttpEventHandler? next = null) =>
-        new RoutingMiddleware(apiEndpoints, staticEndpoint, new LogWrapper<RoutingMiddleware>(logger), next);
+    public IMiddleware NewMiddleware(IEnumerable<IEndpoint> endpoints, ILogger logger, HttpEventHandler? next = null) =>
+        new RoutingMiddleware(endpoints, new LogWrapper<RoutingMiddleware>(logger), next);
 
     public IConfigProvider NewConfigProvider(ILogger logger) => _container.NewConfigProvider(logger);
 
@@ -106,7 +105,7 @@ internal class Container : IContainer
         ApiEndpoint = NewApiEndpoint(new[] { AudioController, DisplayController, MouseController, KeyboardController }, Logger);
         StaticEndpoint = NewStaticEndpoint(Logger);
 
-        Middleware = NewMiddleware(new[] { ApiEndpoint }, StaticEndpoint, Logger);
+        Middleware = NewMiddleware(new[] { ApiEndpoint, StaticEndpoint }, Logger);
         Executor = NewExecutor(ControlProviders, Logger);
 
         HttpWrapper = NewHttpWrapper();

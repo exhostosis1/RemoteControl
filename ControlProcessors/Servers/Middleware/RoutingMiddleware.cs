@@ -6,18 +6,16 @@ using Shared.DataObjects.Http;
 
 namespace Servers.Middleware;
 
-public partial class RoutingMiddleware: AbstractMiddleware
+public class RoutingMiddleware: AbstractMiddleware
 {
-    private readonly IEnumerable<AbstractApiEndpoint> _apiEndpoints;
-    private readonly AbstractEndpoint _staticFilesEndpoint;
+    private readonly IEnumerable<IEndpoint> _endpoints;
     private readonly ILogger<RoutingMiddleware> _logger;
 
-    public RoutingMiddleware(IEnumerable<AbstractApiEndpoint> apiEndpoints, AbstractEndpoint staticFilesEndpoint, ILogger<RoutingMiddleware> logger,
+    public RoutingMiddleware(IEnumerable<IEndpoint> endpoints, ILogger<RoutingMiddleware> logger,
         HttpEventHandler? next = null) : base(next)
     {
         _logger = logger;
-        _apiEndpoints = apiEndpoints;
-        _staticFilesEndpoint = staticFilesEndpoint;
+        _endpoints = endpoints;
     }
 
     public override void ProcessRequest(Context context)
@@ -26,7 +24,7 @@ public partial class RoutingMiddleware: AbstractMiddleware
 
         if (Utils.TryGetApiVersion(context.Request.Path, out var version))
         {
-            var endpoint = _apiEndpoints.FirstOrDefault(x => x.ApiVersion == version);
+            var endpoint = _endpoints.FirstOrDefault(x => x is IApiEndpoint a && a.ApiVersion == version);
 
             if (endpoint == null)
             {
@@ -42,7 +40,7 @@ public partial class RoutingMiddleware: AbstractMiddleware
         else
         {
             _logger.LogInfo("Passing request to static files endpoint");
-            _staticFilesEndpoint.ProcessRequest(context);
+            _endpoints.FirstOrDefault(x => x is not IApiEndpoint)?.ProcessRequest(context);
         }
 
         Next?.Invoke(context);

@@ -128,7 +128,7 @@ public static partial class Utils
     public static IEnumerable<string> GetCurrentIPs() =>
         Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
 
-    public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<BaseApiController> controllers)
+    public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<IApiController> controllers)
     {
         return new ControllersWithMethods(controllers.ToDictionary(
             x => x.GetType().Name.Replace("Controller", "").ToLower(),

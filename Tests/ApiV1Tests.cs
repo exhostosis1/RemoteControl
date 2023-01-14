@@ -10,53 +10,65 @@ namespace Tests;
 
 public class ApiV1Tests: IDisposable
 {
-    public ApiV1Tests()
-    {
-
-    }
-
-    private class FirstController : BaseApiController
+    private class FirstController : IApiController
     {
         public int Onecount;
         public int Twocount;
 
-        public FirstController(ILogger logger) : base(logger)
-        {
-        }
-
-        public IActionResult ActionOne(string _)
+        public IActionResult ActionOne(string? _)
         {
             Onecount++;
-            return Ok();
+            return new OkResult();
         }
 
-        public IActionResult ActionTwo(string _)
+        public IActionResult ActionTwo(string? _)
         {
             Twocount++;
-            return Error("test error");
+            return new ErrorResult("test error");
+        }
+
+        public ControllerMethods GetMethods()
+        {
+            return new ControllerMethods(new Dictionary<string, Func<string?, IActionResult>>
+            {
+                {
+                    "actionone", ActionOne
+                },
+                {
+                    "actiontwo", ActionTwo
+                }
+            });
         }
     }
 
-    private class SecondController : BaseApiController
+    private class SecondController : IApiController
     {
         public int Threecount;
         public int Fourcount;
 
-
-        public SecondController(ILogger logger) : base(logger)
-        {
-        }
-
-        public IActionResult ActionThree(string _)
+        public IActionResult ActionThree(string? _)
         {
             Threecount++;
-            return Json("new");
+            return new JsonResult("new");
         }
 
-        public IActionResult ActionFour(string _)
+        public IActionResult ActionFour(string? _)
         {
             Fourcount++;
-            return Text("text");
+            return new StringResult("text");
+        }
+
+        public ControllerMethods GetMethods()
+        {
+            return new ControllerMethods(new Dictionary<string, Func<string?, IActionResult>>
+            {
+                {
+                    "actionthree", ActionThree
+                },
+                {
+                    "actionfour", ActionFour
+                }
+            });
         }
     }
 
@@ -65,10 +77,10 @@ public class ApiV1Tests: IDisposable
     {
         var logger = Mock.Of<ILogger<ApiV1Endpoint>>();
 
-        var controllers = new List<BaseApiController>
+        var controllers = new List<IApiController>
         {
-            new FirstController(logger),
-            new SecondController(logger)
+            new FirstController(),
+            new SecondController()
         };
 
         var apiEndpoint = new ApiV1Endpoint(controllers, logger);
