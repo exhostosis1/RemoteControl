@@ -8,7 +8,6 @@ using Shared.Config;
 using Shared.ControlProviders;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
-using Shared.RegistryWrapper;
 using Shared.UI;
 using WinFormsUI;
 
