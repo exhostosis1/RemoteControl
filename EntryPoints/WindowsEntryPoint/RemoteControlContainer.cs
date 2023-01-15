@@ -1,13 +1,14 @@
 ﻿using Autostart;
-using Autostart.Registry;
 using ConfigProviders;
 using ControlProviders;
+using ControlProviders.Wrappers;
 using Logging;
 using Shared;
 using Shared.Config;
 using Shared.ControlProviders;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
+using Shared.RegistryWrapper.Registry;
 using Shared.UI;
 using WinFormsUI;
 
@@ -29,12 +30,12 @@ public class RemoteControlContainer : IPlatformDependantContainer
 #if DEBUG
         return new TraceLogger();
 #else
-        return new FileLogger(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log"));
+        return new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
 #endif
     }
 
     public IConfigProvider NewConfigProvider(ILogger logger) =>
-        new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger));
+        new LocalFileConfigProvider(Path.Combine(AppContext.BaseDirectory, "config.ini"), new LogWrapper<LocalFileConfigProvider>(logger));
 
     public IAutostartService NewAutostartService(ILogger logger) =>
         new WinRegistryAutostartService(new RegistryWrapper(), new LogWrapper<WinRegistryAutostartService>(logger));
@@ -51,7 +52,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
         new User32Provider(new LogWrapper<User32Provider>(logger));
 
     public IAudioControlProvider NewAudioProvider(ILogger logger) =>
-        new NAudioProvider(new LogWrapper<NAudioProvider>(logger));
+        new NAudioProvider(new NAudioWrapper(), new LogWrapper<NAudioProvider>(logger));
 
     public RemoteControlContainer()
     {
@@ -61,7 +62,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
         AutostartService = NewAutostartService(Logger);
 
         var user32Provider = new User32Provider(new LogWrapper<User32Provider>(Logger));
-        var naudioProvider = new NAudioProvider(new LogWrapper<NAudioProvider>(Logger));
+        var naudioProvider = new NAudioProvider(new NAudioWrapper(), new LogWrapper<NAudioProvider>(Logger));
         
         AudioProvider = naudioProvider;
         KeyboardProvider = user32Provider;

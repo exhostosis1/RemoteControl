@@ -9,7 +9,7 @@ namespace Tests;
 public class FileLoggerTests : IDisposable
 {
     private readonly FileLogger _fileLogger;
-    private readonly string _filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "log");
+    private readonly string _filePath = Path.Combine(AppContext.BaseDirectory, "log");
 
     public FileLoggerTests()
     {

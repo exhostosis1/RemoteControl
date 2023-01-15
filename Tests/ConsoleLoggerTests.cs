@@ -19,7 +19,7 @@ public class ConsoleLoggerTests : IDisposable
     }
 
     [Fact]
-    public void LogInfoTest()
+    public async void LogInfoTest()
     {
         var message = "test message";
         var type = GetType();
@@ -31,13 +31,15 @@ public class ConsoleLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
+        await Task.Delay(100);
+
         Mock.Get(_console).Verify(x => x.WriteLine(formattedMessage), Times.Once);
         Mock.Get(_console).VerifySet(x => x.ForegroundColor = It.IsAny<ConsoleColor>(), Times.Never());
         Mock.Get(_console).Verify(x => x.ResetColor(), Times.Never);
     }
 
     [Fact]
-    public void LogWarningTest()
+    public async void LogWarningTest()
     {
         var message = "test message";
         var type = GetType();
@@ -49,13 +51,15 @@ public class ConsoleLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
+        await Task.Delay(100);
+
         Mock.Get(_console).Verify(x => x.WriteLine(formattedMessage), Times.Once);
         Mock.Get(_console).VerifySet(x => x.ForegroundColor = ConsoleColor.Yellow, Times.Once);
         Mock.Get(_console).Verify(x => x.ResetColor(), Times.Once);
     }
 
     [Fact]
-    public void LogErrorTest()
+    public async void LogErrorTest()
     {
         var message = "test message";
         var type = GetType();
@@ -66,6 +70,8 @@ public class ConsoleLoggerTests : IDisposable
 
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+
+        await Task.Delay(100);
 
         Mock.Get(_console).Verify(x => x.WriteLine(formattedMessage), Times.Once);
         Mock.Get(_console).VerifySet(x => x.ForegroundColor = ConsoleColor.Red, Times.Once);

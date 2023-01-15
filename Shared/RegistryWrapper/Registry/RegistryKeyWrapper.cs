@@ -1,10 +1,10 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.Win32;
-using Shared.RegistryWrapper;
+﻿using Microsoft.Win32;
+using System;
+using System.Runtime.InteropServices;
 
 #pragma warning disable CA1416
 
-namespace Autostart.Registry;
+namespace Shared.RegistryWrapper.Registry;
 
 public class RegistryKeyWrapper : IRegistryKey
 {
@@ -32,6 +32,9 @@ public class RegistryKeyWrapper : IRegistryKey
         var result = _key.OpenSubKey(name, writable);
         return result == null ? null : new RegistryKeyWrapper(result);
     }
+
+    public IRegistryKey CreateSubKey(string name, bool writable) =>
+        new RegistryKeyWrapper(_key.CreateSubKey(name, writable));
 
     public void SetValue(string? name, object value, RegistryValueKind valueKind) =>
         _key.SetValue(name, value, valueKind);

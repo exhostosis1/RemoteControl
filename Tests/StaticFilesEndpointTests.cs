@@ -18,7 +18,7 @@ public class StaticFilesEndpointTests: IDisposable
     public void RequestTest()
     {
         var directory = "www";
-        var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, directory);
+        var path = Path.Combine(AppContext.BaseDirectory, directory);
 
         if (!Directory.Exists(path))
             Directory.CreateDirectory(path);

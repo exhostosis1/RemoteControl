@@ -2,5 +2,5 @@
 
 public interface ITriggerCollection
 {
-    public void Add(ITrigger trigger);
+    public void AddLogonTrigger(string userId);
 }

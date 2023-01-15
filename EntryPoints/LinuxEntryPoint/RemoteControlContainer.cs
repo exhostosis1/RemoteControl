@@ -28,12 +28,12 @@ public class RemoteControlContainer : IPlatformDependantContainer
 #if DEBUG
         return new TraceLogger();
 #else
-        return new FileLogger(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error.log"));
+        return new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
 #endif
     }
 
     public IConfigProvider NewConfigProvider(ILogger logger) =>
-        new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger));
+        new LocalFileConfigProvider(Path.Combine(AppContext.BaseDirectory, "config.ini"),new LogWrapper<LocalFileConfigProvider>(logger));
 
     public IAutostartService NewAutostartService(ILogger logger) =>
         new DummyAutostartService(new LogWrapper<DummyAutostartService>(logger));

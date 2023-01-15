@@ -17,4 +17,14 @@ public class AppConfig
     public AppConfig(){}
 
     public AppConfig(IEnumerable<CommonConfig> items) => ProcessorConfigs = items.ToList();
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj is not AppConfig that) return false;
+
+        if(this.ProcessorConfigs.Count != that.ProcessorConfigs.Count) return false;
+
+        return !ProcessorConfigs.Where((t, i) => !this.ProcessorConfigs[i].Equals(that.ProcessorConfigs[i])).Any();
+    }
 }

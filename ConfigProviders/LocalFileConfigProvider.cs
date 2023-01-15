@@ -5,13 +5,14 @@ using Shared.Config;
 
 namespace ConfigProviders;
 
-public class LocalFileConfigProvider : BaseConfigProvider
+public class LocalFileConfigProvider : IConfigProvider
 {
-    private static readonly string ConfigPath = AppContext.BaseDirectory + "config.ini";
+    private readonly string _configPath;
     private readonly ILogger<LocalFileConfigProvider> _logger;
 
-    public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger) : base(logger)
+    public LocalFileConfigProvider(string filePath, ILogger<LocalFileConfigProvider> logger)
     {
+        _configPath = filePath;
         _logger = logger;
     }
 
@@ -21,11 +22,11 @@ public class LocalFileConfigProvider : BaseConfigProvider
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    protected override AppConfig GetConfigInternal()
+    public AppConfig GetConfig()
     {
-        _logger.LogInfo($"Getting config from file {ConfigPath}");
+        _logger.LogInfo($"Getting config from file {_configPath}");
 
-        if (!File.Exists(ConfigPath))
+        if (!File.Exists(_configPath))
         {
             _logger.LogWarn("No config file");
             return new AppConfig();
@@ -35,7 +36,7 @@ public class LocalFileConfigProvider : BaseConfigProvider
 
         try
         {
-            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(ConfigPath));
+            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(_configPath));
         }
         catch (JsonException e)
         {
@@ -45,11 +46,11 @@ public class LocalFileConfigProvider : BaseConfigProvider
         return result ?? new AppConfig();
     }
 
-    protected override void SetConfigInternal(AppConfig appConfig)
+    public void SetConfig(AppConfig appConfig)
     {
-        _logger.LogInfo($"Writing config to file {ConfigPath}");
+        _logger.LogInfo($"Writing config to file {_configPath}");
 
-        File.WriteAllText(ConfigPath,
+        File.WriteAllText(_configPath,
             JsonSerializer.Serialize(appConfig, _jsonOptions));
     }
 }

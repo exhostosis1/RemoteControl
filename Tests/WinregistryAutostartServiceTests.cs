@@ -50,6 +50,11 @@ public class WinregistryAutostartServiceTests: IDisposable
             return OpenSubKey(name);
         }
 
+        public IRegistryKey CreateSubKey(string name, bool writable)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetValue(string? name, object value, RegistryValueKind valueKind)
         {
             if (Name != "Run" || name != "Remote Control") throw new InvalidOperationException();

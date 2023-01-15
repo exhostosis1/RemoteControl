@@ -3,7 +3,7 @@ using Shared.TaskServiceWrapper;
 
 namespace Autostart.Task;
 
-public class TaskFolderWrapper: ITaskFolder
+public class TaskFolderWrapper : ITaskFolder
 {
     private readonly TaskFolder _folder;
 

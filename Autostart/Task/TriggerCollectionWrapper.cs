@@ -3,7 +3,7 @@ using Shared.TaskServiceWrapper;
 
 namespace Autostart.Task;
 
-public class TriggerCollectionWrapper: ITriggerCollection
+public class TriggerCollectionWrapper : ITriggerCollection
 {
     private readonly TriggerCollection _collection;
 
@@ -12,5 +12,5 @@ public class TriggerCollectionWrapper: ITriggerCollection
         _collection = collection;
     }
 
-    public void Add(ITrigger trigger) => _collection.Add(((LogonTriggerWrapper)trigger).Trigger);
+    public void AddLogonTrigger(string userId) => _collection.Add(new LogonTrigger { UserId = userId });
 }

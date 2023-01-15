@@ -20,4 +20,13 @@ public class ServerConfig: CommonConfig
             Port = value.Port;
         }
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (this == obj) return true;
+        if(obj is not ServerConfig that) return false;
+
+        return this.Name == that.Name && this.Autostart == that.Autostart && this.Scheme == that.Scheme &&
+               this.Host == that.Host && this.Port == that.Port;
+    }
 }

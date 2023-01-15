@@ -1,5 +1,4 @@
-﻿using Autostart.Task;
-using Shared;
+﻿using Shared;
 using Shared.Logging.Interfaces;
 using Shared.TaskServiceWrapper;
 using System.Diagnostics;
@@ -13,7 +12,7 @@ public class WinTaskAutostartService : IAutostartService
     private readonly ITaskService _ts;
     private readonly string _taskName;
     private readonly ITaskDefinition _td;
-    private readonly string _filename = AppContext.BaseDirectory + "run.bat";
+    private readonly string _filename = Path.Combine(AppContext.BaseDirectory, "run.bat");
     private readonly ILogger<WinTaskAutostartService> _logger;
 
     public WinTaskAutostartService(ITaskService taskService, ILogger<WinTaskAutostartService> logger)
@@ -30,7 +29,7 @@ public class WinTaskAutostartService : IAutostartService
 
         _td = _ts.NewTask();
         _td.Actions.Add(_filename, null, AppContext.BaseDirectory);
-        _td.Triggers.Add(new LogonTriggerWrapper { UserId = userName });
+        _td.Triggers.AddLogonTrigger(userName);
         _td.Principal.UserId = userName;
     }
 
@@ -46,30 +45,25 @@ public class WinTaskAutostartService : IAutostartService
 
         _ts.RootFolder.DeleteTask(_taskName, false);
 
-        if (File.Exists(_filename))
+        if (!value) return;
+ 
+        try
         {
-            try
-            {
-                File.Delete(_filename);
+            File.WriteAllText(_filename, $"start {Process.GetCurrentProcess().MainModule?.FileName}");
+            _ts.RootFolder.RegisterTaskDefinition(_taskName, _td);
 
-                if (value)
-                {
-                    File.WriteAllText(_filename, $"start {Process.GetCurrentProcess().MainModule?.FileName}");
-                    _ts.RootFolder.RegisterTaskDefinition(_taskName, _td);
-                }
-            }
-            catch (UnauthorizedAccessException)
-            {
-                _logger.LogError($"Cannot write {_filename} due to access restrictions");
-            }
-            catch (DirectoryNotFoundException)
-            {
-                _logger.LogError($"Cannot find directory to write {_filename}");
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e.Message);
-            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            _logger.LogError($"Cannot write {_filename} due to access restrictions");
+        }
+        catch (DirectoryNotFoundException)
+        {
+            _logger.LogError($"Cannot find directory to write {_filename}");
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e.Message);
         }
     }
 }

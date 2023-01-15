@@ -2,7 +2,7 @@
 
 namespace Autostart.Task;
 
-public class TaskWrapper: ITask
+public class TaskWrapper : ITask
 {
     private readonly Microsoft.Win32.TaskScheduler.Task _task;
 

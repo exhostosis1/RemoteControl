@@ -1,9 +1,9 @@
-﻿using Shared.RegistryWrapper;
+﻿using System;
 using System.Runtime.InteropServices;
 
 #pragma warning disable CA1416
 
-namespace Autostart.Registry;
+namespace Shared.RegistryWrapper.Registry;
 
 public class RegistryWrapper : IRegistry
 {

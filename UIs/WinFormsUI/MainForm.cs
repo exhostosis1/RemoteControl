@@ -46,8 +46,8 @@ public sealed partial class MainForm : Form, IUserInterface
     private readonly UISettings _settings = new();
     private bool IsDarkMode => _settings.GetColorValue(UIColorType.Background) == _colorBlack;
 
-    private readonly Icon _darkIcon = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Icons\\Device.theme-light.ico"));
-    private readonly Icon _lightIcon = new(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Icons\\Device.theme-dark.ico"));
+    private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico"));
+    private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico"));
 
     public MainForm()
     {

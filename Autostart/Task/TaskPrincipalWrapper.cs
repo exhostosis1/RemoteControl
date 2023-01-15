@@ -3,7 +3,7 @@ using Shared.TaskServiceWrapper;
 
 namespace Autostart.Task;
 
-public class TaskPrincipalWrapper: ITaskPrincipal
+public class TaskPrincipalWrapper : ITaskPrincipal
 {
     private readonly TaskPrincipal _principal;
 

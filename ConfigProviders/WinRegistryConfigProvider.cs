@@ -5,13 +5,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Shared.RegistryWrapper;
 
 namespace ConfigProviders;
 
 [SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Planform check in constructor is sufficient")]
-public class WinRegistryConfigProvider: BaseConfigProvider
+public class WinRegistryConfigProvider: IConfigProvider
 {
-    private readonly RegistryKey _regKey;
+    private readonly IRegistryKey _regKey;
     private const string ValueName = "Config";
     private readonly ILogger<WinRegistryConfigProvider> _logger;
 
@@ -20,18 +21,18 @@ public class WinRegistryConfigProvider: BaseConfigProvider
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public WinRegistryConfigProvider(ILogger<WinRegistryConfigProvider> logger): base(logger)
+    public WinRegistryConfigProvider(IRegistry registry, ILogger<WinRegistryConfigProvider> logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
 
         _logger = logger;
 
-        _regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ?? 
-                  Registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
+        _regKey = registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ??
+                  registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
     }
 
-    protected override AppConfig GetConfigInternal()
+    public AppConfig GetConfig()
     {
         _logger.LogInfo($"Getting config from registry {_regKey}");
 
@@ -54,7 +55,7 @@ public class WinRegistryConfigProvider: BaseConfigProvider
         return result ?? new AppConfig();
     }
 
-    protected override void SetConfigInternal(AppConfig config)
+    public void SetConfig(AppConfig config)
     {
         _logger.LogInfo($"Writing config to registry {_regKey}");
 

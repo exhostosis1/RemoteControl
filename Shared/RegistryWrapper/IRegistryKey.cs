@@ -9,5 +9,6 @@ public interface IRegistryKey : IDisposable
     public object? GetValue(string? name, object? defaultValue);
     public IRegistryKey? OpenSubKey(string name);
     public IRegistryKey? OpenSubKey(string name, bool writable);
+    public IRegistryKey CreateSubKey(string name, bool writable);
     public void SetValue(string? name, object value, RegistryValueKind valueKind);
 }

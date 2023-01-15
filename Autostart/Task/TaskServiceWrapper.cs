@@ -3,22 +3,18 @@ using Shared.TaskServiceWrapper;
 
 namespace Autostart.Task;
 
-public class TaskServiceWrapper: ITaskService
+public class TaskServiceWrapper : ITaskService
 {
-    private readonly TaskService _taskService;
- 
-    public ITaskFolder RootFolder => new TaskFolderWrapper(_taskService.RootFolder);
+    private static readonly TaskService TaskService = new();
 
-    public TaskServiceWrapper(TaskService service)
-    {
-        _taskService = service;
-    }
+    public ITaskFolder RootFolder => new TaskFolderWrapper(TaskService.RootFolder);
+    
 
-    public ITaskDefinition NewTask() => new TaskDefinitionWrapper(_taskService.NewTask());
+    public ITaskDefinition NewTask() => new TaskDefinitionWrapper(TaskService.NewTask());
 
     public ITask? FindTask(string name)
     {
-        var result = _taskService.FindTask(name);
+        var result = TaskService.FindTask(name);
         return result == null ? null : new TaskWrapper(result);
     }
 }
