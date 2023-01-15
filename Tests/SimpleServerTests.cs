@@ -1,6 +1,5 @@
 ﻿using Moq;
 using Servers;
-using Shared;
 using Shared.Config;
 using Shared.DataObjects.Http;
 using Shared.Listeners;
@@ -19,21 +18,21 @@ public class SimpleServerTests: IDisposable
     private class MockListener : IHttpListener
     {
         public bool IsListening { get; private set; }
-        public event BoolEventHandler? OnStatusChange;
-        public event HttpEventHandler? OnRequest;
+        public event EventHandler<bool>? OnStatusChange;
+        public event EventHandler<Context>? OnRequest;
 
         public void StartListen(Uri uri)
         {
             IsListening = true;
-            OnStatusChange?.Invoke(IsListening);
+            OnStatusChange?.Invoke(this, IsListening);
 
-            OnRequest?.Invoke(new Context("path"));
+            OnRequest?.Invoke(this, new Context("path"));
         }
 
         public void StopListen()
         {
             IsListening = false;
-            OnStatusChange?.Invoke(IsListening);
+            OnStatusChange?.Invoke(this, IsListening);
         }
     }
 
@@ -41,7 +40,7 @@ public class SimpleServerTests: IDisposable
     {
         public int InvokeCount = 0;
 
-        public override void ProcessRequest(Context context)
+        public override void ProcessRequest(object? sender, Context context)
         {
             InvokeCount++;
         }

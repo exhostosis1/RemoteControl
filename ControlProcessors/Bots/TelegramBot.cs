@@ -38,12 +38,12 @@ public class TelegramBot: BotProcessor
         _listener = listener;
         _logger = logger;
 
-        _listener.OnStatusChange += status =>
+        _listener.OnStatusChange += (sender, status) =>
         {
             Working = status;
             StatusObservers.ForEach(x => x.OnNext(status));
         };
-        _listener.OnRequest += context =>
+        _listener.OnRequest += (sender, context) =>
         {
             context.Result = executor.Execute(context.Message);
             context.Buttons = _buttons;

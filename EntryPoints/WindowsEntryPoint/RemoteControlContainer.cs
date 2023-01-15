@@ -43,16 +43,16 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IUserInterface NewUserInterface() => new MainForm();
 
     public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) =>
-        new User32Provider(new LogWrapper<User32Provider>(Logger));
+        new InputProvider(new User32Wrapper(), new LogWrapper<InputProvider>(Logger));
 
     public IMouseControlProvider NewMouseProvider(ILogger logger) =>
-        new User32Provider(new LogWrapper<User32Provider>(logger));
+        new InputProvider(new User32Wrapper(), new LogWrapper<InputProvider>(logger));
 
     public IDisplayControlProvider NewDisplayProvider(ILogger logger) =>
-        new User32Provider(new LogWrapper<User32Provider>(logger));
+        new InputProvider(new User32Wrapper(), new LogWrapper<InputProvider>(logger));
 
     public IAudioControlProvider NewAudioProvider(ILogger logger) =>
-        new NAudioProvider(new NAudioWrapper(), new LogWrapper<NAudioProvider>(logger));
+        new AudioProvider(new NAudioWrapper(), new LogWrapper<AudioProvider>(logger));
 
     public RemoteControlContainer()
     {
@@ -61,8 +61,8 @@ public class RemoteControlContainer : IPlatformDependantContainer
         ConfigProvider = NewConfigProvider(Logger);
         AutostartService = NewAutostartService(Logger);
 
-        var user32Provider = new User32Provider(new LogWrapper<User32Provider>(Logger));
-        var naudioProvider = new NAudioProvider(new NAudioWrapper(), new LogWrapper<NAudioProvider>(Logger));
+        var user32Provider = new InputProvider(new User32Wrapper(), new LogWrapper<InputProvider>(Logger));
+        var naudioProvider = new AudioProvider(new NAudioWrapper(), new LogWrapper<AudioProvider>(Logger));
         
         AudioProvider = naudioProvider;
         KeyboardProvider = user32Provider;

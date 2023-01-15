@@ -1,24 +1,12 @@
-﻿using Shared.ControlProviders;
+﻿using Shared;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 using System.Diagnostics;
 
-// ReSharper disable UnusedMember.Local
-// ReSharper disable InconsistentNaming
+namespace ControlProviders.Wrappers;
 
-namespace ControlProviders;
-
-public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
+public class YdoToolWrapper: IInput
 {
-    private readonly ILogger<YdotoolProvider> _logger;
-
-    public YdotoolProvider(ILogger<YdotoolProvider> logger)
-    {
-        _logger = logger;
-    }
-
-    #region Enums
-    private enum YdotoolKey: byte
+    private enum YdotoolKey : byte
     {
         KEY_RESERVED = 0,
         KEY_ESC = 115,
@@ -111,7 +99,7 @@ public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
     }
 
     [Flags]
-    private enum MouseCodes: byte
+    private enum MouseCodes : byte
     {
         LEFT = 0x00,
         RIGHT = 0x01,
@@ -125,9 +113,7 @@ public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
         Down = 0x40,
         Up = 0x80
     }
-    #endregion
-
-    #region Dictionaries
+    
 
     private readonly Dictionary<KeysEnum, YdotoolKey> KeyToScanCode = new()
     {
@@ -163,10 +149,7 @@ public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
             MouseButtons.Middle, MouseCodes.MIDDLE
         }
     };
-
-    #endregion
-
-    #region private
+    
 
     private static readonly Process _proc = new()
     {
@@ -181,8 +164,6 @@ public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
 
     private void FastRunLinuxCommand(string command)
     {
-        _logger.LogInfo($"Running linux command {command}");
-
         _proc.StartInfo.Arguments = $"-c \" {command} \"";
         _proc.Start();
     }
@@ -192,55 +173,41 @@ public class YdotoolProvider : IKeyboardControlProvider, IMouseControlProvider
         FastRunLinuxCommand($"ydotool {args}");
     }
 
-    private void SendKey(YdotoolKey key, KeyPressMode mode)
+    public int SetMonitorInState(MonitorState state)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void SendKeyInput(KeysEnum key, bool up)
     {
         var command = "key ";
-
-        if (mode.HasFlag(KeyPressMode.Down))
-            command += $"{key:D}:1 ";
-        if (mode.HasFlag(KeyPressMode.Up))
-            command += $"{key:D}:0 ";
+        var ydoToolKey = KeyToScanCode[key];
+        
+        command += up ? $"{ydoToolKey:D}:0 " : $"{ydoToolKey:D}:1 ";
 
         RunYdotool(command);
     }
 
-    private void SendText(string text)
+    public void SendCharInput(char c, bool up)
     {
-        RunYdotool($"type {text}");
+        throw new NotImplementedException();
     }
 
-    private void SendMouseMove(int x, int y)
+    public void SendMouseInput(int x, int y)
     {
         RunYdotool($"mousemove -- {x} {y}");
     }
 
-    private void SendMouseButton(MouseCodes button)
+    public void SendMouseInput(MouseButtons button, bool up)
     {
-        RunYdotool($"click {button:X}");
-    }
-    #endregion
+        var ydoToolButton = ButtonToCode[button];
+        ydoToolButton |= up ? MouseCodes.Up : MouseCodes.Down;
 
-    public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => SendKey(KeyToScanCode[key], mode);
-
-    public void TextInput(string text) => SendText(text);
-
-    public void Move(int x, int y) => SendMouseMove(x, y);
-
-    public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
-    {
-        var mouseCode = ButtonToCode[button];
-
-        if (mode.HasFlag(KeyPressMode.Down))
-            mouseCode |= MouseCodes.Down;
-        if (mode.HasFlag(KeyPressMode.Up))
-            mouseCode |= MouseCodes.Up;
-
-        SendMouseButton(mouseCode);
+        RunYdotool($"click {ydoToolButton:X}");
     }
 
-    public void Wheel(bool up)
+    public void SendScrollInput(int scrollAmount)
     {
-        //TODO: add mouse scroll functionality
-        _logger.LogInfo($"scroll {(up ? "up" : "down")}");
+        throw new NotImplementedException();
     }
 }

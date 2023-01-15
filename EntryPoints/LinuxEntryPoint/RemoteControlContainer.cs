@@ -2,6 +2,7 @@
 using ConfigProviders;
 using ConsoleUI;
 using ControlProviders;
+using ControlProviders.Wrappers;
 using Logging;
 using Shared;
 using Shared.Config;
@@ -41,10 +42,10 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IUserInterface NewUserInterface() => new MainConsole();
 
     public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) =>
-        new YdotoolProvider(new LogWrapper<YdotoolProvider>(Logger));
+        new InputProvider(new YdoToolWrapper(), new LogWrapper<InputProvider>(Logger));
 
     public IMouseControlProvider NewMouseProvider(ILogger logger) =>
-        new YdotoolProvider(new LogWrapper<YdotoolProvider>(logger));
+        new InputProvider(new YdoToolWrapper(), new LogWrapper<InputProvider>(logger));
 
     public IDisplayControlProvider NewDisplayProvider(ILogger logger) =>
         new DummyProvider(new LogWrapper<DummyProvider>(logger));
@@ -56,7 +57,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     {
         Logger = NewLogger();
 
-        var ydoToolProvider = new YdotoolProvider(new LogWrapper<YdotoolProvider>(Logger));
+        var ydoToolProvider = new InputProvider(new YdoToolWrapper(), new LogWrapper<InputProvider>(Logger));
         var dummyProvider = new DummyProvider(new LogWrapper<DummyProvider>(Logger));
         
         AudioProvider = dummyProvider;

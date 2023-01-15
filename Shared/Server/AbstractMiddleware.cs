@@ -1,15 +1,16 @@
-﻿using Shared.DataObjects.Http;
+﻿using System;
+using Shared.DataObjects.Http;
 
 namespace Shared.Server;
 
 public abstract class AbstractMiddleware: IMiddleware
 {
-    public HttpEventHandler? Next { get; set; }
+    public EventHandler<Context>? Next { get; set; }
 
-    protected AbstractMiddleware(HttpEventHandler? next = null)
+    protected AbstractMiddleware(EventHandler<Context>? next = null)
     {
         Next = next;
     }
 
-    public abstract void ProcessRequest(Context context);
+    public abstract void ProcessRequest(object? sender, Context context);
 } 

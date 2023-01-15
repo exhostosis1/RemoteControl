@@ -4,5 +4,5 @@ namespace Shared.Server;
 
 public interface IEndpoint
 {
-    public void ProcessRequest(Context context);
+    public void ProcessRequest(object? sender, Context context);
 }

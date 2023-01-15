@@ -18,7 +18,7 @@ public class RoutingMiddlewareTests: IDisposable
         public string ApiVersion => "v1";
         public int Count;
 
-        public void ProcessRequest(Context context)
+        public void ProcessRequest(object? sender, Context? context)
         {
             Count++;
         }
@@ -29,7 +29,7 @@ public class RoutingMiddlewareTests: IDisposable
         public string ApiVersion => "v2";
         public int Count;
 
-        public void ProcessRequest(Context context)
+        public void ProcessRequest(object? sender, Context? context)
         {
             Count++;
         }
@@ -39,7 +39,7 @@ public class RoutingMiddlewareTests: IDisposable
     {
         public int Count;
 
-        public void ProcessRequest(Context context)
+        public void ProcessRequest(object? sender, Context? context)
         {
             Count++;
         }
@@ -63,21 +63,21 @@ public class RoutingMiddlewareTests: IDisposable
         var middleware = new RoutingMiddleware(endpoints, logger);
 
         var context = new Context("http://localhost/api/v2/controller/method");
-        middleware.ProcessRequest(context);
+        middleware.ProcessRequest(this, context);
 
         Assert.True(v1Endpoint.Count == 0);
         Assert.True(v2Endpoint.Count == 1);
         Assert.True(staticEndpoint.Count == 0);
 
         context = new Context("asdff/st/api/v1/controller/method/param");
-        middleware.ProcessRequest(context);
+        middleware.ProcessRequest(this, context);
 
         Assert.True(v1Endpoint.Count == 1);
         Assert.True(v2Endpoint.Count == 1);
         Assert.True(staticEndpoint.Count == 0);
 
         context = new Context("http://localhost/controller/method");
-        middleware.ProcessRequest(context);
+        middleware.ProcessRequest(this, context);
 
         Assert.True(v1Endpoint.Count == 1);
         Assert.True(v2Endpoint.Count == 1);

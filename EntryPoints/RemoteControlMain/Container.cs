@@ -9,6 +9,7 @@ using Shared;
 using Shared.ApiControllers;
 using Shared.Config;
 using Shared.ControlProviders;
+using Shared.DataObjects.Http;
 using Shared.Listeners;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -76,7 +77,7 @@ internal class Container : IContainer
     public IEndpoint NewStaticEndpoint(ILogger logger, string directory = "www") =>
         new StaticFilesEndpoint(new LogWrapper<StaticFilesEndpoint>(logger), directory);
 
-    public IMiddleware NewMiddleware(IEnumerable<IEndpoint> endpoints, ILogger logger, HttpEventHandler? next = null) =>
+    public IMiddleware NewMiddleware(IEnumerable<IEndpoint> endpoints, ILogger logger, EventHandler<Context>? next = null) =>
         new RoutingMiddleware(endpoints, new LogWrapper<RoutingMiddleware>(logger), next);
 
     public IConfigProvider NewConfigProvider(ILogger logger) => _container.NewConfigProvider(logger);

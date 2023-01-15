@@ -22,9 +22,9 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
     
     protected readonly IDisposable StatusUnsubscriber;
 
-    public event StringEventHandler? OnDescriptionClick;
-    public event IntEventHandler? OnStartClick;
-    public event IntEventHandler? OnStopClick;
+    public event EventHandler<string>? OnDescriptionClick;
+    public event EventHandler<int>? OnStartClick;
+    public event EventHandler<int>? OnStopClick;
 
     protected event EventHandler? Disposed;
 
@@ -56,15 +56,15 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
     {
         if (StartStopItem.Text == @"Start")
         {
-            OnStartClick?.Invoke(Id);
+            OnStartClick?.Invoke(this, Id);
         }
         else
         {
-            OnStopClick?.Invoke(Id);
+            OnStopClick?.Invoke(this, Id);
         }
     }
     
-    protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(value);
+    protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(this, value);
 
     
 

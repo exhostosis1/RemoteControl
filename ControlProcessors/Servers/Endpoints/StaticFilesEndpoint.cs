@@ -26,7 +26,7 @@ public class StaticFilesEndpoint : IEndpoint
         { ".css", "text/css" }
     };
 
-    public void ProcessRequest(Context context)
+    public void ProcessRequest(object? sender, Context context)
     {
         var uriPath = context.Request.Path;
 

@@ -4,6 +4,7 @@ using Shared.Logging.Interfaces;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using Shared.DataObjects.Http;
 
 namespace Listeners;
 
@@ -11,8 +12,8 @@ public class SimpleHttpListener : IHttpListener
 {
     public bool IsListening => _wrapper.IsListening;
 
-    public event HttpEventHandler? OnRequest;
-    public event BoolEventHandler? OnStatusChange;
+    public event EventHandler<Context>? OnRequest;
+    public event EventHandler<bool>? OnStatusChange;
 
     private readonly ILogger<SimpleHttpListener> _logger;
     private readonly IHttpListenerWrapper _wrapper;
@@ -24,7 +25,7 @@ public class SimpleHttpListener : IHttpListener
     {
         _logger = logger;
         _wrapper = wrapper;
-        _progress = new Progress<bool>(status => OnStatusChange?.Invoke(status));
+        _progress = new Progress<bool>(status => OnStatusChange?.Invoke(this, status));
     }
 
     public void StartListen(Uri url)
@@ -91,7 +92,7 @@ public class SimpleHttpListener : IHttpListener
                 var context = await _wrapper.GetContextAsync();
                 token.ThrowIfCancellationRequested();
 
-                OnRequest?.Invoke(context);
+                OnRequest?.Invoke(this, context);
 
                 context.Response.Close();
             }

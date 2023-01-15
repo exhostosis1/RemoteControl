@@ -17,7 +17,7 @@ public class SimpleServer: ServerProcessor
         _listener.OnRequest += middleware.ProcessRequest;
         _logger = logger;
 
-        _listener.OnStatusChange += status =>
+        _listener.OnStatusChange += (sender, status) =>
         {
             Working = status;
             StatusObservers.ForEach(x => x.OnNext(status));

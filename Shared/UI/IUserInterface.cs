@@ -1,17 +1,19 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Shared.Config;
 using Shared.ControlProcessor;
 
 namespace Shared.UI;
 
 public interface IUserInterface
 {
-    public event NullableIntEventHandler? StartEvent;
-    public event NullableIntEventHandler? StopEvent;
-    public event EmptyEventHandler? CloseEvent;
-    public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigWithIdEventHandler? ConfigChangedEvent;
-    public event StringEventHandler? ProcessorAddedEvent;
-    public event IntEventHandler? ProcessorRemovedEvent;
+    public event EventHandler<int?>? StartEvent;
+    public event EventHandler<int?>? StopEvent;
+    public event EventHandler? CloseEvent;
+    public event EventHandler<bool>? AutostartChangedEvent;
+    public event EventHandler<(int, CommonConfig)>? ConfigChangedEvent;
+    public event EventHandler<string>? ProcessorAddedEvent;
+    public event EventHandler<int>? ProcessorRemovedEvent;
 
     public void SetAutostartValue(bool value);
 

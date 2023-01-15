@@ -61,9 +61,9 @@ internal abstract class ProcessorPanel : Panel
         FlatStyle = FlatStyle.Flat
     };
 
-    public event IntEventHandler? StartButtonClicked;
-    public event IntEventHandler? StopButtonClicked;
-    public event ConfigWithIdEventHandler? UpdateButtonClicked;
+    public event EventHandler<int>? StartButtonClicked;
+    public event EventHandler<int>? StopButtonClicked;
+    public event EventHandler<(int, CommonConfig)>? UpdateButtonClicked;
 
     protected ProcessorPanel(AbstractControlProcessor processor)
     {
@@ -125,19 +125,19 @@ internal abstract class ProcessorPanel : Panel
     protected void EnableUpdateButton(object? sender, EventArgs e) => UpdateButton.Enabled = true;
 
     protected void RaiseUpdateButtonClickedEvent(CommonConfig config) =>
-        UpdateButtonClicked?.Invoke(Id, config);
+        UpdateButtonClicked?.Invoke(this, (Id, config));
 
     protected abstract void UpdateButtonClick(object? sender, EventArgs e);
 
     protected void StartButtonClick(object? sender, EventArgs args)
     {
-        StartButtonClicked?.Invoke(Id);
+        StartButtonClicked?.Invoke(this, Id);
         StartButton.Enabled = false;
     }
 
     protected void StopButtonClick(object? sender, EventArgs args)
     {
-        StopButtonClicked?.Invoke(Id);
+        StopButtonClicked?.Invoke(this, Id);
         StopButton.Enabled = false;
     }
 

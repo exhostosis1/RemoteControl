@@ -66,7 +66,7 @@ public static class Program
         
         ui.SetAutostartValue(container.AutostartService.CheckAutostart());
 
-        ui.StartEvent += id =>
+        ui.StartEvent += (sender, id) =>
         {
             if(!id.HasValue)
             {
@@ -78,7 +78,7 @@ public static class Program
             }
         };
 
-        ui.StopEvent += id =>
+        ui.StopEvent += (sender, id) =>
         {
             if (!id.HasValue)
             {
@@ -90,7 +90,7 @@ public static class Program
             }
         };
 
-        ui.ProcessorAddedEvent += mode =>
+        ui.ProcessorAddedEvent += (sender, mode) =>
         {
             var processor = mode switch
             {
@@ -103,7 +103,7 @@ public static class Program
             ui.AddProcessor(processor);
         };
 
-        ui.ProcessorRemovedEvent += id =>
+        ui.ProcessorRemovedEvent += (sender, id) =>
         {
             var processor = ControlProcessors.FirstOrDefault(x => x.Id == id);
             if (processor == null)
@@ -115,32 +115,32 @@ public static class Program
             container.ConfigProvider.SetConfig(GetConfig(ControlProcessors));
         };
 
-        ui.AutostartChangedEvent += value =>
+        ui.AutostartChangedEvent += (sender, value) =>
         {
             container.AutostartService.SetAutostart(value);
             ui.SetAutostartValue(container.AutostartService.CheckAutostart());
         };
 
-        ui.ConfigChangedEvent += (id, c) =>
+        ui.ConfigChangedEvent += (sender, configTuple) =>
         {
-            var processor = ControlProcessors.FirstOrDefault(x => x.Id == id);
+            var processor = ControlProcessors.FirstOrDefault(x => x.Id == configTuple.Item1);
             if (processor == null)
                 return;
 
             if (processor.Working)
             {
-                processor.Restart(c);
+                processor.Restart(configTuple.Item2);
             }
             else
             {
-                processor.Config = c;
+                processor.Config = configTuple.Item2;
             }
 
             config = GetConfig(ControlProcessors);
             container.ConfigProvider.SetConfig(config);
         };
 
-        ui.CloseEvent += () =>
+        ui.CloseEvent += (sender, args) =>
         {
             Environment.Exit(0);
         };

@@ -1,6 +1,5 @@
 ﻿using Bots;
 using Moq;
-using Shared;
 using Shared.ApiControllers;
 using Shared.Config;
 using Shared.DataObjects.Bot;
@@ -19,21 +18,21 @@ public class TelegramBotTests: IDisposable
     private class MockListener : IBotListener
     {
         public bool IsListening { get; private set; }
-        public event BoolEventHandler? OnStatusChange;
-        public event BotEventHandler? OnRequest;
+        public event EventHandler<bool>? OnStatusChange;
+        public event EventHandler<BotContext>? OnRequest;
 
         public void StartListen(string apiUrl, string apiKey, List<string> usernames)
         {
             IsListening = true;
-            OnStatusChange?.Invoke(IsListening);
+            OnStatusChange?.Invoke(this, IsListening);
 
-            OnRequest?.Invoke(new BotContext(0, ""));
+            OnRequest?.Invoke(this, new BotContext(0, ""));
         }
 
         public void StopListen()
         {
             IsListening = false;
-            OnStatusChange?.Invoke(IsListening);
+            OnStatusChange?.Invoke(this, IsListening);
         }
     }
 

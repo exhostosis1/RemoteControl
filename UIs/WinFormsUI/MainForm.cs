@@ -2,6 +2,7 @@
 using Shared.ControlProcessor;
 using Shared.UI;
 using Windows.UI.ViewManagement;
+using Shared.Config;
 using WinFormsUI.CustomControls.MenuItems;
 using WinFormsUI.CustomControls.Panels;
 
@@ -12,13 +13,13 @@ public sealed partial class MainForm : Form, IUserInterface
 {
     private readonly ToolStripItem[] _commonMenuItems;
 
-    public event NullableIntEventHandler? StartEvent;
-    public event NullableIntEventHandler? StopEvent;
-    public event EmptyEventHandler? CloseEvent;
-    public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigWithIdEventHandler? ConfigChangedEvent;
-    public event StringEventHandler? ProcessorAddedEvent;
-    public event IntEventHandler? ProcessorRemovedEvent;
+    public event EventHandler<int?>? StartEvent;
+    public event EventHandler<int?>? StopEvent;
+    public event EventHandler? CloseEvent;
+    public event EventHandler<bool>? AutostartChangedEvent;
+    public event EventHandler<(int, CommonConfig)>? ConfigChangedEvent;
+    public event EventHandler<string>? ProcessorAddedEvent;
+    public event EventHandler<int>? ProcessorRemovedEvent;
 
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
@@ -96,9 +97,9 @@ public sealed partial class MainForm : Form, IUserInterface
             _ => throw new NotSupportedException()
         };
 
-        panel.StartButtonClicked += id => StartEvent?.Invoke(id);
-        panel.StopButtonClicked += id => StopEvent?.Invoke(id);
-        panel.UpdateButtonClicked += (id, config) => ConfigChangedEvent?.Invoke(id, config);
+        panel.StartButtonClicked += (sender, id) => StartEvent?.Invoke(sender, id);
+        panel.StopButtonClicked += (sender, id) => StopEvent?.Invoke(sender, id);
+        panel.UpdateButtonClicked += (sender, config) => ConfigChangedEvent?.Invoke(sender, config);
 
         var menu = new ContextMenuStrip();
         menu.RenderMode = ToolStripRenderMode.System;
@@ -119,8 +120,8 @@ public sealed partial class MainForm : Form, IUserInterface
         };
 
         group.OnDescriptionClick += IpToolStripMenuItem_Click;
-        group.OnStartClick += id => StartEvent?.Invoke(id);
-        group.OnStopClick += id => StopEvent?.Invoke(id);
+        group.OnStartClick += (sender, id) => StartEvent?.Invoke(sender, id);
+        group.OnStopClick += (sender, id) => StopEvent?.Invoke(sender, id);
 
         return group;
     }
@@ -176,7 +177,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void RemoveClicked(int id)
     {
-        ProcessorRemovedEvent?.Invoke(id);
+        ProcessorRemovedEvent?.Invoke(this, id);
 
         var p = _windowPanels.FirstOrDefault(x => x.Id == id);
         if (p != null)
@@ -198,10 +199,10 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        CloseEvent?.Invoke();
+        CloseEvent?.Invoke(this, EventArgs.Empty);
     }
 
-    private static void IpToolStripMenuItem_Click(string input)
+    private static void IpToolStripMenuItem_Click(object? sender, string? input)
     {
         var address = input.Replace("&", "^&");
 
@@ -210,12 +211,12 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StartEvent?.Invoke(null);
+        StartEvent?.Invoke(this, null);
     }
 
     private void StopAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StopEvent?.Invoke(null);
+        StopEvent?.Invoke(this, null);
     }
 
     private void ConfigForm_Shown(object sender, EventArgs e)
@@ -225,7 +226,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AutostartStripMenuItem_Click(object sender, EventArgs e)
     {
-        AutostartChangedEvent?.Invoke(!IsAutostart);
+        AutostartChangedEvent?.Invoke(this, !IsAutostart);
     }
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -251,12 +252,12 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddServerButton_Click(object sender, EventArgs e)
     {
-        ProcessorAddedEvent?.Invoke("server");
+        ProcessorAddedEvent?.Invoke(this, "server");
     }
 
     private void AddBotButton_Click(object sender, EventArgs e)
     {
-        ProcessorAddedEvent?.Invoke("bot");
+        ProcessorAddedEvent?.Invoke(this, "bot");
     }
 
     private void ApplyTheme()

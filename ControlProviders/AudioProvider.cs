@@ -1,22 +1,19 @@
 ﻿using ControlProviders.Devices;
+using Shared;
 using Shared.AudioWrapper;
 using Shared.ControlProviders;
 using Shared.ControlProviders.Devices;
 using Shared.Logging.Interfaces;
-using System.Text.RegularExpressions;
 
 namespace ControlProviders;
 
-public partial class NAudioProvider: IAudioControlProvider
+public class AudioProvider: IAudioControlProvider
 {
     private IMMDevice _defaultDevice;
     private readonly IEnumerable<IMMDevice> _devices;
-    private readonly ILogger<NAudioProvider> _logger;
+    private readonly ILogger<AudioProvider> _logger;
 
-    [GeneratedRegex("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase)]
-    private static partial Regex GuidRegex();
-
-    public NAudioProvider(IAudioDeviceEnumerator enumerator, ILogger<NAudioProvider> logger)
+    public AudioProvider(IAudioDeviceEnumerator enumerator, ILogger<AudioProvider> logger)
     {
         _logger = logger;
 
@@ -24,7 +21,7 @@ public partial class NAudioProvider: IAudioControlProvider
         _defaultDevice = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
     }
 
-    private static Guid GetGuid(string input) => new(GuidRegex().Match(input).Value);
+    private static Guid GetGuid(string input) => new(Utils.GuidRegex().Match(input).Value);
 
     public int GetVolume()
     {

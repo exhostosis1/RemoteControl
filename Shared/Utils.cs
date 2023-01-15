@@ -23,16 +23,19 @@ public static partial class Utils
     private const string ActionGroupName = "action";
     private const string ParamGroupName = "param";
 
+    [GeneratedRegex("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase)]
+    public static partial Regex GuidRegex();
+
     [GeneratedRegex("[-0-9]+")]
-    private static partial Regex CoordRegex();
+    public static partial Regex CoordRegex();
 
     [GeneratedRegex(
         $"(?<={ApiPath}v\\d+)\\/(?<{ControllerGroupName}>[a-z]+)\\/(?<{ActionGroupName}>[a-z]+)\\/?(?<{ParamGroupName}>.*)",
         RegexOptions.IgnoreCase)]
-    private static partial Regex ApiRegex();
+    public static partial Regex ApiRegex();
 
     [GeneratedRegex($"(?<={ApiPath})v\\d+", RegexOptions.IgnoreCase)]
-    private static partial Regex ApiVersionRegex();
+    public static partial Regex ApiVersionRegex();
 
     public static bool TryGetCoords(string input, out int x, out int y)
     {

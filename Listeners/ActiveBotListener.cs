@@ -1,4 +1,4 @@
-﻿using Shared;
+﻿using Shared.DataObjects.Bot;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using System.Net.Sockets;
@@ -11,8 +11,8 @@ public class ActiveBotListener: IBotListener
 
     private List<string> _usernames = new();
 
-    public event BoolEventHandler? OnStatusChange;
-    public event BotEventHandler? OnRequest;
+    public event EventHandler<bool>? OnStatusChange;
+    public event EventHandler<BotContext>? OnRequest;
 
     private readonly ILogger<ActiveBotListener> _logger;
     private readonly IActiveApiWrapper _wrapper;
@@ -31,7 +31,7 @@ public class ActiveBotListener: IBotListener
         {
             _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
             IsListening = result;
-            OnStatusChange?.Invoke(result);
+            OnStatusChange?.Invoke(this, result);
         });
     }
 
@@ -78,7 +78,7 @@ public class ActiveBotListener: IBotListener
                 {
                     try
                     {
-                        OnRequest?.Invoke(context);
+                        OnRequest?.Invoke(this, context);
 
                         if (!string.IsNullOrWhiteSpace(context.Result))
                         {

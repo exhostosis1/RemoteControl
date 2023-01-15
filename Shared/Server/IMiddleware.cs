@@ -1,6 +1,9 @@
-﻿namespace Shared.Server;
+﻿using Shared.DataObjects.Http;
+using System;
+
+namespace Shared.Server;
 
 public interface IMiddleware: IEndpoint
 {
-    public HttpEventHandler? Next { get; set; }
+    public EventHandler<Context>? Next { get; set; }
 }

@@ -40,17 +40,17 @@ public class StaticFilesEndpointTests: IDisposable
         var endpoint = new StaticFilesEndpoint(logger, directory);
 
         var context = new Context("/index.html");
-        endpoint.ProcessRequest(context);
+        endpoint.ProcessRequest(this, context);
         var response = Encoding.UTF8.GetString(context.Response.Payload);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/html" } && response == indexContents);
 
         context = new Context("/file.txt");
-        endpoint.ProcessRequest(context);
+        endpoint.ProcessRequest(this, context);
         response = Encoding.UTF8.GetString(context.Response.Payload);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" } && response == fileContents);
 
         context = new Context("..");
-        endpoint.ProcessRequest(context);
+        endpoint.ProcessRequest(this, context);
         Assert.True(context.Response.StatusCode == HttpStatusCode.NotFound);
     }
 

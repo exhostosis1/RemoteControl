@@ -1,4 +1,4 @@
-﻿using Shared;
+﻿using Shared.Config;
 using Shared.ControlProcessor;
 using Shared.UI;
 
@@ -7,13 +7,13 @@ namespace ConsoleUI;
 // ReSharper disable once InconsistentNaming
 public class MainConsole: IUserInterface
 {
-    public event NullableIntEventHandler? StartEvent;
-    public event NullableIntEventHandler? StopEvent;
-    public event EmptyEventHandler? CloseEvent;
-    public event BoolEventHandler? AutostartChangedEvent;
-    public event ConfigWithIdEventHandler? ConfigChangedEvent;
-    public event StringEventHandler? ProcessorAddedEvent;
-    public event IntEventHandler? ProcessorRemovedEvent;
+    public event EventHandler<int?>? StartEvent;
+    public event EventHandler<int?>? StopEvent;
+    public event EventHandler? CloseEvent;
+    public event EventHandler<bool>? AutostartChangedEvent;
+    public event EventHandler<(int, CommonConfig)>? ConfigChangedEvent;
+    public event EventHandler<string>? ProcessorAddedEvent;
+    public event EventHandler<int>? ProcessorRemovedEvent;
 
     public void SetAutostartValue(bool value)
     {
@@ -36,7 +36,7 @@ public class MainConsole: IUserInterface
 
             if (key == "x")
             {
-                CloseEvent?.Invoke();
+                CloseEvent?.Invoke(this, EventArgs.Empty);
                 return;
             }
 
@@ -44,12 +44,12 @@ public class MainConsole: IUserInterface
             {
                 case "s":
                     if(Model.Any(x => x.Working))
-                        StopEvent?.Invoke(null);
+                        StopEvent?.Invoke(this, null);
                     else
-                        StartEvent?.Invoke(null);
+                        StartEvent?.Invoke(this, null);
                     break;
                 case "a":
-                    AutostartChangedEvent?.Invoke(!IsAutostart);
+                    AutostartChangedEvent?.Invoke(this, !IsAutostart);
                     break;
                 default:
                     continue;

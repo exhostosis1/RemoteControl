@@ -12,13 +12,13 @@ public class RoutingMiddleware: AbstractMiddleware
     private readonly ILogger<RoutingMiddleware> _logger;
 
     public RoutingMiddleware(IEnumerable<IEndpoint> endpoints, ILogger<RoutingMiddleware> logger,
-        HttpEventHandler? next = null) : base(next)
+        EventHandler<Context>? next = null) : base(next)
     {
         _logger = logger;
         _endpoints = endpoints;
     }
 
-    public override void ProcessRequest(Context context)
+    public override void ProcessRequest(object? sender, Context context)
     {
         _logger.LogInfo($"Routing request {context.Request.Path}");
 
@@ -34,15 +34,15 @@ public class RoutingMiddleware: AbstractMiddleware
             else
             {
                 _logger.LogInfo($"Passing request to api endpoint version {version}");
-                endpoint.ProcessRequest(context);   
+                endpoint.ProcessRequest(this, context);   
             }
         }
         else
         {
             _logger.LogInfo("Passing request to static files endpoint");
-            _endpoints.FirstOrDefault(x => x is not IApiEndpoint)?.ProcessRequest(context);
+            _endpoints.FirstOrDefault(x => x is not IApiEndpoint)?.ProcessRequest(this, context);
         }
 
-        Next?.Invoke(context);
+        Next?.Invoke(this, context);
     }
 }

@@ -87,20 +87,20 @@ public class ApiV1Tests: IDisposable
 
         var context = new Context("/api/v1/first/actionone");
 
-        apiEndpoint.ProcessRequest(context);
+        apiEndpoint.ProcessRequest(this, context);
 
         Assert.True(context.Response.StatusCode == HttpStatusCode.OK);
 
         context = new Context("/api/v1/first/actiontwo");
-        apiEndpoint.ProcessRequest(context);
+        apiEndpoint.ProcessRequest(this, context);
         Assert.True(context.Response is {StatusCode: HttpStatusCode.InternalServerError, ContentType: "text/plain"});
 
         context = new Context("/api/v1/second/actionthree");
-        apiEndpoint.ProcessRequest(context);
+        apiEndpoint.ProcessRequest(this, context);
         Assert.True(context.Response is {StatusCode: HttpStatusCode.OK, ContentType: "application/json"});
 
         context = new Context("/api/v1/second/actionfour");
-        apiEndpoint.ProcessRequest(context);
+        apiEndpoint.ProcessRequest(this, context);
         Assert.True(context.Response is {StatusCode: HttpStatusCode.OK, ContentType: "text/plain"});
 
         Assert.True((controllers[0] as FirstController)?.Onecount == 1);
@@ -109,7 +109,7 @@ public class ApiV1Tests: IDisposable
         Assert.True((controllers[1] as SecondController)?.Fourcount == 1);
 
         context = new Context("/api/v1/second/actionfive");
-        apiEndpoint.ProcessRequest(context);
+        apiEndpoint.ProcessRequest(this, context);
         Assert.True(context.Response.StatusCode == HttpStatusCode.NotFound);
     }
 

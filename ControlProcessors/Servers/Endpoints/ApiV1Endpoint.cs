@@ -23,7 +23,7 @@ public class ApiV1Endpoint : IApiEndpoint
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
 
-    public void ProcessRequest(Context context)
+    public void ProcessRequest(object? sender, Context context)
     {
         _logger.LogInfo($"Processing api request {context.Request.Path}");
 
