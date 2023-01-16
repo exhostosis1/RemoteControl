@@ -25,11 +25,7 @@ internal class Container : IContainer
     public IConfigProvider ConfigProvider => _container.ConfigProvider;
     public IAutostartService AutostartService => _container.AutostartService;
     public IUserInterface UserInterface => _container.UserInterface;
-    public IAudioControlProvider AudioProvider => _container.AudioProvider;
-    public IDisplayControlProvider DisplayProvider => _container.DisplayProvider;
-    public IKeyboardControlProvider KeyboardProvider => _container.KeyboardProvider;
-    public IMouseControlProvider MouseProvider => _container.MouseProvider;
-    public ControlFacade ControlProviders => _container.ControlProviders;
+    public IControlProvider ControlProvider => _container.ControlProvider;
     public IHttpListener HttpListener { get; }
     public IBotListener BotListener { get; }
     public IHttpListenerWrapper HttpWrapper { get; }
@@ -59,16 +55,16 @@ internal class Container : IContainer
     public IHttpListenerWrapper NewHttpWrapper() =>
         new HttpListenerWrapper();
 
-    public ICommandExecutor NewExecutor(ControlFacade facade, ILogger logger) =>
+    public ICommandExecutor NewExecutor(IControlProvider facade, ILogger logger) =>
         new CommandsExecutor(facade, new LogWrapper<CommandsExecutor>(logger));
 
-    public IApiController NewAudioController(IAudioControlProvider provider, ILogger logger) =>
+    public IApiController NewAudioController(IControlProvider provider, ILogger logger) =>
         new AudioController(provider, new LogWrapper<AudioController>(logger));
-    public IApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger) =>
+    public IApiController NewKeyboardController(IControlProvider provider, ILogger logger) =>
         new KeyboardController(provider, new LogWrapper<KeyboardController>(logger));
-    public IApiController NewMouseController(IMouseControlProvider provider, ILogger logger) =>
+    public IApiController NewMouseController(IControlProvider provider, ILogger logger) =>
         new MouseController(provider, new LogWrapper<MouseController>(logger));
-    public IApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger) =>
+    public IApiController NewDisplayController(IControlProvider provider, ILogger logger) =>
         new DisplayController(provider, new LogWrapper<DisplayController>(logger));
 
     public IEndpoint NewApiEndpoint(IEnumerable<IApiController> controllers, ILogger logger) =>
@@ -86,28 +82,22 @@ internal class Container : IContainer
 
     public IUserInterface NewUserInterface() => _container.NewUserInterface();
 
-    public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) => _container.NewKeyboardProvider(logger);
-
-    public IMouseControlProvider NewMouseProvider(ILogger logger) => _container.NewMouseProvider(logger);
-
-    public IDisplayControlProvider NewDisplayProvider(ILogger logger) => _container.NewDisplayProvider(logger);
-
-    public IAudioControlProvider NewAudioProvider(ILogger logger) => _container.NewAudioProvider(logger);
+    public IControlProvider NewControlProvider(ILogger logger) => _container.NewControlProvider(logger);
 
     public Container(IPlatformDependantContainer input)
     {
         _container = input;
 
-        AudioController = NewAudioController(AudioProvider, Logger);
-        DisplayController = NewDisplayController(DisplayProvider, Logger);
-        MouseController = NewMouseController(MouseProvider, Logger);
-        KeyboardController = NewKeyboardController(KeyboardProvider, Logger);
+        AudioController = NewAudioController(ControlProvider, Logger);
+        DisplayController = NewDisplayController(ControlProvider, Logger);
+        MouseController = NewMouseController(ControlProvider, Logger);
+        KeyboardController = NewKeyboardController(ControlProvider, Logger);
 
         ApiEndpoint = NewApiEndpoint(new[] { AudioController, DisplayController, MouseController, KeyboardController }, Logger);
         StaticEndpoint = NewStaticEndpoint(Logger);
 
         Middleware = NewMiddleware(new[] { ApiEndpoint, StaticEndpoint }, Logger);
-        Executor = NewExecutor(ControlProviders, Logger);
+        Executor = NewExecutor(ControlProvider, Logger);
 
         HttpWrapper = NewHttpWrapper();
         ActiveBotWrapper = NewBotWrapper(Logger);

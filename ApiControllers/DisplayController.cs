@@ -7,20 +7,20 @@ namespace ApiControllers;
 
 public class DisplayController: BaseApiController
 {
-    private readonly IDisplayControlProvider _display;
+    private readonly IControlProvider _provider;
     private readonly ILogger<DisplayController> _logger;
 
-    public DisplayController(IDisplayControlProvider display, ILogger<DisplayController> logger) : base(logger)
+    public DisplayController(IControlProvider provider, ILogger<DisplayController> logger) : base(logger)
     {
         _logger = logger;
-        _display = display;
+        _provider = provider;
     }
 
     public IActionResult Darken(string? _)
     {
         _logger.LogInfo("Turning off display");
 
-        _display.Darken();
+        _provider.DisplayOff();
 
         return Ok();
     }

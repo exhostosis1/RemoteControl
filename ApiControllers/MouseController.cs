@@ -9,20 +9,20 @@ namespace ApiControllers;
 
 public class MouseController : BaseApiController
 {
-    private readonly IMouseControlProvider _input;
+    private readonly IControlProvider _provider;
     private readonly ILogger<MouseController> _logger;
 
-    public MouseController(IMouseControlProvider input, ILogger<MouseController> logger) : base(logger)
+    public MouseController(IControlProvider provider, ILogger<MouseController> logger) : base(logger)
     {
         _logger = logger;
-        _input = input;
+        _provider = provider;
     }
 
     public IActionResult Left(string? _)
     {
         _logger.LogInfo("Pressing left mouse button");
 
-        _input.ButtonPress();
+        _provider.MouseKeyPress();
 
         return Ok();
     }
@@ -31,7 +31,7 @@ public class MouseController : BaseApiController
     {
         _logger.LogInfo("Pressing right mouse button");
 
-        _input.ButtonPress(MouseButtons.Right);
+        _provider.MouseKeyPress(MouseButtons.Right);
 
         return Ok();
     }
@@ -40,7 +40,7 @@ public class MouseController : BaseApiController
     {
         _logger.LogInfo("Pressing middle mouse button");
 
-        _input.ButtonPress(MouseButtons.Middle);
+        _provider.MouseKeyPress(MouseButtons.Middle);
 
         return Ok();
     }
@@ -49,7 +49,7 @@ public class MouseController : BaseApiController
     {
         _logger.LogInfo("Turning wheel up");
 
-        _input.Wheel(true);
+        _provider.MouseWheel(true);
 
         return Ok();
     }
@@ -58,7 +58,7 @@ public class MouseController : BaseApiController
     {
         _logger.LogInfo("Turning wheel down");
 
-        _input.Wheel(false);
+        _provider.MouseWheel(false);
 
         return Ok();
     }
@@ -67,13 +67,13 @@ public class MouseController : BaseApiController
     {
         _logger.LogInfo("Starting drag");
 
-        _input.ButtonPress(MouseButtons.Left, KeyPressMode.Down);
+        _provider.MouseKeyPress(MouseButtons.Left, KeyPressMode.Down);
         Task.Run(async () =>
         {
             await Task.Delay(5_000);
 
             _logger.LogInfo("Stopping drag");
-            _input.ButtonPress(MouseButtons.Left, KeyPressMode.Up);
+            _provider.MouseKeyPress(MouseButtons.Left, KeyPressMode.Up);
         });
 
         return Ok();
@@ -83,7 +83,7 @@ public class MouseController : BaseApiController
     {
         _logger.LogInfo("Stopping drag");
 
-        _input.ButtonPress(MouseButtons.Left, KeyPressMode.Up);
+        _provider.MouseKeyPress(MouseButtons.Left, KeyPressMode.Up);
 
         return Ok();
     }
@@ -100,7 +100,7 @@ public class MouseController : BaseApiController
 
         if (Utils.TryGetCoords(param, out var x, out var y))
         {
-            _input.Move(x, y);
+            _provider.MouseMove(x, y);
         }
 
         return Ok();

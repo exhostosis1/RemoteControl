@@ -1,53 +1,52 @@
-﻿using Shared;
-using Shared.ControlProviders;
+﻿using Shared.ControlProviders;
+using Shared.ControlProviders.Devices;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
 namespace ControlProviders;
 
-public class InputProvider : IDisplayControlProvider, IKeyboardControlProvider, IMouseControlProvider
+public class InputProvider : IControlProvider
 {
     private readonly ILogger<InputProvider> _logger;
-    private readonly IInput _input;
+    private readonly IKeyboardInput _keyboardInput;
+    private readonly IMouseInput _mouseInput;
+    private readonly IDisplayInput _displayInput;
+    private readonly IAudioInput _audioInput;
 
     private const int MouseWheelClickSize = 120;
 
-    public InputProvider(IInput input, ILogger<InputProvider> logger)
+    public InputProvider(IKeyboardInput keyboardInput, IMouseInput mouseInput, IDisplayInput displayInput, IAudioInput audioInput, ILogger<InputProvider> logger)
     {
-        _input = input;
         _logger = logger;
+        _keyboardInput = keyboardInput;
+        _mouseInput = mouseInput;
+        _displayInput = displayInput;
+        _audioInput = audioInput;
     }
 
-    public void Darken() => _input.SetMonitorInState(MonitorState.MonitorStateOff);
+    public int GetVolume() => _audioInput.GetVolume();
 
-    public void KeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click)
-    {
-        if (mode.HasFlag(KeyPressMode.Down))
-            _input.SendKeyInput(key, false);
+    public void SetVolume(int volume) => _audioInput.SetVolume(volume);
 
-        if (mode.HasFlag(KeyPressMode.Up))
-            _input.SendKeyInput(key, true);
-    }
+    public void Mute() => _audioInput.IsMute = true;
 
-    public void TextInput(string text)
-    {
-        foreach (var c in text.ToCharArray())
-        {
-            _input.SendCharInput(c, false);
-            _input.SendCharInput(c, true);
-        }
-    }
+    public void Unmute() => _audioInput.IsMute = false;
 
-    public void Move(int x, int y) => _input.SendMouseInput(x, y);
+    public bool IsMuted => _audioInput.IsMute;
+    public IEnumerable<IAudioDevice> GetAudioDevices() => _audioInput.GetDevices();
 
-    public void ButtonPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click)
-    {
-        if(mode.HasFlag(KeyPressMode.Down))
-            _input.SendMouseInput(button, false);
+    public void SetAudioDevice(Guid id) => _audioInput.SetCurrentDevice(id);
 
-        if (mode.HasFlag(KeyPressMode.Up))
-            _input.SendMouseInput(button, true);
-    }
+    public void DisplayOff() => _displayInput.SetState(MonitorState.MonitorStateOff);
 
-    public void Wheel(bool up) => _input.SendScrollInput(up ? MouseWheelClickSize : -MouseWheelClickSize);
+    public void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => _keyboardInput.SendKey(key, mode);
+
+    public void TextInput(string text) => _keyboardInput.SendText(text);
+
+    public void MouseMove(int x, int y) => _mouseInput.SendMouseMove(x, y);
+
+    public void MouseKeyPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click) =>
+        _mouseInput.SendMouseKey(button, mode);
+
+    public void MouseWheel(bool up) => _mouseInput.SendScroll(up ? MouseWheelClickSize : -MouseWheelClickSize);
 }

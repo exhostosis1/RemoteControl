@@ -27,11 +27,11 @@ public interface IContainer: IPlatformDependantContainer
     public IBotListener NewBotListener(IActiveApiWrapper wrapper, ILogger logger);
     public IActiveApiWrapper NewBotWrapper(ILogger logger);
     public IHttpListenerWrapper NewHttpWrapper();
-    public ICommandExecutor NewExecutor(ControlFacade facade, ILogger logger);
-    public IApiController NewAudioController(IAudioControlProvider provider, ILogger logger);
-    public IApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger);
-    public IApiController NewMouseController(IMouseControlProvider provider, ILogger logger);
-    public IApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger);
+    public ICommandExecutor NewExecutor(IControlProvider facade, ILogger logger);
+    public IApiController NewAudioController(IControlProvider provider, ILogger logger);
+    public IApiController NewKeyboardController(IControlProvider provider, ILogger logger);
+    public IApiController NewMouseController(IControlProvider provider, ILogger logger);
+    public IApiController NewDisplayController(IControlProvider provider, ILogger logger);
     public IEndpoint NewApiEndpoint(IEnumerable<IApiController> controllers, ILogger logger);
     public IEndpoint NewStaticEndpoint(ILogger logger, string directory = "www");
     public IMiddleware NewMiddleware(IEnumerable<IEndpoint> endpoints, ILogger logger, EventHandler<Context>? next = null);

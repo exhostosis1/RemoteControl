@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Listeners;
+﻿using Listeners;
 using Moq;
-using Shared;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 
@@ -26,7 +20,7 @@ public class ActiveBotListenerTests: IDisposable
     }
 
     [Fact]
-    public void StartListenTest()
+    public async void StartListenTest()
     {
         var apiUrl = "apiUrl";
         var apiKey = "apiKey";
@@ -34,7 +28,19 @@ public class ActiveBotListenerTests: IDisposable
 
         _listener.StartListen(apiUrl, apiKey, userNames);
 
-       /// Assert.Raises<BotEventHandler>()
+        await Task.Delay(100);
+
+        Assert.True(_listener.IsListening);
+    }
+
+    [Fact]
+    public async void StopListenTest()
+    {
+        _listener.StopListen();
+
+        await Task.Delay(100);
+
+        Assert.False(_listener.IsListening);
     }
 
     public void Dispose()

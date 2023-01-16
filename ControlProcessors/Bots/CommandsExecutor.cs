@@ -9,9 +9,9 @@ public class CommandsExecutor: ICommandExecutor
 {
     private readonly ILogger<CommandsExecutor> _logger;
 
-    private readonly ControlFacade _controlFacade;
+    private readonly IControlProvider _controlFacade;
 
-    public CommandsExecutor(ControlFacade controlFacade, ILogger<CommandsExecutor> logger)
+    public CommandsExecutor(IControlProvider controlFacade, ILogger<CommandsExecutor> logger)
     {
         _logger = logger;
         _controlFacade = controlFacade;
@@ -21,37 +21,37 @@ public class CommandsExecutor: ICommandExecutor
     {
         _logger.LogInfo($"Executing bot command {command}");
 
-        var volume = _controlFacade.Audio.GetVolume();
+        var volume = _controlFacade.GetVolume();
 
         switch (command)
         {
             case BotButtons.Pause:
-                _controlFacade.Keyboard.KeyPress(KeysEnum.MediaPlayPause);
+                _controlFacade.KeyboardKeyPress(KeysEnum.MediaPlayPause);
                 break;
             case BotButtons.MediaBack:
-                _controlFacade.Keyboard.KeyPress(KeysEnum.MediaPrev);
+                _controlFacade.KeyboardKeyPress(KeysEnum.MediaPrev);
                 break;
             case BotButtons.MediaForth:
-                _controlFacade.Keyboard.KeyPress(KeysEnum.MediaNext);
+                _controlFacade.KeyboardKeyPress(KeysEnum.MediaNext);
                 break;
             case BotButtons.VolumeUp:
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
-                _controlFacade.Audio.SetVolume(volume);
+                _controlFacade.SetVolume(volume);
                 return volume.ToString();
             case BotButtons.VolumeDown:
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume;
-                _controlFacade.Audio.SetVolume(volume);
+                _controlFacade.SetVolume(volume);
                 return volume.ToString();
             case BotButtons.Darken:
-                _controlFacade.Display.Darken();
+                _controlFacade.DisplayOff();
                 break;
             default:
                 if (int.TryParse(command, out volume))
                 {
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
-                    _controlFacade.Audio.SetVolume(volume);
+                    _controlFacade.SetVolume(volume);
                 }
                 return "done";
         }

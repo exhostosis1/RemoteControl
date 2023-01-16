@@ -1,10 +1,11 @@
-﻿using Shared;
+﻿using Shared.ControlProviders;
 using Shared.Enums;
 using System.Diagnostics;
+// ReSharper disable InconsistentNaming
 
 namespace ControlProviders.Wrappers;
 
-public class YdoToolWrapper: IInput
+public class YdoToolWrapper: IKeyboardInput, IMouseInput
 {
     private enum YdotoolKey : byte
     {
@@ -111,7 +112,8 @@ public class YdoToolWrapper: IInput
         TASK = 0x07,
 
         Down = 0x40,
-        Up = 0x80
+        Up = 0x80,
+        Click = Down | Up
     }
     
 
@@ -149,9 +151,22 @@ public class YdoToolWrapper: IInput
             MouseButtons.Middle, MouseCodes.MIDDLE
         }
     };
-    
 
-    private static readonly Process _proc = new()
+    private readonly Dictionary<KeyPressMode, MouseCodes> ModeToCode = new()
+    {
+        {
+            KeyPressMode.Up, MouseCodes.Up
+        },
+        {
+            KeyPressMode.Down, MouseCodes.Down
+        },
+        {
+            KeyPressMode.Click, MouseCodes.Click
+        }
+    };
+
+
+    private static readonly Process Proc = new()
     {
         StartInfo = new ProcessStartInfo
         {
@@ -162,51 +177,49 @@ public class YdoToolWrapper: IInput
         }
     };
 
-    private void FastRunLinuxCommand(string command)
+    private static void FastRunLinuxCommand(string command)
     {
-        _proc.StartInfo.Arguments = $"-c \" {command} \"";
-        _proc.Start();
+        Proc.StartInfo.Arguments = $"-c \" {command} \"";
+        Proc.Start();
     }
 
-    private void RunYdotool(string args)
+    private static void RunYdotool(string args)
     {
         FastRunLinuxCommand($"ydotool {args}");
     }
 
-    public int SetMonitorInState(MonitorState state)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void SendKeyInput(KeysEnum key, bool up)
+    public void SendKey(KeysEnum key, KeyPressMode mode)
     {
         var command = "key ";
         var ydoToolKey = KeyToScanCode[key];
         
-        command += up ? $"{ydoToolKey:D}:0 " : $"{ydoToolKey:D}:1 ";
+        if(mode.HasFlag(KeyPressMode.Down))
+            command += $"{ydoToolKey:D}:1 ";
+        if(mode.HasFlag(KeyPressMode.Up))
+            command += $"{ydoToolKey:D}:0 ";
 
         RunYdotool(command);
     }
 
-    public void SendCharInput(char c, bool up)
+    public void SendText(string text)
     {
-        throw new NotImplementedException();
+        RunYdotool($"text {text}");
     }
 
-    public void SendMouseInput(int x, int y)
+    public void SendMouseMove(int x, int y)
     {
         RunYdotool($"mousemove -- {x} {y}");
     }
 
-    public void SendMouseInput(MouseButtons button, bool up)
+    public void SendMouseKey(MouseButtons button, KeyPressMode mode)
     {
         var ydoToolButton = ButtonToCode[button];
-        ydoToolButton |= up ? MouseCodes.Up : MouseCodes.Down;
+        ydoToolButton |= ModeToCode[mode];
 
         RunYdotool($"click {ydoToolButton:X}");
     }
 
-    public void SendScrollInput(int scrollAmount)
+    public void SendScroll(int scrollAmount)
     {
         throw new NotImplementedException();
     }

@@ -9,12 +9,12 @@ namespace Tests;
 public class AudioControllerTests: IDisposable
 {
     private readonly AudioController _audioController;
-    private readonly IAudioControlProvider _audioControlProvider;
+    private readonly IControlProvider _audioControlProvider;
 
     public AudioControllerTests()
     {
         var logger = Mock.Of<ILogger<AudioController>>();
-        _audioControlProvider = Mock.Of<IAudioControlProvider>();
+        _audioControlProvider = Mock.Of<IControlProvider>();
         _audioController = new AudioController(_audioControlProvider, logger);
     }
 
@@ -23,7 +23,7 @@ public class AudioControllerTests: IDisposable
     {
         var result = _audioController.GetDevices(null);
         Assert.True(result is JsonResult);
-        Mock.Get(_audioControlProvider).Verify(x => x.GetDevices(), Times.Once);
+        Mock.Get(_audioControlProvider).Verify(x => x.GetAudioDevices(), Times.Once);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class AudioControllerTests: IDisposable
 
         result = _audioController.SetDevice(Guid.NewGuid().ToString());
         Assert.True(result is OkResult);
-        Mock.Get(_audioControlProvider).Verify(x => x.SetCurrentControlDevice(It.IsAny<Guid>()), Times.Once);
+        Mock.Get(_audioControlProvider).Verify(x => x.SetAudioDevice(It.IsAny<Guid>()), Times.Once);
     }
 
     [Fact]

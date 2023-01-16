@@ -10,12 +10,12 @@ namespace Tests;
 public class KeyboardControllerTests: IDisposable
 {
     private readonly KeyboardController _keyboardController;
-    private readonly IKeyboardControlProvider _keyboardControlProvider;
+    private readonly IControlProvider _keyboardControlProvider;
 
     public KeyboardControllerTests()
     {
         var logger = Mock.Of<ILogger<KeyboardController>>();
-        _keyboardControlProvider = Mock.Of<IKeyboardControlProvider>();
+        _keyboardControlProvider = Mock.Of<IControlProvider>();
         _keyboardController = new KeyboardController(_keyboardControlProvider, logger);
     }
 
@@ -24,7 +24,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.Back(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.ArrowLeft, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.ArrowLeft, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.Forth(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.ArrowRight, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.ArrowRight, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.MediaBack(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.MediaPrev, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.MediaPrev, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.MediaForth(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.MediaNext, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.MediaNext, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.Pause(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.MediaPlayPause, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.MediaPlayPause, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -64,7 +64,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.MediaVolumeUp(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.VolumeUp, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.VolumeUp, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.MediaVolumeDown(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.VolumeDown, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.VolumeDown, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public class KeyboardControllerTests: IDisposable
     {
         var result = _keyboardController.MediaMute(null);
         Assert.True(result is OkResult);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.Mute, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.Mute, KeyPressMode.Click), Times.Once);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class KeyboardControllerTests: IDisposable
         result = _keyboardController.Text("param");
         Assert.True(result is OkResult);
         Mock.Get(_keyboardControlProvider).Verify(x => x.TextInput("param"), Times.Once);
-        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyPress(KeysEnum.Enter, KeyPressMode.Click), Times.Once);
+        Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.Enter, KeyPressMode.Click), Times.Once);
     }
 
     public void Dispose()

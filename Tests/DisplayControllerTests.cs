@@ -17,14 +17,14 @@ public class DisplayControllerTests: IDisposable
     public void DarkenTest()
     {
         var logger = Mock.Of<ILogger<DisplayController>>();
-        var displayProvider = Mock.Of<IDisplayControlProvider>();
+        var displayProvider = Mock.Of<IControlProvider>();
 
         var displayController = new DisplayController(displayProvider, logger);
 
         var result = displayController.Darken(null);
         Assert.True(result is OkResult);
 
-        Mock.Get(displayProvider).Verify(x => x.Darken(), Times.Once);
+        Mock.Get(displayProvider).Verify(x => x.DisplayOff(), Times.Once);
     }
 
     public void Dispose()

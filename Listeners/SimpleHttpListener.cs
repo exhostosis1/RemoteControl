@@ -21,6 +21,8 @@ public class SimpleHttpListener : IHttpListener
     private CancellationTokenSource? _cst;
     private readonly Progress<bool> _progress;
 
+    private readonly TaskFactory _factory = new();
+
     public SimpleHttpListener(IHttpListenerWrapper wrapper, ILogger<SimpleHttpListener> logger)
     {
         _logger = logger;
@@ -75,9 +77,8 @@ public class SimpleHttpListener : IHttpListener
 
         _cst = new CancellationTokenSource();
 
-#pragma warning disable CS4014
-        ProcessRequestAsync(_progress, _cst.Token);
-#pragma warning restore CS4014
+        _factory.StartNew(async () => await ProcessRequestAsync(_progress, _cst.Token),
+            TaskCreationOptions.LongRunning);
 
         _logger.LogInfo($"Started listening on {url}");
     }

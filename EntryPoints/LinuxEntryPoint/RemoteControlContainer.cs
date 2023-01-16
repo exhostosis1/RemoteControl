@@ -18,11 +18,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
-    public IAudioControlProvider AudioProvider { get; }
-    public IDisplayControlProvider DisplayProvider { get; }
-    public IKeyboardControlProvider KeyboardProvider { get; }
-    public IMouseControlProvider MouseProvider { get; }
-    public ControlFacade ControlProviders { get; }
+    public IControlProvider ControlProvider { get; }
     public ILogger Logger { get; }
     public ILogger NewLogger()
     {
@@ -41,35 +37,16 @@ public class RemoteControlContainer : IPlatformDependantContainer
 
     public IUserInterface NewUserInterface() => new MainConsole();
 
-    public IKeyboardControlProvider NewKeyboardProvider(ILogger logger) =>
-        new InputProvider(new YdoToolWrapper(), new LogWrapper<InputProvider>(Logger));
-
-    public IMouseControlProvider NewMouseProvider(ILogger logger) =>
-        new InputProvider(new YdoToolWrapper(), new LogWrapper<InputProvider>(logger));
-
-    public IDisplayControlProvider NewDisplayProvider(ILogger logger) =>
-        new DummyProvider(new LogWrapper<DummyProvider>(logger));
-
-    public IAudioControlProvider NewAudioProvider(ILogger logger) =>
-        new DummyProvider(new LogWrapper<DummyProvider>(logger));
+    public IControlProvider NewControlProvider(ILogger logger) =>
+        new InputProvider(new YdoToolWrapper(), new YdoToolWrapper(), new DummyWrapper(), new DummyWrapper(),
+            new LogWrapper<InputProvider>(logger));
 
     public RemoteControlContainer()
     {
         Logger = NewLogger();
-
-        var ydoToolProvider = new InputProvider(new YdoToolWrapper(), new LogWrapper<InputProvider>(Logger));
-        var dummyProvider = new DummyProvider(new LogWrapper<DummyProvider>(Logger));
-        
-        AudioProvider = dummyProvider;
-        KeyboardProvider = ydoToolProvider;
-        MouseProvider = ydoToolProvider;
-        DisplayProvider = dummyProvider;
-
-        ControlProviders = new ControlFacade(AudioProvider, KeyboardProvider, MouseProvider, DisplayProvider);
-
+        ControlProvider = NewControlProvider(Logger);
         ConfigProvider = NewConfigProvider(Logger);
         AutostartService = NewAutostartService(Logger);
-        
         UserInterface = NewUserInterface();
     }
 }

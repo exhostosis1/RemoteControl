@@ -9,20 +9,20 @@ namespace ApiControllers;
 
 public class KeyboardController: BaseApiController
 {
-    private readonly IKeyboardControlProvider _input;
+    private readonly IControlProvider _provider;
     private readonly ILogger<KeyboardController> _logger;
 
-    public KeyboardController(IKeyboardControlProvider input, ILogger<KeyboardController> logger) : base(logger)
+    public KeyboardController(IControlProvider provider, ILogger<KeyboardController> logger) : base(logger)
     {
         _logger = logger;
-        _input = input;
+        _provider = provider;
     }
 
     public IActionResult Back(string? _)
     {
         _logger.LogInfo("Pressing arrow left");
 
-        _input.KeyPress(KeysEnum.ArrowLeft);
+        _provider.KeyboardKeyPress(KeysEnum.ArrowLeft);
 
         return Ok();
     }
@@ -31,7 +31,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing arrow right");
 
-        _input.KeyPress(KeysEnum.ArrowRight);
+        _provider.KeyboardKeyPress(KeysEnum.ArrowRight);
 
         return Ok();
     }
@@ -40,7 +40,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing pause");
 
-        _input.KeyPress(KeysEnum.MediaPlayPause);
+        _provider.KeyboardKeyPress(KeysEnum.MediaPlayPause);
 
         return Ok();
     }
@@ -49,7 +49,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing previous");
 
-        _input.KeyPress(KeysEnum.MediaPrev);
+        _provider.KeyboardKeyPress(KeysEnum.MediaPrev);
 
         return Ok();
     }
@@ -58,7 +58,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing next");
 
-        _input.KeyPress(KeysEnum.MediaNext);
+        _provider.KeyboardKeyPress(KeysEnum.MediaNext);
 
         return Ok();
     }
@@ -67,7 +67,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing volume up");
 
-        _input.KeyPress(KeysEnum.VolumeUp);
+        _provider.KeyboardKeyPress(KeysEnum.VolumeUp);
 
         return Ok();
     }
@@ -76,7 +76,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing volume down");
 
-        _input.KeyPress(KeysEnum.VolumeDown);
+        _provider.KeyboardKeyPress(KeysEnum.VolumeDown);
 
         return Ok();
     }
@@ -85,7 +85,7 @@ public class KeyboardController: BaseApiController
     {
         _logger.LogInfo("Pressing mute");
 
-        _input.KeyPress(KeysEnum.Mute);
+        _provider.KeyboardKeyPress(KeysEnum.Mute);
 
         return Ok();
     }
@@ -106,8 +106,8 @@ public class KeyboardController: BaseApiController
 
         _logger.LogInfo($"Inputing text {text}");
 
-        _input.TextInput(text);
-        _input.KeyPress(KeysEnum.Enter);
+        _provider.TextInput(text);
+        _provider.KeyboardKeyPress(KeysEnum.Enter);
 
         return Ok();
     }

@@ -7,20 +7,20 @@ namespace ApiControllers;
 
 public class AudioController: BaseApiController
 {
-    private readonly IAudioControlProvider _audio;
+    private readonly IControlProvider _provider;
     private readonly ILogger<AudioController> _logger;
 
-    public AudioController(IAudioControlProvider audio, ILogger<AudioController> logger) : base(logger)
+    public AudioController(IControlProvider provider, ILogger<AudioController> logger) : base(logger)
     {
         _logger = logger;
-        _audio = audio;
+        _provider = provider;
     }
 
     public IActionResult GetDevices(string? _)
     {
         _logger.LogInfo("Getting devices");
 
-        return Json(_audio.GetDevices());
+        return Json(_provider.GetAudioDevices());
     }
 
     public IActionResult SetDevice(string? param)
@@ -29,7 +29,7 @@ public class AudioController: BaseApiController
 
         if(Guid.TryParse(param, out var guid)) 
         {
-            _audio.SetCurrentControlDevice(guid);
+            _provider.SetAudioDevice(guid);
             return Ok();
         }
 
@@ -41,7 +41,7 @@ public class AudioController: BaseApiController
     {
         _logger.LogInfo("Getting volume");
 
-        return Text(_audio.GetVolume());
+        return Text(_provider.GetVolume());
     }
 
     public IActionResult SetVolume(string? param)
@@ -56,7 +56,7 @@ public class AudioController: BaseApiController
 
         result = result > 100 ? 100 : result < 0 ? 0 : result;
 
-        _audio.SetVolume(result);
+        _provider.SetVolume(result);
 
         return Text(result);
     }
@@ -65,11 +65,11 @@ public class AudioController: BaseApiController
     {
         _logger.LogInfo("Increasing volume by 5");
 
-        var vol = _audio.GetVolume();
+        var vol = _provider.GetVolume();
         vol += 5;
         vol = vol > 100 ? 100 : vol;
 
-        _audio.SetVolume(vol);
+        _provider.SetVolume(vol);
 
         return Text(vol);
     }
@@ -78,11 +78,11 @@ public class AudioController: BaseApiController
     {
         _logger.LogInfo("Decreasing volume by 5");
 
-        var vol = _audio.GetVolume();
+        var vol = _provider.GetVolume();
         vol -= 5;
         vol = vol < 0 ? 0 : vol;
 
-        _audio.SetVolume(vol);
+        _provider.SetVolume(vol);
 
         return Text(vol);
     }
@@ -91,10 +91,10 @@ public class AudioController: BaseApiController
     {
         _logger.LogInfo("Toggling mute status");
 
-        if(_audio.IsMuted)
-            _audio.Unmute();
+        if(_provider.IsMuted)
+            _provider.Unmute();
         else
-            _audio.Mute();
+            _provider.Mute();
 
         return Ok();
     }

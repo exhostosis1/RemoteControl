@@ -1,10 +1,10 @@
-﻿using Shared;
+﻿using Shared.ControlProviders;
 using Shared.Enums;
 using System.Runtime.InteropServices;
 
 namespace ControlProviders.Wrappers;
 
-public partial class User32Wrapper : IInput
+public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
 {
     private const uint Length = 1;
     private readonly Input[] _buffer = new Input[Length];
@@ -128,12 +128,20 @@ public partial class User32Wrapper : IInput
         SendInput(Length, _buffer, _size);
     }
 
-    public int SetMonitorInState(MonitorState state)
+    public void SetState(MonitorState state)
     {
-        return SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
+        SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
     }
 
-    public void SendKeyInput(KeysEnum keyCode, bool up)
+    public void SendKey(KeysEnum key, KeyPressMode mode)
+    {
+        if(mode.HasFlag(KeyPressMode.Down))
+            SendKey(key);
+        if(mode.HasFlag(KeyPressMode.Up))
+            SendKey(key, true);
+    }
+
+    public void SendKey(KeysEnum keyCode, bool up = false)
     {
         var user32KeyCode = KeysToKeyCodes[keyCode];
 
@@ -150,7 +158,7 @@ public partial class User32Wrapper : IInput
         DispatchInput();
     }
 
-    public void SendCharInput(char character, bool up)
+    public void SendCharInput(char character, bool up = false)
     {
         _buffer[0].Type = (uint)InputType.Keyboard;
 
@@ -166,7 +174,16 @@ public partial class User32Wrapper : IInput
         DispatchInput();
     }
 
-    public void SendMouseInput(int x, int y)
+    public void SendText(string text)
+    {
+        foreach (var c in text)
+        {
+            SendCharInput(c);
+            SendCharInput(c, true);
+        }
+    }
+
+    public void SendMouseMove(int x, int y)
     {
         _buffer[0].Type = (uint)InputType.Mouse;
 
@@ -180,7 +197,15 @@ public partial class User32Wrapper : IInput
         DispatchInput();
     }
 
-    public void SendMouseInput(MouseButtons button, bool up)
+    public void SendMouseKey(MouseButtons button, KeyPressMode mode)
+    {
+        if(mode.HasFlag(KeyPressMode.Down))
+            SendMouseKey(button);
+        if(mode.HasFlag(KeyPressMode.Up))
+            SendMouseKey(button, true);
+    }
+
+    public void SendMouseKey(MouseButtons button, bool up = false)
     {
         var user32Button = up ? MouseButtonsToFlags[button].Up : MouseButtonsToFlags[button].Down;
 
@@ -194,7 +219,7 @@ public partial class User32Wrapper : IInput
         DispatchInput();
     }
 
-    public void SendScrollInput(int scrollAmount)
+    public void SendScroll(int scrollAmount)
     {
         _buffer[0].Type = (uint)InputType.Mouse;
 

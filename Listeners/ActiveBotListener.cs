@@ -21,6 +21,7 @@ public class ActiveBotListener: IBotListener
     private readonly IProgress<bool> _progress;
 
     private const int Delay = 1_000;
+    private readonly TaskFactory _factory = new();
 
     public ActiveBotListener(IActiveApiWrapper wrapper, ILogger<ActiveBotListener> logger)
     {
@@ -43,9 +44,7 @@ public class ActiveBotListener: IBotListener
 
         _cst = new CancellationTokenSource();
 
-#pragma warning disable CS4014
-        ListenAsync(apiUri, apiKey, _cst.Token);
-#pragma warning restore CS4014
+        _factory.StartNew(async () => await ListenAsync(apiUri, apiKey, _cst.Token), TaskCreationOptions.LongRunning);
     }
 
     public void StopListen()
