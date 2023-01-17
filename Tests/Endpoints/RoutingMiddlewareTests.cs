@@ -4,16 +4,16 @@ using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 
-namespace Tests;
+namespace Tests.Endpoints;
 
-public class RoutingMiddlewareTests: IDisposable
+public class RoutingMiddlewareTests : IDisposable
 {
     public RoutingMiddlewareTests()
     {
 
     }
 
-    private class MockApiV1Endpoint: IApiEndpoint
+    private class MockApiV1Endpoint : IApiEndpoint
     {
         public string ApiVersion => "v1";
         public int Count;
@@ -24,7 +24,7 @@ public class RoutingMiddlewareTests: IDisposable
         }
     }
 
-    private class MockApiV2Endpoint: IApiEndpoint
+    private class MockApiV2Endpoint : IApiEndpoint
     {
         public string ApiVersion => "v2";
         public int Count;
@@ -35,7 +35,7 @@ public class RoutingMiddlewareTests: IDisposable
         }
     }
 
-    private class MockStaticEndpoint: IEndpoint
+    private class MockStaticEndpoint : IEndpoint
     {
         public int Count;
 
@@ -52,7 +52,7 @@ public class RoutingMiddlewareTests: IDisposable
         var v1Endpoint = new MockApiV1Endpoint();
         var v2Endpoint = new MockApiV2Endpoint();
         var staticEndpoint = new MockStaticEndpoint();
-        
+
         var endpoints = new List<IEndpoint>
         {
             v1Endpoint,

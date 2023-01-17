@@ -4,9 +4,9 @@ using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Endpoints;
 
-public class CommandExecutorTests: IDisposable
+public class CommandExecutorTests : IDisposable
 {
     private readonly ILogger<CommandsExecutor> _logger;
     private readonly IControlProvider _provider;
@@ -52,6 +52,6 @@ public class CommandExecutorTests: IDisposable
 
     public void Dispose()
     {
-        
+
     }
 }

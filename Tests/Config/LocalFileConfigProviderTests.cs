@@ -4,9 +4,9 @@ using Shared.Config;
 using Shared.Logging.Interfaces;
 using System.Text.Json;
 
-namespace Tests;
+namespace Tests.Config;
 
-public class LocalFileConfigProviderTests: IDisposable
+public class LocalFileConfigProviderTests : IDisposable
 {
     private readonly string _filePath = Path.Combine(AppContext.BaseDirectory, "testconfig.ini");
     private readonly LocalFileConfigProvider _provider;
@@ -16,7 +16,7 @@ public class LocalFileConfigProviderTests: IDisposable
     {
         _logger = Mock.Of<ILogger<LocalFileConfigProvider>>();
         _provider = new LocalFileConfigProvider(_filePath, _logger);
-        if(File.Exists(_filePath))
+        if (File.Exists(_filePath))
             File.Delete(_filePath);
     }
 

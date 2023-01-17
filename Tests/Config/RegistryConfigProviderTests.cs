@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ConfigProviders;
+﻿using ConfigProviders;
 using Microsoft.Win32;
 using Moq;
 using Shared.Config;
@@ -11,16 +6,16 @@ using Shared.Logging.Interfaces;
 using Shared.RegistryWrapper;
 using System.Text.Json;
 
-namespace Tests;
+namespace Tests.Config;
 
-public class RegistryConfigProviderTests: IDisposable
+public class RegistryConfigProviderTests : IDisposable
 {
     private readonly RegistryConfigProvider _provider;
     private readonly ILogger<RegistryConfigProvider> _logger;
     private readonly MockRegistry _registry;
     private static MockRegistryKey _currentKey;
 
-    private class MockRegistryKey: IRegistryKey
+    private class MockRegistryKey : IRegistryKey
     {
         public string Name { get; set; } = string.Empty;
         public bool Writable { get; set; } = false;
@@ -102,7 +97,7 @@ public class RegistryConfigProviderTests: IDisposable
         }
     }
 
-    private class MockRegistry: IRegistry
+    private class MockRegistry : IRegistry
     {
         public IRegistryKey CurrentUser { get; } = new MockRegistryKey();
     }

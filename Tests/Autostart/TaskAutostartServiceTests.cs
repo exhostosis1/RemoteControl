@@ -3,7 +3,7 @@ using Moq;
 using Shared.Logging.Interfaces;
 using Shared.TaskServiceWrapper;
 
-namespace Tests;
+namespace Tests.Autostart;
 
 public class TaskAutostartServiceTests
 {
@@ -26,7 +26,7 @@ public class TaskAutostartServiceTests
 
         _winTaskAutostartService = new TaskAutostartService(_taskService, logger);
 
-        if(File.Exists(_filePath))
+        if (File.Exists(_filePath))
             File.Delete(_filePath);
     }
 

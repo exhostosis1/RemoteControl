@@ -5,9 +5,9 @@ using Shared.Logging.Interfaces;
 using Shared.RegistryWrapper;
 using System.Diagnostics;
 
-namespace Tests;
+namespace Tests.Autostart;
 
-public class RegistryAutostartServiceTests: IDisposable
+public class RegistryAutostartServiceTests : IDisposable
 {
     private readonly RegistryAutostartService _service;
     private static MockCurrentUser _regKey;

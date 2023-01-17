@@ -6,9 +6,9 @@ using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using System.Net;
 
-namespace Tests;
+namespace Tests.Endpoints;
 
-public class ApiV1Tests: IDisposable
+public class ApiV1Tests : IDisposable
 {
     private class FirstController : IApiController
     {
@@ -67,15 +67,15 @@ public class ApiV1Tests: IDisposable
 
         context = new Context("/api/v1/first/actiontwo");
         apiEndpoint.ProcessRequest(this, context);
-        Assert.True(context.Response is {StatusCode: HttpStatusCode.InternalServerError, ContentType: "text/plain"});
+        Assert.True(context.Response is { StatusCode: HttpStatusCode.InternalServerError, ContentType: "text/plain" });
 
         context = new Context("/api/v1/second/actionthree");
         apiEndpoint.ProcessRequest(this, context);
-        Assert.True(context.Response is {StatusCode: HttpStatusCode.OK, ContentType: "application/json"});
+        Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "application/json" });
 
         context = new Context("/api/v1/second/actionfour");
         apiEndpoint.ProcessRequest(this, context);
-        Assert.True(context.Response is {StatusCode: HttpStatusCode.OK, ContentType: "text/plain"});
+        Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" });
 
         Assert.True((controllers[0] as FirstController)?.Onecount == 1);
         Assert.True((controllers[0] as FirstController)?.Twocount == 1);

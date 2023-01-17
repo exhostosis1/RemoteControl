@@ -6,9 +6,9 @@ using Shared.DataObjects.Bot;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.CommandProcessors;
 
-public class TelegramBotTests: IDisposable
+public class TelegramBotTests : IDisposable
 {
     public TelegramBotTests()
     {

@@ -3,9 +3,9 @@ using Moq;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Listeners;
 
-public class ActiveBotListenerTests: IDisposable
+public class ActiveBotListenerTests : IDisposable
 {
     private readonly ActiveBotListener _listener;
     private readonly ILogger<ActiveBotListener> _logger;
@@ -24,7 +24,7 @@ public class ActiveBotListenerTests: IDisposable
     {
         var apiUrl = "apiUrl";
         var apiKey = "apiKey";
-        var userNames = new List<string>{ "user1", "user2" };
+        var userNames = new List<string> { "user1", "user2" };
 
         _listener.StartListen(apiUrl, apiKey, userNames);
 

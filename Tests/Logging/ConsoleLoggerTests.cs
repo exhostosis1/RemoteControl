@@ -5,7 +5,7 @@ using Shared.ConsoleWrapper;
 using Shared.Enums;
 using Shared.Logging;
 
-namespace Tests;
+namespace Tests.Logging;
 
 public class ConsoleLoggerTests : IDisposable
 {

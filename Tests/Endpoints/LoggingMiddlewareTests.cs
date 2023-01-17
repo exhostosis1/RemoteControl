@@ -3,9 +3,9 @@ using Servers.Middleware;
 using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Endpoints;
 
-public class LoggingMiddlewareTests: IDisposable
+public class LoggingMiddlewareTests : IDisposable
 {
     public LoggingMiddlewareTests()
     {

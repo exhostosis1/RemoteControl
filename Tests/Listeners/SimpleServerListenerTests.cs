@@ -3,7 +3,7 @@ using Moq;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Listeners;
 
 public class SimpleServerListenerTests : IDisposable
 {

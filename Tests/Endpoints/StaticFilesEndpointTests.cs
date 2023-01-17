@@ -5,9 +5,9 @@ using Shared.Logging.Interfaces;
 using System.Net;
 using System.Text;
 
-namespace Tests;
+namespace Tests.Endpoints;
 
-public class StaticFilesEndpointTests: IDisposable
+public class StaticFilesEndpointTests : IDisposable
 {
     public StaticFilesEndpointTests()
     {

@@ -4,7 +4,7 @@ using Logging.Formatters;
 using Shared.Enums;
 using Shared.Logging;
 
-namespace Tests;
+namespace Tests.Logging;
 
 public class FileLoggerTests : IDisposable
 {

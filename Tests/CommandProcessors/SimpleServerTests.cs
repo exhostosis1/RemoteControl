@@ -6,9 +6,9 @@ using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 
-namespace Tests;
+namespace Tests.CommandProcessors;
 
-public class SimpleServerTests: IDisposable
+public class SimpleServerTests : IDisposable
 {
     public SimpleServerTests()
     {
