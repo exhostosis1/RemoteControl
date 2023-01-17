@@ -32,7 +32,7 @@ public static partial class Utils
     public static partial Regex CoordRegex();
 
     [GeneratedRegex(
-        $"(?<={ApiPath}v\\d+)\\/(?<{ControllerGroupName}>[a-z]+)\\/(?<{ActionGroupName}>[a-z]+)\\/?(?<{ParamGroupName}>.*)",
+        $"(?<={ApiPath}v\\d+)\\/(?<{ControllerGroupName}>[a-z]+)\\/(?<{ActionGroupName}>[a-z]+)\\/?(?<{ParamGroupName}>.*?)(?=\\/|$)",
         RegexOptions.IgnoreCase)]
     public static partial Regex ApiRegex();
 
@@ -64,13 +64,13 @@ public static partial class Utils
         return true;
     }
 
-    public static bool TryParsePath(string path, out string controller, out string action, out string? parameter)
+    public static bool TryParsePath(string path, out string controller, out string action, out string parameter)
     {
         var match = ApiRegex().Match(path);
 
         controller = string.Empty;
         action = string.Empty;
-        parameter = null;
+        parameter = string.Empty;
 
         if (!match.Success) return false;
 
@@ -136,7 +136,7 @@ public static partial class Utils
     public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<IApiController> controllers)
     {
         return new ControllersWithMethods(controllers.ToDictionary(
-            x => x.GetType().Name.Replace("Controller", "").ToLower(),
+            x => x.GetType().Name.Replace("controller", "", StringComparison.OrdinalIgnoreCase).ToLower(),
             x => x.GetMethods()));
     }
 
@@ -152,6 +152,9 @@ public static partial class Utils
 
     public static void AddFirewallRule(Uri uri)
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            throw new Exception("OS not supported");
+
         var command =
             $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
 
