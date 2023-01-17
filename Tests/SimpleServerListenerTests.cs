@@ -28,7 +28,7 @@ public class SimpleServerListenerTests : IDisposable
 
         await Task.Delay(100);
 
-        Assert.True(_listener.IsListening);
+        Mock.Get(_wrapper).Verify(x => x.GetContextAsync(), Times.AtLeastOnce);
     }
 
     [Fact]

@@ -37,8 +37,11 @@ public class RemoteControlContainer : IPlatformDependantContainer
 
     public IUserInterface NewUserInterface() => new MainConsole();
 
+    private readonly YdoToolWrapper _ydoToolWrapper = new();
+    private readonly DummyWrapper _dummyWrapper = new();
+
     public IControlProvider NewControlProvider(ILogger logger) =>
-        new InputProvider(new YdoToolWrapper(), new YdoToolWrapper(), new DummyWrapper(), new DummyWrapper(),
+        new InputProvider(_ydoToolWrapper, _ydoToolWrapper, _dummyWrapper, _dummyWrapper,
             new LogWrapper<InputProvider>(logger));
 
     public RemoteControlContainer()

@@ -1,18 +1,20 @@
-﻿using Microsoft.Win32.TaskScheduler;
-using Shared.TaskServiceWrapper;
+﻿using Shared.TaskServiceWrapper;
 
 namespace Autostart.Task;
 
-public class TaskDefinitionWrapper : ITaskDefinition
+public class LocalTaskDefinition : ITaskDefinition
 {
-    public IActionCollection Actions => new ActionCollectionWrapper(TaskDefinition.Actions);
-    public ITriggerCollection Triggers => new TriggerCollectionWrapper(TaskDefinition.Triggers);
-    public ITaskPrincipal Principal => new TaskPrincipalWrapper(TaskDefinition.Principal);
+    public string Name { get; set; }
+    public string UserId { get; set; }
+    public bool Enabled { get; init; }
 
-    public readonly TaskDefinition TaskDefinition;
+    public List<TaskTrigger> Triggers => new();
 
-    public TaskDefinitionWrapper(TaskDefinition definition)
+    public List<TaskAction> Actions => new();
+
+    public LocalTaskDefinition(string name, string userId)
     {
-        TaskDefinition = definition;
+        Name = name;
+        UserId = userId;
     }
 }

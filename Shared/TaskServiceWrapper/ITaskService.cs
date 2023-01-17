@@ -2,7 +2,9 @@
 
 public interface ITaskService
 {
-    public ITaskDefinition NewTask();
-    public ITask? FindTask(string name);
-    public ITaskFolder RootFolder { get; }
+    public ITaskDefinition? FindTask(string name);
+    public bool RegisterNewTask(ITaskDefinition task);
+    public void DeleteTask(string name, bool throwIfTaskNotFound);
+
+    public ITaskDefinition NewTask(string name, string userId);
 }

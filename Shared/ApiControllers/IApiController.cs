@@ -2,5 +2,4 @@
 
 public interface IApiController
 {
-    public ControllerMethods GetMethods();
 }

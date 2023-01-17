@@ -1,31 +1,25 @@
 ﻿using Microsoft.Win32;
 using Shared.Config;
 using Shared.Logging.Interfaces;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
+using Shared.RegistryWrapper;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Shared.RegistryWrapper;
 
 namespace ConfigProviders;
 
-[SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Planform check in constructor is sufficient")]
-public class WinRegistryConfigProvider: IConfigProvider
+public class RegistryConfigProvider: IConfigProvider
 {
     private readonly IRegistryKey _regKey;
     private const string ValueName = "Config";
-    private readonly ILogger<WinRegistryConfigProvider> _logger;
+    private readonly ILogger<RegistryConfigProvider> _logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public WinRegistryConfigProvider(IRegistry registry, ILogger<WinRegistryConfigProvider> logger)
+    public RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigProvider> logger)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            throw new Exception("OS not supported");
-
         _logger = logger;
 
         _regKey = registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ??

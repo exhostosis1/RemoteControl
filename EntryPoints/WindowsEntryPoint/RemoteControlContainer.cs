@@ -34,12 +34,15 @@ public class RemoteControlContainer : IPlatformDependantContainer
         new LocalFileConfigProvider(Path.Combine(AppContext.BaseDirectory, "config.ini"), new LogWrapper<LocalFileConfigProvider>(logger));
 
     public IAutostartService NewAutostartService(ILogger logger) =>
-        new WinRegistryAutostartService(new RegistryWrapper(), new LogWrapper<WinRegistryAutostartService>(logger));
+        new RegistryAutostartService(new RegistryWrapper(), new LogWrapper<RegistryAutostartService>(logger));
 
     public IUserInterface NewUserInterface() => new MainForm();
 
+    private readonly User32Wrapper _user32Wrapper = new();
+    private readonly NAudioWrapper _naudioWrapper = new();
+
     public IControlProvider NewControlProvider(ILogger logger) =>
-        new InputProvider(new User32Wrapper(), new User32Wrapper(), new User32Wrapper(), new NAudioWrapper(), new LogWrapper<InputProvider>(logger));
+        new InputProvider(_user32Wrapper, _user32Wrapper, _user32Wrapper, _naudioWrapper, new LogWrapper<InputProvider>(logger));
 
     public RemoteControlContainer()
     {

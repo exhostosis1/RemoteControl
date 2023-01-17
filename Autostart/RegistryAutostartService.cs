@@ -1,26 +1,20 @@
 ﻿using Microsoft.Win32;
-using Shared.Logging.Interfaces;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using Shared;
+using Shared.Logging.Interfaces;
 using Shared.RegistryWrapper;
+using System.Diagnostics;
 
 namespace Autostart;
 
-[SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Platform check in constructor is sufficient")]
-public class WinRegistryAutostartService : IAutostartService
+public class RegistryAutostartService : IAutostartService
 {
     private readonly IRegistryKey _regKey;
     private const string RegName = "Remote Control";
     private readonly string _regValue = $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? throw new NullReferenceException()}\"";
-    private readonly ILogger<WinRegistryAutostartService> _logger;
+    private readonly ILogger<RegistryAutostartService> _logger;
 
-    public WinRegistryAutostartService(IRegistry registryWrapper, ILogger<WinRegistryAutostartService> logger)
+    public RegistryAutostartService(IRegistry registryWrapper, ILogger<RegistryAutostartService> logger)
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            throw new Exception("OS not supported");
-
         _logger = logger;
 
         _regKey = registryWrapper.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey("Microsoft")?.OpenSubKey("Windows")

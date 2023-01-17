@@ -1,13 +1,14 @@
 ﻿using ApiControllers;
 using Moq;
+using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Controllers;
 
-public class MouseControllerTests: IDisposable
+public class MouseControllerTests : IDisposable
 {
     private readonly MouseController _mouseController;
     private readonly IControlProvider _mouseControlProvider;
@@ -43,7 +44,7 @@ public class MouseControllerTests: IDisposable
         Mock.Get(_mouseControlProvider).Verify(x => x.MouseKeyPress(MouseButtons.Middle, KeyPressMode.Click), Times.Once);
     }
 
-    [Fact] 
+    [Fact]
     public void WheelUpTest()
     {
         var result = _mouseController.WheelUp(null);
@@ -88,6 +89,28 @@ public class MouseControllerTests: IDisposable
 
         result = _mouseController.Move(null);
         Assert.True(result is ErrorResult);
+    }
+
+    [Fact]
+    public void GetMethodsTest()
+    {
+        var methodNames = new[]
+        {
+            "left",
+            "right",
+            "middle",
+            "wheelup",
+            "wheeldown",
+            "dragstart",
+            "dragstop",
+            "move"
+        };
+
+        var methods = _mouseController.GetMethods();
+        Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
+            x => x.Value.Target == _mouseController && x.Value.Method.ReturnType == typeof(IActionResult) &&
+                 x.Value.Method.GetParameters().Length == 1 &&
+                 x.Value.Method.GetParameters()[0].ParameterType == typeof(string)));
     }
 
     public void Dispose()

@@ -1,5 +1,4 @@
-﻿using Shared.ApiControllers;
-using Shared.ApiControllers.Results;
+﻿using Shared.ApiControllers.Results;
 using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 

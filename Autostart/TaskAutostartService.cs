@@ -7,50 +7,49 @@ using System.Security.Principal;
 
 namespace Autostart;
 
-public class WinTaskAutostartService : IAutostartService
+public class TaskAutostartService : IAutostartService
 {
-    private readonly ITaskService _ts;
+    private readonly ITaskService _taskServiceWrapper;
     private readonly string _taskName;
     private readonly ITaskDefinition _td;
     private readonly string _filename = Path.Combine(AppContext.BaseDirectory, "run.bat");
-    private readonly ILogger<WinTaskAutostartService> _logger;
+    private readonly ILogger<TaskAutostartService> _logger;
 
-    public WinTaskAutostartService(ITaskService taskService, ILogger<WinTaskAutostartService> logger)
+    public TaskAutostartService(ITaskService taskService, ILogger<TaskAutostartService> logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
 
         _logger = logger;
-        _ts = taskService;
+        _taskServiceWrapper = taskService;
 
         var userName = WindowsIdentity.GetCurrent().Name;
         _taskName =
             $"RemoteControl{(userName.LastIndexOf("\\", StringComparison.Ordinal) != -1 ? userName[(userName.LastIndexOf("\\", StringComparison.Ordinal) + 1)..] : userName)}";
 
-        _td = _ts.NewTask();
-        _td.Actions.Add(_filename, null, AppContext.BaseDirectory);
-        _td.Triggers.AddLogonTrigger(userName);
-        _td.Principal.UserId = userName;
+        _td = _taskServiceWrapper.NewTask(_taskName, userName);
+        _td.Actions.Add(new TaskAction(_filename, null, AppContext.BaseDirectory));
+        _td.Triggers.Add(new TaskLogonTrigger(userName));
     }
 
     public bool CheckAutostart()
     {
         _logger.LogInfo("Checking win task autostart");
-        return (_ts.FindTask(_taskName)?.Enabled ?? false) && File.Exists(_filename);
+        return (_taskServiceWrapper.FindTask(_taskName)?.Enabled ?? false) && File.Exists(_filename);
     }
 
     public void SetAutostart(bool value)
     {
         _logger.LogInfo($"Setting win task autostart to {value}");
 
-        _ts.RootFolder.DeleteTask(_taskName, false);
+        _taskServiceWrapper.DeleteTask(_taskName, false);
 
         if (!value) return;
  
         try
         {
             File.WriteAllText(_filename, $"start {Process.GetCurrentProcess().MainModule?.FileName}");
-            _ts.RootFolder.RegisterTaskDefinition(_taskName, _td);
+            _taskServiceWrapper.RegisterNewTask(_td);
 
         }
         catch (UnauthorizedAccessException)

@@ -13,10 +13,10 @@ using System.Text.Json;
 
 namespace Tests;
 
-public class WinRegistryConfigProviderTests: IDisposable
+public class RegistryConfigProviderTests: IDisposable
 {
-    private readonly WinRegistryConfigProvider _provider;
-    private readonly ILogger<WinRegistryConfigProvider> _logger;
+    private readonly RegistryConfigProvider _provider;
+    private readonly ILogger<RegistryConfigProvider> _logger;
     private readonly MockRegistry _registry;
     private static MockRegistryKey _currentKey;
 
@@ -107,11 +107,11 @@ public class WinRegistryConfigProviderTests: IDisposable
         public IRegistryKey CurrentUser { get; } = new MockRegistryKey();
     }
 
-    public WinRegistryConfigProviderTests()
+    public RegistryConfigProviderTests()
     {
-        _logger = Mock.Of<ILogger<WinRegistryConfigProvider>>();
+        _logger = Mock.Of<ILogger<RegistryConfigProvider>>();
         _registry = new MockRegistry();
-        _provider = new WinRegistryConfigProvider(_registry, _logger);
+        _provider = new RegistryConfigProvider(_registry, _logger);
     }
 
     [Fact]

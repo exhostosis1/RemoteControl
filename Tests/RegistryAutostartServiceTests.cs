@@ -7,9 +7,9 @@ using System.Diagnostics;
 
 namespace Tests;
 
-public class WinregistryAutostartServiceTests: IDisposable
+public class RegistryAutostartServiceTests: IDisposable
 {
-    private readonly WinRegistryAutostartService _service;
+    private readonly RegistryAutostartService _service;
     private static MockCurrentUser _regKey;
 
     private class MockCurrentUser : IRegistryKey
@@ -68,11 +68,11 @@ public class WinregistryAutostartServiceTests: IDisposable
         public IRegistryKey CurrentUser { get; } = new MockCurrentUser();
     }
 
-    public WinregistryAutostartServiceTests()
+    public RegistryAutostartServiceTests()
     {
-        var logger = Mock.Of<ILogger<WinRegistryAutostartService>>();
+        var logger = Mock.Of<ILogger<RegistryAutostartService>>();
         var registry = new MockRegistry();
-        _service = new WinRegistryAutostartService(registry, logger);
+        _service = new RegistryAutostartService(registry, logger);
     }
 
     [Fact]

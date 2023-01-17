@@ -1,4 +1,5 @@
 ﻿using Shared.ApiControllers;
+using Shared.ApiControllers.Results;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -7,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
@@ -136,6 +138,16 @@ public static partial class Utils
         return new ControllersWithMethods(controllers.ToDictionary(
             x => x.GetType().Name.Replace("Controller", "").ToLower(),
             x => x.GetMethods()));
+    }
+
+    public static ControllerMethods GetMethods(this IApiController controller)
+    {
+        return new ControllerMethods(controller.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(x =>
+        {
+            var parameters = x.GetParameters();
+            return x.ReturnType == typeof(IActionResult) && parameters.Length == 1 &&
+                   parameters[0].ParameterType == typeof(string);
+        }).ToDictionary(x => x.Name.ToLower(), x => x.CreateDelegate<Func<string?, IActionResult>>(controller)));
     }
 
     public static void AddFirewallRule(Uri uri)

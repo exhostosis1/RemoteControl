@@ -1,13 +1,14 @@
 ﻿using ApiControllers;
 using Moq;
+using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Controllers;
 
-public class KeyboardControllerTests: IDisposable
+public class KeyboardControllerTests : IDisposable
 {
     private readonly KeyboardController _keyboardController;
     private readonly IControlProvider _keyboardControlProvider;
@@ -93,6 +94,29 @@ public class KeyboardControllerTests: IDisposable
         Assert.True(result is OkResult);
         Mock.Get(_keyboardControlProvider).Verify(x => x.TextInput("param"), Times.Once);
         Mock.Get(_keyboardControlProvider).Verify(x => x.KeyboardKeyPress(KeysEnum.Enter, KeyPressMode.Click), Times.Once);
+    }
+
+    [Fact]
+    public void GetMethodsTest()
+    {
+        var methodNames = new[]
+        {
+            "back",
+            "forth",
+            "pause",
+            "mediaback",
+            "mediaforth",
+            "mediavolumeup",
+            "mediavolumedown",
+            "mediamute",
+            "text"
+        };
+
+        var methods = _keyboardController.GetMethods();
+        Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
+            x => x.Value.Target == _keyboardController && x.Value.Method.ReturnType == typeof(IActionResult) &&
+                 x.Value.Method.GetParameters().Length == 1 &&
+                 x.Value.Method.GetParameters()[0].ParameterType == typeof(string)));
     }
 
     public void Dispose()

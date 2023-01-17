@@ -26,19 +26,6 @@ public class ApiV1Tests: IDisposable
             Twocount++;
             return new ErrorResult("test error");
         }
-
-        public ControllerMethods GetMethods()
-        {
-            return new ControllerMethods(new Dictionary<string, Func<string?, IActionResult>>
-            {
-                {
-                    "actionone", ActionOne
-                },
-                {
-                    "actiontwo", ActionTwo
-                }
-            });
-        }
     }
 
     private class SecondController : IApiController
@@ -56,19 +43,6 @@ public class ApiV1Tests: IDisposable
         {
             Fourcount++;
             return new StringResult("text");
-        }
-
-        public ControllerMethods GetMethods()
-        {
-            return new ControllerMethods(new Dictionary<string, Func<string?, IActionResult>>
-            {
-                {
-                    "actionthree", ActionThree
-                },
-                {
-                    "actionfour", ActionFour
-                }
-            });
         }
     }
 

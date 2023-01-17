@@ -1,12 +1,13 @@
 ﻿using ApiControllers;
 using Moq;
+using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace Tests.Controllers;
 
-public class AudioControllerTests: IDisposable
+public class AudioControllerTests : IDisposable
 {
     private readonly AudioController _audioController;
     private readonly IControlProvider _audioControlProvider;
@@ -93,7 +94,27 @@ public class AudioControllerTests: IDisposable
         Mock.Get(_audioControlProvider).Verify(x => x.Mute(), Times.Once);
     }
 
+    [Fact]
+    public void GetMethodsTest()
+    {
+        var methodNames = new[]
+        {
+            "getvolume",
+            "setvolume",
+            "getdevices",
+            "setdevice",
+            "increaseby5",
+            "decreaseby5",
+            "mute"
+        };
 
+        var methods = _audioController.GetMethods();
+        Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
+            x => x.Value.Target == _audioController && x.Value.Method.ReturnType == typeof(IActionResult) &&
+                 x.Value.Method.GetParameters().Length == 1 &&
+                 x.Value.Method.GetParameters()[0].ParameterType == typeof(string)));
+    }
+    
     public void Dispose()
     {
 
