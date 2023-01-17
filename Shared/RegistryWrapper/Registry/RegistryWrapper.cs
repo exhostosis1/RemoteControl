@@ -11,6 +11,7 @@ public class RegistryWrapper : IRegistry
 
     public RegistryWrapper()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) throw new Exception("OS not supported");
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) 
+            throw new Exception("OS not supported");
     }
 }

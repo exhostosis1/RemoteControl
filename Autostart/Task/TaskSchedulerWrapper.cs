@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32.TaskScheduler;
+﻿using System.Runtime.InteropServices;
+using Microsoft.Win32.TaskScheduler;
 using Shared.TaskServiceWrapper;
 
 namespace Autostart.Task;
@@ -6,6 +7,12 @@ namespace Autostart.Task;
 public class TaskSchedulerWrapper : ITaskService
 {
     private static readonly TaskService TaskService = new();
+
+    public TaskSchedulerWrapper()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            throw new Exception("OS not supported");
+    }
 
     public bool RegisterNewTask(ITaskDefinition task)
     {

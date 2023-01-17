@@ -123,6 +123,12 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
         }
     };
 
+    public User32Wrapper()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            throw new Exception("OS not supported");
+    }
+
     private void DispatchInput()
     {
         SendInput(Length, _buffer, _size);

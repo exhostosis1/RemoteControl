@@ -3,7 +3,7 @@ using NAudio.CoreAudioApi;
 using Shared;
 using Shared.ControlProviders;
 using Shared.ControlProviders.Devices;
-using Shared.Logging.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace ControlProviders.Wrappers;
 
@@ -16,6 +16,9 @@ public class NAudioWrapper: IAudioInput
 
     public NAudioWrapper()
     {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            throw new Exception("OS not supported");
+
         _devices = Enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
         _defaultDevice = Enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
     }

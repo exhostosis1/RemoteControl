@@ -1,6 +1,7 @@
 ﻿using Shared.ControlProviders;
 using Shared.Enums;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 // ReSharper disable InconsistentNaming
 
 namespace ControlProviders.Wrappers;
@@ -176,6 +177,12 @@ public class YdoToolWrapper: IKeyboardInput, IMouseInput
             RedirectStandardError = true
         }
     };
+
+    public YdoToolWrapper()
+    {
+        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            throw new Exception("OS not supported");
+    }
 
     private static void FastRunLinuxCommand(string command)
     {
