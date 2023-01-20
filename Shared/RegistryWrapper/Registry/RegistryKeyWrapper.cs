@@ -36,8 +36,8 @@ public class RegistryKeyWrapper : IRegistryKey
     public IRegistryKey CreateSubKey(string name, bool writable) =>
         new RegistryKeyWrapper(_key.CreateSubKey(name, writable));
 
-    public void SetValue(string? name, object value, RegistryValueKind valueKind) =>
-        _key.SetValue(name, value, valueKind);
+    public void SetValue(string? name, object value, RegValueType valueKind) =>
+        _key.SetValue(name, value, (RegistryValueKind)valueKind);
 
     public void Dispose()
     {

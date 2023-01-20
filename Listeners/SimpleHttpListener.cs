@@ -8,12 +8,9 @@ using Shared.DataObjects.Http;
 
 namespace Listeners;
 
-public class SimpleHttpListener : IHttpListener
+public class SimpleHttpListener : IListener<HttpContext>
 {
-    public bool IsListening => _wrapper.IsListening;
-
-    public event EventHandler<Context>? OnRequest;
-    public event EventHandler<bool>? OnStatusChange;
+    public ListenerState State { get; private set; }
 
     private readonly ILogger<SimpleHttpListener> _logger;
     private readonly IHttpListenerWrapper _wrapper;
@@ -23,14 +20,22 @@ public class SimpleHttpListener : IHttpListener
 
     private readonly TaskFactory _factory = new();
 
+    private readonly List<IObserver<bool>> _statusObservers = new();
+    private readonly List<IObserver<HttpContext>> _requestObservers = new();
+
     public SimpleHttpListener(IHttpListenerWrapper wrapper, ILogger<SimpleHttpListener> logger)
     {
         _logger = logger;
         _wrapper = wrapper;
-        _progress = new Progress<bool>(status => OnStatusChange?.Invoke(this, status));
+        State = new ListenerState();
+        _progress = new Progress<bool>(status =>
+        {
+            State.Listening = status;
+            _statusObservers.ForEach(x => x.OnNext(status));
+        });
     }
 
-    public void StartListen(Uri url)
+    public void StartListen(StartParameters param)
     {
         if (_wrapper.IsListening)
         {
@@ -39,19 +44,19 @@ public class SimpleHttpListener : IHttpListener
 
         try
         {
-            _wrapper.Start(url);
+            _wrapper.Start(param.Uri);
         }
         catch (HttpListenerException e)
         {
             if(e.Message.Contains("Failed to listen"))
             {
-                _logger.LogError($"{url} is already registered");
+                _logger.LogError($"{param.Uri} is already registered");
                 return;
             }
 
-            if(!Utils.GetCurrentIPs().Contains(url.Host))
+            if(!Utils.GetCurrentIPs().Contains(param.Uri.Host))
             {
-                _logger.LogError($"{url.Host} is currently unavailable");
+                _logger.LogError($"{param.Uri.Host} is currently unavailable");
                 return;
             }
 
@@ -63,11 +68,11 @@ public class SimpleHttpListener : IHttpListener
             var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
             var translatedValue = sid.Translate(typeof(NTAccount)).Value;
             var command =
-                $"netsh http add urlacl url={url} user={translatedValue}";
+                $"netsh http add urlacl url={param.Uri} user={translatedValue}";
 
             Utils.RunWindowsCommandAsAdmin(command);
 
-            _wrapper.Start(url);
+            _wrapper.Start(param.Uri);
         }
         catch (Exception e)
         {
@@ -80,7 +85,7 @@ public class SimpleHttpListener : IHttpListener
         _factory.StartNew(async () => await ProcessRequestAsync(_progress, _cst.Token),
             TaskCreationOptions.LongRunning);
 
-        _logger.LogInfo($"Started listening on {url}");
+        _logger.LogInfo($"Started listening on {param.Uri}");
     }
 
     private async Task ProcessRequestAsync(IProgress<bool> progress, CancellationToken token)
@@ -93,7 +98,7 @@ public class SimpleHttpListener : IHttpListener
                 var context = await _wrapper.GetContextAsync();
                 token.ThrowIfCancellationRequested();
 
-                OnRequest?.Invoke(this, context);
+                _requestObservers.ForEach(x => x.OnNext(context));
 
                 context.Response.Close();
             }
@@ -103,11 +108,13 @@ public class SimpleHttpListener : IHttpListener
             }
             catch (Exception e)
             {
+                _requestObservers.ForEach(x => x.OnError(e));
                 _logger.LogError(e.Message);
                 break;
             }
         }
 
+        _requestObservers.ForEach(x => x.OnCompleted());
         progress.Report(false);
     }
 
@@ -121,5 +128,17 @@ public class SimpleHttpListener : IHttpListener
         }
 
         _logger.LogInfo("Stopped listening");
+    }
+
+    public IDisposable Subscribe(IObserver<bool> observer)
+    {
+        _statusObservers.Add(observer);
+        return new Unsubscriber<bool>(_statusObservers, observer);
+    }
+
+    public IDisposable Subscribe(IObserver<HttpContext> observer)
+    {
+        _requestObservers.Add(observer);
+        return new Unsubscriber<HttpContext>(_requestObservers, observer);
     }
 }

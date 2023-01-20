@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
-public class ServerConfig: CommonConfig
+public class ServerConfig: CommonConfig, IEquatable<ServerConfig>
 {
     public string Scheme { get; set; } = string.Empty;
     public string Host { get; set; } = string.Empty;
@@ -21,12 +21,12 @@ public class ServerConfig: CommonConfig
         }
     }
 
-    public override bool Equals(object? obj)
+    public bool Equals(ServerConfig? that)
     {
-        if (this == obj) return true;
-        if(obj is not ServerConfig that) return false;
+        if (ReferenceEquals(null, that)) return false;
+        if (ReferenceEquals(this, that)) return true;
 
-        return this.Name == that.Name && this.Autostart == that.Autostart && this.Scheme == that.Scheme &&
-               this.Host == that.Host && this.Port == that.Port;
+        return Name == that.Name && Autostart == that.Autostart && Scheme == that.Scheme &&
+               Host == that.Host && Port == that.Port;
     }
 }

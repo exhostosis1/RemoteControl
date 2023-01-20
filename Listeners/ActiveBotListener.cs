@@ -2,17 +2,15 @@
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using System.Net.Sockets;
+using Shared;
 
 namespace Listeners;
 
-public class ActiveBotListener: IBotListener
+public class ActiveBotListener: IListener<BotContext>
 {
-    public bool IsListening { get; private set; }
+    public ListenerState State { get; private set; }
 
     private List<string> _usernames = new();
-
-    public event EventHandler<bool>? OnStatusChange;
-    public event EventHandler<BotContext>? OnRequest;
 
     private readonly ILogger<ActiveBotListener> _logger;
     private readonly IActiveApiWrapper _wrapper;
@@ -23,33 +21,38 @@ public class ActiveBotListener: IBotListener
     private const int Delay = 1_000;
     private readonly TaskFactory _factory = new();
 
+    private readonly List<IObserver<bool>> _statusSubscribers = new();
+    private readonly List<IObserver<BotContext>> _requestSubscribers = new();
+
     public ActiveBotListener(IActiveApiWrapper wrapper, ILogger<ActiveBotListener> logger)
     {
+        State = new ListenerState();
         _logger = logger;
         _wrapper = wrapper;
         
         _progress = new Progress<bool>(result =>
         {
             _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
-            IsListening = result;
-            OnStatusChange?.Invoke(this, result);
+            State.Listening = result;
+            _statusSubscribers.ForEach(x => x.OnNext(result));
         });
     }
 
-    public void StartListen(string apiUri, string apiKey, List<string> usernames)
+    public void StartListen(StartParameters param)
     {
-        if (IsListening) return;
+        if (State.Listening) return;
 
-        _usernames = usernames;
+        if (param.Usernames != null)
+            _usernames = param.Usernames;
 
         _cst = new CancellationTokenSource();
 
-        _factory.StartNew(async () => await ListenAsync(apiUri, apiKey, _cst.Token), TaskCreationOptions.LongRunning);
+        _factory.StartNew(async () => await ListenAsync(param.Uri.ToString(), param.ApiKey ?? "", _cst.Token), TaskCreationOptions.LongRunning);
     }
 
     public void StopListen()
     {
-        if (!IsListening) return;
+        if (!State.Listening) return;
 
         try
         {
@@ -77,7 +80,7 @@ public class ActiveBotListener: IBotListener
                 {
                     try
                     {
-                        OnRequest?.Invoke(this, context);
+                        _requestSubscribers.ForEach(x => x.OnNext(context));
 
                         if (!string.IsNullOrWhiteSpace(context.Result))
                         {
@@ -115,11 +118,25 @@ public class ActiveBotListener: IBotListener
             }
             catch (Exception e)
             {
+                _requestSubscribers.ForEach(x => x.OnError(e));
                 _logger.LogError(e.Message);
                 break;
             }
         }
 
+        _requestSubscribers.ForEach(x => x.OnCompleted());
         _progress.Report(false);
+    }
+
+    public IDisposable Subscribe(IObserver<bool> observer)
+    {
+        _statusSubscribers.Add(observer);
+        return new Unsubscriber<bool>(_statusSubscribers, observer);
+    }
+
+    public IDisposable Subscribe(IObserver<BotContext> observer)
+    {
+        _requestSubscribers.Add(observer);
+        return new Unsubscriber<BotContext>(_requestSubscribers, observer);
     }
 }

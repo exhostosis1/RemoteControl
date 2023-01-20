@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
-public class AppConfig
+public class AppConfig: IEquatable<AppConfig>
 {
     public List<CommonConfig> ProcessorConfigs { get; set; } = new();
     
@@ -18,13 +19,13 @@ public class AppConfig
 
     public AppConfig(IEnumerable<CommonConfig> items) => ProcessorConfigs = items.ToList();
 
-    public override bool Equals(object? obj)
+    public bool Equals(AppConfig? that)
     {
-        if (ReferenceEquals(this, obj)) return true;
-        if (obj is not AppConfig that) return false;
+        if (ReferenceEquals(null, that)) return false;
+        if (ReferenceEquals(this, that)) return true;
 
-        if(this.ProcessorConfigs.Count != that.ProcessorConfigs.Count) return false;
+        if (ProcessorConfigs.Count != that.ProcessorConfigs.Count) return false;
 
-        return !ProcessorConfigs.Where((t, i) => !this.ProcessorConfigs[i].Equals(that.ProcessorConfigs[i])).Any();
+        return !ProcessorConfigs.Where((t, i) => !ProcessorConfigs[i].Equals(that.ProcessorConfigs[i])).Any();
     }
 }

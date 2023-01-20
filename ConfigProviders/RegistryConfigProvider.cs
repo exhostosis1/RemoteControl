@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.Logging.Interfaces;
 using Shared.RegistryWrapper;
 using System.Text.Json;
@@ -53,6 +52,6 @@ public class RegistryConfigProvider: IConfigProvider
     {
         _logger.LogInfo($"Writing config to registry {_regKey}");
 
-        _regKey.SetValue(ValueName, JsonSerializer.Serialize(config, _jsonOptions), RegistryValueKind.String);
+        _regKey.SetValue(ValueName, JsonSerializer.Serialize(config, _jsonOptions), RegValueType.String);
     }
 }

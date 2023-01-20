@@ -11,5 +11,5 @@ public interface IHttpListenerWrapper
 
     public bool IsListening { get; }
 
-    public Task<Context> GetContextAsync();
+    public Task<HttpContext> GetContextAsync();
 }

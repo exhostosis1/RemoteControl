@@ -36,7 +36,7 @@ public class MainConsole: IUserInterface
 
             if (key == "x")
             {
-                CloseEvent?.Invoke(this, EventArgs.Empty);
+                CloseEvent?.Invoke(null, EventArgs.Empty);
                 return;
             }
 
@@ -44,12 +44,12 @@ public class MainConsole: IUserInterface
             {
                 case "s":
                     if(Model.Any(x => x.Working))
-                        StopEvent?.Invoke(this, null);
+                        StopEvent?.Invoke(null, null);
                     else
-                        StartEvent?.Invoke(this, null);
+                        StartEvent?.Invoke(null, null);
                     break;
                 case "a":
-                    AutostartChangedEvent?.Invoke(this, !IsAutostart);
+                    AutostartChangedEvent?.Invoke(null, !IsAutostart);
                     break;
                 default:
                     continue;

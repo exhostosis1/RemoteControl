@@ -13,7 +13,7 @@ public static class Program
 
     private static AbstractControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
     {
-        var result = new SimpleServer(container.NewHttpListener(container.HttpWrapper, container.Logger), container.Middleware, new LogWrapper<SimpleServer>(container.Logger), config)
+        var result = new SimpleServer(container.NewHttpListener(container.HttpWrapper, container.Logger), container.ApiMiddleware, new LogWrapper<SimpleServer>(container.Logger), config)
         {
             Id = _id++
         };

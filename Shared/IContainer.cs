@@ -1,30 +1,29 @@
-﻿using System;
-using Shared.ApiControllers;
+﻿using Shared.ApiControllers;
 using Shared.ControlProviders;
+using Shared.DataObjects.Bot;
+using Shared.DataObjects.Http;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using System.Collections.Generic;
-using Shared.DataObjects.Http;
 
 namespace Shared;
 
 public interface IContainer: IPlatformDependantContainer
 {
-    public IHttpListener HttpListener { get; }
-    public IBotListener BotListener { get; }
+    public IListener<HttpContext> HttpListener { get; }
+    public IListener<BotContext> BotListener { get; }
     public IHttpListenerWrapper HttpWrapper { get; }
     public IActiveApiWrapper ActiveBotWrapper { get; }
-    public IMiddleware Middleware { get; }
     public ICommandExecutor Executor { get; }
     public IApiController AudioController { get; }
     public IApiController MouseController { get; }
     public IApiController KeyboardController { get; }
     public IApiController DisplayController { get; }
-    public IEndpoint ApiEndpoint { get; }
-    public IEndpoint StaticEndpoint { get; }
-    public IHttpListener NewHttpListener(IHttpListenerWrapper wrapper, ILogger logger);
-    public IBotListener NewBotListener(IActiveApiWrapper wrapper, ILogger logger);
+    public AbstractMiddleware<HttpContext> ApiMiddleware { get; }
+    public AbstractMiddleware<HttpContext> StaticMiddleware { get; }
+    public IListener<HttpContext> NewHttpListener(IHttpListenerWrapper wrapper, ILogger logger);
+    public IListener<BotContext> NewBotListener(IActiveApiWrapper wrapper, ILogger logger);
     public IActiveApiWrapper NewBotWrapper(ILogger logger);
     public IHttpListenerWrapper NewHttpWrapper();
     public ICommandExecutor NewExecutor(IControlProvider facade, ILogger logger);
@@ -32,7 +31,6 @@ public interface IContainer: IPlatformDependantContainer
     public IApiController NewKeyboardController(IControlProvider provider, ILogger logger);
     public IApiController NewMouseController(IControlProvider provider, ILogger logger);
     public IApiController NewDisplayController(IControlProvider provider, ILogger logger);
-    public IEndpoint NewApiEndpoint(IEnumerable<IApiController> controllers, ILogger logger);
-    public IEndpoint NewStaticEndpoint(ILogger logger, string directory = "www");
-    public IMiddleware NewMiddleware(IEnumerable<IEndpoint> endpoints, ILogger logger, EventHandler<Context>? next = null);
+    public AbstractMiddleware<HttpContext> NewApiMiddleware(IEnumerable<IApiController> controllers, ILogger logger, AbstractMiddleware<HttpContext>? next = null);
+    public AbstractMiddleware<HttpContext> NewStaticMiddleware(ILogger logger, string directory = "www");
 }

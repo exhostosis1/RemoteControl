@@ -6,9 +6,6 @@ public abstract class BotProcessor : GenericControlProcessor<BotConfig>
 {
     protected BotProcessor(BotConfig? config = null): base(config)
     {
-        DefaultConfig = new BotConfig
-        {
-            ApiUri = "https://api.telegram.org/bot"
-        };
+        DefaultConfig.ApiUri = "https://api.telegram.org/bot";
     }
 }

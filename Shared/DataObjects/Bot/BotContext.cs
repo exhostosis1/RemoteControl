@@ -2,7 +2,7 @@
 
 namespace Shared.DataObjects.Bot;
 
-public class BotContext
+public class BotContext: IContext
 {
     public int Id { get; set; }
     public string Message { get; set; }

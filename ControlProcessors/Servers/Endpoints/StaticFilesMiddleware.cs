@@ -5,12 +5,12 @@ using Shared.DataObjects.Http;
 
 namespace Servers.Endpoints;
 
-public class StaticFilesEndpoint : IEndpoint
+public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
 {
     private readonly string _contentFolder;
-    private readonly ILogger<StaticFilesEndpoint> _logger;
+    private readonly ILogger<StaticFilesMiddleware> _logger;
 
-    public StaticFilesEndpoint(ILogger<StaticFilesEndpoint> logger, string directory = "www")
+    public StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string directory = "www")
     {
         _logger = logger;
         _contentFolder = AppContext.BaseDirectory + directory;
@@ -26,7 +26,7 @@ public class StaticFilesEndpoint : IEndpoint
         { ".css", "text/css" }
     };
 
-    public void ProcessRequest(object? sender, Context context)
+    public override void ProcessRequest(HttpContext context)
     {
         var uriPath = context.Request.Path;
 

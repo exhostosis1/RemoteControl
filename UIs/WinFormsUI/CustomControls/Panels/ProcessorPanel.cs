@@ -125,19 +125,19 @@ internal abstract class ProcessorPanel : Panel
     protected void EnableUpdateButton(object? sender, EventArgs e) => UpdateButton.Enabled = true;
 
     protected void RaiseUpdateButtonClickedEvent(CommonConfig config) =>
-        UpdateButtonClicked?.Invoke(this, (Id, config));
+        UpdateButtonClicked?.Invoke(null, (Id, config));
 
     protected abstract void UpdateButtonClick(object? sender, EventArgs e);
 
     protected void StartButtonClick(object? sender, EventArgs args)
     {
-        StartButtonClicked?.Invoke(this, Id);
+        StartButtonClicked?.Invoke(null, Id);
         StartButton.Enabled = false;
     }
 
     protected void StopButtonClick(object? sender, EventArgs args)
     {
-        StopButtonClicked?.Invoke(this, Id);
+        StopButtonClicked?.Invoke(null, Id);
         StopButton.Enabled = false;
     }
 

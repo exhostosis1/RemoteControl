@@ -29,10 +29,10 @@ public class HttpListenerWrapper: IHttpListenerWrapper
             _listener.Stop();
     }
 
-    public async Task<Context> GetContextAsync()
+    public async Task<HttpContext> GetContextAsync()
     {
         var context = await _listener.GetContextAsync();
 
-        return new Context(context);
+        return new HttpContext(context);
     }
 }

@@ -4,20 +4,20 @@ using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class LoggingMiddleware : AbstractMiddleware
+public class LoggingMiddleware: AbstractMiddleware<HttpContext>
 {
     private readonly ILogger<LoggingMiddleware> _logger;
 
-    public LoggingMiddleware(ILogger<LoggingMiddleware> logger, EventHandler<Context>? next = null) : base(next)
+    public LoggingMiddleware(ILogger<LoggingMiddleware> logger, AbstractMiddleware<HttpContext>? next = null): base(next)
     {
         _logger = logger;
     }
 
-    public override void ProcessRequest(object? sender, Context context)
+    public override void ProcessRequest(HttpContext context)
     {
         _logger.LogInfo(context.Request.Path);
 
-        Next?.Invoke(this, context);
+        Next?.ProcessRequest(context);
 
         _logger.LogInfo($"{context.Response.StatusCode}\n{context.Response.ContentType}\n{context.Response.Payload}");
     }

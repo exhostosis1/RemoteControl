@@ -8,9 +8,9 @@ public class LocalTaskDefinition : ITaskDefinition
     public string UserId { get; set; }
     public bool Enabled { get; init; }
 
-    public List<TaskTrigger> Triggers => new();
+    public TaskTriggerCollection Triggers => new();
 
-    public List<TaskAction> Actions => new();
+    public TaskActionCollection Actions => new();
 
     public LocalTaskDefinition(string name, string userId)
     {

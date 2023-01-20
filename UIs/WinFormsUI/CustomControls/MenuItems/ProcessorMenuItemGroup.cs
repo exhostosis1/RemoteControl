@@ -56,15 +56,15 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
     {
         if (StartStopItem.Text == @"Start")
         {
-            OnStartClick?.Invoke(this, Id);
+            OnStartClick?.Invoke(null, Id);
         }
         else
         {
-            OnStopClick?.Invoke(this, Id);
+            OnStopClick?.Invoke(null, Id);
         }
     }
     
-    protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(this, value);
+    protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(null, value);
 
     
 

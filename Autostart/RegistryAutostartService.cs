@@ -1,5 +1,4 @@
-﻿using Microsoft.Win32;
-using Shared;
+﻿using Shared;
 using Shared.Logging.Interfaces;
 using Shared.RegistryWrapper;
 using System.Diagnostics;
@@ -37,7 +36,7 @@ public class RegistryAutostartService : IAutostartService
         {
             try
             {
-                _regKey.SetValue(RegName, _regValue, RegistryValueKind.String);
+                _regKey.SetValue(RegName, _regValue, RegValueType.String);
             }
             catch (Exception e)
             {

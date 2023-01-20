@@ -177,7 +177,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void RemoveClicked(int id)
     {
-        ProcessorRemovedEvent?.Invoke(this, id);
+        ProcessorRemovedEvent?.Invoke(null, id);
 
         var p = _windowPanels.FirstOrDefault(x => x.Id == id);
         if (p != null)
@@ -199,7 +199,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        CloseEvent?.Invoke(this, EventArgs.Empty);
+        CloseEvent?.Invoke(null, EventArgs.Empty);
     }
 
     private static void IpToolStripMenuItem_Click(object? sender, string? input)
@@ -211,12 +211,12 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StartEvent?.Invoke(this, null);
+        StartEvent?.Invoke(null, null);
     }
 
     private void StopAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StopEvent?.Invoke(this, null);
+        StopEvent?.Invoke(null, null);
     }
 
     private void ConfigForm_Shown(object sender, EventArgs e)
@@ -226,7 +226,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AutostartStripMenuItem_Click(object sender, EventArgs e)
     {
-        AutostartChangedEvent?.Invoke(this, !IsAutostart);
+        AutostartChangedEvent?.Invoke(null, !IsAutostart);
     }
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -252,12 +252,12 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddServerButton_Click(object sender, EventArgs e)
     {
-        ProcessorAddedEvent?.Invoke(this, "server");
+        ProcessorAddedEvent?.Invoke(null, "server");
     }
 
     private void AddBotButton_Click(object sender, EventArgs e)
     {
-        ProcessorAddedEvent?.Invoke(this, "bot");
+        ProcessorAddedEvent?.Invoke(null, "bot");
     }
 
     private void ApplyTheme()

@@ -9,13 +9,14 @@ using Shared.DataObjects.Http;
 
 namespace Servers.Endpoints;
 
-public class ApiV1Endpoint : IApiEndpoint
+public class ApiV1Middleware : AbstractMiddleware<HttpContext>
 {
     private readonly ControllersWithMethods _controllers;
-    private readonly ILogger<ApiV1Endpoint> _logger;
+    private readonly ILogger<ApiV1Middleware> _logger;
     public string ApiVersion => "v1";
 
-    public ApiV1Endpoint(IEnumerable<IApiController> controllers, ILogger<ApiV1Endpoint> logger)
+    public ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger,
+        AbstractMiddleware<HttpContext>? next = null) : base(next)
     {
         _logger = logger;
         _controllers = controllers.GetControllersWithMethods();
@@ -23,13 +24,20 @@ public class ApiV1Endpoint : IApiEndpoint
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
 
-    public void ProcessRequest(object? sender, Context context)
+    public override void ProcessRequest(HttpContext context)
     {
+        if (!Utils.TryGetApiVersion(context.Request.Path, out var version) || version != ApiVersion)
+        {
+            Next?.ProcessRequest(context);
+            return;
+        }
+
         _logger.LogInfo($"Processing api request {context.Request.Path}");
 
         if (!Utils.TryParsePath(context.Request.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
             || !_controllers[controller].ContainsKey(action))
         {
+
             context.Response.StatusCode = HttpStatusCode.NotFound;
             _logger.LogError("Api method not found");
             return;
