@@ -2,11 +2,16 @@
 
 namespace Shared.Server;
 
-public abstract class AbstractMiddleware<T> where T: IContext
+public interface IMiddleware<in T> where T: IContext
 {
-    protected AbstractMiddleware<T>? Next { get; set; }
+    public void ProcessRequest(T context);
+}
 
-    public AbstractMiddleware(AbstractMiddleware<T>? next = null)
+public abstract class AbstractMiddleware<T>: IMiddleware<T> where T : IContext
+{
+    protected IMiddleware<T>? Next { get; set; }
+
+    public AbstractMiddleware(IMiddleware<T>? next = null)
     {
         Next = next;
     }

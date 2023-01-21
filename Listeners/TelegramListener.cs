@@ -13,9 +13,9 @@ public class TelegramListener: IListener<BotContext>
         private readonly string _apiKey;
         private readonly string _apiUrl;
         private readonly int _chatId;
-        private readonly TelegramBotApiProvider _wrapper;
+        private readonly IBotApiProvider _wrapper;
 
-        public LocalResponse(string apiUrl, string apiKey, int chatId, TelegramBotApiProvider wrapper)
+        public LocalResponse(string apiUrl, string apiKey, int chatId, IBotApiProvider wrapper)
         {
             _apiKey = apiKey;
             _apiUrl = apiUrl;
@@ -34,7 +34,7 @@ public class TelegramListener: IListener<BotContext>
     private List<string> _usernames = new();
 
     private readonly ILogger<TelegramListener> _logger;
-    private readonly TelegramBotApiProvider _wrapper;
+    private readonly IBotApiProvider _wrapper;
 
     private CancellationTokenSource? _cst;
     private readonly IProgress<bool> _progress;
@@ -45,7 +45,7 @@ public class TelegramListener: IListener<BotContext>
     private readonly Queue<BotContextRequest> _updates = new();
     private readonly SemaphoreSlim _semaphore = new(0);
 
-    public TelegramListener(TelegramBotApiProvider wrapper, ILogger<TelegramListener> logger)
+    public TelegramListener(IBotApiProvider wrapper, ILogger<TelegramListener> logger)
     {
         _logger = logger;
         _wrapper = wrapper;

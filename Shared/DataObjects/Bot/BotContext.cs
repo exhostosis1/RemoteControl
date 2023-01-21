@@ -2,16 +2,15 @@
 
 public class BotContext: IContext
 {
-    public BotContextRequest Request { get; set; }
-    public BotContextResponse Response { get; set; }
+    public IRequest Request => BotRequest;
+    public IResponse Response => BotResponse;
 
-    public BotContext(BotContextRequest request)
-    {
-        Request = request;
-    }
+    public BotContextRequest BotRequest { get; set; }
+    public BotContextResponse BotResponse { get; set; }
 
-    public BotContext(BotContextRequest request, BotContextResponse response) : this(request)
+    public BotContext(BotContextRequest request, BotContextResponse response)
     {
-        Response = response;
+        BotRequest = request;
+        BotResponse = response;
     }
 }

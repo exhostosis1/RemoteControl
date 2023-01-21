@@ -15,10 +15,10 @@ public class LoggingMiddleware: AbstractMiddleware<HttpContext>
 
     public override void ProcessRequest(HttpContext context)
     {
-        _logger.LogInfo(context.Request.Path);
+        _logger.LogInfo(context.HttpRequest.Path);
 
         Next?.ProcessRequest(context);
 
-        _logger.LogInfo($"{context.Response.StatusCode}\n{context.Response.ContentType}\n{context.Response.Payload}");
+        _logger.LogInfo($"{context.HttpResponse.StatusCode}\n{context.HttpResponse.ContentType}\n{context.HttpResponse.Payload}");
     }
 }

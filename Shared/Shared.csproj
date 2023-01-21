@@ -10,4 +10,8 @@
     <DebugType>none</DebugType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="ControlProcessor\" />
+  </ItemGroup>
+
 </Project>

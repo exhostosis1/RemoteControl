@@ -28,7 +28,7 @@ public static class Program
 
                     for (var i = 0; i < RemoteControlMain.Program.ControlProcessors.Count; i++)
                     {
-                        if (RemoteControlMain.Program.ControlProcessors[i].Working)
+                        if (RemoteControlMain.Program.ControlProcessors[i].Status.Working)
                         {
                             indexes.Add(i);
                             RemoteControlMain.Program.ControlProcessors[i].Stop();

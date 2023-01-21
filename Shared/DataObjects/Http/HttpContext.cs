@@ -2,13 +2,16 @@
 
 public class HttpContext: IContext
 {
-    public Request Request { get; set; }
-    public Response Response { get; set; }
+    public IRequest Request => HttpRequest;
+    public IResponse Response => HttpResponse;
+
+    public Request HttpRequest { get; set; }
+    public Response HttpResponse { get; set; }
 
 
     public HttpContext(Request request, Response response)
     {
-        Request = request;
-        Response = response;
+        HttpRequest = request;
+        HttpResponse = response;
     }
 }

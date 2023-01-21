@@ -1,12 +1,12 @@
 ﻿using Shared;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;
 
 internal abstract class ProcessorMenuItemGroup : IDisposable
 {
     public int Id { get; init; }
-    protected readonly AbstractControlProcessor Processor;
+    protected readonly IServer Processor;
 
     protected readonly ToolStripMenuItem NameItem = new()
     {
@@ -28,7 +28,7 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
 
     protected event EventHandler? Disposed;
 
-    protected ProcessorMenuItemGroup(AbstractControlProcessor processor)
+    protected ProcessorMenuItemGroup(IServer processor)
     {
         Id = processor.Id;
         Processor = processor;
@@ -36,16 +36,16 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
         NameItem.Text = processor.Config.Name;
         Items.Add(NameItem);
         
-        DescriptionItem.Enabled = processor.Working;
+        DescriptionItem.Enabled = processor.Status.Working;
         Items.Add(DescriptionItem);
 
-        StartStopItem.Text = !processor.Working ? @"Start" : @"Stop";
+        StartStopItem.Text = !processor.Status.Working ? @"Start" : @"Stop";
         StartStopItem.Click += StartStopClicked;
         Items.Add(StartStopItem);
 
         Items.Add(new ToolStripSeparator());
 
-        StatusUnsubscriber = processor.Subscribe(new Observer<bool>(working =>
+        StatusUnsubscriber = processor.Status.Subscribe(new Observer<bool>(working =>
         {
             StartStopItem.Text = working ? @"Stop" : @"Start";
             DescriptionItem.Enabled = working;

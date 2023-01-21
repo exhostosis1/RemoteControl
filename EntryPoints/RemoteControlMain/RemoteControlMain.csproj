@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\ApiControllers\ApiControllers.csproj" />
-    <ProjectReference Include="..\..\ControlProcessors\Bots\Bots.csproj" />
     <ProjectReference Include="..\..\ControlProcessors\Servers\Servers.csproj" />
     <ProjectReference Include="..\..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />

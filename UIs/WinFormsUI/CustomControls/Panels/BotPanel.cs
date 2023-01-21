@@ -1,6 +1,6 @@
 ﻿using Shared;
 using Shared.Config;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;
 
@@ -51,7 +51,7 @@ internal sealed class BotPanel : ProcessorPanel
 
     private readonly IDisposable _unsubscriber;
 
-    public BotPanel(BotProcessor processor) : base(processor)
+    public BotPanel(IServer<BotConfig> processor) : base(processor)
     {
         _apiUrlTextBox.Text = processor.CurrentConfig.ApiUri;
         _apiKeyTextBox.Text = processor.CurrentConfig.ApiKey;

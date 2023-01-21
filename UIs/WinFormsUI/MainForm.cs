@@ -1,8 +1,8 @@
 ﻿using Shared;
-using Shared.ControlProcessor;
 using Shared.UI;
 using Windows.UI.ViewManagement;
 using Shared.Config;
+using Shared.Server;
 using WinFormsUI.CustomControls.MenuItems;
 using WinFormsUI.CustomControls.Panels;
 
@@ -24,7 +24,7 @@ public sealed partial class MainForm : Form, IUserInterface
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
     
-    private List<AbstractControlProcessor> _model = new();
+    private List<IServer> _model = new();
     private readonly List<ProcessorMenuItemGroup> _toolStripGroups = new();
     private readonly List<ProcessorPanel> _windowPanels = new();
 
@@ -69,7 +69,7 @@ public sealed partial class MainForm : Form, IUserInterface
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
     }
 
-    public void RunUI(List<AbstractControlProcessor> processors)
+    public void RunUI(List<IServer> processors)
     {
         _model = processors;
 
@@ -88,12 +88,12 @@ public sealed partial class MainForm : Form, IUserInterface
     private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
     private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGrup));
 
-    private ProcessorPanel CreatePanel(AbstractControlProcessor processor)
+    private ProcessorPanel CreatePanel(IServer processor)
     {
         ProcessorPanel panel = processor switch
         {
-            ServerProcessor s => new ServerPanel(s),
-            BotProcessor b => new BotPanel(b),
+            IServer<ServerConfig> s => new ServerPanel(s),
+            IServer<BotConfig> b => new BotPanel(b),
             _ => throw new NotSupportedException()
         };
 
@@ -110,12 +110,12 @@ public sealed partial class MainForm : Form, IUserInterface
         return panel;
     }
 
-    private ProcessorMenuItemGroup CreateMenuItemGrup(AbstractControlProcessor processor)
+    private ProcessorMenuItemGroup CreateMenuItemGrup(IServer processor)
     {
         ProcessorMenuItemGroup group = processor switch
         {
-            ServerProcessor s => new ServerMenuItemGroup(s),
-            BotProcessor b => new BotMenuItemGroup(b),
+            IServer<ServerConfig> s => new ServerMenuItemGroup(s),
+            IServer<BotConfig> b => new BotMenuItemGroup(b),
             _ => throw new NotSupportedException()
         };
 
@@ -126,7 +126,7 @@ public sealed partial class MainForm : Form, IUserInterface
         return group;
     }
 
-    public void AddProcessor(AbstractControlProcessor processor)
+    public void AddProcessor(IServer processor)
     {
         _windowPanels.Add(CreatePanel(processor));
         _toolStripGroups.Add(CreateMenuItemGrup(processor));
@@ -231,8 +231,8 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var uris = _model.Where(x => x.Working && x is ServerProcessor)
-            .Select(x => ((ServerProcessor)x).CurrentConfig.Uri);
+        var uris = _model.Where(x => x.Status.Working && x is IServer<ServerConfig>)
+            .Select(x => ((IServer<ServerConfig>)x).CurrentConfig.Uri);
         Utils.AddFirewallRule(uris);
     }
 

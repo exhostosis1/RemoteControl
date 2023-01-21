@@ -27,6 +27,7 @@ public class TelegramBot: BotProcessor
 
         _progress = new Progress<bool>(status =>
         {
+            StatusObservers.ForEach(x => x.OnNext(status));
             Working = status;
         });
     }

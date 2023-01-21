@@ -1,9 +1,10 @@
-﻿using Bots;
-using Servers;
+﻿using Servers;
 using Shared;
 using Shared.Config;
-using Shared.ControlProcessor;
+using Shared.DataObjects.Bot;
+using Shared.DataObjects.Http;
 using Shared.Logging;
+using Shared.Server;
 
 namespace RemoteControlMain;
 
@@ -11,9 +12,9 @@ public static class Program
 {
     private static int _id;
 
-    private static AbstractControlProcessor CreateSimpleServer(IContainer container, ServerConfig? config = null)
+    private static IServer CreateSimpleServer(IContainer container, ServerConfig? config = null)
     {
-        var result = new SimpleServer(container.NewWebListener(container.NewHttpListener()), container.ApiMiddleware, new LogWrapper<SimpleServer>(container.Logger), config)
+        var result = new SimpleServer<HttpContext, ServerConfig>(container.NewWebListener(container.NewHttpListener(container.Logger)), container.ApiMiddleware, new LogWrapper<SimpleServer<HttpContext, ServerConfig>>(container.Logger), config)
         {
             Id = _id++
         };
@@ -21,9 +22,9 @@ public static class Program
         return result;
     }
 
-    private static AbstractControlProcessor CreateTelegramBot(IContainer container, BotConfig? config = null)
+    private static IServer CreateTelegramBot(IContainer container, BotConfig? config = null)
     {
-        var result = new TelegramBot(container.NewBotListener(container.NewTelegramBotApiProvider(container.NewHttpClient(), container.Logger), container.Logger), container.CommandExecutor, new LogWrapper<TelegramBot>(container.Logger), config)
+        var result = new SimpleServer<BotContext, BotConfig>(container.NewBotListener(container.NewTelegramBotApiProvider(container.NewHttpClient(), container.Logger), container.Logger), container.CommandExecutor, new LogWrapper<SimpleServer<BotContext, BotConfig>>(container.Logger), config)
         {
             Id = _id++
         };
@@ -31,23 +32,20 @@ public static class Program
         return result;
     }
 
-    private static IEnumerable<AbstractControlProcessor> CreateProcessors(AppConfig config, IContainer container)
+    private static IEnumerable<IServer> CreateProcessors(AppConfig config, IContainer container)
     {
-        foreach (var configServer in config.Servers)
+        return config.ProcessorConfigs.Select(x => x switch
         {
-            yield return CreateSimpleServer(container, configServer);
-        }
-
-        foreach (var configBot in config.Bots)
-        {
-            yield return CreateTelegramBot(container, configBot);
-        }
+            ServerConfig s => CreateSimpleServer(container, s),
+            BotConfig b => CreateTelegramBot(container, b),
+            _ => throw new NotSupportedException("Config not supported")
+        });
     }
 
-    private static AppConfig GetConfig(IEnumerable<AbstractControlProcessor> processors) =>
+    private static AppConfig GetConfig(IEnumerable<IServer> processors) =>
         new(processors.Select(x => x.Config));
 
-    public static List<AbstractControlProcessor> ControlProcessors { get; private set; } = new();
+    public static List<IServer> ControlProcessors { get; private set; } = new();
 
     public static void Run(IPlatformDependantContainer lesserContainer)
     {
@@ -121,13 +119,13 @@ public static class Program
             ui.SetAutostartValue(container.AutostartService.CheckAutostart());
         };
 
-        ui.ConfigChangedEvent += (sender, configTuple) =>
+        ui.ConfigChangedEvent += (_, configTuple) =>
         {
             var processor = ControlProcessors.FirstOrDefault(x => x.Id == configTuple.Item1);
             if (processor == null)
                 return;
 
-            if (processor.Working)
+            if (processor.Status.Working)
             {
                 processor.Restart(configTuple.Item2);
             }

@@ -1,80 +1,80 @@
 ﻿using Shared;
 using Shared.Config;
-using Shared.ControlProcessor;
-using Shared.DataObjects.Http;
+using Shared.DataObjects;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using Shared.Server;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
 
 namespace Servers;
 
-public class SimpleServer: ServerProcessor
+public class SimpleServer<TContext, TConfig>: IServer<TConfig> where TContext: IContext where TConfig: CommonConfig, new()
 {
-    private readonly ILogger<SimpleServer> _logger;
-    
-    private readonly IListener<HttpContext> _wrapper;
-    private readonly AbstractMiddleware<HttpContext> _middleware;
+    public int Id { get; init; } = -1;
+    public ServerStatus Status { get; } = new();
 
-    private CancellationTokenSource? _cst;
-    private readonly Progress<bool> _progress;
+    private readonly ILogger<SimpleServer<TContext, TConfig>> _logger;
+    
+    private readonly IListener<TContext> _listener;
+    private readonly IMiddleware<TContext> _middleware;
+
+    private CancellationTokenSource? _cts;
+    private readonly IProgress<bool> _progress;
 
     private readonly TaskFactory _factory = new();
 
-    public SimpleServer(IListener<HttpContext> wrapper, AbstractMiddleware<HttpContext> middleware, ILogger<SimpleServer> logger, ServerConfig? config = null): base(config)
+    public TConfig DefaultConfig { get; } = new();
+
+    public CommonConfig Config
     {
-        _logger = logger;
-        _wrapper = wrapper;
-        _middleware = middleware;
-        _progress = new Progress<bool>(status =>
-        {
-            Working = status;
-            StatusObservers.ForEach(x => x.OnNext(status));
-        });
+        get => CurrentConfig;
+        set => CurrentConfig = value as TConfig ?? CurrentConfig;
     }
 
-    protected override void StartInternal(ServerConfig config)
+    private TConfig _currentConfig;
+
+    public TConfig CurrentConfig
     {
-        if (_wrapper.IsListening)
+        get => _currentConfig;
+        set
+        {
+            _currentConfig = value;
+            _configObservers.ForEach(x => x.OnNext(value));
+        }
+    }
+
+    private readonly List<IObserver<TConfig>> _configObservers = new();
+
+    public SimpleServer(IListener<TContext> listener, IMiddleware<TContext> middleware, ILogger<SimpleServer<TContext, TConfig>> logger, TConfig? config = null)
+    {
+        _currentConfig = config ?? DefaultConfig;
+
+        _logger = logger;
+        _listener = listener;
+        _middleware = middleware;
+
+        _progress = new Progress<bool>(status => Status.Working = status);
+    }
+
+    public void Start(TConfig? config = null)
+    {
+        if (config != null)
+            CurrentConfig = config;
+
+        if (Status.Working)
         {
             Stop();
         }
 
-        var param = new StartParameters(config.Uri.ToString());
+        var param = CurrentConfig switch
+        {
+            ServerConfig s => new StartParameters(s.Uri.ToString()),
+            BotConfig b => new StartParameters(b.ApiUri, b.ApiKey, b.Usernames),
+            _ => throw new NotSupportedException("Config type not supported")
+        };
 
         try
         {
-            _wrapper.StartListen(param);
-        }
-        catch (HttpListenerException e)
-        {
-            if (e.Message.Contains("Failed to listen"))
-            {
-                _logger.LogError($"{config.Uri} is already registered");
-                return;
-            }
-
-            if (!Utils.GetCurrentIPs().Contains(config.Uri.Host))
-            {
-                _logger.LogError($"{config.Uri.Host} is currently unavailable");
-                return;
-            }
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                throw;
-
-            _logger.LogWarn("Trying to add listening permissions to user");
-
-            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
-            var translatedValue = sid.Translate(typeof(NTAccount)).Value;
-            var command =
-                $"netsh http add urlacl url={config.Uri} user={translatedValue}";
-
-            Utils.RunWindowsCommandAsAdmin(command);
-
-            _wrapper.StartListen(param);
+            _listener.StartListen(param);
         }
         catch (Exception e)
         {
@@ -82,26 +82,28 @@ public class SimpleServer: ServerProcessor
             return;
         }
 
-        _cst = new CancellationTokenSource();
+        _cts = new CancellationTokenSource();
 
-        _factory.StartNew(async () => await ProcessRequestAsync(_progress, _cst.Token),
-            TaskCreationOptions.LongRunning);
+        _factory.StartNew(async () => await ProcessRequestAsync(_cts.Token), TaskCreationOptions.LongRunning);
 
         _logger.LogInfo($"Started listening on {param.Uri}");
     }
 
-    private async Task ProcessRequestAsync(IProgress<bool> progress, CancellationToken token)
+    public void Restart(TConfig? config = null)
     {
-        progress.Report(true);
+        Stop();
+        Start(config);
+    }
+
+    private async Task ProcessRequestAsync(CancellationToken token)
+    {
+        _progress.Report(true);
         while (!token.IsCancellationRequested)
         {
             try
             {
-                var context = await _wrapper.GetContextAsync(token);
-                token.ThrowIfCancellationRequested();
-
+                var context = await _listener.GetContextAsync(token);
                 _middleware.ProcessRequest(context);
-
                 context.Response.Close();
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)
@@ -115,18 +117,40 @@ public class SimpleServer: ServerProcessor
             }
         }
         
-        progress.Report(false);
+        _progress.Report(false);
     }
 
-    public override void Stop()
+    public void Start(CommonConfig? config = null)
     {
-        if (_wrapper.IsListening)
+        var c = config as TConfig ?? CurrentConfig;
+        Start(c);
+    }
+
+    public void Restart(CommonConfig? config = null)
+    {
+        Stop();
+        Start(config);
+    }
+
+    public void Stop()
+    {
+        if (!Status.Working) return;
+
+        try
         {
-            _cst?.Cancel();
-            _cst?.Dispose();
-            _wrapper.StopListen();
+            _cts?.Cancel();
+            _cts?.Dispose();
         }
+        catch (ObjectDisposedException) { }
+
+        _listener.StopListen();
 
         _logger.LogInfo("Stopped listening");
+    }
+
+    public IDisposable Subscribe(IObserver<TConfig> observer)
+    {
+        _configObservers.Add(observer);
+        return new Unsubscriber<TConfig>(_configObservers, observer);
     }
 }

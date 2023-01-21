@@ -1,7 +1,6 @@
 ﻿using ApiControllers;
-using Bots;
 using Listeners;
-using Servers.Endpoints;
+using Servers.Middleware;
 using Shared;
 using Shared.ApiControllers;
 using Shared.Bots.Telegram;
@@ -31,14 +30,14 @@ internal class Container : IContainer
     public IListener<BotContext> BotListener { get; }
     public IHttpClient HttpClient { get; }
     public IHttpListener HttpListener { get; }
-    public TelegramBotApiProvider TelegramBotApiProvider { get; }
+    public IBotApiProvider TelegramBotApiProvider { get; }
     public IApiController AudioController { get; }
     public IApiController MouseController { get; }
     public IApiController KeyboardController { get; }
     public IApiController DisplayController { get; }
-    public AbstractMiddleware<HttpContext> ApiMiddleware { get; }
-    public AbstractMiddleware<HttpContext> StaticMiddleware { get; }
-    public AbstractMiddleware<BotContext> CommandExecutor { get; }
+    public IMiddleware<HttpContext> ApiMiddleware { get; }
+    public IMiddleware<HttpContext> StaticMiddleware { get; }
+    public IMiddleware<BotContext> CommandExecutor { get; }
 
     public ILogger NewLogger() => _innerContainer.NewLogger();
     public IConfigProvider NewConfigProvider(ILogger logger) => _innerContainer.NewConfigProvider(logger);
@@ -46,12 +45,12 @@ internal class Container : IContainer
     public IUserInterface NewUserInterface() => _innerContainer.NewUserInterface();
     public IControlProvider NewControlProvider(ILogger logger) => _innerContainer.NewControlProvider(logger);
     public IListener<HttpContext> NewWebListener(IHttpListener listener) => new SimpleHttpListener(listener);
-    public IListener<BotContext> NewBotListener(TelegramBotApiProvider provider, ILogger logger) =>
+    public IListener<BotContext> NewBotListener(IBotApiProvider provider, ILogger logger) =>
         new TelegramListener(provider, new LogWrapper<TelegramListener>(logger));
     public IHttpClient NewHttpClient() => new HttpClientWrapper();
-    public IHttpListener NewHttpListener() => new HttpListenerWrapper();
-    public TelegramBotApiProvider NewTelegramBotApiProvider(IHttpClient client, ILogger logger) =>
-        new(client, new LogWrapper<TelegramBotApiProvider>(logger));
+    public IHttpListener NewHttpListener(ILogger logger) => new HttpListenerWrapper(new LogWrapper<HttpListenerWrapper>(logger));
+    public IBotApiProvider NewTelegramBotApiProvider(IHttpClient client, ILogger logger) =>
+        new TelegramBotApiProvider(client, new LogWrapper<TelegramBotApiProvider>(logger));
     public IApiController NewAudioController(IControlProvider provider, ILogger logger) =>
         new AudioController(provider, new LogWrapper<AudioController>(logger));
     public IApiController NewKeyboardController(IControlProvider provider, ILogger logger) =>
@@ -60,19 +59,19 @@ internal class Container : IContainer
         new MouseController(provider, new LogWrapper<MouseController>(logger));
     public IApiController NewDisplayController(IControlProvider provider, ILogger logger) =>
         new DisplayController(provider, new LogWrapper<DisplayController>(logger));
-    public AbstractMiddleware<HttpContext> NewApiMiddleware(IEnumerable<IApiController> controllers, ILogger logger,
-        AbstractMiddleware<HttpContext>? next = null) =>
+    public IMiddleware<HttpContext> NewApiMiddleware(IEnumerable<IApiController> controllers, ILogger logger,
+        IMiddleware<HttpContext>? next = null) =>
         new ApiV1Middleware(controllers, new LogWrapper<ApiV1Middleware>(logger), next);
-    public AbstractMiddleware<HttpContext> NewStaticMiddleware(ILogger logger, string directory = "www") =>
+    public IMiddleware<HttpContext> NewStaticMiddleware(ILogger logger, string directory = "www") =>
         new StaticFilesMiddleware(new LogWrapper<StaticFilesMiddleware>(logger), directory);
-    public AbstractMiddleware<BotContext> NewCommmandExecutor(IControlProvider provider, ILogger logger) =>
+    public IMiddleware<BotContext> NewCommmandExecutor(IControlProvider provider, ILogger logger) =>
         new CommandsExecutor(provider, new LogWrapper<CommandsExecutor>(logger));
 
     public Container(IPlatformDependantContainer inner)
     {
         _innerContainer = inner;
 
-        HttpListener = NewHttpListener();
+        HttpListener = NewHttpListener(Logger);
         WebListener = NewWebListener(HttpListener);
         
         HttpClient = NewHttpClient();

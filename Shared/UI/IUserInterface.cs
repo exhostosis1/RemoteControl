@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Shared.Config;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace Shared.UI;
 
@@ -18,7 +18,7 @@ public interface IUserInterface
     public void SetAutostartValue(bool value);
 
     // ReSharper disable once InconsistentNaming
-    public void RunUI(List<AbstractControlProcessor> processors);
+    public void RunUI(List<IServer> processors);
     public void ShowError(string message);
-    public void AddProcessor(AbstractControlProcessor processor);
+    public void AddProcessor(IServer processor);
 }

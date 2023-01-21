@@ -1,12 +1,12 @@
 ﻿using Shared.Config;
 using Shared;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;
 
 internal class ServerMenuItemGroup : ProcessorMenuItemGroup
 {
-    public ServerMenuItemGroup(ServerProcessor processor): base(processor)
+    public ServerMenuItemGroup(IServer<ServerConfig> processor): base(processor)
     {
         DescriptionItem.Text = processor.CurrentConfig.Uri.ToString();
         DescriptionItem.Click += (_, _) => DescriptionClickInvoke(DescriptionItem.Text);

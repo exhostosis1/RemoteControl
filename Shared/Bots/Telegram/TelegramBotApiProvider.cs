@@ -14,7 +14,16 @@ using System.Threading.Tasks;
 
 namespace Shared.Bots.Telegram;
 
-public class TelegramBotApiProvider
+public interface IBotApiProvider
+{
+    public UpdateResponse GetUpdates(string apiUrl, string apiKey);
+    public Task<UpdateResponse> GetUpdatesAsync(string apiUrl, string apiKey, CancellationToken token = default);
+    public Task SendResponseAsync(string apiUrl, string apiKey, int chatId, string message,
+        ButtonsMarkup? buttons = null, CancellationToken token = default);
+    public void SendResponse(string apiUrl, string apiKey, int chatId, string message, ButtonsMarkup? buttons = null);
+}
+
+public class TelegramBotApiProvider: IBotApiProvider
 {
     class LocalHttpRequest: IHttpClientRequest
     {

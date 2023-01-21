@@ -5,9 +5,9 @@ namespace Shared.Config;
 
 public class ServerConfig: CommonConfig
 {
-    public string Scheme { get; set; } = string.Empty;
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; }
+    public string Scheme { get; set; } = "http";
+    public string Host { get; set; } = "localhost";
+    public int Port { get; set; } = 80;
 
     [JsonIgnore]
     public Uri Uri

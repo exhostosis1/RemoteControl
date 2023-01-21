@@ -7,7 +7,7 @@ using System.Net;
 using System.Text;
 using Shared.DataObjects.Http;
 
-namespace Servers.Endpoints;
+namespace Servers.Middleware;
 
 public class ApiV1Middleware : AbstractMiddleware<HttpContext>
 {
@@ -16,7 +16,7 @@ public class ApiV1Middleware : AbstractMiddleware<HttpContext>
     public string ApiVersion => "v1";
 
     public ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger,
-        AbstractMiddleware<HttpContext>? next = null) : base(next)
+        IMiddleware<HttpContext>? next = null) : base(next)
     {
         _logger = logger;
         _controllers = controllers.GetControllersWithMethods();
@@ -26,19 +26,19 @@ public class ApiV1Middleware : AbstractMiddleware<HttpContext>
 
     public override void ProcessRequest(HttpContext context)
     {
-        if (!Utils.TryGetApiVersion(context.Request.Path, out var version) || version != ApiVersion)
+        if (!Utils.TryGetApiVersion(context.HttpRequest.Path, out var version) || version != ApiVersion)
         {
             Next?.ProcessRequest(context);
             return;
         }
 
-        _logger.LogInfo($"Processing api request {context.Request.Path}");
+        _logger.LogInfo($"Processing api request {context.HttpRequest.Path}");
 
-        if (!Utils.TryParsePath(context.Request.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
+        if (!Utils.TryParsePath(context.HttpRequest.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
             || !_controllers[controller].ContainsKey(action))
         {
 
-            context.Response.StatusCode = HttpStatusCode.NotFound;
+            context.HttpResponse.StatusCode = HttpStatusCode.NotFound;
             _logger.LogError("Api method not found");
             return;
         }
@@ -47,18 +47,18 @@ public class ApiV1Middleware : AbstractMiddleware<HttpContext>
         {
             var result = _controllers[controller][action](param);
 
-            context.Response.StatusCode = result.StatusCode;
-            context.Response.Payload = GetBytes(result.Result);
+            context.HttpResponse.StatusCode = result.StatusCode;
+            context.HttpResponse.Payload = GetBytes(result.Result);
 
             if (result is JsonResult)
-                context.Response.ContentType = "application/json";
+                context.HttpResponse.ContentType = "application/json";
         }
         catch (Exception e)
         {
             _logger.LogError(e.Message);
 
-            context.Response.StatusCode = HttpStatusCode.InternalServerError;
-            context.Response.Payload = Encoding.UTF8.GetBytes(e.Message);
+            context.HttpResponse.StatusCode = HttpStatusCode.InternalServerError;
+            context.HttpResponse.Payload = Encoding.UTF8.GetBytes(e.Message);
         }
     }
 }

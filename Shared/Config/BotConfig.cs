@@ -7,7 +7,7 @@ namespace Shared.Config;
 
 public class BotConfig: CommonConfig
 {
-    public string ApiUri { get; set; } = string.Empty;
+    public string ApiUri { get; set; } = "http://api.telegram.org";
     public string ApiKey { get; set; } = string.Empty;
     public List<string> Usernames { get; set; } = new();
 

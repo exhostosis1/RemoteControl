@@ -3,7 +3,7 @@ using Shared.Server;
 using System.Net;
 using Shared.DataObjects.Http;
 
-namespace Servers.Endpoints;
+namespace Servers.Middleware;
 
 public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
 {
@@ -28,13 +28,13 @@ public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
 
     public override void ProcessRequest(HttpContext context)
     {
-        var uriPath = context.Request.Path;
+        var uriPath = context.HttpRequest.Path;
 
         _logger.LogInfo($"Processing file request {uriPath}");
 
         if (uriPath.Contains(".."))
         {
-            context.Response.StatusCode = HttpStatusCode.NotFound;
+            context.HttpResponse.StatusCode = HttpStatusCode.NotFound;
             return;
         }
 
@@ -47,16 +47,16 @@ public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
 
         var extension = Path.GetExtension(path);
 
-        context.Response.ContentType = ContentTypes.TryGetValue(extension, out var value) ? value : "text/plain";
+        context.HttpResponse.ContentType = ContentTypes.TryGetValue(extension, out var value) ? value : "text/plain";
 
         if (File.Exists(path))
         {
-            context.Response.Payload = File.ReadAllBytes(path);
+            context.HttpResponse.Payload = File.ReadAllBytes(path);
         }
         else
         {
             _logger.LogError($"File not found {path}");
-            context.Response.StatusCode = HttpStatusCode.NotFound;
+            context.HttpResponse.StatusCode = HttpStatusCode.NotFound;
         }
     }
 }

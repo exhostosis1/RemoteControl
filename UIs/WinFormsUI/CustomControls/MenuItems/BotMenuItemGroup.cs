@@ -1,12 +1,12 @@
 ﻿using Shared.Config;
 using Shared;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;
 
 internal class BotMenuItemGroup : ProcessorMenuItemGroup
 {
-    public BotMenuItemGroup(BotProcessor processor) : base(processor)
+    public BotMenuItemGroup(IServer<BotConfig> processor) : base(processor)
     {
         DescriptionItem.Text = processor.CurrentConfig.UsernamesString;
 

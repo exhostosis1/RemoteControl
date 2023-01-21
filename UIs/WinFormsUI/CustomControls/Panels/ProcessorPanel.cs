@@ -1,13 +1,13 @@
 ﻿using Shared;
 using Shared.Config;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;
 
 internal abstract class ProcessorPanel : Panel
 {
     public int Id { get; init; }
-    protected readonly AbstractControlProcessor ControlProcessor;
+    protected readonly IServer ControlProcessor;
     protected readonly SynchronizationContext? SynchronizationContext;
     protected readonly IDisposable Unsubscriber;
     protected Theme Theme { get; set; } = new();
@@ -65,7 +65,7 @@ internal abstract class ProcessorPanel : Panel
     public event EventHandler<int>? StopButtonClicked;
     public event EventHandler<(int, CommonConfig)>? UpdateButtonClicked;
 
-    protected ProcessorPanel(AbstractControlProcessor processor)
+    protected ProcessorPanel(IServer processor)
     {
         Width = 508;
         Height = 90;
@@ -78,7 +78,7 @@ internal abstract class ProcessorPanel : Panel
 
         SynchronizationContext = SynchronizationContext.Current;
 
-        if (processor.Working)
+        if (processor.Status.Working)
         {
             StopButton.Visible = true;
         }
@@ -106,7 +106,7 @@ internal abstract class ProcessorPanel : Panel
             UpdateButton
         });
 
-        Unsubscriber = ControlProcessor.Subscribe(new Observer<bool>(SetButtons));
+        Unsubscriber = ControlProcessor.Status.Subscribe(new Observer<bool>(SetButtons));
         Disposed += (_, _) => Unsubscriber.Dispose();
     }
 

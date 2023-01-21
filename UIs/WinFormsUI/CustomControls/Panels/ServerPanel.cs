@@ -1,6 +1,6 @@
 ﻿using Shared;
 using Shared.Config;
-using Shared.ControlProcessor;
+using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;
 
@@ -50,7 +50,7 @@ internal class ServerPanel : ProcessorPanel
 
     private readonly IDisposable _unsubscriber;
 
-    public ServerPanel(ServerProcessor processor) : base(processor)
+    public ServerPanel(IServer<ServerConfig> processor) : base(processor)
     {
         _schemeTextBox.Text = processor.CurrentConfig.Scheme;
         _hostTextBox.Text = processor.CurrentConfig.Host;
