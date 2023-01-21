@@ -169,8 +169,8 @@ public static partial class Utils
         }
     }
 
-    public static async Task<T> PostAsJsonAndGetResultAsync<T>(this HttpClient client, string? uri, object content, CancellationToken token,
-        JsonSerializerOptions? options = null)
+    public static async Task<T> PostAsJsonAndGetResultAsync<T>(this HttpClient client, string? uri, object content,
+        JsonSerializerOptions? options = null, CancellationToken token = default)
     {
         HttpResponseMessage response;
 
@@ -188,9 +188,9 @@ public static partial class Utils
 
         if (!response.IsSuccessStatusCode)
         {
-            throw new HttpRequestException("Error sending request to bot api", null, response.StatusCode);
+            throw new HttpRequestException("Error sending request", null, response.StatusCode);
         }
 
-        return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse api response");
+        return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse response");
     }
 }

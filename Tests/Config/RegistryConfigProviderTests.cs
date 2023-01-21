@@ -90,7 +90,7 @@ public class RegistryConfigProviderTests : IDisposable
             return result;
         }
 
-        public void SetValue(string? name, object value, RegistryValueKind valueKind)
+        public void SetValue(string? name, object value, RegValueType valueKind)
         {
             if (Name == "RemoteControl" && name == "Config" && value is string s)
                 Value = s;

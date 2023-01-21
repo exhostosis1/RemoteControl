@@ -1,6 +1,7 @@
 ﻿using Bots;
 using Moq;
 using Shared.ControlProviders;
+using Shared.DataObjects.Bot;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
@@ -22,8 +23,15 @@ public class CommandExecutorTests : IDisposable
     {
         var executor = new CommandsExecutor(_provider, _logger);
 
-        var result = executor.Execute(BotButtons.Darken);
-        Assert.True(result == "done");
+        var context = new BotContext
+        {
+            Request = new BotContextRequest
+            {
+                Command = BotButtons.Darken
+            }
+        };
+        executor.ProcessRequest(context);
+        Assert.True(context.Response.Result == "done");
         Mock.Get(_provider).Verify(x => x.DisplayOff());
 
         result = executor.Execute(BotButtons.MediaBack);

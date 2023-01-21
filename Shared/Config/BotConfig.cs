@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
-public class BotConfig: CommonConfig, IEquatable<BotConfig>
+public class BotConfig: CommonConfig
 {
     public string ApiUri { get; set; } = string.Empty;
     public string ApiKey { get; set; } = string.Empty;
@@ -21,10 +21,10 @@ public class BotConfig: CommonConfig, IEquatable<BotConfig>
         set => Usernames = value.Split(UsernamesSeparator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
     }
 
-    public bool Equals(BotConfig? that)
+    public override bool Equals(object? other)
     {
-        if (ReferenceEquals(null, that)) return false;
-        if (ReferenceEquals(this, that)) return true;
+        if (ReferenceEquals(this, other)) return true;
+        if (other is not BotConfig that) return false;
 
         if (Name != that.Name || Autostart != that.Autostart || ApiUri != that.ApiUri ||
             ApiKey != that.ApiKey || Usernames.Count != that.Usernames.Count) return false;

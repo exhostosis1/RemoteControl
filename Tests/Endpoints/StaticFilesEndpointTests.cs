@@ -35,22 +35,22 @@ public class StaticFilesEndpointTests : IDisposable
         File.WriteAllText(Path.Combine(path, "index.html"), indexContents);
         File.WriteAllText(Path.Combine(path, "file.txt"), fileContents);
 
-        var logger = Mock.Of<ILogger<StaticFilesEndpoint>>();
+        var logger = Mock.Of<ILogger<StaticFilesMiddleware>>();
 
-        var endpoint = new StaticFilesEndpoint(logger, directory);
+        var endpoint = new StaticFilesMiddleware(logger, directory);
 
-        var context = new Context("/index.html");
-        endpoint.ProcessRequest(this, context);
+        var context = new HttpContext("/index.html");
+        endpoint.ProcessRequest(context);
         var response = Encoding.UTF8.GetString(context.Response.Payload);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/html" } && response == indexContents);
 
-        context = new Context("/file.txt");
-        endpoint.ProcessRequest(this, context);
+        context = new HttpContext("/file.txt");
+        endpoint.ProcessRequest(context);
         response = Encoding.UTF8.GetString(context.Response.Payload);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" } && response == fileContents);
 
-        context = new Context("..");
-        endpoint.ProcessRequest(this, context);
+        context = new HttpContext("..");
+        endpoint.ProcessRequest(context);
         Assert.True(context.Response.StatusCode == HttpStatusCode.NotFound);
     }
 

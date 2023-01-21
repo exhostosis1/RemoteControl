@@ -57,10 +57,10 @@ public class LocalFileConfigProviderTests : IDisposable
         File.WriteAllText(_filePath, configText);
 
         config = _provider.GetConfig();
-        Assert.True(config.Equals(savedConfig));
+        Assert.Equal(config, savedConfig);
 
         config = _provider.GetConfig();
-        Assert.True(config.Equals(savedConfig));
+        Assert.Equal(config, savedConfig);
 
         Mock.Get(_logger).Verify(x => x.LogInfo(It.IsAny<string>()), Times.Exactly(3));
 

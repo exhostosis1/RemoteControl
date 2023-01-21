@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Servers;
+using Shared;
 using Shared.Config;
 using Shared.DataObjects.Http;
 using Shared.Listeners;
@@ -10,100 +11,53 @@ namespace Tests.CommandProcessors;
 
 public class SimpleServerTests : IDisposable
 {
+    private readonly SimpleServer _server;
+    private readonly ILogger<SimpleServer> _logger;
+    private readonly Mock<AbstractMiddleware<HttpContext>> _middlewareMock;
+    private readonly Mock<IListener<HttpContext>> _listenerMock;
+
+    private int _statusChangeCount;
+    private bool _isListening;
+    private ServerConfig _currentConfig;
+
+    private readonly IDisposable? _statusUnsubscriber = null;
+    private readonly IDisposable? _configUnsubscriber = null;
+
     public SimpleServerTests()
     {
+        _middlewareMock = new Mock<AbstractMiddleware<HttpContext>>(MockBehavior.Strict);
+        _listenerMock = new Mock<IListener<HttpContext>>(MockBehavior.Strict);
+        var state = new ListenerState();
+        _listenerMock.SetupGet(x => x.State).Returns(state);
+        _logger = Mock.Of<ILogger<SimpleServer>>();
 
-    }
+        _server = new SimpleServer(_listenerMock.Object, _middlewareMock.Object, _logger);
 
-    private class MockListener : IHttpListener
-    {
-        public bool IsListening { get; private set; }
-        public event EventHandler<bool>? OnStatusChange;
-        public event EventHandler<Context>? OnRequest;
-
-        public void StartListen(Uri uri)
-        {
-            IsListening = true;
-            OnStatusChange?.Invoke(this, IsListening);
-
-            OnRequest?.Invoke(this, new Context("path"));
-        }
-
-        public void StopListen()
-        {
-            IsListening = false;
-            OnStatusChange?.Invoke(this, IsListening);
-        }
-    }
-
-    private class MockMiddleware : AbstractMiddleware
-    {
-        public int InvokeCount = 0;
-
-        public override void ProcessRequest(object? sender, Context context)
-        {
-            InvokeCount++;
-        }
+        _statusUnsubscriber = _server.Subscribe(new Observer<bool>(status => _statusChangeCount++));
     }
 
     [Fact]
-    public void StartStopTest()
+    public void StartWithoutConfigTest()
     {
-        var middleware = new MockMiddleware();
-        var logger = Mock.Of<ILogger<SimpleServer>>();
-        var listener = new MockListener();
+        _listenerMock.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
+        _middlewareMock.Setup(x => x.ProcessRequest(It.IsAny<HttpContext>()));
 
-        var statusObserver = Mock.Of<IObserver<bool>>();
-        var configObserver = Mock.Of<IObserver<ServerConfig>>();
+        _server.Start();
 
-        var firstConfig = new ServerConfig
-        {
-            Scheme = "http",
-            Host = "localhost",
-            Port = 1234
-        };
+        Assert.Equal(SimpleServer.DefaultConfig, _server.CurrentConfig);
 
-        var secondConfig = new ServerConfig
-        {
-            Scheme = "https",
-            Host = "1.2.3.4",
-            Port = 5778
-        };
+        var context = new HttpContext("localhost");
+        
+        _middlewareMock.Verify(x => x.ProcessRequest(context), Times.Once);
 
-        var server = new SimpleServer(listener, middleware, logger, firstConfig);
+        Assert.True(_statusChangeCount == 1);
 
-        using var statusUnsub = server.Subscribe(statusObserver);
-        using var configUnsub = server.Subscribe(configObserver);
-
-        Assert.Same(server.CurrentConfig, firstConfig);
-        Assert.False(server.Working);
-
-        server.Start();
-        Assert.True(server.Working);
-
-        server.Stop();
-        Assert.False(server.Working);
-
-        server.Start(secondConfig);
-        Assert.True(server.Working);
-        Assert.Same(server.CurrentConfig, secondConfig);
-
-        server.Restart();
-        Assert.True(server.Working);
-        Assert.Same(server.CurrentConfig, secondConfig);
-
-        server.Restart(firstConfig);
-        Assert.True(server.Working);
-        Assert.Same(server.CurrentConfig, firstConfig);
-
-        Assert.True(middleware.InvokeCount == 4);
-        Mock.Get(statusObserver).Verify(x => x.OnNext(true), Times.Exactly(4));
-        Mock.Get(statusObserver).Verify(x => x.OnNext(false), Times.Exactly(3));
-        Mock.Get(configObserver).Verify(x => x.OnNext(It.IsAny<ServerConfig>()), Times.Exactly(2));
+        Assert.True(_server.Working);
     }
 
     public void Dispose()
     {
-
+        _statusUnsubscriber?.Dispose();
+        _configUnsubscriber?.Dispose();
     }
 }

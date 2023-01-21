@@ -1,144 +1,45 @@
-﻿using Shared;
+﻿using Shared.DataObjects.Http;
 using Shared.Listeners;
-using Shared.Logging.Interfaces;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using Shared.DataObjects.Http;
 
 namespace Listeners;
 
 public class SimpleHttpListener : IListener<HttpContext>
 {
-    public ListenerState State { get; private set; }
+    private readonly IHttpListener _listener;
 
-    private readonly ILogger<SimpleHttpListener> _logger;
-    private readonly IHttpListenerWrapper _wrapper;
+    public bool IsListening => _listener.IsListening;
 
-    private CancellationTokenSource? _cst;
-    private readonly Progress<bool> _progress;
-
-    private readonly TaskFactory _factory = new();
-
-    private readonly List<IObserver<bool>> _statusObservers = new();
-    private readonly List<IObserver<HttpContext>> _requestObservers = new();
-
-    public SimpleHttpListener(IHttpListenerWrapper wrapper, ILogger<SimpleHttpListener> logger)
+    public SimpleHttpListener(IHttpListener listener)
     {
-        _logger = logger;
-        _wrapper = wrapper;
-        State = new ListenerState();
-        _progress = new Progress<bool>(status =>
-        {
-            State.Listening = status;
-            _statusObservers.ForEach(x => x.OnNext(status));
-        });
+        _listener = listener;
     }
 
     public void StartListen(StartParameters param)
     {
-        if (_wrapper.IsListening)
+        if (_listener.IsListening)
         {
-            StopListen();
+            _listener.Stop();
         }
 
-        try
-        {
-            _wrapper.Start(param.Uri);
-        }
-        catch (HttpListenerException e)
-        {
-            if(e.Message.Contains("Failed to listen"))
-            {
-                _logger.LogError($"{param.Uri} is already registered");
-                return;
-            }
+        _listener.GetNew();
+        _listener.Prefixes.Add(param.Uri);
 
-            if(!Utils.GetCurrentIPs().Contains(param.Uri.Host))
-            {
-                _logger.LogError($"{param.Uri.Host} is currently unavailable");
-                return;
-            }
-
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                throw;
-
-            _logger.LogWarn("Trying to add listening permissions to user");
-
-            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
-            var translatedValue = sid.Translate(typeof(NTAccount)).Value;
-            var command =
-                $"netsh http add urlacl url={param.Uri} user={translatedValue}";
-
-            Utils.RunWindowsCommandAsAdmin(command);
-
-            _wrapper.Start(param.Uri);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e.Message);
-            return;
-        }
-
-        _cst = new CancellationTokenSource();
-
-        _factory.StartNew(async () => await ProcessRequestAsync(_progress, _cst.Token),
-            TaskCreationOptions.LongRunning);
-
-        _logger.LogInfo($"Started listening on {param.Uri}");
-    }
-
-    private async Task ProcessRequestAsync(IProgress<bool> progress, CancellationToken token)
-    {
-        progress.Report(true);
-        while (!token.IsCancellationRequested)
-        {
-            try
-            {
-                var context = await _wrapper.GetContextAsync();
-                token.ThrowIfCancellationRequested();
-
-                _requestObservers.ForEach(x => x.OnNext(context));
-
-                context.Response.Close();
-            }
-            catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException or HttpListenerException)
-            {
-                break;
-            }
-            catch (Exception e)
-            {
-                _requestObservers.ForEach(x => x.OnError(e));
-                _logger.LogError(e.Message);
-                break;
-            }
-        }
-
-        _requestObservers.ForEach(x => x.OnCompleted());
-        progress.Report(false);
+        _listener.Start();
     }
 
     public void StopListen()
     {
-        if (_wrapper.IsListening)
-        {
-            _cst?.Cancel();
-            _cst?.Dispose();
-            _wrapper.Stop();
-        }
-
-        _logger.LogInfo("Stopped listening");
+        if (_listener.IsListening)
+            _listener.Stop();
     }
 
-    public IDisposable Subscribe(IObserver<bool> observer)
+    public async Task<HttpContext> GetContextAsync(CancellationToken token = default)
     {
-        _statusObservers.Add(observer);
-        return new Unsubscriber<bool>(_statusObservers, observer);
+        return await _listener.GetContextAsync();
     }
 
-    public IDisposable Subscribe(IObserver<HttpContext> observer)
+    public HttpContext GetContext()
     {
-        _requestObservers.Add(observer);
-        return new Unsubscriber<HttpContext>(_requestObservers, observer);
+        return _listener.GetContext();
     }
 }

@@ -5,6 +5,7 @@ using Shared.ApiControllers.Results;
 using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using System.Net;
+using Shared.Server;
 
 namespace Tests.Endpoints;
 
@@ -49,7 +50,7 @@ public class ApiV1Tests : IDisposable
     [Fact]
     public void RequestTest()
     {
-        var logger = Mock.Of<ILogger<ApiV1Endpoint>>();
+        var logger = Mock.Of<ILogger<ApiV1Middleware>>();
 
         var controllers = new List<IApiController>
         {
@@ -57,24 +58,24 @@ public class ApiV1Tests : IDisposable
             new SecondController()
         };
 
-        var apiEndpoint = new ApiV1Endpoint(controllers, logger);
+        var apiEndpoint = new ApiV1Middleware(controllers, logger);
 
-        var context = new Context("/api/v1/first/actionone");
+        var context = new HttpContext("/api/v1/first/actionone");
 
-        apiEndpoint.ProcessRequest(this, context);
+        apiEndpoint.ProcessRequest(context);
 
         Assert.True(context.Response.StatusCode == HttpStatusCode.OK);
 
-        context = new Context("/api/v1/first/actiontwo");
-        apiEndpoint.ProcessRequest(this, context);
+        context = new HttpContext("/api/v1/first/actiontwo");
+        apiEndpoint.ProcessRequest(context);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.InternalServerError, ContentType: "text/plain" });
 
-        context = new Context("/api/v1/second/actionthree");
-        apiEndpoint.ProcessRequest(this, context);
+        context = new HttpContext("/api/v1/second/actionthree");
+        apiEndpoint.ProcessRequest(context);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "application/json" });
 
-        context = new Context("/api/v1/second/actionfour");
-        apiEndpoint.ProcessRequest(this, context);
+        context = new HttpContext("/api/v1/second/actionfour");
+        apiEndpoint.ProcessRequest(context);
         Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" });
 
         Assert.True((controllers[0] as FirstController)?.Onecount == 1);
@@ -82,8 +83,8 @@ public class ApiV1Tests : IDisposable
         Assert.True((controllers[1] as SecondController)?.Threecount == 1);
         Assert.True((controllers[1] as SecondController)?.Fourcount == 1);
 
-        context = new Context("/api/v1/second/actionfive");
-        apiEndpoint.ProcessRequest(this, context);
+        context = new HttpContext("/api/v1/second/actionfive");
+        apiEndpoint.ProcessRequest(context);
         Assert.True(context.Response.StatusCode == HttpStatusCode.NotFound);
     }
 

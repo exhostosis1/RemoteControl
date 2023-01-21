@@ -1,18 +1,14 @@
-﻿using System;
-using System.Net;
-
-namespace Shared.DataObjects.Http;
+﻿namespace Shared.DataObjects.Http;
 
 public class HttpContext: IContext
 {
     public Request Request { get; set; }
-    public Response Response { get; set; } = new();
+    public Response Response { get; set; }
 
-    public HttpContext(string path) => Request = new Request(path);
 
-    public HttpContext(HttpListenerContext context)
+    public HttpContext(Request request, Response response)
     {
-        Request = new Request(context.Request.RawUrl ?? throw new ArgumentNullException(nameof(context), "Path is null"));
-        Response = new Response(context.Response);
+        Request = request;
+        Response = response;
     }
 }

@@ -26,11 +26,11 @@ public class ActiveBotListenerTests : IDisposable
         var apiKey = "apiKey";
         var userNames = new List<string> { "user1", "user2" };
 
-        _listener.StartListen(apiUrl, apiKey, userNames);
+        _listener.StartListen(new StartParameters(new Uri(apiUrl), apiKey, userNames));
 
         await Task.Delay(100);
 
-        Assert.True(_listener.IsListening);
+        Assert.True(_listener.State.Listening);
     }
 
     [Fact]
@@ -40,7 +40,7 @@ public class ActiveBotListenerTests : IDisposable
 
         await Task.Delay(100);
 
-        Assert.False(_listener.IsListening);
+        Assert.False(_listener.State.Listening);
     }
 
     public void Dispose()

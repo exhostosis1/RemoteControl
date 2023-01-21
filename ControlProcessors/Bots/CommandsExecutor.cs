@@ -1,15 +1,36 @@
-﻿using Shared.ApiControllers;
-using Shared.ControlProviders;
+﻿using Shared.ControlProviders;
+using Shared.DataObjects.Bot;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
+using Shared.Server;
 
 namespace Bots;
 
-public class CommandsExecutor: ICommandExecutor
+public class CommandsExecutor: AbstractMiddleware<BotContext>
 {
     private readonly ILogger<CommandsExecutor> _logger;
 
     private readonly IControlProvider _controlFacade;
+
+    private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
+    {
+        new()
+        {
+            new SingleButton(BotButtons.MediaBack),
+            new SingleButton(BotButtons.Pause),
+            new SingleButton(BotButtons.MediaForth)
+        },
+        new()
+        {
+            new SingleButton(BotButtons.VolumeDown),
+            new SingleButton(BotButtons.Darken),
+            new SingleButton(BotButtons.VolumeUp)
+        }
+    })
+    {
+        Resize = true,
+        Persistent = true
+    };
 
     public CommandsExecutor(IControlProvider controlFacade, ILogger<CommandsExecutor> logger)
     {
@@ -17,13 +38,15 @@ public class CommandsExecutor: ICommandExecutor
         _controlFacade = controlFacade;
     }
 
-    public string Execute(string command)
+    public override void ProcessRequest(BotContext context)
     {
-        _logger.LogInfo($"Executing bot command {command}");
+        _logger.LogInfo($"Executing bot command {context.Request.Command}");
 
         var volume = _controlFacade.GetVolume();
+        
+        context.Response.Buttons = _buttons;
 
-        switch (command)
+        switch (context.Request.Command)
         {
             case BotButtons.Pause:
                 _controlFacade.KeyboardKeyPress(KeysEnum.MediaPlayPause);
@@ -38,24 +61,27 @@ public class CommandsExecutor: ICommandExecutor
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
                 _controlFacade.SetVolume(volume);
-                return volume.ToString();
+                context.Response.Message = volume.ToString();
+                break;
             case BotButtons.VolumeDown:
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume;
                 _controlFacade.SetVolume(volume);
-                return volume.ToString();
+                context.Response.Message = volume.ToString();
+                break;
             case BotButtons.Darken:
                 _controlFacade.DisplayOff();
                 break;
             default:
-                if (int.TryParse(command, out volume))
+                if (int.TryParse(context.Request.Command, out volume))
                 {
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                     _controlFacade.SetVolume(volume);
                 }
-                return "done";
+                context.Response.Message = "done";
+                break;
         }
 
-        return "done";
+        context.Response.Message = "done";
     }
 }

@@ -4,6 +4,7 @@ using Shared.TaskServiceWrapper;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using Shared.Wrappers.TaskServiceWrapper;
 
 namespace Autostart;
 

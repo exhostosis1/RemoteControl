@@ -1,10 +1,12 @@
 ﻿using Shared.DataObjects;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Shared.Listeners;
 
-public record StartParameters(Uri Uri, string? ApiKey = null, List<string>? Usernames = null);
+public record StartParameters(string Uri, string? ApiKey = null, List<string>? Usernames = null);
 
 public class ListenerState : IObservable<bool>
 {
@@ -29,9 +31,11 @@ public class ListenerState : IObservable<bool>
     }
 }
 
-public interface IListener<out T>: IObservable<T> where T: IContext
+public interface IListener<T> where T: IContext
 {
-    public ListenerState State { get; }
+    public bool IsListening { get; }
     public void StartListen(StartParameters param);
     public void StopListen();
+    public Task<T> GetContextAsync(CancellationToken token = default);
+    public T GetContext();
 }

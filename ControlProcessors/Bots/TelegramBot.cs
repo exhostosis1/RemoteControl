@@ -1,58 +1,30 @@
-﻿using Shared;
-using Shared.ApiControllers;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.ControlProcessor;
 using Shared.DataObjects.Bot;
-using Shared.Enums;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
+using Shared.Server;
 
 namespace Bots;
 
-public class TelegramBot: BotProcessor, IDisposable
+public class TelegramBot: BotProcessor
 {
     private readonly IListener<BotContext> _listener;
     private readonly ILogger<TelegramBot> _logger;
+    private readonly AbstractMiddleware<BotContext> _middleware;
 
-    private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
-    {
-        new()
-        {
-            new SingleButton(BotButtons.MediaBack),
-            new SingleButton(BotButtons.Pause),
-            new SingleButton(BotButtons.MediaForth)
-        },
-        new()
-        {
-            new SingleButton(BotButtons.VolumeDown),
-            new SingleButton(BotButtons.Darken),
-            new SingleButton(BotButtons.VolumeUp)
-        }
-    })
-    {
-        Resize = true,
-        Persistent = true
-    };
+    private readonly IProgress<bool> _progress;
 
-    private readonly IDisposable _statusUnsubscriber;
-    private readonly IDisposable _requestUnsubscriber;
-
-    public TelegramBot(IListener<BotContext> listener, ICommandExecutor executor, ILogger<TelegramBot> logger, BotConfig? config = null) : base(config)
+    public TelegramBot(IListener<BotContext> listener, AbstractMiddleware<BotContext> executor, ILogger<TelegramBot> logger, BotConfig? config = null) : base(config)
     {
         _listener = listener;
         _logger = logger;
+        _middleware = executor;
 
-        _statusUnsubscriber = _listener.State.Subscribe(new Observer<bool>(status =>
+        _progress = new Progress<bool>(status =>
         {
             Working = status;
-            StatusObservers.ForEach(x => x.OnNext(status));
-        }));
-
-        _requestUnsubscriber = _listener.Subscribe(new Observer<BotContext>(context =>
-        {
-            context.Result = executor.Execute(context.Message);
-            context.Buttons = _buttons;
-        }));
+        });
     }
 
     protected override void StartInternal(BotConfig config)
@@ -65,7 +37,35 @@ public class TelegramBot: BotProcessor, IDisposable
             return;
         }
 
-        _listener.StartListen(new StartParameters(new Uri(CurrentConfig.ApiUri), CurrentConfig.ApiKey, config.Usernames));
+        _listener.StartListen(new StartParameters(CurrentConfig.ApiUri, CurrentConfig.ApiKey, config.Usernames));
+    }
+
+    private async Task Listen(CancellationToken token = default)
+    {
+        _progress.Report(true);
+        while (!token.IsCancellationRequested)
+        {
+            try
+            {
+                var context = await _listener.GetContextAsync(token);
+                token.ThrowIfCancellationRequested();
+
+                _middleware.ProcessRequest(context);
+
+                context.Response.Close();
+            }
+            catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)
+            {
+                break;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e.Message);
+                break;
+            }
+        }
+
+        _progress.Report(false);
     }
 
     public override void Stop()
@@ -73,11 +73,5 @@ public class TelegramBot: BotProcessor, IDisposable
         if (!Working) return;
 
         _listener.StopListen();
-    }
-
-    public void Dispose()
-    {
-        _statusUnsubscriber.Dispose();
-        _requestUnsubscriber.Dispose();
     }
 }

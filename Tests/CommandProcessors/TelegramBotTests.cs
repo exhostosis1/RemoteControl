@@ -1,8 +1,10 @@
 ﻿using Bots;
 using Moq;
+using Shared;
 using Shared.ApiControllers;
 using Shared.Config;
 using Shared.DataObjects.Bot;
+using Shared.DataObjects.Http;
 using Shared.Listeners;
 using Shared.Logging.Interfaces;
 
@@ -15,24 +17,28 @@ public class TelegramBotTests : IDisposable
 
     }
 
-    private class MockListener : IBotListener
+    private class MockListener : IListener<BotContext>
     {
-        public bool IsListening { get; private set; }
-        public event EventHandler<bool>? OnStatusChange;
-        public event EventHandler<BotContext>? OnRequest;
+        public ListenerState State { get; set; } = new();
 
-        public void StartListen(string apiUrl, string apiKey, List<string> usernames)
+        private readonly List<IObserver<BotContext>> _requestObservers = new();
+
+        public void StartListen(StartParameters param)
         {
-            IsListening = true;
-            OnStatusChange?.Invoke(this, IsListening);
+            State.Listening = true;
 
-            OnRequest?.Invoke(this, new BotContext(0, ""));
+            _requestObservers.ForEach(x => x.OnNext(new BotContext()));
         }
 
         public void StopListen()
         {
-            IsListening = false;
-            OnStatusChange?.Invoke(this, IsListening);
+            State.Listening = false;
+        }
+
+        public IDisposable Subscribe(IObserver<BotContext> observer)
+        {
+            _requestObservers.Add(observer);
+            return new Unsubscriber<BotContext>(_requestObservers, observer);
         }
     }
 

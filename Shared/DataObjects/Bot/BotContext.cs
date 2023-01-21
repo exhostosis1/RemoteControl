@@ -1,51 +1,17 @@
-﻿using System.Collections.Generic;
-
-namespace Shared.DataObjects.Bot;
+﻿namespace Shared.DataObjects.Bot;
 
 public class BotContext: IContext
 {
-    public int Id { get; set; }
-    public string Message { get; set; }
-    public string? Result { get; set; }
-    public ButtonsMarkup? Buttons { get; set; }
+    public BotContextRequest Request { get; set; }
+    public BotContextResponse Response { get; set; }
 
-    public BotContext(int id, string message)
+    public BotContext(BotContextRequest request)
     {
-        Id = id;
-        Message = message;
+        Request = request;
     }
-}
 
-public abstract class ButtonsMarkup
-{
-    
-}
-
-public class ReplyButtonsMarkup: ButtonsMarkup
-{
-    public IEnumerable<IEnumerable<SingleButton>> Items { get; set; }
-
-    public bool Resize { get; set; }
-    public bool Persistent { get; set; }
-    public bool OneTime { get; set; }
-
-    public ReplyButtonsMarkup(IEnumerable<IEnumerable<SingleButton>> items)
+    public BotContext(BotContextRequest request, BotContextResponse response) : this(request)
     {
-        Items = items;
-    }
-}
-
-public class RemoveButtonsMarkup: ButtonsMarkup
-{
-    public bool Remove = true;
-}
-
-public class SingleButton
-{
-    public string Text { get; set; }
-
-    public SingleButton(string text)
-    {
-        Text = text;
+        Response = response;
     }
 }

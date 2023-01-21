@@ -24,7 +24,7 @@ public class SimpleServerListenerTests : IDisposable
     {
         var uri = new Uri("http://localhost:148");
 
-        _listener.StartListen(uri);
+        _listener.StartListen(new StartParameters(uri));
 
         await Task.Delay(100);
 
@@ -38,7 +38,7 @@ public class SimpleServerListenerTests : IDisposable
 
         await Task.Delay(100);
 
-        Assert.False(_listener.IsListening);
+        Assert.False(_listener.State.Listening);
     }
 
     public void Dispose()
