@@ -13,7 +13,11 @@ public class TelegramBot: BotProcessor
     private readonly ILogger<TelegramBot> _logger;
     private readonly AbstractMiddleware<BotContext> _middleware;
 
+    private readonly TaskFactory _factory = new();
+
     private readonly IProgress<bool> _progress;
+
+    private CancellationTokenSource? _cts;
 
     public TelegramBot(IListener<BotContext> listener, AbstractMiddleware<BotContext> executor, ILogger<TelegramBot> logger, BotConfig? config = null) : base(config)
     {
@@ -38,6 +42,9 @@ public class TelegramBot: BotProcessor
         }
 
         _listener.StartListen(new StartParameters(CurrentConfig.ApiUri, CurrentConfig.ApiKey, config.Usernames));
+        _cts = new CancellationTokenSource();
+
+        _factory.StartNew(async () => await Listen(_cts.Token), TaskCreationOptions.LongRunning);
     }
 
     private async Task Listen(CancellationToken token = default)
@@ -73,5 +80,12 @@ public class TelegramBot: BotProcessor
         if (!Working) return;
 
         _listener.StopListen();
+        
+        try
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+        }
+        catch(ObjectDisposedException){}
     }
 }

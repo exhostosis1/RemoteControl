@@ -26,7 +26,7 @@ public class TelegramListener: IListener<BotContext>
 
         public override void Close()
         {
-            _wrapper.SendResponse(_apiKey, _apiUrl, _chatId, Message, Buttons);
+            _wrapper.SendResponse(_apiUrl, _apiKey, _chatId, Message, Buttons);
         }
     }
 

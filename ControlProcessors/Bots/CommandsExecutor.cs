@@ -62,13 +62,13 @@ public class CommandsExecutor: AbstractMiddleware<BotContext>
                 volume = volume > 100 ? 100 : volume;
                 _controlFacade.SetVolume(volume);
                 context.Response.Message = volume.ToString();
-                break;
+                return;
             case BotButtons.VolumeDown:
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume;
                 _controlFacade.SetVolume(volume);
                 context.Response.Message = volume.ToString();
-                break;
+                return;
             case BotButtons.Darken:
                 _controlFacade.DisplayOff();
                 break;
@@ -78,7 +78,6 @@ public class CommandsExecutor: AbstractMiddleware<BotContext>
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                     _controlFacade.SetVolume(volume);
                 }
-                context.Response.Message = "done";
                 break;
         }
 

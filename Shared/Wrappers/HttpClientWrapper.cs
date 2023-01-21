@@ -3,6 +3,7 @@ using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,7 +56,7 @@ public class HttpClientWrapper : IHttpClient
     public IHttpClientResponse Send(IHttpClientRequest request)
     {
         var newRequest = new HttpRequestMessage(request.Method, request.RequestUri);
-        newRequest.Content = new StringContent(request.Content);
+        newRequest.Content = new StringContent(request.Content, Encoding.UTF8, "application/json");
 
         var response = _client.Send(newRequest);
 
