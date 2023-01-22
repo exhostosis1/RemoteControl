@@ -1,6 +1,5 @@
 ﻿using Shared;
 using Shared.Logging.Interfaces;
-using Shared.TaskServiceWrapper;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;

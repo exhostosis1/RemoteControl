@@ -14,7 +14,7 @@ public static class Program
 
     private static IServer CreateSimpleServer(IContainer container, ServerConfig? config = null)
     {
-        var result = new SimpleServer<HttpContext, ServerConfig>(container.NewWebListener(container.NewHttpListener(container.Logger)), container.ApiMiddleware, new LogWrapper<SimpleServer<HttpContext, ServerConfig>>(container.Logger), config)
+        var result = new SimpleServer<HttpContext, ServerConfig>(container.NewWebListener(container.NewHttpListener(container.Logger), container.Logger), container.ApiMiddleware, new LogWrapper<SimpleServer<HttpContext, ServerConfig>>(container.Logger), config)
         {
             Id = _id++
         };

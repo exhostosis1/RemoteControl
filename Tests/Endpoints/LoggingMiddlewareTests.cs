@@ -18,16 +18,18 @@ public class LoggingMiddlewareTests : IDisposable
         var logger = Mock.Of<ILogger<LoggingMiddleware>>();
         var middleware = new LoggingMiddleware(logger);
 
-        var context = new HttpContext("http://yo");
+        var response = Mock.Of<HttpContextResponse>();
+
+        var context = new HttpContext(new HttpContextRequest("http://yo"), response);
         middleware.ProcessRequest(context);
         var context1 = context;
-        Mock.Get(logger).Verify(x => x.LogInfo(context1.Request.Path), Times.Exactly(1));
-        Mock.Get(logger).Verify(x => x.LogInfo($"{context1.Response.StatusCode}\n{context1.Response.ContentType}\n{context1.Response.Payload}"), Times.Exactly(1));
+        Mock.Get(logger).Verify(x => x.LogInfo(context1.HttpRequest.Path), Times.Exactly(1));
+        Mock.Get(logger).Verify(x => x.LogInfo($"{context1.HttpResponse.StatusCode}\n{context1.HttpResponse.ContentType}\n{context1.HttpResponse.Payload}"), Times.Exactly(1));
 
-        context = new HttpContext("test contents");
+        context = new HttpContext(new HttpContextRequest("test contents"), response);
         middleware.ProcessRequest(context);
-        Mock.Get(logger).Verify(x => x.LogInfo(context.Request.Path), Times.Exactly(1));
-        Mock.Get(logger).Verify(x => x.LogInfo($"{context.Response.StatusCode}\n{context.Response.ContentType}\n{context.Response.Payload}"), Times.Exactly(2));
+        Mock.Get(logger).Verify(x => x.LogInfo(context.HttpRequest.Path), Times.Exactly(1));
+        Mock.Get(logger).Verify(x => x.LogInfo($"{context.HttpResponse.StatusCode}\n{context.HttpResponse.ContentType}\n{context.HttpResponse.Payload}"), Times.Exactly(2));
     }
 
     public void Dispose()

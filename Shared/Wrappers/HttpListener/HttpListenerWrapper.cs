@@ -8,9 +8,9 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using Shared.Logging.Interfaces;
 
-namespace Shared.Wrappers;
+namespace Shared.Wrappers.HttpListener;
 
-public class PrefixCollection: IPrefixesCollection
+public class PrefixCollection : IPrefixesCollection
 {
     private readonly HttpListenerPrefixCollection _collection;
 
@@ -22,9 +22,9 @@ public class PrefixCollection: IPrefixesCollection
     public void Add(string prefix) => _collection.Add(prefix);
 }
 
-public class HttpListenerWrapper: IHttpListener
+public class HttpListenerWrapper : IHttpListener
 {
-    class LocalResponse: Response
+    class LocalResponse : HttpContextResponse
     {
         private readonly HttpListenerResponse _response;
 
@@ -37,8 +37,8 @@ public class HttpListenerWrapper: IHttpListener
         {
             _response.StatusCode = (int)StatusCode;
             _response.ContentType = ContentType;
-            
-            if(Payload.Length > 0)
+
+            if (Payload.Length > 0)
                 _response.OutputStream.Write(Payload);
 
             _response.Close();
@@ -59,7 +59,7 @@ public class HttpListenerWrapper: IHttpListener
     public void Start()
     {
         if (_listener.IsListening) return;
-        
+
         try
         {
             _listener.Start();
@@ -102,13 +102,13 @@ public class HttpListenerWrapper: IHttpListener
 
     public void Stop()
     {
-        if(_listener.IsListening)
+        if (_listener.IsListening)
             _listener.Stop();
     }
 
     public void GetNew()
     {
-        if(_listener.IsListening)
+        if (_listener.IsListening)
             _listener.Stop();
 
         _listener = new HttpListener();
@@ -117,7 +117,7 @@ public class HttpListenerWrapper: IHttpListener
 
     private HttpContext ConvertContext(HttpListenerContext context)
     {
-        var request = new Request(context.Request.RawUrl ?? string.Empty);
+        var request = new HttpContextRequest(context.Request.RawUrl ?? string.Empty);
         var response = new LocalResponse(context.Response);
         return new HttpContext(request, response);
     }

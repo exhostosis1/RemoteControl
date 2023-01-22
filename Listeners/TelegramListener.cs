@@ -139,6 +139,8 @@ public class TelegramListener: IListener<BotContext>
         catch (ObjectDisposedException)
         {
         }
+
+        _updates.Clear();
     }
 
     private BotContext CreateContext(BotContextRequest request) => new (request, new LocalResponse(request.ApiUrl, request.ApiKey, request.Id, _wrapper));

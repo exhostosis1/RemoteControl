@@ -1,6 +1,5 @@
 ﻿using Shared;
 using Shared.Logging.Interfaces;
-using Shared.RegistryWrapper;
 using System.Diagnostics;
 using Shared.Wrappers.RegistryWrapper;
 

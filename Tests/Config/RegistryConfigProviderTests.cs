@@ -1,9 +1,8 @@
 ﻿using ConfigProviders;
-using Microsoft.Win32;
 using Moq;
 using Shared.Config;
 using Shared.Logging.Interfaces;
-using Shared.RegistryWrapper;
+using Shared.Wrappers.RegistryWrapper;
 using System.Text.Json;
 
 namespace Tests.Config;

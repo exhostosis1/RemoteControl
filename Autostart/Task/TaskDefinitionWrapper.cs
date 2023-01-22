@@ -1,5 +1,4 @@
-﻿using Shared.TaskServiceWrapper;
-using Shared.Wrappers.TaskServiceWrapper;
+﻿using Shared.Wrappers.TaskServiceWrapper;
 
 namespace Autostart.Task;
 

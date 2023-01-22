@@ -85,8 +85,6 @@ public class SimpleServer<TContext, TConfig>: IServer<TConfig> where TContext: I
         _cts = new CancellationTokenSource();
 
         _factory.StartNew(async () => await ProcessRequestAsync(_cts.Token), TaskCreationOptions.LongRunning);
-
-        _logger.LogInfo($"Started listening on {param.Uri}");
     }
 
     public void Restart(TConfig? config = null)
@@ -144,8 +142,6 @@ public class SimpleServer<TContext, TConfig>: IServer<TConfig> where TContext: I
         catch (ObjectDisposedException) { }
 
         _listener.StopListen();
-
-        _logger.LogInfo("Stopped listening");
     }
 
     public IDisposable Subscribe(IObserver<TConfig> observer)

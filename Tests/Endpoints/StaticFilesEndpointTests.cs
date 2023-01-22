@@ -1,9 +1,9 @@
 ﻿using Moq;
-using Servers.Endpoints;
 using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using System.Net;
 using System.Text;
+using Servers.Middleware;
 
 namespace Tests.Endpoints;
 
@@ -39,19 +39,21 @@ public class StaticFilesEndpointTests : IDisposable
 
         var endpoint = new StaticFilesMiddleware(logger, directory);
 
-        var context = new HttpContext("/index.html");
-        endpoint.ProcessRequest(context);
-        var response = Encoding.UTF8.GetString(context.Response.Payload);
-        Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/html" } && response == indexContents);
+        var res = Mock.Of<HttpContextResponse>();
 
-        context = new HttpContext("/file.txt");
+        var context = new HttpContext(new HttpContextRequest("/index.html"), res);
         endpoint.ProcessRequest(context);
-        response = Encoding.UTF8.GetString(context.Response.Payload);
-        Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" } && response == fileContents);
+        var response = Encoding.UTF8.GetString(context.HttpResponse.Payload);
+        Assert.True(context.HttpResponse is { StatusCode: HttpStatusCode.OK, ContentType: "text/html" } && response == indexContents);
 
-        context = new HttpContext("..");
+        context = new HttpContext(new HttpContextRequest("/file.txt"), res);
         endpoint.ProcessRequest(context);
-        Assert.True(context.Response.StatusCode == HttpStatusCode.NotFound);
+        response = Encoding.UTF8.GetString(context.HttpResponse.Payload);
+        Assert.True(context.HttpResponse is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" } && response == fileContents);
+
+        context = new HttpContext(new HttpContextRequest(".."), res);
+        endpoint.ProcessRequest(context);
+        Assert.True(context.HttpResponse.StatusCode == HttpStatusCode.NotFound);
     }
 
     public void Dispose()

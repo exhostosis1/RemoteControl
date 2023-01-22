@@ -1,8 +1,8 @@
 ﻿using Autostart;
 using Moq;
 using Shared.Logging.Interfaces;
-using Shared.TaskServiceWrapper;
 using System.Linq.Expressions;
+using Shared.Wrappers.TaskServiceWrapper;
 
 namespace Tests.Autostart;
 

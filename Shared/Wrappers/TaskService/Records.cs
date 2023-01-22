@@ -1,4 +1,4 @@
-﻿namespace Shared.TaskServiceWrapper;
+﻿namespace Shared.Wrappers.TaskServiceWrapper;
 
 public record TaskAction(string Filename, string? Arguments = null, string? Directory = null);
 public record TaskTrigger;

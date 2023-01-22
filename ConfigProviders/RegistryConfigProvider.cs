@@ -1,6 +1,5 @@
 ﻿using Shared.Config;
 using Shared.Logging.Interfaces;
-using Shared.RegistryWrapper;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Shared.Wrappers.RegistryWrapper;

@@ -1,9 +1,9 @@
 ﻿using Autostart;
 using Moq;
 using Shared.Logging.Interfaces;
-using Shared.RegistryWrapper;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using Shared.Wrappers.RegistryWrapper;
 
 namespace Tests.Autostart;
 

@@ -8,21 +8,20 @@ namespace Tests.Listeners;
 public class SimpleServerListenerTests : IDisposable
 {
     private readonly SimpleHttpListener _listener;
-    private readonly ILogger<SimpleHttpListener> _logger;
-    private readonly IHttpListenerWrapper _wrapper;
+    private readonly IHttpListener _wrapper;
 
     public SimpleServerListenerTests()
     {
-        _wrapper = Mock.Of<IHttpListenerWrapper>();
-        _logger = Mock.Of<ILogger<SimpleHttpListener>>();
+        _wrapper = Mock.Of<IHttpListener>();
+        var logger = Mock.Of<ILogger<SimpleHttpListener>>();
 
-        _listener = new SimpleHttpListener(_wrapper, _logger);
+        _listener = new SimpleHttpListener(_wrapper, logger);
     }
 
     [Fact]
     public async void StartListenTest()
     {
-        var uri = new Uri("http://localhost:148");
+        var uri = "http://localhost:148";
 
         _listener.StartListen(new StartParameters(uri));
 
@@ -38,7 +37,7 @@ public class SimpleServerListenerTests : IDisposable
 
         await Task.Delay(100);
 
-        Assert.False(_listener.State.Listening);
+        Assert.False(_listener.IsListening);
     }
 
     public void Dispose()

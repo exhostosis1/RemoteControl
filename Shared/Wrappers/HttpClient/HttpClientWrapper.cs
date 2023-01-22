@@ -1,4 +1,5 @@
-﻿using Shared.Listeners;
+﻿using Shared;
+using Shared.Listeners;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -8,9 +9,9 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Shared.Wrappers;
+namespace Shared.Wrappers.HttpClient;
 
-public class HttpClientWrapperRequest: IHttpClientRequest
+public class HttpClientWrapperRequest : IHttpClientRequest
 {
     public HttpMethod Method { get; set; }
     public string RequestUri { get; set; }
@@ -21,14 +22,14 @@ public class HttpClientWrapperRequest: IHttpClientRequest
     }
 }
 
-public class HttpClientWrapperResponse: IHttpClientResponse
+public class HttpClientWrapperResponse : IHttpClientResponse
 {
     public bool IsSuccessStatusCode { get; set; }
     public HttpStatusCode StatusCode { get; set; }
     public IHttpClientResponseContent Content { get; set; }
 }
 
-public class HttpClientWrapperContent: IHttpClientResponseContent
+public class HttpClientWrapperContent : IHttpClientResponseContent
 {
     private readonly HttpContent _content;
 

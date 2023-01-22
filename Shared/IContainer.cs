@@ -25,7 +25,7 @@ public interface IContainer: IPlatformDependantContainer
     public IMiddleware<HttpContext> StaticMiddleware { get; }
     public IMiddleware<BotContext> CommandExecutor { get; }
 
-    public IListener<HttpContext> NewWebListener(IHttpListener listener);
+    public IListener<HttpContext> NewWebListener(IHttpListener listener, ILogger logger);
     public IListener<BotContext> NewBotListener(IBotApiProvider provider, ILogger logger);
     public IHttpClient NewHttpClient();
     public IHttpListener NewHttpListener(ILogger logger);

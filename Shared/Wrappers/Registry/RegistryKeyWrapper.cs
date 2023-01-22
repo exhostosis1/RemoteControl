@@ -1,11 +1,10 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Runtime.InteropServices;
-using Shared.Wrappers.RegistryWrapper;
 
 #pragma warning disable CA1416
 
-namespace Shared.RegistryWrapper.Registry;
+namespace Shared.Wrappers.RegistryWrapper;
 
 public class RegistryKeyWrapper : IRegistryKey
 {

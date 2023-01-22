@@ -13,7 +13,7 @@ using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.UI;
-using Shared.Wrappers;
+using Shared.Wrappers.HttpListener;
 
 namespace RemoteControlMain;
 
@@ -44,7 +44,8 @@ internal class Container : IContainer
     public IAutostartService NewAutostartService(ILogger logger) => _innerContainer.NewAutostartService(logger);
     public IUserInterface NewUserInterface() => _innerContainer.NewUserInterface();
     public IControlProvider NewControlProvider(ILogger logger) => _innerContainer.NewControlProvider(logger);
-    public IListener<HttpContext> NewWebListener(IHttpListener listener) => new SimpleHttpListener(listener);
+    public IListener<HttpContext> NewWebListener(IHttpListener listener, ILogger logger) =>
+        new SimpleHttpListener(listener, new LogWrapper<SimpleHttpListener>(logger));
     public IListener<BotContext> NewBotListener(IBotApiProvider provider, ILogger logger) =>
         new TelegramListener(provider, new LogWrapper<TelegramListener>(logger));
     public IHttpClient NewHttpClient() => new HttpClientWrapper();
@@ -72,7 +73,7 @@ internal class Container : IContainer
         _innerContainer = inner;
 
         HttpListener = NewHttpListener(Logger);
-        WebListener = NewWebListener(HttpListener);
+        WebListener = NewWebListener(HttpListener, Logger);
         
         HttpClient = NewHttpClient();
         TelegramBotApiProvider = NewTelegramBotApiProvider(HttpClient, Logger);

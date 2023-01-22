@@ -1,11 +1,10 @@
 ﻿using Moq;
-using Servers.Endpoints;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using System.Net;
-using Shared.Server;
+using Servers.Middleware;
 
 namespace Tests.Endpoints;
 
@@ -47,6 +46,14 @@ public class ApiV1Tests : IDisposable
         }
     }
 
+    private class LocalResponse : HttpContextResponse
+    {
+        public override void Close()
+        {
+
+        }
+    }
+
     [Fact]
     public void RequestTest()
     {
@@ -60,32 +67,34 @@ public class ApiV1Tests : IDisposable
 
         var apiEndpoint = new ApiV1Middleware(controllers, logger);
 
-        var context = new HttpContext("/api/v1/first/actionone");
+        var response = Mock.Of<HttpContextResponse>();
+
+        var context = new HttpContext(new HttpContextRequest("/api/v1/first/actionone"), response);
 
         apiEndpoint.ProcessRequest(context);
 
-        Assert.True(context.Response.StatusCode == HttpStatusCode.OK);
+        Assert.True(context.HttpResponse.StatusCode == HttpStatusCode.OK);
 
-        context = new HttpContext("/api/v1/first/actiontwo");
+        context = new HttpContext(new HttpContextRequest("/api/v1/first/actiontwo"), response);
         apiEndpoint.ProcessRequest(context);
-        Assert.True(context.Response is { StatusCode: HttpStatusCode.InternalServerError, ContentType: "text/plain" });
+        Assert.True(context.HttpResponse is { StatusCode: HttpStatusCode.InternalServerError, ContentType: "text/plain" });
 
-        context = new HttpContext("/api/v1/second/actionthree");
+        context = new HttpContext(new HttpContextRequest("/api/v1/second/actionthree"), response);
         apiEndpoint.ProcessRequest(context);
-        Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "application/json" });
+        Assert.True(context.HttpResponse is { StatusCode: HttpStatusCode.OK, ContentType: "application/json" });
 
-        context = new HttpContext("/api/v1/second/actionfour");
+        context = new HttpContext(new HttpContextRequest("/api/v1/second/actionfour"), response);
         apiEndpoint.ProcessRequest(context);
-        Assert.True(context.Response is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" });
+        Assert.True(context.HttpResponse is { StatusCode: HttpStatusCode.OK, ContentType: "text/plain" });
 
         Assert.True((controllers[0] as FirstController)?.Onecount == 1);
         Assert.True((controllers[0] as FirstController)?.Twocount == 1);
         Assert.True((controllers[1] as SecondController)?.Threecount == 1);
         Assert.True((controllers[1] as SecondController)?.Fourcount == 1);
 
-        context = new HttpContext("/api/v1/second/actionfive");
+        context = new HttpContext(new HttpContextRequest("/api/v1/second/actionfive"), response);
         apiEndpoint.ProcessRequest(context);
-        Assert.True(context.Response.StatusCode == HttpStatusCode.NotFound);
+        Assert.True(context.HttpResponse.StatusCode == HttpStatusCode.NotFound);
     }
 
     public void Dispose()
