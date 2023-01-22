@@ -2,7 +2,7 @@
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Logging.Interfaces;
 
 namespace Tests.Controllers;
@@ -10,12 +10,12 @@ namespace Tests.Controllers;
 public class DisplayControllerTests : IDisposable
 {
     private readonly DisplayController _controller;
-    private readonly IControlProvider _provider;
+    private readonly IDisplayControlProvider _provider;
 
     public DisplayControllerTests()
     {
         var logger = Mock.Of<ILogger<DisplayController>>();
-        _provider = Mock.Of<IControlProvider>();
+        _provider = Mock.Of<IDisplayControlProvider>();
 
         _controller = new DisplayController(_provider, logger);
     }

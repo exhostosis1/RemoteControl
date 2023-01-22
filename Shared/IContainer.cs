@@ -1,6 +1,6 @@
 ﻿using Shared.ApiControllers;
 using Shared.Bots.Telegram;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.DataObjects.Bot;
 using Shared.DataObjects.Http;
 using Shared.Listeners;
@@ -30,11 +30,11 @@ public interface IContainer: IPlatformDependantContainer
     public IHttpClient NewHttpClient();
     public IHttpListener NewHttpListener(ILogger logger);
     public IBotApiProvider NewTelegramBotApiProvider(IHttpClient client, ILogger logger);
-    public IApiController NewAudioController(IControlProvider provider, ILogger logger);
-    public IApiController NewKeyboardController(IControlProvider provider, ILogger logger);
-    public IApiController NewMouseController(IControlProvider provider, ILogger logger);
-    public IApiController NewDisplayController(IControlProvider provider, ILogger logger);
+    public IApiController NewAudioController(IAudioControlProvider provider, ILogger logger);
+    public IApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger);
+    public IApiController NewMouseController(IMouseControlProvider provider, ILogger logger);
+    public IApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger);
     public IMiddleware<HttpContext> NewApiMiddleware(IEnumerable<IApiController> controllers, ILogger logger, IMiddleware<HttpContext>? next = null);
     public IMiddleware<HttpContext> NewStaticMiddleware(ILogger logger, string directory = "www");
-    public IMiddleware<BotContext> NewCommmandExecutor(IControlProvider provider, ILogger logger);
+    public IMiddleware<BotContext> NewCommmandExecutor(IGeneralControlProvider provider, ILogger logger);
 }

@@ -1,5 +1,5 @@
-﻿using Shared.ControlProviders;
-using Shared.ControlProviders.Devices;
+﻿using Shared.ControlProviders.Devices;
+using Shared.ControlProviders.Input;
 using Shared.Enums;
 
 namespace ControlProviders.Wrappers;

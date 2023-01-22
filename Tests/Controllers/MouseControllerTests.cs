@@ -2,7 +2,7 @@
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
@@ -11,12 +11,12 @@ namespace Tests.Controllers;
 public class MouseControllerTests : IDisposable
 {
     private readonly MouseController _mouseController;
-    private readonly IControlProvider _mouseControlProvider;
+    private readonly IMouseControlProvider _mouseControlProvider;
 
     public MouseControllerTests()
     {
         var logger = Mock.Of<ILogger<MouseController>>();
-        _mouseControlProvider = Mock.Of<IControlProvider>();
+        _mouseControlProvider = Mock.Of<IMouseControlProvider>();
         _mouseController = new MouseController(_mouseControlProvider, logger);
     }
 

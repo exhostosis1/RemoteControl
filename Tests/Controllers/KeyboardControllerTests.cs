@@ -2,7 +2,7 @@
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
@@ -11,12 +11,12 @@ namespace Tests.Controllers;
 public class KeyboardControllerTests : IDisposable
 {
     private readonly KeyboardController _keyboardController;
-    private readonly IControlProvider _keyboardControlProvider;
+    private readonly IKeyboardControlProvider _keyboardControlProvider;
 
     public KeyboardControllerTests()
     {
         var logger = Mock.Of<ILogger<KeyboardController>>();
-        _keyboardControlProvider = Mock.Of<IControlProvider>();
+        _keyboardControlProvider = Mock.Of<IKeyboardControlProvider>();
         _keyboardController = new KeyboardController(_keyboardControlProvider, logger);
     }
 

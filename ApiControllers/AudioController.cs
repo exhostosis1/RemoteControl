@@ -1,15 +1,15 @@
 ﻿using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
 public class AudioController: BaseApiController
 {
-    private readonly IControlProvider _provider;
+    private readonly IAudioControlProvider _provider;
     private readonly ILogger<AudioController> _logger;
 
-    public AudioController(IControlProvider provider, ILogger<AudioController> logger) : base(logger)
+    public AudioController(IAudioControlProvider provider, ILogger<AudioController> logger) : base(logger)
     {
         _logger = logger;
         _provider = provider;

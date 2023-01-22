@@ -1,4 +1,4 @@
-﻿using Shared.ControlProviders;
+﻿using Shared.ControlProviders.Provider;
 using Shared.DataObjects.Bot;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
@@ -10,7 +10,7 @@ public class CommandsExecutor: AbstractMiddleware<BotContext>
 {
     private readonly ILogger<CommandsExecutor> _logger;
 
-    private readonly IControlProvider _controlFacade;
+    private readonly IGeneralControlProvider _controlFacade;
 
     private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
@@ -32,7 +32,7 @@ public class CommandsExecutor: AbstractMiddleware<BotContext>
         Persistent = true
     };
 
-    public CommandsExecutor(IControlProvider controlFacade, ILogger<CommandsExecutor> logger)
+    public CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<CommandsExecutor> logger)
     {
         _logger = logger;
         _controlFacade = controlFacade;

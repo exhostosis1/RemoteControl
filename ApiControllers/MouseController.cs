@@ -1,6 +1,6 @@
 ﻿using Shared;
 using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
@@ -8,10 +8,10 @@ namespace ApiControllers;
 
 public class MouseController : BaseApiController
 {
-    private readonly IControlProvider _provider;
+    private readonly IMouseControlProvider _provider;
     private readonly ILogger<MouseController> _logger;
 
-    public MouseController(IControlProvider provider, ILogger<MouseController> logger) : base(logger)
+    public MouseController(IMouseControlProvider provider, ILogger<MouseController> logger) : base(logger)
     {
         _logger = logger;
         _provider = provider;

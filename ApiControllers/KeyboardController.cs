@@ -1,5 +1,5 @@
 ﻿using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 using System.Net;
@@ -8,10 +8,10 @@ namespace ApiControllers;
 
 public class KeyboardController: BaseApiController
 {
-    private readonly IControlProvider _provider;
+    private readonly IKeyboardControlProvider _provider;
     private readonly ILogger<KeyboardController> _logger;
 
-    public KeyboardController(IControlProvider provider, ILogger<KeyboardController> logger) : base(logger)
+    public KeyboardController(IKeyboardControlProvider provider, ILogger<KeyboardController> logger) : base(logger)
     {
         _logger = logger;
         _provider = provider;

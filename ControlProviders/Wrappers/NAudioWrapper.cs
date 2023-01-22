@@ -1,8 +1,8 @@
 ﻿using ControlProviders.Devices;
 using NAudio.CoreAudioApi;
 using Shared;
-using Shared.ControlProviders;
 using Shared.ControlProviders.Devices;
+using Shared.ControlProviders.Input;
 using System.Runtime.InteropServices;
 
 namespace ControlProviders.Wrappers;

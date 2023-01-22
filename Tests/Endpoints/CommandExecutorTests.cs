@@ -1,6 +1,6 @@
 ﻿using Moq;
 using Servers.Middleware;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.DataObjects.Bot;
 using Shared.Logging.Interfaces;
 
@@ -9,12 +9,12 @@ namespace Tests.Endpoints;
 public class CommandExecutorTests : IDisposable
 {
     private readonly ILogger<CommandsExecutor> _logger;
-    private readonly IControlProvider _provider;
+    private readonly IGeneralControlProvider _provider;
 
     public CommandExecutorTests()
     {
         _logger = Mock.Of<ILogger<CommandsExecutor>>();
-        _provider = Mock.Of<IControlProvider>();
+        _provider = Mock.Of<IGeneralControlProvider>();
     }
 
     private class LocalResponse: BotContextResponse

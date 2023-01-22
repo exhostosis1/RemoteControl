@@ -6,7 +6,7 @@ using ControlProviders.Wrappers;
 using Logging;
 using Shared;
 using Shared.Config;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.UI;
@@ -18,7 +18,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
-    public IControlProvider ControlProvider { get; }
+    public IGeneralControlProvider ControlProvider { get; }
     public ILogger Logger { get; }
     public ILogger NewLogger()
     {
@@ -40,7 +40,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     private readonly YdoToolWrapper _ydoToolWrapper = new();
     private readonly DummyWrapper _dummyWrapper = new();
 
-    public IControlProvider NewControlProvider(ILogger logger) =>
+    public IGeneralControlProvider NewControlProvider(ILogger logger) =>
         new InputProvider(_ydoToolWrapper, _ydoToolWrapper, _dummyWrapper, _dummyWrapper,
             new LogWrapper<InputProvider>(logger));
 

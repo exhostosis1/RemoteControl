@@ -5,7 +5,7 @@ using ControlProviders.Wrappers;
 using Logging;
 using Shared;
 using Shared.Config;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.UI;
@@ -19,7 +19,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IConfigProvider ConfigProvider { get; }
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
-    public IControlProvider ControlProvider { get; }
+    public IGeneralControlProvider ControlProvider { get; }
     public ILogger Logger { get; }
     public ILogger NewLogger()
     {
@@ -41,7 +41,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     private readonly User32Wrapper _user32Wrapper = new();
     private readonly NAudioWrapper _naudioWrapper = new();
 
-    public IControlProvider NewControlProvider(ILogger logger) =>
+    public IGeneralControlProvider NewControlProvider(ILogger logger) =>
         new InputProvider(_user32Wrapper, _user32Wrapper, _user32Wrapper, _naudioWrapper, new LogWrapper<InputProvider>(logger));
 
     public RemoteControlContainer()

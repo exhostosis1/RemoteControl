@@ -1,11 +1,12 @@
-﻿using Shared.ControlProviders;
-using Shared.ControlProviders.Devices;
+﻿using Shared.ControlProviders.Devices;
+using Shared.ControlProviders.Input;
+using Shared.ControlProviders.Provider;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
 namespace ControlProviders;
 
-public class InputProvider : IControlProvider
+public class InputProvider : IGeneralControlProvider
 {
     private readonly ILogger<InputProvider> _logger;
     private readonly IKeyboardInput _keyboardInput;

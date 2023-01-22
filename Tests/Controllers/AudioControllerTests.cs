@@ -2,7 +2,7 @@
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Provider;
 using Shared.Logging.Interfaces;
 
 namespace Tests.Controllers;
@@ -10,12 +10,12 @@ namespace Tests.Controllers;
 public class AudioControllerTests : IDisposable
 {
     private readonly AudioController _audioController;
-    private readonly IControlProvider _audioControlProvider;
+    private readonly IAudioControlProvider _audioControlProvider;
 
     public AudioControllerTests()
     {
         var logger = Mock.Of<ILogger<AudioController>>();
-        _audioControlProvider = Mock.Of<IControlProvider>();
+        _audioControlProvider = Mock.Of<IAudioControlProvider>();
         _audioController = new AudioController(_audioControlProvider, logger);
     }
 

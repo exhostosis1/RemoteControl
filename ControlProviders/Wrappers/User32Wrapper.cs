@@ -1,4 +1,4 @@
-﻿using Shared.ControlProviders;
+﻿using Shared.ControlProviders.Input;
 using Shared.Enums;
 using System.Runtime.InteropServices;
 

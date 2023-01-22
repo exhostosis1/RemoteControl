@@ -1,6 +1,6 @@
 ﻿using ControlProviders;
 using Moq;
-using Shared.ControlProviders;
+using Shared.ControlProviders.Input;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
