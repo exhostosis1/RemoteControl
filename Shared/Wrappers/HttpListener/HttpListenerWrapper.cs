@@ -10,18 +10,6 @@ using Shared.Logging.Interfaces;
 
 namespace Shared.Wrappers.HttpListener;
 
-public class PrefixCollection : IPrefixesCollection
-{
-    private readonly HttpListenerPrefixCollection _collection;
-
-    public PrefixCollection(HttpListenerPrefixCollection collection)
-    {
-        _collection = collection;
-    }
-
-    public void Add(string prefix) => _collection.Add(prefix);
-}
-
 public class HttpListenerWrapper : IHttpListener
 {
     class LocalResponse : HttpContextResponse
@@ -45,7 +33,7 @@ public class HttpListenerWrapper : IHttpListener
         }
     }
 
-    private HttpListener _listener = new();
+    private System.Net.HttpListener _listener = new();
     public bool IsListening => _listener.IsListening;
     public IPrefixesCollection Prefixes { get; private set; }
     private readonly ILogger<HttpListenerWrapper> _logger;
@@ -111,7 +99,7 @@ public class HttpListenerWrapper : IHttpListener
         if (_listener.IsListening)
             _listener.Stop();
 
-        _listener = new HttpListener();
+        _listener = new System.Net.HttpListener();
         Prefixes = new PrefixCollection(_listener.Prefixes);
     }
 

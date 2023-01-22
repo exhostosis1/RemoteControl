@@ -9,7 +9,7 @@ using Shared.ControlProviders;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.UI;
-using Shared.Wrappers.RegistryWrapper.Registry;
+using Shared.Wrappers.Registry;
 using WinFormsUI;
 
 namespace WindowsEntryPoint;

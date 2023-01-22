@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using Shared.RegistryWrapper;
-using Shared.RegistryWrapper.Registry;
+using Shared.Wrappers.RegistryWrapper;
 
 #pragma warning disable CA1416
 
-namespace Shared.Wrappers.RegistryWrapper;
+namespace Shared.Wrappers.Registry;
 
 public class RegistryWrapper : IRegistry
 {

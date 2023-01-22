@@ -1,7 +1,5 @@
-﻿using Shared;
-using Shared.Listeners;
+﻿using Shared.Listeners;
 using System;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -11,39 +9,9 @@ using System.Threading.Tasks;
 
 namespace Shared.Wrappers.HttpClient;
 
-public class HttpClientWrapperRequest : IHttpClientRequest
-{
-    public HttpMethod Method { get; set; }
-    public string RequestUri { get; set; }
-    public string Content { get; set; }
-    public IHttpClientRequest New(HttpMethod method, string requestUri)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-public class HttpClientWrapperResponse : IHttpClientResponse
-{
-    public bool IsSuccessStatusCode { get; set; }
-    public HttpStatusCode StatusCode { get; set; }
-    public IHttpClientResponseContent Content { get; set; }
-}
-
-public class HttpClientWrapperContent : IHttpClientResponseContent
-{
-    private readonly HttpContent _content;
-
-    public HttpClientWrapperContent(HttpContent content)
-    {
-        _content = content;
-    }
-
-    public Task<T?> ReadFromJsonAsync<T>() => _content.ReadFromJsonAsync<T>();
-}
-
 public class HttpClientWrapper : IHttpClient
 {
-    private readonly HttpClient _client = new()
+    private readonly System.Net.Http.HttpClient _client = new()
     {
         Timeout = TimeSpan.FromSeconds(15)
     };

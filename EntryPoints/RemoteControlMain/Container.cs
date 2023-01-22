@@ -13,6 +13,7 @@ using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.UI;
+using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
 
 namespace RemoteControlMain;
