@@ -202,7 +202,7 @@ public sealed partial class MainForm : Form, IUserInterface
         CloseEvent?.Invoke(null, EventArgs.Empty);
     }
 
-    private static void IpToolStripMenuItem_Click(object? sender, string? input)
+    private static void IpToolStripMenuItem_Click(object? sender, string input)
     {
         var address = input.Replace("&", "^&");
 

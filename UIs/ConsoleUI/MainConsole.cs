@@ -71,7 +71,7 @@ public class MainConsole : IUserInterface
 
     public void AddProcessor(IServer processor)
     {
-        throw new NotImplementedException();
+        ProcessorAddedEvent?.Invoke(null, string.Empty);
     }
 
     private void DisplayInfo(List<IServer> dtos)
@@ -93,5 +93,15 @@ public class MainConsole : IUserInterface
         }
 
         Console.Write($"{(dtos.Any(x => x.Status.Working) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
+    }
+
+    protected void OnProcessorRemovedEvent(int e)
+    {
+        ProcessorRemovedEvent?.Invoke(this, e);
+    }
+
+    protected void OnConfigChangedEvent((int, CommonConfig) e)
+    {
+        ConfigChangedEvent?.Invoke(this, e);
     }
 }

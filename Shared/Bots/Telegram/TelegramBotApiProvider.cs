@@ -70,7 +70,7 @@ public class TelegramBotApiProvider : IBotApiProvider
         _client.Send(request);
     }
 
-    public T SendBotApiRequest<T>(string apiUrl, string apiKey, string method, object parameters)
+    public T SendBotApiRequest<T>(string apiUrl, string apiKey, string method, object parameters) where T: class
     {
         var request = new LocalHttpRequest(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {
@@ -80,7 +80,7 @@ public class TelegramBotApiProvider : IBotApiProvider
         var response = _client.Send(request);
 
         return response.IsSuccessStatusCode
-            ? response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult() ??
+            ? response.Content?.ReadFromJsonAsync<T>().GetAwaiter().GetResult() ??
               throw new JsonException("Cannot parse response")
             : throw new Exception($"Server returned error with code {response.StatusCode}");
     }

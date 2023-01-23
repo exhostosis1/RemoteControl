@@ -10,9 +10,7 @@ namespace Tests.Config;
 public class RegistryConfigProviderTests : IDisposable
 {
     private readonly RegistryConfigProvider _provider;
-    private readonly ILogger<RegistryConfigProvider> _logger;
-    private readonly MockRegistry _registry;
-    private static MockRegistryKey _currentKey;
+    private static MockRegistryKey? _currentKey;
 
     private class MockRegistryKey : IRegistryKey
     {
@@ -103,9 +101,9 @@ public class RegistryConfigProviderTests : IDisposable
 
     public RegistryConfigProviderTests()
     {
-        _logger = Mock.Of<ILogger<RegistryConfigProvider>>();
-        _registry = new MockRegistry();
-        _provider = new RegistryConfigProvider(_registry, _logger);
+        var logger = Mock.Of<ILogger<RegistryConfigProvider>>();
+        var registry = new MockRegistry();
+        _provider = new RegistryConfigProvider(registry, logger);
     }
 
     [Fact]
@@ -166,7 +164,7 @@ public class RegistryConfigProviderTests : IDisposable
 
         _provider.SetConfig(testConfig);
 
-        var registryConfig = JsonSerializer.Deserialize<AppConfig>(_currentKey.Value);
+        var registryConfig = JsonSerializer.Deserialize<AppConfig>(_currentKey?.Value ?? throw new NullReferenceException());
 
         Assert.Equal(testConfig, registryConfig);
     }

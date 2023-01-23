@@ -5,15 +5,15 @@ namespace Shared.Config;
 
 public class ServerConfig : CommonConfig
 {
-    public string Scheme { get; set; } = "http";
-    public string Host { get; set; } = "localhost";
-    public int Port { get; set; } = 80;
+    public string Scheme { get; init; } = "http";
+    public string Host { get; init;  } = "localhost";
+    public int Port { get; init;  } = 80;
 
     [JsonIgnore]
     public Uri Uri
     {
         get => new UriBuilder(Scheme, Host, Port).Uri;
-        set
+        init
         {
             Scheme = value.Scheme;
             Host = value.Host;
@@ -28,5 +28,15 @@ public class ServerConfig : CommonConfig
 
         return Name == that.Name && Autostart == that.Autostart && Scheme == that.Scheme &&
                Host == that.Host && Port == that.Port;
+    }
+
+    protected bool Equals(ServerConfig other)
+    {
+        return Scheme == other.Scheme && Host == other.Host && Port == other.Port;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Scheme, Host, Port);
     }
 }

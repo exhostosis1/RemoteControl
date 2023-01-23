@@ -6,7 +6,7 @@ namespace Shared.Config;
 
 public class AppConfig
 {
-    public List<CommonConfig> ProcessorConfigs { get; set; } = new();
+    public List<CommonConfig> ProcessorConfigs { get; init; } = new();
 
     [JsonIgnore]
     public IEnumerable<ServerConfig> Servers => ProcessorConfigs.Where(x => x is ServerConfig).Cast<ServerConfig>();
@@ -26,5 +26,15 @@ public class AppConfig
         if (ProcessorConfigs.Count != that.ProcessorConfigs.Count) return false;
 
         return !ProcessorConfigs.Where((t, i) => !ProcessorConfigs[i].Equals(that.ProcessorConfigs[i])).Any();
+    }
+
+    protected bool Equals(AppConfig other)
+    {
+        return ProcessorConfigs.Equals(other.ProcessorConfigs);
+    }
+
+    public override int GetHashCode()
+    {
+        return ProcessorConfigs.GetHashCode();
     }
 }

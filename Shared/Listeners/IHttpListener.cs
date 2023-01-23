@@ -13,8 +13,3 @@ public interface IHttpListener
     public Task<HttpContext> GetContextAsync();
     public void GetNew();
 }
-
-public interface IPrefixesCollection
-{
-    public void Add(string prefix);
-}
