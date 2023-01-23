@@ -1,12 +1,12 @@
-﻿using System;
-using System.Linq;
-using Shared.DataObjects.Http;
+﻿using Shared.DataObjects.Http;
 using Shared.Listeners;
+using Shared.Logging.Interfaces;
+using System;
+using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Shared.Logging.Interfaces;
 
 namespace Shared.Wrappers.HttpListener;
 

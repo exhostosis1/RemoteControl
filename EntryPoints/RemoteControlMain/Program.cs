@@ -61,12 +61,12 @@ public static class Program
             if (x.Config.Autostart)
                 x.Start();
         });
-        
+
         ui.SetAutostartValue(container.AutostartService.CheckAutostart());
 
         ui.StartEvent += (sender, id) =>
         {
-            if(!id.HasValue)
+            if (!id.HasValue)
             {
                 ControlProcessors.ForEach(x => x.Start());
             }

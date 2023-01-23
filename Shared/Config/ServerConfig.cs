@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
-public class ServerConfig: CommonConfig
+public class ServerConfig : CommonConfig
 {
     public string Scheme { get; set; } = "http";
     public string Host { get; set; } = "localhost";

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Shared;
 
-public interface IContainer: IPlatformDependantContainer
+public interface IContainer : IPlatformDependantContainer
 {
     public IListener<HttpContext> WebListener { get; }
     public IListener<BotContext> BotListener { get; }

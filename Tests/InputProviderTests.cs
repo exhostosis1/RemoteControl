@@ -6,7 +6,7 @@ using Shared.Logging.Interfaces;
 
 namespace Tests;
 
-public class InputProviderTests: IDisposable
+public class InputProviderTests : IDisposable
 {
     private readonly InputProvider _provider;
     private readonly ILogger<InputProvider> _logger;
@@ -66,7 +66,7 @@ public class InputProviderTests: IDisposable
     public void WheelTest()
     {
         _provider.MouseWheel(false);
-        
+
         Mock.Get(_mouse).Verify(x => x.SendScroll(-120), Times.Once);
     }
 

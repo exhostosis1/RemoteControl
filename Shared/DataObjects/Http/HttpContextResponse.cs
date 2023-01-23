@@ -3,7 +3,7 @@ using System.Net;
 
 namespace Shared.DataObjects.Http;
 
-public abstract class HttpContextResponse: IResponse
+public abstract class HttpContextResponse : IResponse
 {
     public string ContentType { get; set; } = "text/plain";
     public byte[] Payload { get; set; } = Array.Empty<byte>();

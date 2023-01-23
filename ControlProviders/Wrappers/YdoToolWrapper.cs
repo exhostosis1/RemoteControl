@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace ControlProviders.Wrappers;
 
-public class YdoToolWrapper: IKeyboardInput, IMouseInput
+public class YdoToolWrapper : IKeyboardInput, IMouseInput
 {
     private enum YdotoolKey : byte
     {
@@ -116,7 +116,7 @@ public class YdoToolWrapper: IKeyboardInput, IMouseInput
         Up = 0x80,
         Click = Down | Up
     }
-    
+
 
     private readonly Dictionary<KeysEnum, YdotoolKey> KeyToScanCode = new()
     {
@@ -199,10 +199,10 @@ public class YdoToolWrapper: IKeyboardInput, IMouseInput
     {
         var command = "key ";
         var ydoToolKey = KeyToScanCode[key];
-        
-        if(mode.HasFlag(KeyPressMode.Down))
+
+        if (mode.HasFlag(KeyPressMode.Down))
             command += $"{ydoToolKey:D}:1 ";
-        if(mode.HasFlag(KeyPressMode.Up))
+        if (mode.HasFlag(KeyPressMode.Up))
             command += $"{ydoToolKey:D}:0 ";
 
         RunYdotool(command);

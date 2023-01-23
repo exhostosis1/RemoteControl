@@ -141,9 +141,9 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
 
     public void SendKey(KeysEnum key, KeyPressMode mode)
     {
-        if(mode.HasFlag(KeyPressMode.Down))
+        if (mode.HasFlag(KeyPressMode.Down))
             SendKey(key);
-        if(mode.HasFlag(KeyPressMode.Up))
+        if (mode.HasFlag(KeyPressMode.Up))
             SendKey(key, true);
     }
 
@@ -205,9 +205,9 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
 
     public void SendMouseKey(MouseButtons button, KeyPressMode mode)
     {
-        if(mode.HasFlag(KeyPressMode.Down))
+        if (mode.HasFlag(KeyPressMode.Down))
             SendMouseKey(button);
-        if(mode.HasFlag(KeyPressMode.Up))
+        if (mode.HasFlag(KeyPressMode.Up))
             SendMouseKey(button, true);
     }
 

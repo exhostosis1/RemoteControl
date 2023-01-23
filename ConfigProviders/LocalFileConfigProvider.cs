@@ -1,7 +1,7 @@
-﻿using Shared.Logging.Interfaces;
+﻿using Shared.Config;
+using Shared.Logging.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Shared.Config;
 
 namespace ConfigProviders;
 
@@ -17,8 +17,8 @@ public class LocalFileConfigProvider : IConfigProvider
     }
 
     private readonly JsonSerializerOptions _jsonOptions = new()
-    { 
-        WriteIndented = true, 
+    {
+        WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 

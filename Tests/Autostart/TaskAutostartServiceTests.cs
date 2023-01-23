@@ -1,8 +1,8 @@
 ﻿using Autostart;
 using Moq;
 using Shared.Logging.Interfaces;
-using System.Linq.Expressions;
 using Shared.Wrappers.TaskServiceWrapper;
+using System.Linq.Expressions;
 
 namespace Tests.Autostart;
 
@@ -108,7 +108,7 @@ public class TaskAutostartServiceTests
         _taskServiceMock.Verify(_deleteExpression, Times.Once);
         Assert.True(File.Exists(_filePath));
         _taskServiceMock.Verify(_registerExpression, Times.Once);
-        
+
         File.Delete(_filePath);
     }
 

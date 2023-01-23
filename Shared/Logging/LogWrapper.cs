@@ -4,7 +4,7 @@ using System;
 
 namespace Shared.Logging;
 
-public class LogWrapper<T>: ILogger<T> where T : class
+public class LogWrapper<T> : ILogger<T> where T : class
 {
     private readonly ILogger _logger;
 

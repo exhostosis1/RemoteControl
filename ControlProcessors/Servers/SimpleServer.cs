@@ -7,13 +7,13 @@ using Shared.Server;
 
 namespace Servers;
 
-public class SimpleServer<TContext, TConfig>: IServer<TConfig> where TContext: IContext where TConfig: CommonConfig, new()
+public class SimpleServer<TContext, TConfig> : IServer<TConfig> where TContext : IContext where TConfig : CommonConfig, new()
 {
     public int Id { get; init; } = -1;
     public ServerStatus Status { get; } = new();
 
     private readonly ILogger<SimpleServer<TContext, TConfig>> _logger;
-    
+
     private readonly IListener<TContext> _listener;
     private readonly IMiddleware<TContext> _middleware;
 
@@ -114,7 +114,7 @@ public class SimpleServer<TContext, TConfig>: IServer<TConfig> where TContext: I
                 break;
             }
         }
-        
+
         _progress.Report(false);
     }
 

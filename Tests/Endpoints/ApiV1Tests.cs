@@ -1,10 +1,10 @@
 ﻿using Moq;
+using Servers.Middleware;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using System.Net;
-using Servers.Middleware;
 
 namespace Tests.Endpoints;
 

@@ -1,6 +1,6 @@
 ﻿namespace Shared.DataObjects.Bot;
 
-public class BotContext: IContext
+public class BotContext : IContext
 {
     public IRequest Request => BotRequest;
     public IResponse Response => BotResponse;

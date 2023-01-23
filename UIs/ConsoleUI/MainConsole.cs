@@ -5,7 +5,7 @@ using Shared.UI;
 namespace ConsoleUI;
 
 // ReSharper disable once InconsistentNaming
-public class MainConsole: IUserInterface
+public class MainConsole : IUserInterface
 {
     public event EventHandler<int?>? StartEvent;
     public event EventHandler<int?>? StopEvent;
@@ -43,7 +43,7 @@ public class MainConsole: IUserInterface
             switch (key)
             {
                 case "s":
-                    if(Model.Any(x => x.Status.Working))
+                    if (Model.Any(x => x.Status.Working))
                         StopEvent?.Invoke(null, null);
                     else
                         StartEvent?.Invoke(null, null);
@@ -63,9 +63,9 @@ public class MainConsole: IUserInterface
     {
         var color = Console.ForegroundColor;
         Console.ForegroundColor = ConsoleColor.Red;
-            
+
         Console.WriteLine(message);
-            
+
         Console.ForegroundColor = color;
     }
 

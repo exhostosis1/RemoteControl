@@ -1,6 +1,6 @@
 ﻿namespace Shared.DataObjects.Http;
 
-public class HttpContextRequest: IRequest
+public class HttpContextRequest : IRequest
 {
     public string Path { get; set; }
 

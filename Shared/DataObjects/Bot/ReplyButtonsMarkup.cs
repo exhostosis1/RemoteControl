@@ -2,7 +2,7 @@
 
 namespace Shared.DataObjects.Bot;
 
-public class ReplyButtonsMarkup: ButtonsMarkup
+public class ReplyButtonsMarkup : ButtonsMarkup
 {
     public IEnumerable<IEnumerable<SingleButton>> Items { get; set; }
 

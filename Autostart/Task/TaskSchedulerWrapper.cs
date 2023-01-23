@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using Microsoft.Win32.TaskScheduler;
+﻿using Microsoft.Win32.TaskScheduler;
 using Shared.Wrappers.TaskServiceWrapper;
+using System.Runtime.InteropServices;
 
 namespace Autostart.Task;
 

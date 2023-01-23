@@ -3,7 +3,7 @@ using Shared.Logging.Interfaces;
 
 namespace Autostart;
 
-public class DummyAutostartService: IAutostartService
+public class DummyAutostartService : IAutostartService
 {
     private bool _autostart;
     private readonly ILogger<DummyAutostartService> _logger;

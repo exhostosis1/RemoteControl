@@ -6,7 +6,7 @@ using System.Net;
 
 namespace ApiControllers;
 
-public class KeyboardController: BaseApiController
+public class KeyboardController : BaseApiController
 {
     private readonly IKeyboardControlProvider _provider;
     private readonly ILogger<KeyboardController> _logger;

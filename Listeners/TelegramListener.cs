@@ -6,9 +6,9 @@ using System.Net.Sockets;
 
 namespace Listeners;
 
-public class TelegramListener: IListener<BotContext>
+public class TelegramListener : IListener<BotContext>
 {
-    private class LocalResponse: BotContextResponse
+    private class LocalResponse : BotContextResponse
     {
         private readonly string _apiKey;
         private readonly string _apiUrl;
@@ -49,7 +49,7 @@ public class TelegramListener: IListener<BotContext>
     {
         _logger = logger;
         _wrapper = wrapper;
-        
+
         _progress = new Progress<bool>(result =>
         {
             _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
@@ -123,7 +123,7 @@ public class TelegramListener: IListener<BotContext>
                 break;
             }
         }
-        
+
         _progress.Report(false);
     }
 
@@ -143,7 +143,7 @@ public class TelegramListener: IListener<BotContext>
         _updates.Clear();
     }
 
-    private BotContext CreateContext(BotContextRequest request) => new (request, new LocalResponse(request.ApiUrl, request.ApiKey, request.Id, _wrapper));
+    private BotContext CreateContext(BotContextRequest request) => new(request, new LocalResponse(request.ApiUrl, request.ApiKey, request.Id, _wrapper));
 
     public async Task<BotContext> GetContextAsync(CancellationToken token = default)
     {

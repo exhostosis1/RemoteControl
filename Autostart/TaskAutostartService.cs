@@ -1,9 +1,9 @@
 ﻿using Shared;
 using Shared.Logging.Interfaces;
+using Shared.Wrappers.TaskServiceWrapper;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-using Shared.Wrappers.TaskServiceWrapper;
 
 namespace Autostart;
 
@@ -45,7 +45,7 @@ public class TaskAutostartService : IAutostartService
         _taskServiceWrapper.DeleteTask(_taskName, false);
 
         if (!value) return;
- 
+
         try
         {
             File.WriteAllText(_filename, $"start {Process.GetCurrentProcess().MainModule?.FileName}");

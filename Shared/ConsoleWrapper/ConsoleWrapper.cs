@@ -2,7 +2,7 @@
 
 namespace Shared.ConsoleWrapper;
 
-public class ConsoleWrapper: IConsole
+public class ConsoleWrapper : IConsole
 {
     public void WriteLine(string? value) => Console.WriteLine(value);
 

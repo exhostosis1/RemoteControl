@@ -1,5 +1,5 @@
-﻿using System.Net;
-using Shared.Listeners;
+﻿using Shared.Listeners;
+using System.Net;
 
 namespace Shared.Wrappers.HttpListener;
 

@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using Shared.Bots.Telegram.ApiObjects.Response;
+﻿using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.Bots.Telegram.ApiObjects.Response.Keyboard;
+using System.Text.Json.Serialization;
 
 namespace Shared.Bots.Telegram.ApiObjects.Request;
 

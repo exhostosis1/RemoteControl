@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace Logging;
 
-public class TraceLogger: AbstractLogger
+public class TraceLogger : AbstractLogger
 {
     public TraceLogger(LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : base(level,
         formatter)

@@ -1,8 +1,8 @@
 ﻿using Shared;
-using Shared.UI;
-using Windows.UI.ViewManagement;
 using Shared.Config;
 using Shared.Server;
+using Shared.UI;
+using Windows.UI.ViewManagement;
 using WinFormsUI.CustomControls.MenuItems;
 using WinFormsUI.CustomControls.Panels;
 
@@ -23,7 +23,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
-    
+
     private List<IServer> _model = new();
     private readonly List<ProcessorMenuItemGroup> _toolStripGroups = new();
     private readonly List<ProcessorPanel> _windowPanels = new();

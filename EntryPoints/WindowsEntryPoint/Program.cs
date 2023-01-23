@@ -21,32 +21,32 @@ public static class Program
             switch (args.Reason)
             {
                 case SessionSwitchReason.SessionLock:
-                {
-                    logger.LogInfo(type, "Stopping processords due to logout");
-
-                    indexes.Clear();
-
-                    for (var i = 0; i < RemoteControlMain.Program.ControlProcessors.Count; i++)
                     {
-                        if (RemoteControlMain.Program.ControlProcessors[i].Status.Working)
+                        logger.LogInfo(type, "Stopping processords due to logout");
+
+                        indexes.Clear();
+
+                        for (var i = 0; i < RemoteControlMain.Program.ControlProcessors.Count; i++)
                         {
-                            indexes.Add(i);
-                            RemoteControlMain.Program.ControlProcessors[i].Stop();
+                            if (RemoteControlMain.Program.ControlProcessors[i].Status.Working)
+                            {
+                                indexes.Add(i);
+                                RemoteControlMain.Program.ControlProcessors[i].Stop();
+                            }
                         }
-                    }
 
-                    break;
-                }
+                        break;
+                    }
                 case SessionSwitchReason.SessionUnlock:
-                {
-                    logger.LogInfo(type, "Resoring processors");
-
-                    foreach (var index in indexes)
                     {
-                        RemoteControlMain.Program.ControlProcessors[index].Start();
+                        logger.LogInfo(type, "Resoring processors");
+
+                        foreach (var index in indexes)
+                        {
+                            RemoteControlMain.Program.ControlProcessors[index].Start();
+                        }
+                        break;
                     }
-                    break;
-                }
                 default:
                     break;
             }

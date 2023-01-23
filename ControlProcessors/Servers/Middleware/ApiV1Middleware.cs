@@ -1,11 +1,11 @@
 ﻿using Shared;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
+using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using System.Net;
 using System.Text;
-using Shared.DataObjects.Http;
 
 namespace Servers.Middleware;
 

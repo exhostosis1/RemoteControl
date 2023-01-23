@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Shared.Wrappers.TaskServiceWrapper;
 
-public class TaskActionCollection: IEnumerable<TaskAction>
+public class TaskActionCollection : IEnumerable<TaskAction>
 {
     private readonly List<TaskAction> _actions = new();
 

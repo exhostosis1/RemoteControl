@@ -17,18 +17,18 @@ public class CommandExecutorTests : IDisposable
         _provider = Mock.Of<IGeneralControlProvider>();
     }
 
-    private class LocalResponse: BotContextResponse
+    private class LocalResponse : BotContextResponse
     {
         public override void Close()
         {
-            
+
         }
     }
 
     [Fact]
     public void ExecuteTest()
     {
-        
+
     }
 
     public void Dispose()

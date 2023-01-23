@@ -4,11 +4,11 @@ using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class LoggingMiddleware: AbstractMiddleware<HttpContext>
+public class LoggingMiddleware : AbstractMiddleware<HttpContext>
 {
     private readonly ILogger<LoggingMiddleware> _logger;
 
-    public LoggingMiddleware(ILogger<LoggingMiddleware> logger, AbstractMiddleware<HttpContext>? next = null): base(next)
+    public LoggingMiddleware(ILogger<LoggingMiddleware> logger, AbstractMiddleware<HttpContext>? next = null) : base(next)
     {
         _logger = logger;
     }

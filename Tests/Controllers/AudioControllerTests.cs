@@ -114,7 +114,7 @@ public class AudioControllerTests : IDisposable
                  x.Value.Method.GetParameters().Length == 1 &&
                  x.Value.Method.GetParameters()[0].ParameterType == typeof(string)));
     }
-    
+
     public void Dispose()
     {
 

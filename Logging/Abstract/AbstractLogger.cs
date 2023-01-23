@@ -1,12 +1,12 @@
 ﻿using Logging.Formatters;
 using Shared.Enums;
+using Shared.Logging;
 using Shared.Logging.Interfaces;
 using System.Collections.Concurrent;
-using Shared.Logging;
 
 namespace Logging.Abstract;
 
-public abstract class AbstractLogger: ILogger
+public abstract class AbstractLogger : ILogger
 {
     private readonly BlockingCollection<LogMessage> _messages = new();
     private readonly IMessageFormatter _formatter;
@@ -22,7 +22,7 @@ public abstract class AbstractLogger: ILogger
 
     public void Log(Type type, string message, LoggingLevel level = LoggingLevel.Error)
     {
-        if(level >= _currentLoggingLevel)
+        if (level >= _currentLoggingLevel)
             _messages.Add(new LogMessage(type, level, DateTime.Now, message));
     }
 

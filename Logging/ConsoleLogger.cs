@@ -5,7 +5,7 @@ using Shared.Logging.Interfaces;
 
 namespace Logging;
 
-public class ConsoleLogger: AbstractLogger
+public class ConsoleLogger : AbstractLogger
 {
     private readonly IConsole _console;
 

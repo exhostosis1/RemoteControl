@@ -4,7 +4,7 @@ using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class DisplayController: BaseApiController
+public class DisplayController : BaseApiController
 {
     private readonly IDisplayControlProvider _provider;
     private readonly ILogger<DisplayController> _logger;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Shared.Wrappers.TaskServiceWrapper;
 
-public class TaskTriggerCollection: IEnumerable<TaskTrigger>
+public class TaskTriggerCollection : IEnumerable<TaskTrigger>
 {
     private readonly List<TaskTrigger> _triggers = new();
 

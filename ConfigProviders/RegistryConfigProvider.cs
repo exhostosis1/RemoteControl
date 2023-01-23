@@ -1,12 +1,12 @@
 ﻿using Shared.Config;
 using Shared.Logging.Interfaces;
+using Shared.Wrappers.RegistryWrapper;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Shared.Wrappers.RegistryWrapper;
 
 namespace ConfigProviders;
 
-public class RegistryConfigProvider: IConfigProvider
+public class RegistryConfigProvider : IConfigProvider
 {
     private readonly IRegistryKey _regKey;
     private const string ValueName = "Config";

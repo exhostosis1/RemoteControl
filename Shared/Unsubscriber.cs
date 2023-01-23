@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Shared;
 
-public class Unsubscriber<T>: IDisposable
+public class Unsubscriber<T> : IDisposable
 {
     private readonly IList<IObserver<T>> _observers;
     private readonly IObserver<T> _observer;

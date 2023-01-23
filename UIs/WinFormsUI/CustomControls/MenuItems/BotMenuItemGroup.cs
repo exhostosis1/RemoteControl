@@ -1,5 +1,5 @@
-﻿using Shared.Config;
-using Shared;
+﻿using Shared;
+using Shared.Config;
 using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;

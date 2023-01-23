@@ -4,7 +4,7 @@ using Shared.Enums;
 
 namespace ControlProviders.Wrappers;
 
-public class DummyWrapper: IKeyboardInput, IMouseInput, IDisplayInput, IAudioInput
+public class DummyWrapper : IKeyboardInput, IMouseInput, IDisplayInput, IAudioInput
 {
     public void SendKey(KeysEnum key, KeyPressMode mode)
     {

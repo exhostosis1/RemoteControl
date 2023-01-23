@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Shared.Wrappers.RegistryWrapper;
+using System;
 using System.Runtime.InteropServices;
-using Shared.Wrappers.RegistryWrapper;
 
 #pragma warning disable CA1416
 

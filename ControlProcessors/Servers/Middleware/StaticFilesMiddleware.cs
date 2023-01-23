@@ -1,7 +1,7 @@
-﻿using Shared.Logging.Interfaces;
+﻿using Shared.DataObjects.Http;
+using Shared.Logging.Interfaces;
 using Shared.Server;
 using System.Net;
-using Shared.DataObjects.Http;
 
 namespace Servers.Middleware;
 

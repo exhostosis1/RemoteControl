@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.Server;
+using System;
+using System.Collections.Generic;
 
 namespace Shared.UI;
 

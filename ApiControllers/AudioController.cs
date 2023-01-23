@@ -4,7 +4,7 @@ using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class AudioController: BaseApiController
+public class AudioController : BaseApiController
 {
     private readonly IAudioControlProvider _provider;
     private readonly ILogger<AudioController> _logger;
@@ -26,7 +26,7 @@ public class AudioController: BaseApiController
     {
         _logger.LogInfo($"Setting device to {param}");
 
-        if(Guid.TryParse(param, out var guid)) 
+        if (Guid.TryParse(param, out var guid))
         {
             _provider.SetAudioDevice(guid);
             return Ok();
@@ -90,7 +90,7 @@ public class AudioController: BaseApiController
     {
         _logger.LogInfo("Toggling mute status");
 
-        if(_provider.IsMuted)
+        if (_provider.IsMuted)
             _provider.Unmute();
         else
             _provider.Mute();

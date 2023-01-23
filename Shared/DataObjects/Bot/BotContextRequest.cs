@@ -1,6 +1,6 @@
 ﻿namespace Shared.DataObjects.Bot;
 
-public class BotContextRequest: IRequest
+public class BotContextRequest : IRequest
 {
     public int Id { get; set; }
     public string Command { get; set; }

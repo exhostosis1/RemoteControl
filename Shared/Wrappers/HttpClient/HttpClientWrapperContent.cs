@@ -1,7 +1,7 @@
-﻿using System.Net.Http;
+﻿using Shared.Listeners;
+using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using Shared.Listeners;
 
 namespace Shared.Wrappers.HttpClient;
 

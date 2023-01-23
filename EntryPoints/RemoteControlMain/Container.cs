@@ -75,11 +75,11 @@ internal class Container : IContainer
 
         HttpListener = NewHttpListener(Logger);
         WebListener = NewWebListener(HttpListener, Logger);
-        
+
         HttpClient = NewHttpClient();
         TelegramBotApiProvider = NewTelegramBotApiProvider(HttpClient, Logger);
         BotListener = NewBotListener(TelegramBotApiProvider, Logger);
-        
+
         AudioController = NewAudioController(ControlProvider, Logger);
         DisplayController = NewDisplayController(ControlProvider, Logger);
         KeyboardController = NewKeyboardController(ControlProvider, Logger);

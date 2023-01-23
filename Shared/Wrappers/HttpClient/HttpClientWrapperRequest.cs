@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Shared.Listeners;
+using System;
 using System.Net.Http;
-using Shared.Listeners;
 
 namespace Shared.Wrappers.HttpClient;
 

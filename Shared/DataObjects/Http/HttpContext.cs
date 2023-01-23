@@ -1,6 +1,6 @@
 ﻿namespace Shared.DataObjects.Http;
 
-public class HttpContext: IContext
+public class HttpContext : IContext
 {
     public IRequest Request => HttpRequest;
     public IResponse Response => HttpResponse;

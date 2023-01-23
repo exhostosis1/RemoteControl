@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Shared.ControlProviders.Devices;
+using System;
 using System.Collections.Generic;
-using Shared.ControlProviders.Devices;
 
 namespace Shared.ControlProviders.Provider;
 

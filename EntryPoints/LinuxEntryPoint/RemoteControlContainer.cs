@@ -30,7 +30,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     }
 
     public IConfigProvider NewConfigProvider(ILogger logger) =>
-        new LocalFileConfigProvider(Path.Combine(AppContext.BaseDirectory, "config.ini"),new LogWrapper<LocalFileConfigProvider>(logger));
+        new LocalFileConfigProvider(Path.Combine(AppContext.BaseDirectory, "config.ini"), new LogWrapper<LocalFileConfigProvider>(logger));
 
     public IAutostartService NewAutostartService(ILogger logger) =>
         new DummyAutostartService(new LogWrapper<DummyAutostartService>(logger));

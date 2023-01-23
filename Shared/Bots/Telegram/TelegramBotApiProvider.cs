@@ -14,9 +14,9 @@ using System.Threading.Tasks;
 
 namespace Shared.Bots.Telegram;
 
-public class TelegramBotApiProvider: IBotApiProvider
+public class TelegramBotApiProvider : IBotApiProvider
 {
-    class LocalHttpRequest: IHttpClientRequest
+    class LocalHttpRequest : IHttpClientRequest
     {
         public HttpMethod Method { get; set; }
         public string RequestUri { get; set; }

@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 
 namespace ControlProviders.Wrappers;
 
-public class NAudioWrapper: IAudioInput
+public class NAudioWrapper : IAudioInput
 {
-    private static readonly MMDeviceEnumerator Enumerator = new ();
+    private static readonly MMDeviceEnumerator Enumerator = new();
 
     private MMDevice _defaultDevice;
     private readonly IEnumerable<MMDevice> _devices;

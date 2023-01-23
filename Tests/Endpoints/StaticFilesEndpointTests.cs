@@ -1,9 +1,9 @@
 ﻿using Moq;
+using Servers.Middleware;
 using Shared.DataObjects.Http;
 using Shared.Logging.Interfaces;
 using System.Net;
 using System.Text;
-using Servers.Middleware;
 
 namespace Tests.Endpoints;
 

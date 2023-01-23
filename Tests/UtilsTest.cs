@@ -4,7 +4,7 @@ using Shared.ApiControllers.Results;
 
 namespace Tests;
 
-public class UtilsTest: IDisposable
+public class UtilsTest : IDisposable
 {
     public UtilsTest()
     {
@@ -37,7 +37,7 @@ public class UtilsTest: IDisposable
     public void ApiRegexTest(string input, string resultController, string resultAction, string resultParameter)
     {
         var result = Utils.TryParsePath(input, out var controller, out var action, out var parameter);
-        
+
         Assert.True(result);
 
         Assert.Equal(resultController, controller);
@@ -67,7 +67,7 @@ public class UtilsTest: IDisposable
 
         Assert.True(result);
         Assert.Equal(version, resultVersion);
-        
+
     }
 
     [Theory]

@@ -2,7 +2,7 @@
 
 namespace Shared.Server;
 
-public abstract class AbstractMiddleware<T>: IMiddleware<T> where T : IContext
+public abstract class AbstractMiddleware<T> : IMiddleware<T> where T : IContext
 {
     protected IMiddleware<T>? Next { get; set; }
 

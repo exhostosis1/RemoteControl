@@ -1,5 +1,5 @@
-﻿using System;
-using Shared.Enums;
+﻿using Shared.Enums;
+using System;
 
 namespace Shared.Logging;
 

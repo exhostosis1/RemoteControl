@@ -7,7 +7,7 @@ namespace Shared.Listeners;
 
 public record StartParameters(string Uri, string? ApiKey = null, List<string>? Usernames = null);
 
-public interface IListener<T> where T: IContext
+public interface IListener<T> where T : IContext
 {
     public bool IsListening { get; }
     public void StartListen(StartParameters param);

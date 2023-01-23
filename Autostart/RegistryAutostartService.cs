@@ -1,7 +1,7 @@
 ﻿using Shared;
 using Shared.Logging.Interfaces;
-using System.Diagnostics;
 using Shared.Wrappers.RegistryWrapper;
+using System.Diagnostics;
 
 namespace Autostart;
 

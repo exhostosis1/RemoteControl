@@ -19,7 +19,7 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
     protected readonly List<ToolStripItem> Items = new();
 
     public ToolStripItem[] ItemsArray => Items.ToArray();
-    
+
     protected readonly IDisposable StatusUnsubscriber;
 
     public event EventHandler<string>? OnDescriptionClick;
@@ -35,7 +35,7 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
 
         NameItem.Text = processor.Config.Name;
         Items.Add(NameItem);
-        
+
         DescriptionItem.Enabled = processor.Status.Working;
         Items.Add(DescriptionItem);
 
@@ -63,10 +63,10 @@ internal abstract class ProcessorMenuItemGroup : IDisposable
             OnStopClick?.Invoke(null, Id);
         }
     }
-    
+
     protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(null, value);
 
-    
+
 
     public void Dispose()
     {

@@ -1,7 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Shared.Bots.Telegram.ApiObjects.Response;
+﻿using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.DataObjects.Bot;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Shared.Bots.Telegram;
 

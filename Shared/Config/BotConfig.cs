@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
-public class BotConfig: CommonConfig
+public class BotConfig : CommonConfig
 {
     public string ApiUri { get; set; } = "http://api.telegram.org";
     public string ApiKey { get; set; } = string.Empty;

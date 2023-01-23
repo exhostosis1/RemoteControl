@@ -6,7 +6,7 @@ internal static partial class DarkTitleBar
 {
     [LibraryImport("dwmapi.dll")]
     private static partial int DwmSetWindowAttribute(nint hwnd, int attr, ref int attrValue, int attrSize);
-    
+
     private const int DwmwaUseImmersiveDarkMode = 20;
 
     internal static bool UseImmersiveDarkMode(nint handle, bool enabled)

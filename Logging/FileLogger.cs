@@ -4,7 +4,7 @@ using Shared.Logging.Interfaces;
 
 namespace Logging;
 
-public class FileLogger: AbstractLogger
+public class FileLogger : AbstractLogger
 {
     private readonly string _path;
 
