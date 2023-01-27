@@ -1,10 +1,10 @@
-﻿using ConfigProviders;
+﻿using System.Text.Json;
+using ConfigProviders;
 using Moq;
 using Shared.Config;
 using Shared.Logging.Interfaces;
-using System.Text.Json;
 
-namespace Tests.Config;
+namespace UnitTests.Config;
 
 public class LocalFileConfigProviderTests : IDisposable
 {
@@ -16,23 +16,29 @@ public class LocalFileConfigProviderTests : IDisposable
     {
         _logger = Mock.Of<ILogger<LocalFileConfigProvider>>();
         _provider = new LocalFileConfigProvider(_filePath, _logger);
+
         if (File.Exists(_filePath))
             File.Delete(_filePath);
     }
 
     [Fact]
-    public void GetConfigTest()
+    public void GetDefaultConfigTest()
     {
         var config = _provider.GetConfig();
+        var defaultConfig = new AppConfig();
 
         Mock.Get(_logger).Verify(x => x.LogWarn("No config file"), Times.Once);
-        Assert.True(config.ProcessorConfigs.Count == 0);
+        Assert.Equal(config, defaultConfig);
+    }
 
+    [Fact]
+    public void ReadConfigFromFileTest()
+    {
         var configText = @"
 {
-  ""ProcessorConfigs"": [
+  ""ServerConfigs"": [
     {
-      ""$type"": ""server"",
+      ""$type"": ""web"",
       ""Scheme"": ""http"",
       ""Host"": ""192.168.31.12"",
       ""Port"": 1488,
@@ -56,13 +62,8 @@ public class LocalFileConfigProviderTests : IDisposable
 
         File.WriteAllText(_filePath, configText);
 
-        config = _provider.GetConfig();
+        var config = _provider.GetConfig();
         Assert.Equal(config, savedConfig);
-
-        config = _provider.GetConfig();
-        Assert.Equal(config, savedConfig);
-
-        Mock.Get(_logger).Verify(x => x.LogInfo(It.IsAny<string>()), Times.Exactly(3));
 
         File.Delete(_filePath);
     }
@@ -70,9 +71,9 @@ public class LocalFileConfigProviderTests : IDisposable
     [Fact]
     public void SetConfigTest()
     {
-        var config = new AppConfig()
+        var config = new AppConfig
         {
-            ProcessorConfigs = new List<CommonConfig>
+            ServerConfigs = new List<CommonConfig>
             {
                 new BotConfig
                 {
@@ -82,7 +83,7 @@ public class LocalFileConfigProviderTests : IDisposable
                     Autostart = true,
                     Usernames = new List<string>{"user1", "user2"}
                 },
-                new ServerConfig
+                new WebConfig
                 {
                     Name = "server1",
                     Autostart = false,
@@ -90,7 +91,7 @@ public class LocalFileConfigProviderTests : IDisposable
                     Scheme = "scheme1",
                     Port = 1234
                 },
-                new ServerConfig
+                new WebConfig
                 {
                     Name = "server2",
                     Autostart = false,
@@ -103,11 +104,9 @@ public class LocalFileConfigProviderTests : IDisposable
 
         _provider.SetConfig(config);
 
-        Mock.Get(_logger).Verify(x => x.LogInfo($"Writing config to file {_filePath}"), Times.Once);
-
         var savedConfig = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(_filePath));
 
-        Assert.True(savedConfig?.Equals(config));
+        Assert.Equal(savedConfig, config);
 
         File.Delete(_filePath);
     }

@@ -1,5 +1,4 @@
-﻿using Shared.Listeners;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
@@ -25,7 +24,7 @@ public class HttpClientWrapper : IHttpClient
     public IHttpClientResponse Send(IHttpClientRequest request)
     {
         var newRequest = new HttpRequestMessage(request.Method, request.RequestUri);
-        newRequest.Content = new StringContent(request.Content, Encoding.UTF8, "application/json");
+        newRequest.Content = new StringContent(request.Content ?? string.Empty, Encoding.UTF8, "application/json");
 
         var response = _client.Send(newRequest);
 

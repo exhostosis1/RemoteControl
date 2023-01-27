@@ -6,35 +6,35 @@ namespace Shared.Config;
 
 public class AppConfig
 {
-    public List<CommonConfig> ProcessorConfigs { get; init; } = new();
+    public List<CommonConfig> ServerConfigs { get; init; } = new();
 
     [JsonIgnore]
-    public IEnumerable<ServerConfig> Servers => ProcessorConfigs.Where(x => x is ServerConfig).Cast<ServerConfig>();
+    public IEnumerable<WebConfig> Servers => ServerConfigs.Where(x => x is WebConfig).Cast<WebConfig>();
 
     [JsonIgnore]
-    public IEnumerable<BotConfig> Bots => ProcessorConfigs.Where(x => x is BotConfig).Cast<BotConfig>();
+    public IEnumerable<BotConfig> Bots => ServerConfigs.Where(x => x is BotConfig).Cast<BotConfig>();
 
     public AppConfig() { }
 
-    public AppConfig(IEnumerable<CommonConfig> items) => ProcessorConfigs = items.ToList();
+    public AppConfig(IEnumerable<CommonConfig> items) => ServerConfigs = items.ToList();
 
     public override bool Equals(object? other)
     {
         if (ReferenceEquals(this, other)) return true;
         if (other is not AppConfig that) return false;
 
-        if (ProcessorConfigs.Count != that.ProcessorConfigs.Count) return false;
+        if (ServerConfigs.Count != that.ServerConfigs.Count) return false;
 
-        return !ProcessorConfigs.Where((t, i) => !ProcessorConfigs[i].Equals(that.ProcessorConfigs[i])).Any();
+        return !ServerConfigs.Where((t, i) => !ServerConfigs[i].Equals(that.ServerConfigs[i])).Any();
     }
 
     protected bool Equals(AppConfig other)
     {
-        return ProcessorConfigs.Equals(other.ProcessorConfigs);
+        return ServerConfigs.Equals(other.ServerConfigs);
     }
 
     public override int GetHashCode()
     {
-        return ProcessorConfigs.GetHashCode();
+        return ServerConfigs.GetHashCode();
     }
 }

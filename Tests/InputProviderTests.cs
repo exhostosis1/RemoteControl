@@ -4,12 +4,11 @@ using Shared.ControlProviders.Input;
 using Shared.Enums;
 using Shared.Logging.Interfaces;
 
-namespace Tests;
+namespace UnitTests;
 
 public class InputProviderTests : IDisposable
 {
     private readonly InputProvider _provider;
-    private readonly ILogger<InputProvider> _logger;
     private readonly IKeyboardInput _keyboard;
     private readonly IMouseInput _mouse;
     private readonly IDisplayInput _display;
@@ -18,13 +17,13 @@ public class InputProviderTests : IDisposable
 
     public InputProviderTests()
     {
-        _logger = Mock.Of<ILogger<InputProvider>>();
+        var logger = Mock.Of<ILogger<InputProvider>>();
         _keyboard = Mock.Of<IKeyboardInput>();
         _mouse = Mock.Of<IMouseInput>();
         _display = Mock.Of<IDisplayInput>();
         _audio = Mock.Of<IAudioInput>();
 
-        _provider = new InputProvider(_keyboard, _mouse, _display, _audio, _logger);
+        _provider = new InputProvider(_keyboard, _mouse, _display, _audio, logger);
     }
 
     [Fact]
@@ -38,7 +37,7 @@ public class InputProviderTests : IDisposable
     [Fact]
     public void KeyPressTest()
     {
-        _provider.KeyboardKeyPress(KeysEnum.Enter, KeyPressMode.Click);
+        _provider.KeyboardKeyPress(KeysEnum.Enter);
 
         Mock.Get(_keyboard).Verify(x => x.SendKey(KeysEnum.Enter, KeyPressMode.Click), Times.Once);
     }
@@ -46,7 +45,7 @@ public class InputProviderTests : IDisposable
     [Fact]
     public void MouseKeyTest()
     {
-        _provider.MouseKeyPress(MouseButtons.Middle, KeyPressMode.Click);
+        _provider.MouseKeyPress(MouseButtons.Middle);
 
         Mock.Get(_mouse).Verify(x => x.SendMouseKey(MouseButtons.Middle, KeyPressMode.Click), Times.Once);
     }
@@ -57,7 +56,7 @@ public class InputProviderTests : IDisposable
         var x = 34;
         var y = 18;
 
-        _provider.MouseMove(34, 18);
+        _provider.MouseMove(x, y);
 
         Mock.Get(_mouse).Verify(input => input.SendMouseMove(x, y), Times.Once);
     }
@@ -125,7 +124,9 @@ public class InputProviderTests : IDisposable
     public void GetDevicesTest()
     {
         var result = _provider.GetAudioDevices();
-        Assert.NotNull(result);
+        Assert.True(result.ToList().Count == 0);
+
+        Mock.Get(_audio).Verify(x => x.GetDevices(), Times.Once);
     }
 
     [Fact]

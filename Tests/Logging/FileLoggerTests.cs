@@ -1,10 +1,9 @@
 using Logging;
 using Logging.Formatters;
-
 using Shared.Enums;
 using Shared.Logging;
 
-namespace Tests.Logging;
+namespace UnitTests.Logging;
 
 public class FileLoggerTests : IDisposable
 {
@@ -24,76 +23,50 @@ public class FileLoggerTests : IDisposable
     [Fact]
     public async Task LogInfoTest()
     {
-        var message = "test message";
+        const string message = "test message";
         var type = GetType();
-        var level = LoggingLevel.Info;
+        const LoggingLevel level = LoggingLevel.Info;
 
         _fileLogger.Log(type, message, level);
 
-        var loggedText = "";
+        await Task.Delay(100);
 
-        try
-        {
-            loggedText = await File.ReadAllTextAsync(_filePath);
-        }
-        catch (IOException)
-        {
-        }
-
-        Assert.True(string.IsNullOrEmpty(loggedText));
+        Assert.False(File.Exists(_filePath));
     }
 
     [Fact]
     public async Task LogWarningTest()
     {
-        var message = "test message";
+        const string message = "test message";
         var type = GetType();
-        var level = LoggingLevel.Warn;
+        const LoggingLevel level = LoggingLevel.Warn;
 
         _fileLogger.Log(type, message, level);
 
-        var loggedText = "";
+        await Task.Delay(100);
 
-        try
-        {
-            loggedText = await File.ReadAllTextAsync(_filePath);
-        }
-        catch (IOException)
-        {
-        }
-
-        Assert.True(string.IsNullOrEmpty(loggedText));
+        Assert.False(File.Exists(_filePath));
     }
 
     [Fact]
     public async Task LogErrorTest()
     {
-        var message = "test message";
+        const string message = "test message";
         var type = GetType();
-        var level = LoggingLevel.Error;
+        const LoggingLevel level = LoggingLevel.Error;
         var date = DateTime.Now;
-
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message)) + Environment.NewLine;
 
         _fileLogger.Log(type, message, level);
 
-        var loggedText = "";
+        await Task.Delay(100);
 
-        for (var i = 0; i < 10; i++)
-        {
-            try
-            {
-                loggedText = await File.ReadAllTextAsync(_filePath);
-                break;
-            }
-            catch (IOException)
-            {
-                await Task.Delay(1000);
-            }
-        }
+        var formattedMessage = new DefaultMessageFormatter().Format(new LogMessage(type, level, date, message));
 
-        Assert.True(formattedMessage == loggedText);
+        Assert.True(File.Exists(_filePath));
+
+        var writtenMessage = (await File.ReadAllLinesAsync(_filePath)).First();
+
+        Assert.Equal(formattedMessage, writtenMessage);
     }
 
     public void Dispose()

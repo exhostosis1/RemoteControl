@@ -4,10 +4,10 @@ using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;
 
-internal abstract class ProcessorPanel : Panel
+internal abstract class ServerPanel : Panel
 {
     public int Id { get; init; }
-    protected readonly IServer ControlProcessor;
+    protected readonly IServer Server;
     protected readonly SynchronizationContext? SynchronizationContext;
     protected readonly IDisposable Unsubscriber;
     protected Theme Theme { get; set; } = new();
@@ -65,20 +65,20 @@ internal abstract class ProcessorPanel : Panel
     public event EventHandler<int>? StopButtonClicked;
     public event EventHandler<(int, CommonConfig)>? UpdateButtonClicked;
 
-    protected ProcessorPanel(IServer processor)
+    protected ServerPanel(IServer server)
     {
         Width = 508;
         Height = 90;
         Left = 12;
         BorderStyle = BorderStyle.FixedSingle;
 
-        Id = processor.Id;
-        ControlProcessor = processor;
-        NameTextBox.Text = processor.Config.Name;
+        Id = server.Id;
+        Server = server;
+        NameTextBox.Text = server.Config.Name;
 
         SynchronizationContext = SynchronizationContext.Current;
 
-        if (processor.Status.Working)
+        if (server.Status.Working)
         {
             StopButton.Visible = true;
         }
@@ -91,7 +91,7 @@ internal abstract class ProcessorPanel : Panel
         StopButton.Click += StopButtonClick;
         UpdateButton.Click += UpdateButtonClick;
 
-        AutostartBox.Checked = processor.Config.Autostart;
+        AutostartBox.Checked = server.Config.Autostart;
 
         NameTextBox.TextChanged += EnableUpdateButton;
         AutostartBox.CheckedChanged += EnableUpdateButton;
@@ -106,7 +106,7 @@ internal abstract class ProcessorPanel : Panel
             UpdateButton
         });
 
-        Unsubscriber = ControlProcessor.Status.Subscribe(new Observer<bool>(SetButtons));
+        Unsubscriber = Server.Status.Subscribe(new Observer<bool>(SetButtons));
         Disposed += (_, _) => Unsubscriber.Dispose();
     }
 

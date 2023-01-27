@@ -1,5 +1,4 @@
-﻿using Shared.Listeners;
-using System.Net.Http;
+﻿using System.Net.Http;
 
 namespace Shared.Wrappers.HttpClient;
 

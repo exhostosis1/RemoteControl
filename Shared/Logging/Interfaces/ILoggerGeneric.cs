@@ -2,7 +2,7 @@
 
 namespace Shared.Logging.Interfaces;
 
-public interface ILogger<T> : ILogger where T : class
+public interface ILogger<out T> : ILogger where T : class
 {
     public void Log(string message, LoggingLevel level) => Log(typeof(T), message, level);
     public void LogInfo(string message) => LogInfo(typeof(T), message);

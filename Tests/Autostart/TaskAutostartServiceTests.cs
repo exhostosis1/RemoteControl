@@ -1,10 +1,10 @@
-﻿using Autostart;
+﻿using System.Linq.Expressions;
+using Autostart;
 using Moq;
 using Shared.Logging.Interfaces;
 using Shared.Wrappers.TaskServiceWrapper;
-using System.Linq.Expressions;
 
-namespace Tests.Autostart;
+namespace UnitTests.Autostart;
 
 public class TaskAutostartServiceTests
 {

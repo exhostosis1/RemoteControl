@@ -4,7 +4,7 @@ using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;
 
-internal class ServerPanel : ProcessorPanel
+internal class HttpPanel : ServerPanel
 {
     private readonly Label _schemeLabel = new()
     {
@@ -50,11 +50,11 @@ internal class ServerPanel : ProcessorPanel
 
     private readonly IDisposable _unsubscriber;
 
-    public ServerPanel(IServer<ServerConfig> processor) : base(processor)
+    public HttpPanel(IServer<WebConfig> server) : base(server)
     {
-        _schemeTextBox.Text = processor.CurrentConfig.Scheme;
-        _hostTextBox.Text = processor.CurrentConfig.Host;
-        _portTextBox.Text = processor.CurrentConfig.Port.ToString();
+        _schemeTextBox.Text = server.CurrentConfig.Scheme;
+        _hostTextBox.Text = server.CurrentConfig.Host;
+        _portTextBox.Text = server.CurrentConfig.Port.ToString();
 
         _schemeTextBox.TextChanged += EnableUpdateButton;
         _hostTextBox.TextChanged += EnableUpdateButton;
@@ -80,12 +80,12 @@ internal class ServerPanel : ProcessorPanel
             _portTextBox
         });
 
-        _unsubscriber = processor.Subscribe(new Observer<ServerConfig>(ConfigChanged));
+        _unsubscriber = server.Subscribe(new Observer<WebConfig>(ConfigChanged));
 
         Disposed += LocalDispose;
     }
 
-    private void ConfigChanged(ServerConfig config)
+    private void ConfigChanged(WebConfig config)
     {
         NameTextBox.Text = config.Name;
         AutostartBox.Checked = config.Autostart;
@@ -124,7 +124,7 @@ internal class ServerPanel : ProcessorPanel
             return;
         }
 
-        var config = new ServerConfig
+        var config = new WebConfig
         {
             Autostart = AutostartBox.Checked,
             Uri = uri,

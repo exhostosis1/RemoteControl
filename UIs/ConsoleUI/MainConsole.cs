@@ -1,4 +1,5 @@
 ﻿using Shared.Config;
+using Shared.Enums;
 using Shared.Server;
 using Shared.UI;
 
@@ -7,13 +8,13 @@ namespace ConsoleUI;
 // ReSharper disable once InconsistentNaming
 public class MainConsole : IUserInterface
 {
-    public event EventHandler<int?>? StartEvent;
-    public event EventHandler<int?>? StopEvent;
-    public event EventHandler? CloseEvent;
-    public event EventHandler<bool>? AutostartChangedEvent;
-    public event EventHandler<(int, CommonConfig)>? ConfigChangedEvent;
-    public event EventHandler<string>? ProcessorAddedEvent;
-    public event EventHandler<int>? ProcessorRemovedEvent;
+    public event EventHandler<int?>? OnStart;
+    public event EventHandler<int?>? OnStop;
+    public event EventHandler? OnClose;
+    public event EventHandler<bool>? OnAutostartChanged;
+    public event EventHandler<(int, CommonConfig)>? OnConfigChanged;
+    public event EventHandler<ServerType>? OnServerAdded;
+    public event EventHandler<int>? OnServerRemoved;
 
     public void SetAutostartValue(bool value)
     {
@@ -36,7 +37,7 @@ public class MainConsole : IUserInterface
 
             if (key == "x")
             {
-                CloseEvent?.Invoke(null, EventArgs.Empty);
+                OnClose?.Invoke(null, EventArgs.Empty);
                 return;
             }
 
@@ -44,12 +45,12 @@ public class MainConsole : IUserInterface
             {
                 case "s":
                     if (Model.Any(x => x.Status.Working))
-                        StopEvent?.Invoke(null, null);
+                        OnStart?.Invoke(null, null);
                     else
-                        StartEvent?.Invoke(null, null);
+                        OnStart?.Invoke(null, null);
                     break;
                 case "a":
-                    AutostartChangedEvent?.Invoke(null, !IsAutostart);
+                    OnAutostartChanged?.Invoke(null, !IsAutostart);
                     break;
                 default:
                     continue;
@@ -69,9 +70,9 @@ public class MainConsole : IUserInterface
         Console.ForegroundColor = color;
     }
 
-    public void AddProcessor(IServer processor)
+    public void AddServer(IServer server)
     {
-        ProcessorAddedEvent?.Invoke(null, string.Empty);
+        OnServerAdded?.Invoke(null, ServerType.Http);
     }
 
     private void DisplayInfo(List<IServer> dtos)
@@ -80,7 +81,7 @@ public class MainConsole : IUserInterface
         {
             switch (dto)
             {
-                case IServer<ServerConfig> s:
+                case IServer<WebConfig> s:
                     Console.WriteLine(s.Status.Working ? $"Server {s.CurrentConfig.Name} listening on {s.CurrentConfig.Uri}" : $"Server {s.CurrentConfig.Name} stopped");
                     break;
                 case IServer<BotConfig> b:
@@ -97,11 +98,11 @@ public class MainConsole : IUserInterface
 
     protected void OnProcessorRemovedEvent(int e)
     {
-        ProcessorRemovedEvent?.Invoke(this, e);
+        OnServerRemoved?.Invoke(this, e);
     }
 
     protected void OnConfigChangedEvent((int, CommonConfig) e)
     {
-        ConfigChangedEvent?.Invoke(this, e);
+        OnConfigChanged?.Invoke(this, e);
     }
 }

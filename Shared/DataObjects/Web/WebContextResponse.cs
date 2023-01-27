@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Net;
 
-namespace Shared.DataObjects.Http;
+namespace Shared.DataObjects.Web;
 
-public abstract class HttpContextResponse : IResponse
+public abstract class WebContextResponse : IResponse
 {
     public string ContentType { get; set; } = "text/plain";
     public byte[] Payload { get; set; } = Array.Empty<byte>();

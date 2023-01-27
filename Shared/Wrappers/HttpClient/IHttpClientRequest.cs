@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Shared.Listeners;
+namespace Shared.Wrappers.HttpClient;
 
 public interface IHttpClientRequest
 {

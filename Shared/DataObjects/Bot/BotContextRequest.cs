@@ -1,4 +1,6 @@
-﻿namespace Shared.DataObjects.Bot;
+﻿using System;
+
+namespace Shared.DataObjects.Bot;
 
 public class BotContextRequest : IRequest
 {
@@ -8,11 +10,14 @@ public class BotContextRequest : IRequest
     public string ApiUrl { get; set; }
     public string ApiKey { get; set; }
 
-    public BotContextRequest(string apiUrl, string apiKey, int id, string command)
+    public DateTime Date { get; set; }
+
+    public BotContextRequest(string apiUrl, string apiKey, int id, string command, DateTime date)
     {
         Id = id;
         Command = command;
         ApiUrl = apiUrl;
         ApiKey = apiKey;
+        Date = date;
     }
 }

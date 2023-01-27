@@ -1,8 +1,7 @@
 ﻿using Servers;
 using Shared;
 using Shared.Config;
-using Shared.DataObjects.Bot;
-using Shared.DataObjects.Http;
+using Shared.Enums;
 using Shared.Logging;
 using Shared.Server;
 
@@ -12,9 +11,12 @@ public static class Program
 {
     private static int _id;
 
-    private static IServer CreateSimpleServer(IContainer container, ServerConfig? config = null)
+    private static IServer CreateSimpleServer(IContainer container, WebConfig? config = null)
     {
-        var result = new SimpleServer<HttpContext, ServerConfig>(container.NewWebListener(container.NewHttpListener(container.Logger), container.Logger), container.ApiMiddleware, new LogWrapper<SimpleServer<HttpContext, ServerConfig>>(container.Logger), config)
+        var result = new SimpleServer(
+            container.NewWebListener(container.NewHttpListener(container.Logger), container.Logger),
+            container.ApiMiddleware,
+            new LogWrapper<SimpleServer>(container.Logger), config)
         {
             Id = _id++
         };
@@ -24,7 +26,10 @@ public static class Program
 
     private static IServer CreateTelegramBot(IContainer container, BotConfig? config = null)
     {
-        var result = new SimpleServer<BotContext, BotConfig>(container.NewBotListener(container.NewTelegramBotApiProvider(container.NewHttpClient(), container.Logger), container.Logger), container.CommandExecutor, new LogWrapper<SimpleServer<BotContext, BotConfig>>(container.Logger), config)
+        var result = new BotServer(
+            container.NewBotListener(container.NewTelegramBotApiProvider(container.NewHttpClient(), container.Logger),
+                container.Logger), container.CommandExecutor,
+            new LogWrapper<BotServer>(container.Logger), config)
         {
             Id = _id++
         };
@@ -32,20 +37,20 @@ public static class Program
         return result;
     }
 
-    private static IEnumerable<IServer> CreateProcessors(AppConfig config, IContainer container)
+    private static IEnumerable<IServer> CreateServers(AppConfig config, IContainer container)
     {
-        return config.ProcessorConfigs.Select(x => x switch
+        return config.ServerConfigs.Select(x => x switch
         {
-            ServerConfig s => CreateSimpleServer(container, s),
+            WebConfig s => CreateSimpleServer(container, s),
             BotConfig b => CreateTelegramBot(container, b),
             _ => throw new NotSupportedException("Config not supported")
         });
     }
 
-    private static AppConfig GetConfig(IEnumerable<IServer> processors) =>
-        new(processors.Select(x => x.Config));
+    private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
+        new(servers.Select(x => x.Config));
 
-    public static List<IServer> ControlProcessors { get; private set; } = new();
+    public static List<IServer> Servers { get; private set; } = new();
 
     public static void Run(IPlatformDependantContainer lesserContainer)
     {
@@ -54,9 +59,9 @@ public static class Program
         var ui = container.UserInterface;
         var config = container.ConfigProvider.GetConfig();
 
-        ControlProcessors = CreateProcessors(config, container).ToList();
+        Servers = CreateServers(config, container).ToList();
 
-        ControlProcessors.ForEach(x =>
+        Servers.ForEach(x =>
         {
             if (x.Config.Autostart)
                 x.Start();
@@ -64,85 +69,85 @@ public static class Program
 
         ui.SetAutostartValue(container.AutostartService.CheckAutostart());
 
-        ui.StartEvent += (sender, id) =>
+        ui.OnStart += (_, id) =>
         {
             if (!id.HasValue)
             {
-                ControlProcessors.ForEach(x => x.Start());
+                Servers.ForEach(x => x.Start());
             }
             else
             {
-                ControlProcessors.FirstOrDefault(x => x.Id == id)?.Start();
+                Servers.FirstOrDefault(x => x.Id == id)?.Start();
             }
         };
 
-        ui.StopEvent += (sender, id) =>
+        ui.OnStop += (_, id) =>
         {
             if (!id.HasValue)
             {
-                ControlProcessors.ForEach(x => x.Stop());
+                Servers.ForEach(x => x.Stop());
             }
             else
             {
-                ControlProcessors.FirstOrDefault(x => x.Id == id)?.Stop();
+                Servers.FirstOrDefault(x => x.Id == id)?.Stop();
             }
         };
 
-        ui.ProcessorAddedEvent += (sender, mode) =>
+        ui.OnServerAdded += (_, mode) =>
         {
-            var processor = mode switch
+            var server = mode switch
             {
-                "server" => CreateSimpleServer(container),
-                "bot" => CreateTelegramBot(container),
+                ServerType.Http => CreateSimpleServer(container),
+                ServerType.Bot => CreateTelegramBot(container),
                 _ => throw new NotSupportedException()
             };
 
-            ControlProcessors.Add(processor);
-            ui.AddProcessor(processor);
+            Servers.Add(server);
+            ui.AddServer(server);
         };
 
-        ui.ProcessorRemovedEvent += (sender, id) =>
+        ui.OnServerRemoved += (_, id) =>
         {
-            var processor = ControlProcessors.FirstOrDefault(x => x.Id == id);
-            if (processor == null)
+            var server = Servers.FirstOrDefault(x => x.Id == id);
+            if (server == null)
                 return;
 
-            processor.Stop();
-            ControlProcessors.Remove(processor);
+            server.Stop();
+            Servers.Remove(server);
 
-            container.ConfigProvider.SetConfig(GetConfig(ControlProcessors));
+            container.ConfigProvider.SetConfig(GetConfig(Servers));
         };
 
-        ui.AutostartChangedEvent += (sender, value) =>
+        ui.OnAutostartChanged += (_, value) =>
         {
             container.AutostartService.SetAutostart(value);
             ui.SetAutostartValue(container.AutostartService.CheckAutostart());
         };
 
-        ui.ConfigChangedEvent += (_, configTuple) =>
+        ui.OnConfigChanged += (_, configTuple) =>
         {
-            var processor = ControlProcessors.FirstOrDefault(x => x.Id == configTuple.Item1);
-            if (processor == null)
+            var server = Servers.FirstOrDefault(x => x.Id == configTuple.Item1);
+            if (server == null)
                 return;
 
-            if (processor.Status.Working)
+            if (server.Status.Working)
             {
-                processor.Restart(configTuple.Item2);
+                server.Restart(configTuple.Item2);
             }
             else
             {
-                processor.Config = configTuple.Item2;
+                server.Config = configTuple.Item2;
             }
 
-            config = GetConfig(ControlProcessors);
+            config = GetConfig(Servers);
             container.ConfigProvider.SetConfig(config);
         };
 
-        ui.CloseEvent += (sender, args) =>
+        ui.OnClose += (_, args) =>
         {
             Environment.Exit(0);
         };
 
-        ui.RunUI(ControlProcessors);
+        ui.RunUI(Servers);
     }
 }

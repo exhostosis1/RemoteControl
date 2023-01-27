@@ -2,7 +2,7 @@
 
 namespace Shared.Config;
 
-[JsonDerivedType(typeof(ServerConfig), "server")]
+[JsonDerivedType(typeof(WebConfig), "web")]
 [JsonDerivedType(typeof(BotConfig), "bot")]
 public abstract class CommonConfig
 {

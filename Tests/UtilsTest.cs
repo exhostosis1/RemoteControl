@@ -2,7 +2,7 @@
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 
-namespace Tests;
+namespace UnitTests;
 
 public class UtilsTest : IDisposable
 {

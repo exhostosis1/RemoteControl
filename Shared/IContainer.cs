@@ -2,18 +2,19 @@
 using Shared.Bots.Telegram;
 using Shared.ControlProviders.Provider;
 using Shared.DataObjects.Bot;
-using Shared.DataObjects.Http;
-using Shared.Listeners;
 using Shared.Logging.Interfaces;
 using Shared.Server;
+using Shared.Wrappers.HttpClient;
+using Shared.Wrappers.HttpListener;
 using System.Collections.Generic;
+using Shared.DataObjects.Web;
 
 namespace Shared;
 
 public interface IContainer : IPlatformDependantContainer
 {
-    public IListener<HttpContext> WebListener { get; }
-    public IListener<BotContext> BotListener { get; }
+    public IWebListener WebListener { get; }
+    public IBotListener BotListener { get; }
     public IHttpClient HttpClient { get; }
     public IHttpListener HttpListener { get; }
     public IBotApiProvider TelegramBotApiProvider { get; }
@@ -21,12 +22,12 @@ public interface IContainer : IPlatformDependantContainer
     public IApiController MouseController { get; }
     public IApiController KeyboardController { get; }
     public IApiController DisplayController { get; }
-    public IMiddleware<HttpContext> ApiMiddleware { get; }
-    public IMiddleware<HttpContext> StaticMiddleware { get; }
-    public IMiddleware<BotContext> CommandExecutor { get; }
+    public IWebMiddleware ApiMiddleware { get; }
+    public IWebMiddleware StaticMiddleware { get; }
+    public IBotMiddleware CommandExecutor { get; }
 
-    public IListener<HttpContext> NewWebListener(IHttpListener listener, ILogger logger);
-    public IListener<BotContext> NewBotListener(IBotApiProvider provider, ILogger logger);
+    public IWebListener NewWebListener(IHttpListener listener, ILogger logger);
+    public IBotListener NewBotListener(IBotApiProvider provider, ILogger logger);
     public IHttpClient NewHttpClient();
     public IHttpListener NewHttpListener(ILogger logger);
     public IBotApiProvider NewTelegramBotApiProvider(IHttpClient client, ILogger logger);
@@ -34,7 +35,7 @@ public interface IContainer : IPlatformDependantContainer
     public IApiController NewKeyboardController(IKeyboardControlProvider provider, ILogger logger);
     public IApiController NewMouseController(IMouseControlProvider provider, ILogger logger);
     public IApiController NewDisplayController(IDisplayControlProvider provider, ILogger logger);
-    public IMiddleware<HttpContext> NewApiMiddleware(IEnumerable<IApiController> controllers, ILogger logger, IMiddleware<HttpContext>? next = null);
-    public IMiddleware<HttpContext> NewStaticMiddleware(ILogger logger, string directory = "www");
-    public IMiddleware<BotContext> NewCommmandExecutor(IGeneralControlProvider provider, ILogger logger);
+    public IWebMiddleware NewApiMiddleware(IEnumerable<IApiController> controllers, ILogger logger, IWebMiddleware? next = null);
+    public IWebMiddleware NewStaticMiddleware(ILogger logger, string directory = "www");
+    public IBotMiddleware NewCommmandExecutor(IGeneralControlProvider provider, ILogger logger);
 }

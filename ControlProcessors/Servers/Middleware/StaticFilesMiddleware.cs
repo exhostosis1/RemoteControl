@@ -1,11 +1,11 @@
-﻿using Shared.DataObjects.Http;
+﻿using Shared.DataObjects.Web;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using System.Net;
 
 namespace Servers.Middleware;
 
-public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
+public class StaticFilesMiddleware : AbstractMiddleware<WebContext>, IWebMiddleware
 {
     private readonly string _contentFolder;
     private readonly ILogger<StaticFilesMiddleware> _logger;
@@ -13,7 +13,7 @@ public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
     public StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string directory = "www")
     {
         _logger = logger;
-        _contentFolder = AppContext.BaseDirectory + directory;
+        _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
     }
 
     private static readonly Dictionary<string, string> ContentTypes = new()
@@ -26,37 +26,37 @@ public class StaticFilesMiddleware : AbstractMiddleware<HttpContext>
         { ".css", "text/css" }
     };
 
-    public override void ProcessRequest(HttpContext context)
+    public override void ProcessRequest(WebContext context)
     {
-        var uriPath = context.HttpRequest.Path;
+        var uriPath = context.WebRequest.Path;
 
         _logger.LogInfo($"Processing file request {uriPath}");
 
         if (uriPath.Contains(".."))
         {
-            context.HttpResponse.StatusCode = HttpStatusCode.NotFound;
+            context.WebResponse.StatusCode = HttpStatusCode.NotFound;
             return;
         }
 
-        var path = _contentFolder + uriPath;
+        var path = Path.Combine(_contentFolder, uriPath.Replace("/", "").Replace("\\", ""));
 
         if (string.IsNullOrEmpty(uriPath) || uriPath == "/")
         {
-            path += "index.html";
+            path = Path.Combine(path, "index.html");
         }
 
         var extension = Path.GetExtension(path);
 
-        context.HttpResponse.ContentType = ContentTypes.TryGetValue(extension, out var value) ? value : "text/plain";
+        context.WebResponse.ContentType = ContentTypes.TryGetValue(extension, out var value) ? value : "text/plain";
 
         if (File.Exists(path))
         {
-            context.HttpResponse.Payload = File.ReadAllBytes(path);
+            context.WebResponse.Payload = File.ReadAllBytes(path);
         }
         else
         {
             _logger.LogError($"File not found {path}");
-            context.HttpResponse.StatusCode = HttpStatusCode.NotFound;
+            context.WebResponse.StatusCode = HttpStatusCode.NotFound;
         }
     }
 }

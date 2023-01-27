@@ -89,18 +89,15 @@ public class MouseController : BaseApiController
 
     public IActionResult Move(string? param)
     {
-        if (string.IsNullOrWhiteSpace(param))
+        if (string.IsNullOrWhiteSpace(param) || !Utils.TryGetCoords(param, out var x, out var y))
         {
             _logger.LogError($"Cannot move mouse by {param}");
-            return Error("Empty coordinates");
+            return Error("Wrong coordinates");
         }
 
         _logger.LogInfo($"Moving mouse by {param}");
-
-        if (Utils.TryGetCoords(param, out var x, out var y))
-        {
-            _provider.MouseMove(x, y);
-        }
+        
+        _provider.MouseMove(x, y);
 
         return Ok();
     }

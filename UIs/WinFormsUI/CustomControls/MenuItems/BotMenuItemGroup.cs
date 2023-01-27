@@ -4,13 +4,13 @@ using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;
 
-internal class BotMenuItemGroup : ProcessorMenuItemGroup
+internal class BotMenuItemGroup : ServerMenuItemGroup
 {
-    public BotMenuItemGroup(IServer<BotConfig> processor) : base(processor)
+    public BotMenuItemGroup(IServer<BotConfig> server) : base(server)
     {
-        DescriptionItem.Text = processor.CurrentConfig.UsernamesString;
+        DescriptionItem.Text = server.CurrentConfig.UsernamesString;
 
-        var configUnsubscriber = processor.Subscribe(new Observer<BotConfig>(ConfigChanged));
+        var configUnsubscriber = server.Subscribe(new Observer<BotConfig>(ConfigChanged));
         Disposed += (_, _) => configUnsubscriber.Dispose();
     }
 

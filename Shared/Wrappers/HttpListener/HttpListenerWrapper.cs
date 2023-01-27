@@ -1,18 +1,17 @@
-﻿using Shared.DataObjects.Http;
-using Shared.Listeners;
-using Shared.Logging.Interfaces;
+﻿using Shared.Logging.Interfaces;
 using System;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using Shared.DataObjects.Web;
 
 namespace Shared.Wrappers.HttpListener;
 
 public class HttpListenerWrapper : IHttpListener
 {
-    class LocalResponse : HttpContextResponse
+    class LocalResponse : WebContextResponse
     {
         private readonly HttpListenerResponse _response;
 
@@ -103,13 +102,13 @@ public class HttpListenerWrapper : IHttpListener
         Prefixes = new PrefixCollection(_listener.Prefixes);
     }
 
-    private HttpContext ConvertContext(HttpListenerContext context)
+    private WebContext ConvertContext(HttpListenerContext context)
     {
-        var request = new HttpContextRequest(context.Request.RawUrl ?? string.Empty);
+        var request = new WebContextRequest(context.Request.RawUrl ?? string.Empty);
         var response = new LocalResponse(context.Response);
-        return new HttpContext(request, response);
+        return new WebContext(request, response);
     }
 
-    public HttpContext GetContext() => ConvertContext(_listener.GetContext());
-    public async Task<HttpContext> GetContextAsync() => ConvertContext(await _listener.GetContextAsync());
+    public WebContext GetContext() => ConvertContext(_listener.GetContext());
+    public async Task<WebContext> GetContextAsync() => ConvertContext(await _listener.GetContextAsync());
 }

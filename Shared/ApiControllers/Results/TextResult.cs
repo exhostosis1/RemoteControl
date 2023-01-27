@@ -2,9 +2,9 @@
 
 namespace Shared.ApiControllers.Results;
 
-public class StringResult : IActionResult
+public class TextResult : IActionResult
 {
-    public StringResult(object result)
+    public TextResult(object result)
     {
         Result = result.ToString();
         StatusCode = HttpStatusCode.OK;

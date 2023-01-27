@@ -2,8 +2,8 @@
 using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.Bots.Telegram.ApiObjects.Response.Keyboard;
 using Shared.DataObjects.Bot;
-using Shared.Listeners;
 using Shared.Logging.Interfaces;
+using Shared.Wrappers.HttpClient;
 using System;
 using System.Linq;
 using System.Net.Http;
@@ -16,13 +16,13 @@ namespace Shared.Bots.Telegram;
 
 public class TelegramBotApiProvider : IBotApiProvider
 {
-    class LocalHttpRequest : IHttpClientRequest
+    class LocalWebRequest : IHttpClientRequest
     {
         public HttpMethod Method { get; set; }
         public string RequestUri { get; set; }
         public string? Content { get; set; }
 
-        public LocalHttpRequest(HttpMethod method, string requestUri)
+        public LocalWebRequest(HttpMethod method, string requestUri)
         {
             Method = method;
             RequestUri = requestUri;
@@ -62,7 +62,7 @@ public class TelegramBotApiProvider : IBotApiProvider
 
     public void SendBotApiRequest(string apiUrl, string apiKey, string method, object parameters)
     {
-        var request = new LocalHttpRequest(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
+        var request = new LocalWebRequest(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {
             Content = JsonSerializer.Serialize(parameters, _jsonOptions)
         };
@@ -72,7 +72,7 @@ public class TelegramBotApiProvider : IBotApiProvider
 
     public T SendBotApiRequest<T>(string apiUrl, string apiKey, string method, object parameters) where T: class
     {
-        var request = new LocalHttpRequest(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
+        var request = new LocalWebRequest(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {
             Content = JsonSerializer.Serialize(parameters, _jsonOptions)
         };

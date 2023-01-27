@@ -6,7 +6,7 @@ using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class CommandsExecutor : AbstractMiddleware<BotContext>
+public class CommandsExecutor : AbstractMiddleware<BotContext>, IBotMiddleware
 {
     private readonly ILogger<CommandsExecutor> _logger;
 
@@ -42,8 +42,6 @@ public class CommandsExecutor : AbstractMiddleware<BotContext>
     {
         _logger.LogInfo($"Executing bot command {context.BotRequest.Command}");
 
-        var volume = _controlFacade.GetVolume();
-
         context.BotResponse.Buttons = _buttons;
 
         switch (context.BotRequest.Command)
@@ -58,14 +56,16 @@ public class CommandsExecutor : AbstractMiddleware<BotContext>
                 _controlFacade.KeyboardKeyPress(KeysEnum.MediaNext);
                 break;
             case BotButtons.VolumeUp:
+                var volume = _controlFacade.GetVolume();
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
                 _controlFacade.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
                 return;
             case BotButtons.VolumeDown:
+                volume = _controlFacade.GetVolume();
                 volume -= 5;
-                volume = volume < 0 ? 0 : volume;
+                volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                 _controlFacade.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
                 return;

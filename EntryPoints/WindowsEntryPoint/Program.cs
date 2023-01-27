@@ -22,16 +22,16 @@ public static class Program
             {
                 case SessionSwitchReason.SessionLock:
                     {
-                        logger.LogInfo(type, "Stopping processords due to logout");
+                        logger.LogInfo(type, "Stopping servers due to logout");
 
                         indexes.Clear();
 
-                        for (var i = 0; i < RemoteControlMain.Program.ControlProcessors.Count; i++)
+                        for (var i = 0; i < RemoteControlMain.Program.Servers.Count; i++)
                         {
-                            if (RemoteControlMain.Program.ControlProcessors[i].Status.Working)
+                            if (RemoteControlMain.Program.Servers[i].Status.Working)
                             {
                                 indexes.Add(i);
-                                RemoteControlMain.Program.ControlProcessors[i].Stop();
+                                RemoteControlMain.Program.Servers[i].Stop();
                             }
                         }
 
@@ -39,11 +39,11 @@ public static class Program
                     }
                 case SessionSwitchReason.SessionUnlock:
                     {
-                        logger.LogInfo(type, "Resoring processors");
+                        logger.LogInfo(type, "Resoring servers");
 
                         foreach (var index in indexes)
                         {
-                            RemoteControlMain.Program.ControlProcessors[index].Start();
+                            RemoteControlMain.Program.Servers[index].Start();
                         }
                         break;
                     }

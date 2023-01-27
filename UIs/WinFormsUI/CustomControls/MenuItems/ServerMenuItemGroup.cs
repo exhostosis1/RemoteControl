@@ -4,18 +4,18 @@ using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;
 
-internal class ServerMenuItemGroup : ProcessorMenuItemGroup
+internal class HttpMenuItemGroup : ServerMenuItemGroup
 {
-    public ServerMenuItemGroup(IServer<ServerConfig> processor) : base(processor)
+    public HttpMenuItemGroup(IServer<WebConfig> server) : base(server)
     {
-        DescriptionItem.Text = processor.CurrentConfig.Uri.ToString();
+        DescriptionItem.Text = server.CurrentConfig.Uri.ToString();
         DescriptionItem.Click += (_, _) => DescriptionClickInvoke(DescriptionItem.Text);
 
-        var configUnsubscriber = processor.Subscribe(new Observer<ServerConfig>(ConfigChanged));
+        var configUnsubscriber = server.Subscribe(new Observer<WebConfig>(ConfigChanged));
         Disposed += (_, _) => configUnsubscriber.Dispose();
     }
 
-    private void ConfigChanged(ServerConfig config)
+    private void ConfigChanged(WebConfig config)
     {
         NameItem.Text = config.Name;
         DescriptionItem.Text = config.Uri.ToString();

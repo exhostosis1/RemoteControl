@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Shared.Config;
 
-public class ServerConfig : CommonConfig
+public class WebConfig : CommonConfig
 {
     public string Scheme { get; init; } = "http";
     public string Host { get; init;  } = "localhost";
@@ -24,13 +24,13 @@ public class ServerConfig : CommonConfig
     public override bool Equals(object? other)
     {
         if (ReferenceEquals(this, other)) return true;
-        if (other is not ServerConfig that) return false;
+        if (other is not WebConfig that) return false;
 
         return Name == that.Name && Autostart == that.Autostart && Scheme == that.Scheme &&
                Host == that.Host && Port == that.Port;
     }
 
-    protected bool Equals(ServerConfig other)
+    protected bool Equals(WebConfig other)
     {
         return Scheme == other.Scheme && Host == other.Host && Port == other.Port;
     }

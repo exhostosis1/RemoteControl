@@ -2,7 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Shared.Listeners;
+namespace Shared.Wrappers.HttpClient;
 
 public interface IHttpClient
 {

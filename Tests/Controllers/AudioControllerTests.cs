@@ -1,97 +1,184 @@
-﻿using ApiControllers;
+﻿using System.Text.Json;
+using ApiControllers;
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
+using Shared.ControlProviders.Devices;
 using Shared.ControlProviders.Provider;
 using Shared.Logging.Interfaces;
 
-namespace Tests.Controllers;
+namespace UnitTests.Controllers;
 
 public class AudioControllerTests : IDisposable
 {
     private readonly AudioController _audioController;
-    private readonly IAudioControlProvider _audioControlProvider;
+    private readonly Mock<IAudioControlProvider> _audioControlProvider;
+    private readonly ILogger<AudioController> _logger;
 
     public AudioControllerTests()
     {
-        var logger = Mock.Of<ILogger<AudioController>>();
-        _audioControlProvider = Mock.Of<IAudioControlProvider>();
-        _audioController = new AudioController(_audioControlProvider, logger);
+        _logger = Mock.Of<ILogger<AudioController>>();
+        _audioControlProvider = new Mock<IAudioControlProvider>(MockBehavior.Strict);
+        _audioController = new AudioController(_audioControlProvider.Object, _logger);
+    }
+
+    private class MockAudioDevice : IAudioDevice
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public bool IsCurrentControlDevice { get; set; }
     }
 
     [Fact]
     public void GetDeviceTest()
     {
+        var devices = new List<IAudioDevice>
+        {
+            new MockAudioDevice
+            {
+                Id = Guid.NewGuid(),
+                IsCurrentControlDevice = true,
+                Name = "device1"
+            },
+            new MockAudioDevice
+            {
+                Id = Guid.NewGuid(),
+                IsCurrentControlDevice = false,
+                Name = "device2"
+            }
+        };
+
+        _audioControlProvider.Setup(x => x.GetAudioDevices()).Returns(devices);
+
         var result = _audioController.GetDevices(null);
-        Assert.True(result is JsonResult);
-        Mock.Get(_audioControlProvider).Verify(x => x.GetAudioDevices(), Times.Once);
+
+        var expectedJson = JsonSerializer.Serialize(devices);
+
+        Assert.True(result is JsonResult && result.Result == expectedJson);
+
+        _audioControlProvider.Verify(x => x.GetAudioDevices(), Times.Once);
     }
 
     [Fact]
     public void SetDeviceTest()
     {
-        var result = _audioController.SetDevice("param");
-        Assert.True(result is ErrorResult);
+        var validGuid1 = Guid.NewGuid().ToString();
+        var validGuid2 = Guid.NewGuid().ToString();
 
-        result = _audioController.SetDevice(Guid.NewGuid().ToString());
+        var invalidGuid = "guid";
+
+        _audioControlProvider.Setup(x => x.SetAudioDevice(It.IsAny<Guid>()));
+
+        var result = _audioController.SetDevice(validGuid1);
         Assert.True(result is OkResult);
-        Mock.Get(_audioControlProvider).Verify(x => x.SetAudioDevice(It.IsAny<Guid>()), Times.Once);
+
+        result = _audioController.SetDevice(validGuid2);
+        Assert.True(result is OkResult);
+
+        result = _audioController.SetDevice(invalidGuid);
+        Assert.True(result is ErrorResult {Result: "No such device"});
+
+        Mock.Get(_logger).Verify(x => x.LogError($"Cannot set device to {invalidGuid}"));
+
+        _audioControlProvider.Verify(x => x.SetAudioDevice(It.IsAny<Guid>()), Times.Exactly(2));
     }
 
-    [Fact]
-    public void GetVolumeTest()
+    [Theory]
+    [InlineData(23)]
+    [InlineData(45)]
+    [InlineData(100)]
+    public void GetVolumeTest(int value)
     {
+        _audioControlProvider.Setup(x => x.GetVolume()).Returns(value);
+
         var result = _audioController.GetVolume(null);
-        Assert.True(result is StringResult);
-        Mock.Get(_audioControlProvider).Verify(x => x.GetVolume(), Times.Once);
+        Assert.True(result is TextResult && result.Result == value.ToString());
+
+        _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
+    }
+
+    [Theory]
+    [InlineData("15")]
+    [InlineData("140")]
+    [InlineData("-45")]
+    public void SetVolumeTest(string input)
+    {
+        var expectedInput = int.Parse(input);
+        expectedInput = expectedInput > 100 ? 100 : expectedInput < 0 ? 0 : expectedInput;
+
+        _audioControlProvider.Setup(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)));
+
+        var result = _audioController.SetVolume(input);
+
+        Assert.True(result is TextResult && result.Result == expectedInput.ToString());
+        _audioControlProvider.Verify(x => x.SetVolume(expectedInput), Times.Once);
     }
 
     [Fact]
-    public void SetVolumeTest()
+    public void SetVolumeFailTest()
     {
-        var result = _audioController.SetVolume("15");
-        Assert.True(result is StringResult { Result: "15" });
+        const string input = "abasd";
 
-        result = _audioController.SetVolume("abdsd");
-        Assert.True(result is ErrorResult);
+        var result = _audioController.SetVolume(input);
+        Assert.True(result is ErrorResult{Result: "Wrong volume format" });
 
-        result = _audioController.SetVolume("140");
-        Assert.True(result is StringResult { Result: "100" });
-
-        result = _audioController.SetVolume("-45");
-        Assert.True(result is StringResult { Result: "0" });
-
-        Mock.Get(_audioControlProvider).Verify(x => x.SetVolume(It.IsAny<int>()), Times.Exactly(3));
-
+        Mock.Get(_logger).Verify(x => x.LogError($"Cannot set volume to {input}"));
     }
 
-    [Fact]
-    public void IncreaseBy5Test()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(15)]
+    [InlineData(90)]
+    [InlineData(100)]
+    public void IncreaseBy5Test(int volume)
     {
+        _audioControlProvider.Setup(x => x.GetVolume()).Returns(volume);
+        _audioControlProvider.Setup(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)));
+
+        var expectedVolume = volume + 5;
+        expectedVolume = expectedVolume > 100 ? 100 : expectedVolume < 0 ? 0 : expectedVolume;
+
         var result = _audioController.IncreaseBy5(null);
-        Assert.True(result is StringResult { Result: "5" });
+        Assert.True(result is TextResult && result.Result == expectedVolume.ToString());
 
-        Mock.Get(_audioControlProvider).Verify(x => x.GetVolume(), Times.Once);
-        Mock.Get(_audioControlProvider).Verify(x => x.SetVolume(5), Times.Once);
+        _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
+        _audioControlProvider.Verify(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)), Times.Once);
     }
 
-    [Fact]
-    public void DecreaseBy5Test()
+    [Theory]
+    [InlineData(0)]
+    [InlineData(15)]
+    [InlineData(90)]
+    [InlineData(100)]
+    public void DecreaseBy5Test(int volume)
     {
+        _audioControlProvider.Setup(x => x.GetVolume()).Returns(volume);
+        _audioControlProvider.Setup(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)));
+
+        var expectedVolume = volume - 5;
+        expectedVolume = expectedVolume > 100 ? 100 : expectedVolume < 0 ? 0 : expectedVolume;
+
         var result = _audioController.DecreaseBy5(null);
-        Assert.True(result is StringResult { Result: "0" });
+        Assert.True(result is TextResult && result.Result == expectedVolume.ToString());
 
-        Mock.Get(_audioControlProvider).Verify(x => x.GetVolume(), Times.Once);
-        Mock.Get(_audioControlProvider).Verify(x => x.SetVolume(0), Times.Once);
+        _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
+        _audioControlProvider.Verify(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)), Times.Once);
     }
 
-    [Fact]
-    public void MuteTest()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void MuteTest(bool value)
     {
-        var result = _audioController.Mute(null);
+        _audioControlProvider.SetupGet(x => x.IsMuted).Returns(value);
+        _audioControlProvider.Setup(x => x.Mute());
+        _audioControlProvider.Setup(x => x.Unmute());
 
-        Mock.Get(_audioControlProvider).VerifyGet(x => x.IsMuted, Times.Once);
-        Mock.Get(_audioControlProvider).Verify(x => x.Mute(), Times.Once);
+        var result = _audioController.Mute(null);
+        Assert.True(result is OkResult);
+
+        _audioControlProvider.Verify(x => x.Mute(), value ? Times.Never : Times.Once);
+        _audioControlProvider.Verify(x => x.Unmute(), value ? Times.Once : Times.Never);
     }
 
     [Fact]

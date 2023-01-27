@@ -66,7 +66,7 @@ public class AudioController : BaseApiController
 
         var vol = _provider.GetVolume();
         vol += 5;
-        vol = vol > 100 ? 100 : vol;
+        vol = vol > 100 ? 100 : vol < 0 ? 0 : vol;
 
         _provider.SetVolume(vol);
 
@@ -79,7 +79,7 @@ public class AudioController : BaseApiController
 
         var vol = _provider.GetVolume();
         vol -= 5;
-        vol = vol < 0 ? 0 : vol;
+        vol = vol > 100 ? 100 : vol < 0 ? 0 : vol;
 
         _provider.SetVolume(vol);
 

@@ -4,7 +4,7 @@ using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;
 
-internal sealed class BotPanel : ProcessorPanel
+internal sealed class BotPanel : ServerPanel
 {
     private readonly Label _apiUrlLabel = new()
     {
@@ -51,11 +51,11 @@ internal sealed class BotPanel : ProcessorPanel
 
     private readonly IDisposable _unsubscriber;
 
-    public BotPanel(IServer<BotConfig> processor) : base(processor)
+    public BotPanel(IServer<BotConfig> server) : base(server)
     {
-        _apiUrlTextBox.Text = processor.CurrentConfig.ApiUri;
-        _apiKeyTextBox.Text = processor.CurrentConfig.ApiKey;
-        _userIdsListBox.Text = string.Join(Environment.NewLine, processor.CurrentConfig.Usernames);
+        _apiUrlTextBox.Text = server.CurrentConfig.ApiUri;
+        _apiKeyTextBox.Text = server.CurrentConfig.ApiKey;
+        _userIdsListBox.Text = string.Join(Environment.NewLine, server.CurrentConfig.Usernames);
 
         _apiKeyTextBox.TextChanged += EnableUpdateButton;
         _apiUrlTextBox.TextChanged += EnableUpdateButton;
@@ -71,7 +71,7 @@ internal sealed class BotPanel : ProcessorPanel
             _userIdsListBox
         });
 
-        _unsubscriber = processor.Subscribe(new Observer<BotConfig>(ConfigChanged));
+        _unsubscriber = server.Subscribe(new Observer<BotConfig>(ConfigChanged));
 
         Disposed += LocalDispose;
     }

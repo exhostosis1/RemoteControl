@@ -1,7 +1,7 @@
 ﻿using Shared;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
-using Shared.DataObjects.Http;
+using Shared.DataObjects.Web;
 using Shared.Logging.Interfaces;
 using Shared.Server;
 using System.Net;
@@ -9,14 +9,14 @@ using System.Text;
 
 namespace Servers.Middleware;
 
-public class ApiV1Middleware : AbstractMiddleware<HttpContext>
+public class ApiV1Middleware : AbstractMiddleware<WebContext>, IWebMiddleware
 {
     private readonly ControllersWithMethods _controllers;
     private readonly ILogger<ApiV1Middleware> _logger;
     public string ApiVersion => "v1";
 
     public ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger,
-        IMiddleware<HttpContext>? next = null) : base(next)
+        IWebMiddleware? next = null) : base(next)
     {
         _logger = logger;
         _controllers = controllers.GetControllersWithMethods();
@@ -24,21 +24,21 @@ public class ApiV1Middleware : AbstractMiddleware<HttpContext>
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
 
-    public override void ProcessRequest(HttpContext context)
+    public override void ProcessRequest(WebContext context)
     {
-        if (!Utils.TryGetApiVersion(context.HttpRequest.Path, out var version) || version != ApiVersion)
+        if (!Utils.TryGetApiVersion(context.WebRequest.Path, out var version) || version != ApiVersion)
         {
             Next?.ProcessRequest(context);
             return;
         }
 
-        _logger.LogInfo($"Processing api request {context.HttpRequest.Path}");
+        _logger.LogInfo($"Processing api request {context.WebRequest.Path}");
 
-        if (!Utils.TryParsePath(context.HttpRequest.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
+        if (!Utils.TryParsePath(context.WebRequest.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
             || !_controllers[controller].ContainsKey(action))
         {
 
-            context.HttpResponse.StatusCode = HttpStatusCode.NotFound;
+            context.WebResponse.StatusCode = HttpStatusCode.NotFound;
             _logger.LogError("Api method not found");
             return;
         }
@@ -47,18 +47,18 @@ public class ApiV1Middleware : AbstractMiddleware<HttpContext>
         {
             var result = _controllers[controller][action](param);
 
-            context.HttpResponse.StatusCode = result.StatusCode;
-            context.HttpResponse.Payload = GetBytes(result.Result);
+            context.WebResponse.StatusCode = result.StatusCode;
+            context.WebResponse.Payload = GetBytes(result.Result);
 
             if (result is JsonResult)
-                context.HttpResponse.ContentType = "application/json";
+                context.WebResponse.ContentType = "application/json";
         }
         catch (Exception e)
         {
             _logger.LogError(e.Message);
 
-            context.HttpResponse.StatusCode = HttpStatusCode.InternalServerError;
-            context.HttpResponse.Payload = Encoding.UTF8.GetBytes(e.Message);
+            context.WebResponse.StatusCode = HttpStatusCode.InternalServerError;
+            context.WebResponse.Payload = Encoding.UTF8.GetBytes(e.Message);
         }
     }
 }

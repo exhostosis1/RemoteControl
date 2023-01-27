@@ -1,10 +1,11 @@
-﻿using Shared.DataObjects.Http;
-using Shared.Listeners;
+﻿using Shared;
+using Shared.DataObjects.Web;
 using Shared.Logging.Interfaces;
+using Shared.Wrappers.HttpListener;
 
 namespace Listeners;
 
-public class SimpleHttpListener : IListener<HttpContext>
+public class SimpleHttpListener : IWebListener
 {
     private readonly IHttpListener _listener;
     private readonly ILogger<SimpleHttpListener> _logger;
@@ -17,7 +18,7 @@ public class SimpleHttpListener : IListener<HttpContext>
         _logger = logger;
     }
 
-    public void StartListen(StartParameters param)
+    public void StartListen(WebParameters param)
     {
         if (_listener.IsListening)
         {
@@ -40,13 +41,18 @@ public class SimpleHttpListener : IListener<HttpContext>
         _logger.LogInfo("Http listener stopped");
     }
 
-    public async Task<HttpContext> GetContextAsync(CancellationToken token = default)
+    public async Task<WebContext> GetContextAsync(CancellationToken token = default)
     {
         return await _listener.GetContextAsync();
     }
 
-    public HttpContext GetContext()
+    public WebContext GetContext()
     {
         return _listener.GetContext();
+    }
+
+    public IDisposable Subscribe(IObserver<bool> observer)
+    {
+        throw new NotImplementedException();
     }
 }

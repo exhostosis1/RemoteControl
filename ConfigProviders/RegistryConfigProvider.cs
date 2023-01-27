@@ -10,6 +10,7 @@ public class RegistryConfigProvider : IConfigProvider
 {
     private readonly IRegistryKey _regKey;
     private const string ValueName = "Config";
+    private const string KeyName = "RemoteControl";
     private readonly ILogger<RegistryConfigProvider> _logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
@@ -21,8 +22,9 @@ public class RegistryConfigProvider : IConfigProvider
     {
         _logger = logger;
 
-        _regKey = registry.CurrentUser.OpenSubKey("SOFTWARE")!.OpenSubKey("RemoteControl", true) ??
-                  registry.CurrentUser.OpenSubKey("SOFTWARE", true)!.CreateSubKey("RemoteControl", true);
+        _regKey = registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey(KeyName, true) ??
+                  registry.CurrentUser.OpenSubKey("SOFTWARE", true)?.CreateSubKey(KeyName, true) ??
+                  throw new Exception("Registry branch not found");
     }
 
     public AppConfig GetConfig()

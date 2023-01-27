@@ -7,21 +7,21 @@ using Shared.Logging;
 
 namespace UnitTests.Logging;
 
-public class ConsoleLoggerTests : IDisposable
+public class TraceLoggerTests : IDisposable
 {
-    private readonly ConsoleLogger _logger;
-    private readonly Mock<IConsole> _console;
+    private readonly TraceLogger _logger;
+    private readonly Mock<ITrace> _trace;
 
-    public ConsoleLoggerTests()
+    public TraceLoggerTests()
     {
-        _console = new Mock<IConsole>(MockBehavior.Strict);
-        _logger = new ConsoleLogger(_console.Object);
+        _trace = new Mock<ITrace>(MockBehavior.Strict);
+        _logger = new TraceLogger(_trace.Object);
     }
 
     [Fact]
     public async void LogInfoTest()
     {
-        _console.Setup(x => x.WriteLine(It.IsAny<string>()));
+        _trace.Setup(x => x.TraceInformation(It.IsAny<string>()));
 
         const string message = "test message";
         var type = GetType();
@@ -35,15 +35,13 @@ public class ConsoleLoggerTests : IDisposable
 
         await Task.Delay(100);
 
-        _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
+        _trace.Verify(x => x.TraceInformation(formattedMessage), Times.Once);
     }
 
     [Fact]
     public async void LogWarningTest()
     {
-        _console.Setup(x => x.WriteLine(It.IsAny<string>()));
-        _console.SetupSet(x => x.ForegroundColor = ConsoleColor.Yellow);
-        _console.Setup(x => x.ResetColor());
+        _trace.Setup(x => x.TraceWarning(It.IsAny<string>()));
 
         const string message = "test message";
         var type = GetType();
@@ -57,17 +55,13 @@ public class ConsoleLoggerTests : IDisposable
 
         await Task.Delay(100);
 
-        _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
-        _console.VerifySet(x => x.ForegroundColor = ConsoleColor.Yellow, Times.Once);
-        _console.Verify(x => x.ResetColor(), Times.Once);
+        _trace.Verify(x => x.TraceWarning(formattedMessage), Times.Once);
     }
 
     [Fact]
     public async void LogErrorTest()
     {
-        _console.Setup(x => x.WriteLine(It.IsAny<string>()));
-        _console.SetupSet(x => x.ForegroundColor = ConsoleColor.Red);
-        _console.Setup(x => x.ResetColor());
+        _trace.Setup(x => x.TraceError(It.IsAny<string>()));
 
         const string message = "test message";
         var type = GetType();
@@ -81,9 +75,7 @@ public class ConsoleLoggerTests : IDisposable
 
         await Task.Delay(100);
 
-        _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
-        _console.VerifySet(x => x.ForegroundColor = ConsoleColor.Red, Times.Once);
-        _console.Verify(x => x.ResetColor(), Times.Once);
+        _trace.Verify(x => x.TraceError(formattedMessage), Times.Once);
     }
 
     public void Dispose()

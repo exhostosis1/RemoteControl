@@ -1,7 +1,7 @@
-﻿using Shared.DataObjects.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Shared.DataObjects.Web;
 
-namespace Shared.Listeners;
+namespace Shared.Wrappers.HttpListener;
 
 public interface IHttpListener
 {
@@ -9,7 +9,7 @@ public interface IHttpListener
     public void Start();
     public void Stop();
     public IPrefixesCollection Prefixes { get; }
-    public HttpContext GetContext();
-    public Task<HttpContext> GetContextAsync();
+    public WebContext GetContext();
+    public Task<WebContext> GetContextAsync();
     public void GetNew();
 }

@@ -6,6 +6,7 @@ using ControlProviders.Wrappers;
 using Logging;
 using Shared;
 using Shared.Config;
+using Shared.ConsoleWrapper;
 using Shared.ControlProviders.Provider;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -23,7 +24,7 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public ILogger NewLogger()
     {
 #if DEBUG
-        return new TraceLogger();
+        return new TraceLogger(new TraceWrapper());
 #else
         return new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
 #endif

@@ -3,6 +3,7 @@ using Shared.Config;
 using Shared.Server;
 using Shared.UI;
 using Windows.UI.ViewManagement;
+using Shared.Enums;
 using WinFormsUI.CustomControls.MenuItems;
 using WinFormsUI.CustomControls.Panels;
 
@@ -13,20 +14,20 @@ public sealed partial class MainForm : Form, IUserInterface
 {
     private readonly ToolStripItem[] _commonMenuItems;
 
-    public event EventHandler<int?>? StartEvent;
-    public event EventHandler<int?>? StopEvent;
-    public event EventHandler? CloseEvent;
-    public event EventHandler<bool>? AutostartChangedEvent;
-    public event EventHandler<(int, CommonConfig)>? ConfigChangedEvent;
-    public event EventHandler<string>? ProcessorAddedEvent;
-    public event EventHandler<int>? ProcessorRemovedEvent;
+    public event EventHandler<int?>? OnStart;
+    public event EventHandler<int?>? OnStop;
+    public event EventHandler? OnClose;
+    public event EventHandler<bool>? OnAutostartChanged;
+    public event EventHandler<(int, CommonConfig)>? OnConfigChanged;
+    public event EventHandler<ServerType>? OnServerAdded;
+    public event EventHandler<int>? OnServerRemoved;
 
     private const int GroupMargin = 6;
     private bool IsAutostart { get; set; }
 
     private List<IServer> _model = new();
-    private readonly List<ProcessorMenuItemGroup> _toolStripGroups = new();
-    private readonly List<ProcessorPanel> _windowPanels = new();
+    private readonly List<ServerMenuItemGroup> _toolStripGroups = new();
+    private readonly List<ServerPanel> _windowPanels = new();
 
     private readonly Theme _lightTheme = new()
     {
@@ -69,9 +70,9 @@ public sealed partial class MainForm : Form, IUserInterface
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
     }
 
-    public void RunUI(List<IServer> processors)
+    public void RunUI(List<IServer> servers)
     {
-        _model = processors;
+        _model = servers;
 
         PopulateWindowPanels();
         PopulateContextMenuGroups();
@@ -88,48 +89,48 @@ public sealed partial class MainForm : Form, IUserInterface
     private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
     private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGrup));
 
-    private ProcessorPanel CreatePanel(IServer processor)
+    private ServerPanel CreatePanel(IServer server)
     {
-        ProcessorPanel panel = processor switch
+        ServerPanel panel = server switch
         {
-            IServer<ServerConfig> s => new ServerPanel(s),
+            IServer<WebConfig> s => new HttpPanel(s),
             IServer<BotConfig> b => new BotPanel(b),
             _ => throw new NotSupportedException()
         };
 
-        panel.StartButtonClicked += (sender, id) => StartEvent?.Invoke(sender, id);
-        panel.StopButtonClicked += (sender, id) => StopEvent?.Invoke(sender, id);
-        panel.UpdateButtonClicked += (sender, config) => ConfigChangedEvent?.Invoke(sender, config);
+        panel.StartButtonClicked += (sender, id) => OnStart?.Invoke(sender, id);
+        panel.StopButtonClicked += (sender, id) => OnStop?.Invoke(sender, id);
+        panel.UpdateButtonClicked += (sender, config) => OnConfigChanged?.Invoke(sender, config);
 
         var menu = new ContextMenuStrip();
         menu.RenderMode = ToolStripRenderMode.System;
-        menu.Items.Add(new ToolStripMenuItem("Remove", null, (_, _) => RemoveClicked(processor.Id)));
+        menu.Items.Add(new ToolStripMenuItem("Remove", null, (_, _) => RemoveClicked(server.Id)));
 
         panel.ContextMenuStrip = menu;
 
         return panel;
     }
 
-    private ProcessorMenuItemGroup CreateMenuItemGrup(IServer processor)
+    private ServerMenuItemGroup CreateMenuItemGrup(IServer server)
     {
-        ProcessorMenuItemGroup group = processor switch
+        ServerMenuItemGroup group = server switch
         {
-            IServer<ServerConfig> s => new ServerMenuItemGroup(s),
+            IServer<WebConfig> s => new HttpMenuItemGroup(s),
             IServer<BotConfig> b => new BotMenuItemGroup(b),
             _ => throw new NotSupportedException()
         };
 
         group.OnDescriptionClick += IpToolStripMenuItem_Click;
-        group.OnStartClick += (sender, id) => StartEvent?.Invoke(sender, id);
-        group.OnStopClick += (sender, id) => StopEvent?.Invoke(sender, id);
+        group.OnStartClick += (sender, id) => OnStart?.Invoke(sender, id);
+        group.OnStopClick += (sender, id) => OnStop?.Invoke(sender, id);
 
         return group;
     }
 
-    public void AddProcessor(IServer processor)
+    public void AddServer(IServer server)
     {
-        _windowPanels.Add(CreatePanel(processor));
-        _toolStripGroups.Add(CreateMenuItemGrup(processor));
+        _windowPanels.Add(CreatePanel(server));
+        _toolStripGroups.Add(CreateMenuItemGrup(server));
 
         DrawWindow();
         SetContextMenu();
@@ -177,7 +178,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void RemoveClicked(int id)
     {
-        ProcessorRemovedEvent?.Invoke(null, id);
+        OnServerRemoved?.Invoke(null, id);
 
         var p = _windowPanels.FirstOrDefault(x => x.Id == id);
         if (p != null)
@@ -199,7 +200,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        CloseEvent?.Invoke(null, EventArgs.Empty);
+        OnClose?.Invoke(null, EventArgs.Empty);
     }
 
     private static void IpToolStripMenuItem_Click(object? sender, string input)
@@ -211,12 +212,12 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StartEvent?.Invoke(null, null);
+        OnStart?.Invoke(null, null);
     }
 
     private void StopAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        StopEvent?.Invoke(null, null);
+        OnStop?.Invoke(null, null);
     }
 
     private void ConfigForm_Shown(object sender, EventArgs e)
@@ -226,19 +227,19 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AutostartStripMenuItem_Click(object sender, EventArgs e)
     {
-        AutostartChangedEvent?.Invoke(null, !IsAutostart);
+        OnAutostartChanged?.Invoke(null, !IsAutostart);
     }
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var uris = _model.Where(x => x.Status.Working && x is IServer<ServerConfig>)
-            .Select(x => ((IServer<ServerConfig>)x).CurrentConfig.Uri);
+        var uris = _model.Where(x => x.Status.Working && x is IServer<WebConfig>)
+            .Select(x => ((IServer<WebConfig>)x).CurrentConfig.Uri);
         Utils.AddFirewallRule(uris);
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-        if (e.Button == MouseButtons.Left)
+        if (e.Button == System.Windows.Forms.MouseButtons.Left)
         {
             Show();
         }
@@ -252,12 +253,12 @@ public sealed partial class MainForm : Form, IUserInterface
 
     private void AddServerButton_Click(object sender, EventArgs e)
     {
-        ProcessorAddedEvent?.Invoke(null, "server");
+        OnServerAdded?.Invoke(null, ServerType.Http);
     }
 
     private void AddBotButton_Click(object sender, EventArgs e)
     {
-        ProcessorAddedEvent?.Invoke(null, "bot");
+        OnServerAdded?.Invoke(null, ServerType.Bot);
     }
 
     private void ApplyTheme()
@@ -287,7 +288,7 @@ public sealed partial class MainForm : Form, IUserInterface
 
         foreach (Control control in Controls)
         {
-            if (control is ProcessorPanel panel)
+            if (control is ServerPanel panel)
                 panel.ApplyTheme(theme);
         }
     }

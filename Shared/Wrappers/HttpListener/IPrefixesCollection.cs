@@ -1,4 +1,4 @@
-﻿namespace Shared.Listeners;
+﻿namespace Shared.Wrappers.HttpListener;
 
 public interface IPrefixesCollection
 {
