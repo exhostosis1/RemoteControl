@@ -34,30 +34,30 @@ public class LocalFileConfigProviderTests : IDisposable
     [Fact]
     public void ReadConfigFromFileTest()
     {
-        var configText = @"
+        var configText = """
 {
-  ""ServerConfigs"": [
+  "ServerConfigs": [
     {
-      ""$type"": ""web"",
-      ""Scheme"": ""http"",
-      ""Host"": ""192.168.31.12"",
-      ""Port"": 1488,
-      ""Name"": ""localhost"",
-      ""Autostart"": true
+      "$type": "web",
+      "Scheme": "http",
+      "Host": "192.168.31.12",
+      "Port": 1488,
+      "Name": "localhost",
+      "Autostart": true
     },
     {
-      ""$type"": ""bot"",
-      ""ApiUri"": ""apiUrl"",
-      ""ApiKey"": ""apiKey"",
-      ""Usernames"": [
-        ""exhostosis""
+      "$type": "bot",
+      "ApiUri": "apiUrl",
+      "ApiKey": "apiKey",
+      "Usernames": [
+        "exhostosis"
       ],
-      ""Name"": ""telegram"",
-      ""Autostart"": false
+      "Name": "telegram",
+      "Autostart": false
     }
   ]
 }
-";
+""";
         var savedConfig = JsonSerializer.Deserialize<AppConfig>(configText);
 
         File.WriteAllText(_filePath, configText);
