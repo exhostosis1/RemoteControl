@@ -1,4 +1,6 @@
-﻿using Logging.Formatters;
+﻿using System.Collections.Concurrent;
+using Logging.Formatters;
+using Shared;
 using Shared.Enums;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -7,10 +9,14 @@ namespace Logging.Abstract;
 
 public abstract class AbstractLogger : ILogger
 {
-    private readonly List<LogMessage> _messages = new();
+    private readonly BlockingCollection<LogMessage> _messages = new();
     private readonly IMessageFormatter _formatter;
     private readonly LoggingLevel _currentLoggingLevel;
-    private readonly SemaphoreSlim _semaphore = new(0);
+
+    private readonly Utils.Waiter _addWaiter = new();
+    private readonly Utils.Waiter _countWaiter = new();
+
+    private int _count;
 
     protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
     {
@@ -24,27 +30,30 @@ public abstract class AbstractLogger : ILogger
     {
         if (level >= _currentLoggingLevel)
         {
-            _messages.Add(new LogMessage(type, level, DateTime.Now, message));
+            _addWaiter.WaitIfLocked();
 
-            _semaphore.Release();
+            _messages.Add(new LogMessage(type, level, DateTime.Now, message));
+            _count++;
         }
     }
 
     public void Flush()
     {
-        while (_messages.Count > 0)
+        _addWaiter.Lock();
+
+        while (_count > 0)
         {
-            Thread.Sleep(100);
+            _countWaiter.WaitIfLocked();
         }
+
+        _addWaiter.Unlock();
     }
 
     private void WriteMessages()
     {
-        while (true)
+        foreach (var message in _messages.GetConsumingEnumerable())
         {
-            _semaphore.Wait();
-
-            var message = _messages.First();
+            _countWaiter.Lock();
 
             switch (message.Level)
             {
@@ -60,8 +69,9 @@ public abstract class AbstractLogger : ILogger
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-
-            _messages.Remove(message);
+            
+            _count = _messages.Count;
+            _countWaiter.Unlock();
         }
     }
 
