@@ -19,7 +19,7 @@ public class TraceLoggerTests : IDisposable
     }
 
     [Fact]
-    public async void LogInfoTest()
+    public void LogInfoTest()
     {
         _trace.Setup(x => x.TraceInformation(It.IsAny<string>()));
 
@@ -33,13 +33,13 @@ public class TraceLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
-        await Task.Delay(100);
+        _logger.Flush();
 
         _trace.Verify(x => x.TraceInformation(formattedMessage), Times.Once);
     }
 
     [Fact]
-    public async void LogWarningTest()
+    public void LogWarningTest()
     {
         _trace.Setup(x => x.TraceWarning(It.IsAny<string>()));
 
@@ -53,13 +53,13 @@ public class TraceLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
-        await Task.Delay(100);
+        _logger.Flush();
 
         _trace.Verify(x => x.TraceWarning(formattedMessage), Times.Once);
     }
 
     [Fact]
-    public async void LogErrorTest()
+    public void LogErrorTest()
     {
         _trace.Setup(x => x.TraceError(It.IsAny<string>()));
 
@@ -73,7 +73,7 @@ public class TraceLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
-        await Task.Delay(100);
+        _logger.Flush();
 
         _trace.Verify(x => x.TraceError(formattedMessage), Times.Once);
     }

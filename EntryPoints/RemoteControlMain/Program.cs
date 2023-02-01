@@ -56,6 +56,29 @@ public static class Program
     {
         var container = new Container(lesserContainer);
 
+        var mutex = new Mutex(false, "RemoteControlMutex");
+
+        try
+        {
+            if (mutex.WaitOne(0, false))
+            {
+                DoJob(container);
+            }
+            else
+            {
+                container.Logger.LogError(typeof(Program), "Another instance of the application is already running.");
+                container.Logger.Flush();
+                Environment.Exit(0);
+            }
+        }
+        finally
+        {
+            mutex.Close();
+        }
+    }
+
+    private static void DoJob(IContainer container)
+    {
         var ui = container.UserInterface;
         var config = container.ConfigProvider.GetConfig();
 

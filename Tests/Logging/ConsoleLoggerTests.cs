@@ -19,7 +19,7 @@ public class ConsoleLoggerTests : IDisposable
     }
 
     [Fact]
-    public async void LogInfoTest()
+    public void LogInfoTest()
     {
         _console.Setup(x => x.WriteLine(It.IsAny<string>()));
 
@@ -33,13 +33,13 @@ public class ConsoleLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
-        await Task.Delay(100);
+        _logger.Flush();
 
         _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
     }
 
     [Fact]
-    public async void LogWarningTest()
+    public void LogWarningTest()
     {
         _console.Setup(x => x.WriteLine(It.IsAny<string>()));
         _console.SetupSet(x => x.ForegroundColor = ConsoleColor.Yellow);
@@ -55,7 +55,7 @@ public class ConsoleLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
-        await Task.Delay(100);
+        _logger.Flush();
 
         _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
         _console.VerifySet(x => x.ForegroundColor = ConsoleColor.Yellow, Times.Once);
@@ -63,7 +63,7 @@ public class ConsoleLoggerTests : IDisposable
     }
 
     [Fact]
-    public async void LogErrorTest()
+    public void LogErrorTest()
     {
         _console.Setup(x => x.WriteLine(It.IsAny<string>()));
         _console.SetupSet(x => x.ForegroundColor = ConsoleColor.Red);
@@ -79,7 +79,7 @@ public class ConsoleLoggerTests : IDisposable
         var formatter = new DefaultMessageFormatter();
         var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
 
-        await Task.Delay(100);
+        _logger.Flush();
 
         _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
         _console.VerifySet(x => x.ForegroundColor = ConsoleColor.Red, Times.Once);

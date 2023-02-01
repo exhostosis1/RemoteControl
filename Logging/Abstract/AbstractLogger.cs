@@ -2,15 +2,15 @@
 using Shared.Enums;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
-using System.Collections.Concurrent;
 
 namespace Logging.Abstract;
 
 public abstract class AbstractLogger : ILogger
 {
-    private readonly BlockingCollection<LogMessage> _messages = new();
+    private readonly List<LogMessage> _messages = new();
     private readonly IMessageFormatter _formatter;
     private readonly LoggingLevel _currentLoggingLevel;
+    private readonly SemaphoreSlim _semaphore = new(0);
 
     protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
     {
@@ -23,13 +23,29 @@ public abstract class AbstractLogger : ILogger
     public void Log(Type type, string message, LoggingLevel level = LoggingLevel.Error)
     {
         if (level >= _currentLoggingLevel)
+        {
             _messages.Add(new LogMessage(type, level, DateTime.Now, message));
+
+            _semaphore.Release();
+        }
+    }
+
+    public void Flush()
+    {
+        while (_messages.Count > 0)
+        {
+            Thread.Sleep(100);
+        }
     }
 
     private void WriteMessages()
     {
-        foreach (var message in _messages.GetConsumingEnumerable())
+        while (true)
         {
+            _semaphore.Wait();
+
+            var message = _messages.First();
+
             switch (message.Level)
             {
                 case LoggingLevel.Error:
@@ -44,6 +60,8 @@ public abstract class AbstractLogger : ILogger
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+
+            _messages.Remove(message);
         }
     }
 

@@ -21,7 +21,7 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public async Task LogInfoTest()
+    public void LogInfoTest()
     {
         const string message = "test message";
         var type = GetType();
@@ -29,13 +29,13 @@ public class FileLoggerTests : IDisposable
 
         _fileLogger.Log(type, message, level);
 
-        await Task.Delay(100);
+        _fileLogger.Flush();
 
         Assert.False(File.Exists(_filePath));
     }
 
     [Fact]
-    public async Task LogWarningTest()
+    public void LogWarningTest()
     {
         const string message = "test message";
         var type = GetType();
@@ -43,13 +43,13 @@ public class FileLoggerTests : IDisposable
 
         _fileLogger.Log(type, message, level);
 
-        await Task.Delay(100);
+        _fileLogger.Flush();
 
         Assert.False(File.Exists(_filePath));
     }
 
     [Fact]
-    public async Task LogErrorTest()
+    public void LogErrorTest()
     {
         const string message = "test message";
         var type = GetType();
@@ -58,13 +58,13 @@ public class FileLoggerTests : IDisposable
 
         _fileLogger.Log(type, message, level);
 
-        await Task.Delay(100);
+        _fileLogger.Flush();
 
         var formattedMessage = new DefaultMessageFormatter().Format(new LogMessage(type, level, date, message));
 
         Assert.True(File.Exists(_filePath));
 
-        var writtenMessage = (await File.ReadAllLinesAsync(_filePath)).First();
+        var writtenMessage = (File.ReadAllLines(_filePath)).First();
 
         Assert.Equal(formattedMessage, writtenMessage);
     }
