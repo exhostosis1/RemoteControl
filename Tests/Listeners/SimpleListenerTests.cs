@@ -36,7 +36,7 @@ public class SimpleHttpListenerTests : IDisposable
         _wrapper.SetupGet(x => x.IsListening).Returns(listening);
         _wrapper.Setup(x => x.Stop()).Callback(() => listening = false);
 
-        var uri = "http://localhost.com";
+        const string uri = "http://localhost.com";
 
         _listener.StartListen(new WebParameters(uri));
 
@@ -97,7 +97,7 @@ public class SimpleHttpListenerTests : IDisposable
     }
 
     [Fact]
-    public async void GetContextAsyncText()
+    public void GetContextAsyncText()
     {
         const string value1 = "path1";
         const string value2 = "path2";
@@ -112,16 +112,16 @@ public class SimpleHttpListenerTests : IDisposable
             .Returns(GetContext(value3))
             .Throws<IndexOutOfRangeException>();
 
-        var result = await _listener.GetContextAsync();
+        var result = _listener.GetContextAsync().GetAwaiter().GetResult();
         Assert.Equal(value1, result.WebRequest.Path);
 
-        result = await _listener.GetContextAsync();
+        result = _listener.GetContextAsync().GetAwaiter().GetResult();
         Assert.Equal(value2, result.WebRequest.Path);
 
-        result = await _listener.GetContextAsync();
+        result = _listener.GetContextAsync().GetAwaiter().GetResult();
         Assert.Equal(value3, result.WebRequest.Path);
 
-        await Assert.ThrowsAsync<IndexOutOfRangeException>(() => _listener.GetContextAsync());
+        Assert.Throws<IndexOutOfRangeException>(() => _listener.GetContextAsync().GetAwaiter().GetResult());
 
         _wrapper.Verify(x => x.GetContextAsync(), Times.Exactly(4));
 

@@ -28,7 +28,7 @@ public class AbstractLoggerTest: IDisposable
 
         protected override void ProcessError(string message)
         {
-            Thread.Sleep(TimeSpan.FromSeconds(1));
+            Thread.Sleep(100);
             Count++;
         }
     }
@@ -48,13 +48,13 @@ public class AbstractLoggerTest: IDisposable
 
         Task.Run(() =>
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             _logger.Log(this.GetType(), "locked message");
         });
 
         Task.Run(() =>
         {
-            Thread.Sleep(1000);
+            Thread.Sleep(500);
             _logger.Log(this.GetType(), "locked message");
         });
 
@@ -62,7 +62,7 @@ public class AbstractLoggerTest: IDisposable
 
         Assert.True(_logger.Count == 10);
 
-        Thread.Sleep(5000);
+        Thread.Sleep(1000);
 
         Assert.True(_logger.Count == 12);
     }
@@ -75,7 +75,7 @@ public class AbstractLoggerTest: IDisposable
             _logger.Log(this.GetType(), "test message");
         }
 
-        Assert.Throws<TimeoutException>(() => _logger.Flush(TimeSpan.FromSeconds(5)));
+        Assert.Throws<TimeoutException>(() => _logger.Flush(500));
     }
 
     public void Dispose()

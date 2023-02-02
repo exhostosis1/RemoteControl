@@ -28,16 +28,16 @@ public class SimpleServerTests : IDisposable
     }
 
     [Fact]
-    public async Task StartWithoutConfigTest()
+    public void StartWithoutConfigTest()
     {
         _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
 
-        await StartTestLocal();
+        StartTestLocal();
 
         _listener.Verify(x => x.StartListen(It.IsAny<WebParameters>()), Times.Once);
     }
 
-    private async Task StartTestLocal(WebConfig? config = null)
+    private void StartTestLocal(WebConfig? config = null)
     {
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
@@ -46,24 +46,18 @@ public class SimpleServerTests : IDisposable
                 return null!;
             });
         _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
-        
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+        var mre = new ManualResetEventSlim(false);
+
         using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
-                // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+                mre.Set();
         }));
 
         _server.Start(config);
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        mre.Wait();
 
         Assert.True(_server.Status.Working);
         Assert.Equal(_server.CurrentConfig, config ?? _server.DefaultConfig);
@@ -78,14 +72,14 @@ public class SimpleServerTests : IDisposable
     [InlineData(Config1)]
     [InlineData(Config2)]
     [InlineData(null)]
-    public async Task StartWithConfigTest(string? uri)
+    public void StartWithConfigTest(string? uri)
     {
         var config = uri == null ? null : new WebConfig { Uri = new Uri(uri) };
         var parameters = new WebParameters(config?.Uri.ToString() ?? _server.CurrentConfig.Uri.ToString());
 
         _listener.Setup(x => x.StartListen(parameters));
 
-        await StartTestLocal(config);
+        StartTestLocal(config);
 
         _listener.Verify(x => x.StartListen(parameters), Times.Once);
     }
@@ -104,7 +98,7 @@ public class SimpleServerTests : IDisposable
     }
 
     [Fact]
-    public async Task RestartTest()
+    public void RestartTest()
     {
         var config1 = new WebConfig
         {
@@ -127,50 +121,33 @@ public class SimpleServerTests : IDisposable
             return null!;
         });
 
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var mre = new ManualResetEventSlim(false);
         var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
-            if(status)
-                // ReSharper disable once AccessToModifiedClosure
-                // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+            if (status)
+                mre.Set();
         }));
 
         _server.Start(config1);
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        mre.Wait();
 
         Assert.True(_server.Status.Working);
         Assert.Equal(_server.CurrentConfig, config1);
-
-        cts.Dispose();
+        
+        mre.Reset();
         sub.Dispose();
 
-        cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
-                // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+                mre.Set();
         }));
 
         _server.Restart(config2);
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        mre.Wait();
 
-        cts.Dispose();
         sub.Dispose();
 
         Assert.True(_server.Status.Working);
@@ -183,50 +160,65 @@ public class SimpleServerTests : IDisposable
 
 
     [Fact]
-    public async Task ProcessRequestTest()
+    public void ProcessRequestTest()
     {
         var context = new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
+        var contextMre = new ManualResetEventSlim(false);
 
         _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
-        _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>()))
+        _listener.SetupSequence(x => x.GetContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
+                return context;
+            })
+            .ReturnsAsync(() =>
+            {
+                Thread.Sleep(100);
+                return context;
+            })
+            .ReturnsAsync(() =>
+            {
+                Thread.Sleep(100);
+                return context;
+            })
+            .ReturnsAsync(() =>
+            {
+                contextMre.Set();
+                Thread.Sleep(100);
+                return context;
+            })
+            .ReturnsAsync(() =>
+            {
+                Thread.Sleep(TimeSpan.FromHours(1));
                 return context;
             });
         _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
 
-        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var startStopMre = new ManualResetEventSlim(false);
         using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
-                // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+                startStopMre.Set();
         }));
 
         _server.Start();
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        startStopMre.Wait();
 
         Assert.True(_server.Status.Working);
 
-        await Task.Delay(TimeSpan.FromSeconds(10), CancellationToken.None);
+        contextMre.Wait();
 
         _server.Stop();
 
         _listener.Verify(x => x.StartListen(It.IsAny<WebParameters>()), Times.Once);
-        _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.AtLeast(9));
-        _middleware.Verify(x => x.ProcessRequest(context), Times.AtLeast(9));
+        _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.AtLeast(4));
+        _middleware.Verify(x => x.ProcessRequest(context), Times.AtLeast(3));
     }
 
     [Fact]
-    public async Task SubscribtionTest()
+    public void SubscribtionTest()
     {
         _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
@@ -249,50 +241,34 @@ public class SimpleServerTests : IDisposable
             Port = 123
         };
 
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        var mre = new ManualResetEventSlim(false);
         var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
-                // ReSharper disable once AccessToModifiedClosure
-                // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+                mre.Set();
         }));
 
         _server.Start(config1);
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        mre.Wait();
 
         Assert.True(s);
         Assert.Equal(config1, c);
 
-        cts.Dispose();
+        mre.Reset();
         sub.Dispose();
 
-        cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (!status)
                 // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+                mre.Set();
         }));
 
         _server.Stop();
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
-
-        cts.Dispose();
+        mre.Wait();
+        
         sub.Dispose();
         
         Assert.False(s);

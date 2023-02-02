@@ -3,7 +3,6 @@ using Moq;
 using Shared;
 using Shared.Bots.Telegram;
 using Shared.Bots.Telegram.ApiObjects.Response;
-using Shared.DataObjects.Bot;
 using Shared.Logging.Interfaces;
 
 namespace UnitTests.Listeners;
@@ -23,71 +22,74 @@ public class TelegramListenerTests : IDisposable
     }
 
     [Fact]
-    public async Task StartAndStopListenTest()
+    public void StartAndStopListenTest()
     {
-        var uri = "localhost";
-        var apiKey = "apiKey";
+        const string uri = "localhost";
+        const string apiKey = "apiKey";
         var usernames = new List<string> { "user1", "user2" };
 
         var param = new BotParameters(uri, apiKey, usernames);
+        var startStopMre = new ManualResetEventSlim(false);
+        var contextMre = new ManualResetEventSlim(false);
 
-        _wrapper.Setup(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(() => new UpdateResponse { Ok = true });
-        
-        var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        _wrapper.SetupSequence(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(() => new UpdateResponse { Ok = true })
+            .ReturnsAsync(() => new UpdateResponse { Ok = true })
+            .ReturnsAsync(() => new UpdateResponse { Ok = true })
+            .ReturnsAsync(() =>
+            {
+                contextMre.Set();
+                return new UpdateResponse { Ok = true };
+            });
+
         var statusSub = _listener.Subscribe(new Observer<bool>(status =>
         {
             if(status)
-                // ReSharper disable once AccessToDisposedClosure
-                // ReSharper disable once AccessToModifiedClosure
-                cts.Cancel();
+            {
+                startStopMre.Set();
+            }
+            else
+            {
+                startStopMre.Reset();
+            }
         }));
 
         _listener.StartListen(param);
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        startStopMre.Wait();
+        startStopMre.Reset();
 
         Assert.True(_listener.IsListening);
 
-        cts.Dispose();
         statusSub.Dispose();
-
-        await Task.Delay(TimeSpan.FromSeconds(10), CancellationToken.None);
-
-        cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        
         statusSub = _listener.Subscribe(new Observer<bool>(status =>
         {
-            if (!status)
-                // ReSharper disable once AccessToDisposedClosure
-                cts.Cancel();
+            if(status)
+            {
+                startStopMre.Reset();
+            }
+            else
+            {
+                startStopMre.Set();
+            }
         }));
+
+        contextMre.Wait();
 
         _listener.StopListen();
 
-        try
-        {
-            await Task.Delay(TimeSpan.FromSeconds(10), cts.Token);
-        }
-        catch (TaskCanceledException)
-        {
-        }
+        startStopMre.Wait();
 
         Assert.False(_listener.IsListening);
 
-        cts.Dispose();
         statusSub.Dispose();
 
-        _wrapper.Verify(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()), Times.AtLeast(9));
+        _wrapper.Verify(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()), Times.Exactly(4));
     }
 
     [Fact]
-    public async Task GetContextAsyncTest()
+    public void GetContextAsyncTest()
     {
         const string uri = "localhost";
         const string apiKey = "apiKey";
@@ -177,11 +179,11 @@ public class TelegramListenerTests : IDisposable
 
         _listener.StartListen(param);
 
-        var context = await _listener.GetContextAsync();
+        var context = _listener.GetContextAsync().GetAwaiter().GetResult();
         Assert.True(context.BotRequest.Id == 1);
         Assert.True(context.BotRequest.Command == "test message 1");
 
-        context = await _listener.GetContextAsync();
+        context = _listener.GetContextAsync().GetAwaiter().GetResult();
         Assert.True(context.BotRequest.Id == 1);
         Assert.True(context.BotRequest.Command == "test message 2");
 

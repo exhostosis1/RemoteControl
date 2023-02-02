@@ -12,8 +12,10 @@ public abstract class AbstractLogger : ILogger
     private readonly IMessageFormatter _formatter;
     private readonly LoggingLevel _currentLoggingLevel;
 
-    private bool _locked;
     private int _count;
+
+    private readonly ManualResetEventSlim _addEvent = new(true);
+    private readonly ManualResetEventSlim _countEvent = new(false);
 
     protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
     {
@@ -23,12 +25,16 @@ public abstract class AbstractLogger : ILogger
         new TaskFactory().StartNew(WriteMessages, TaskCreationOptions.LongRunning);
     }
 
+    public Task LogAsync(Type type, string message, LoggingLevel level)
+    {
+        return Task.Run(() => Log(type, message, level));
+    }
+
     public void Log(Type type, string message, LoggingLevel level = LoggingLevel.Error)
     {
         if (level >= _currentLoggingLevel)
         {
-            while(_locked)
-                Thread.Sleep(50);
+            _addEvent.Wait(TimeSpan.FromMinutes(1));
 
             _messages.Add(new LogMessage(type, level, DateTime.Now, message));
             _count++;
@@ -36,30 +42,39 @@ public abstract class AbstractLogger : ILogger
     }
 
     public void Flush(int millisecondsTimeout = int.MaxValue) => Flush(TimeSpan.FromMilliseconds(millisecondsTimeout));
-
-    public void Flush(TimeSpan timeout)
+    public void Flush(TimeSpan timeout) => Flush(new CancellationTokenSource(timeout).Token);
+    public void Flush(CancellationToken token)
     {
-        _locked = true;
-        var start = DateTime.Now;
+        _addEvent.Reset();
 
-        while (_count > 0)
+        try
         {
-            Thread.Sleep(50);
-
-            if (DateTime.Now - start > timeout)
+            while (_count > 0)
             {
-                _locked = false;
-                throw new TimeoutException("Flush operation timed out");
+                _countEvent.Wait(token);
             }
         }
+        catch (OperationCanceledException)
+        {
+            throw new TimeoutException("Flush timed out or cancelled");
+        }
+        finally
+        {
+            _addEvent.Set();
+        }
+    }
 
-        _locked = false;
+    public Task FlushAsync(CancellationToken token)
+    {
+        return Task.Run(() => Flush(token), token);
     }
 
     private void WriteMessages()
     {
         foreach (var message in _messages.GetConsumingEnumerable())
         {
+            _countEvent.Reset();
+
             switch (message.Level)
             {
                 case LoggingLevel.Error:
@@ -76,6 +91,7 @@ public abstract class AbstractLogger : ILogger
             }
             
             _count = _messages.Count;
+            _countEvent.Set();
         }
     }
 
