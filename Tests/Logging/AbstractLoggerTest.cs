@@ -52,9 +52,30 @@ public class AbstractLoggerTest: IDisposable
             _logger.Log(this.GetType(), "locked message");
         });
 
+        Task.Run(() =>
+        {
+            Thread.Sleep(1000);
+            _logger.Log(this.GetType(), "locked message");
+        });
+
         _logger.Flush();
 
         Assert.True(_logger.Count == 10);
+
+        Thread.Sleep(5000);
+
+        Assert.True(_logger.Count == 12);
+    }
+
+    [Fact]
+    public void TimeoutFlushTest()
+    {
+        for (var i = 0; i < 10; i++)
+        {
+            _logger.Log(this.GetType(), "test message");
+        }
+
+        Assert.Throws<TimeoutException>(() => _logger.Flush(TimeSpan.FromSeconds(5)));
     }
 
     public void Dispose()

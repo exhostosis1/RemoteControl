@@ -193,30 +193,4 @@ public static partial class Utils
 
         return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse response");
     }
-
-    public class Waiter
-    {
-        public bool Waiting { get; private set; }
-        private readonly SemaphoreSlim _semaphore = new(0, 1);
-
-        public void WaitIfLocked()
-        {
-            if (Waiting)
-                _semaphore.Wait();
-        }
-
-        public void Lock()
-        {
-            Waiting = true;
-        }
-
-        public void Unlock()
-        {
-            if (Waiting)
-            {
-                Waiting = false;
-                _semaphore.Release();
-            }
-        }
-    }
 }

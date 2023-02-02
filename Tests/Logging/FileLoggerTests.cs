@@ -2,6 +2,7 @@ using Logging;
 using Logging.Formatters;
 using Shared.Enums;
 using Shared.Logging;
+using Shared.Logging.Interfaces;
 
 namespace UnitTests.Logging;
 
@@ -9,10 +10,11 @@ public class FileLoggerTests : IDisposable
 {
     private readonly FileLogger _fileLogger;
     private readonly string _filePath = Path.Combine(AppContext.BaseDirectory, "log");
+    private readonly IMessageFormatter _formatter = new TestMessageFormatter();
 
     public FileLoggerTests()
     {
-        _fileLogger = new FileLogger(_filePath);
+        _fileLogger = new FileLogger(_filePath, LoggingLevel.Error, _formatter);
 
         if (File.Exists(_filePath))
         {
@@ -60,7 +62,7 @@ public class FileLoggerTests : IDisposable
 
         _fileLogger.Flush();
 
-        var formattedMessage = new DefaultMessageFormatter().Format(new LogMessage(type, level, date, message));
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         Assert.True(File.Exists(_filePath));
 

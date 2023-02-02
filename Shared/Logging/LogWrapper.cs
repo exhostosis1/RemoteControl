@@ -14,5 +14,6 @@ public class LogWrapper<T> : ILogger<T> where T : class
     }
 
     public void Log(Type type, string message, LoggingLevel level) => _logger.Log(type, message, level);
-    public void Flush() => _logger.Flush();
+    public void Flush(int timeout) => Flush(TimeSpan.FromMilliseconds(timeout));
+    public void Flush(TimeSpan timeout) => _logger.Flush(timeout);
 }

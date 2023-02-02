@@ -4,6 +4,7 @@ using Moq;
 using Shared.ConsoleWrapper;
 using Shared.Enums;
 using Shared.Logging;
+using Shared.Logging.Interfaces;
 
 namespace UnitTests.Logging;
 
@@ -11,11 +12,12 @@ public class TraceLoggerTests : IDisposable
 {
     private readonly TraceLogger _logger;
     private readonly Mock<ITrace> _trace;
+    private readonly IMessageFormatter _formatter = new TestMessageFormatter();
 
     public TraceLoggerTests()
     {
         _trace = new Mock<ITrace>(MockBehavior.Strict);
-        _logger = new TraceLogger(_trace.Object);
+        _logger = new TraceLogger(_trace.Object, LoggingLevel.Info, _formatter);
     }
 
     [Fact]
@@ -29,9 +31,8 @@ public class TraceLoggerTests : IDisposable
         var date = DateTime.Now;
 
         _logger.Log(type, message, level);
-
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+        
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         _logger.Flush();
 
@@ -49,9 +50,8 @@ public class TraceLoggerTests : IDisposable
         var date = DateTime.Now;
 
         _logger.Log(type, message, level);
-
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+        
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         _logger.Flush();
 
@@ -69,9 +69,8 @@ public class TraceLoggerTests : IDisposable
         var date = DateTime.Now;
 
         _logger.Log(type, message, level);
-
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+        
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         _logger.Flush();
 

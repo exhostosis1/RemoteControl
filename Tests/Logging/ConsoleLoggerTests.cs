@@ -4,6 +4,7 @@ using Moq;
 using Shared.ConsoleWrapper;
 using Shared.Enums;
 using Shared.Logging;
+using Shared.Logging.Interfaces;
 
 namespace UnitTests.Logging;
 
@@ -11,11 +12,12 @@ public class ConsoleLoggerTests : IDisposable
 {
     private readonly ConsoleLogger _logger;
     private readonly Mock<IConsole> _console;
+    private readonly IMessageFormatter _formatter = new TestMessageFormatter();
 
     public ConsoleLoggerTests()
     {
         _console = new Mock<IConsole>(MockBehavior.Strict);
-        _logger = new ConsoleLogger(_console.Object);
+        _logger = new ConsoleLogger(_console.Object, LoggingLevel.Info, _formatter);
     }
 
     [Fact]
@@ -26,12 +28,10 @@ public class ConsoleLoggerTests : IDisposable
         const string message = "test message";
         var type = GetType();
         const LoggingLevel level = LoggingLevel.Info;
-        var date = DateTime.Now;
 
         _logger.Log(type, message, level);
 
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, DateTime.Now, message));
 
         _logger.Flush();
 
@@ -51,9 +51,7 @@ public class ConsoleLoggerTests : IDisposable
         var date = DateTime.Now;
 
         _logger.Log(type, message, level);
-
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         _logger.Flush();
 
@@ -75,9 +73,8 @@ public class ConsoleLoggerTests : IDisposable
         var date = DateTime.Now;
 
         _logger.Log(type, message, level);
-
-        var formatter = new DefaultMessageFormatter();
-        var formattedMessage = formatter.Format(new LogMessage(type, level, date, message));
+        
+        var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         _logger.Flush();
 

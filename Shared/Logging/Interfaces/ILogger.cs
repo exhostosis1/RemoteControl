@@ -11,5 +11,6 @@ public interface ILogger
     public void LogError(Type type, string message) => Log(type, message, LoggingLevel.Error);
     public void LogWarn(Type type, string message) => Log(type, message, LoggingLevel.Warn);
 
-    public void Flush();
+    public void Flush(int timeout = int.MaxValue);
+    public void Flush(TimeSpan timeout);
 }
