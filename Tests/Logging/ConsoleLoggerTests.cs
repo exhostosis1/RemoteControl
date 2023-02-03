@@ -10,7 +10,7 @@ namespace UnitTests.Logging;
 
 public class ConsoleLoggerTests : IDisposable
 {
-    private readonly ConsoleLogger _logger;
+    private readonly ILogger _logger;
     private readonly Mock<IConsole> _console;
     private readonly IMessageFormatter _formatter = new TestMessageFormatter();
 
@@ -21,7 +21,7 @@ public class ConsoleLoggerTests : IDisposable
     }
 
     [Fact]
-    public void LogInfoTest()
+    public async Task LogInfoTest()
     {
         _console.Setup(x => x.WriteLine(It.IsAny<string>()));
 
@@ -29,17 +29,15 @@ public class ConsoleLoggerTests : IDisposable
         var type = GetType();
         const LoggingLevel level = LoggingLevel.Info;
 
-        _logger.Log(type, message, level);
+        await _logger.LogAsync(type, message, level);
 
         var formattedMessage = _formatter.Format(new LogMessage(type, level, DateTime.Now, message));
-
-        _logger.Flush();
 
         _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
     }
 
     [Fact]
-    public void LogWarningTest()
+    public async Task LogWarningTest()
     {
         _console.Setup(x => x.WriteLine(It.IsAny<string>()));
         _console.SetupSet(x => x.ForegroundColor = ConsoleColor.Yellow);
@@ -50,10 +48,8 @@ public class ConsoleLoggerTests : IDisposable
         const LoggingLevel level = LoggingLevel.Warn;
         var date = DateTime.Now;
 
-        _logger.Log(type, message, level);
+        await _logger.LogAsync(type, message, level);
         var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
-
-        _logger.Flush();
 
         _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
         _console.VerifySet(x => x.ForegroundColor = ConsoleColor.Yellow, Times.Once);
@@ -61,7 +57,7 @@ public class ConsoleLoggerTests : IDisposable
     }
 
     [Fact]
-    public void LogErrorTest()
+    public async Task LogErrorTest()
     {
         _console.Setup(x => x.WriteLine(It.IsAny<string>()));
         _console.SetupSet(x => x.ForegroundColor = ConsoleColor.Red);
@@ -72,15 +68,30 @@ public class ConsoleLoggerTests : IDisposable
         const LoggingLevel level = LoggingLevel.Error;
         var date = DateTime.Now;
 
-        _logger.Log(type, message, level);
+        await _logger.LogAsync(type, message, level);
         
         var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
-
-        _logger.Flush();
 
         _console.Verify(x => x.WriteLine(formattedMessage), Times.Once);
         _console.VerifySet(x => x.ForegroundColor = ConsoleColor.Red, Times.Once);
         _console.Verify(x => x.ResetColor(), Times.Once);
+    }
+
+    [Theory]
+    [InlineData(1000)]
+    public void ParallelLoggingTest(int count)
+    {
+        _console.Setup(x => x.WriteLine(It.IsAny<string>()));
+
+        var tasks = new Task[count];
+        for (var i = 0; i < tasks.Length; i++)
+        {
+            tasks[i] = Task.Run(() => _logger.Log(this.GetType(), "test message", LoggingLevel.Info));
+        }
+
+        Task.WaitAll(tasks);
+
+        _console.Verify(x => x.WriteLine(It.IsAny<string>()), Times.Exactly(count));
     }
 
     public void Dispose()

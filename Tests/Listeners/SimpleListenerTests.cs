@@ -97,7 +97,7 @@ public class SimpleHttpListenerTests : IDisposable
     }
 
     [Fact]
-    public void GetContextAsyncText()
+    public async Task GetContextAsyncText()
     {
         const string value1 = "path1";
         const string value2 = "path2";
@@ -112,16 +112,16 @@ public class SimpleHttpListenerTests : IDisposable
             .Returns(GetContext(value3))
             .Throws<IndexOutOfRangeException>();
 
-        var result = _listener.GetContextAsync().GetAwaiter().GetResult();
+        var result = await _listener.GetContextAsync();
         Assert.Equal(value1, result.WebRequest.Path);
 
-        result = _listener.GetContextAsync().GetAwaiter().GetResult();
+        result = await _listener.GetContextAsync();
         Assert.Equal(value2, result.WebRequest.Path);
 
-        result = _listener.GetContextAsync().GetAwaiter().GetResult();
+        result = await _listener.GetContextAsync();
         Assert.Equal(value3, result.WebRequest.Path);
 
-        Assert.Throws<IndexOutOfRangeException>(() => _listener.GetContextAsync().GetAwaiter().GetResult());
+        await Assert.ThrowsAsync<IndexOutOfRangeException>(async () => await _listener.GetContextAsync());
 
         _wrapper.Verify(x => x.GetContextAsync(), Times.Exactly(4));
 

@@ -1,5 +1,6 @@
 using Logging;
 using Logging.Formatters;
+using Moq;
 using Shared.Enums;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -8,7 +9,7 @@ namespace UnitTests.Logging;
 
 public class FileLoggerTests : IDisposable
 {
-    private readonly FileLogger _fileLogger;
+    private readonly ILogger _fileLogger;
     private readonly string _filePath = Path.Combine(AppContext.BaseDirectory, "log");
     private readonly IMessageFormatter _formatter = new TestMessageFormatter();
 
@@ -23,55 +24,67 @@ public class FileLoggerTests : IDisposable
     }
 
     [Fact]
-    public void LogInfoTest()
+    public async Task LogInfoTest()
     {
         const string message = "test message";
         var type = GetType();
         const LoggingLevel level = LoggingLevel.Info;
 
-        _fileLogger.Log(type, message, level);
-
-        _fileLogger.Flush();
+        await _fileLogger.LogAsync(type, message, level);
 
         Assert.False(File.Exists(_filePath));
     }
 
     [Fact]
-    public void LogWarningTest()
+    public async Task LogWarningTest()
     {
         const string message = "test message";
         var type = GetType();
         const LoggingLevel level = LoggingLevel.Warn;
 
-        _fileLogger.Log(type, message, level);
-
-        _fileLogger.Flush();
+        await _fileLogger.LogAsync(type, message, level);
 
         Assert.False(File.Exists(_filePath));
     }
 
     [Fact]
-    public void LogErrorTest()
+    public async Task LogErrorTest()
     {
         const string message = "test message";
         var type = GetType();
         const LoggingLevel level = LoggingLevel.Error;
         var date = DateTime.Now;
 
-        _fileLogger.Log(type, message, level);
-
-        _fileLogger.Flush();
+        await _fileLogger.LogAsync(type, message, level);
 
         var formattedMessage = _formatter.Format(new LogMessage(type, level, date, message));
 
         Assert.True(File.Exists(_filePath));
 
-        var writtenMessage = (File.ReadAllLines(_filePath)).First();
+        var writtenMessage = (await File.ReadAllLinesAsync(_filePath)).First();
 
         Assert.Equal(formattedMessage, writtenMessage);
     }
 
+    [Theory]
+    [InlineData(1000)]
+    public void ParallelLoggingTest(int count)
+    {
+        var tasks = new Task[count];
+        for (var i = 0; i < tasks.Length; i++)
+        {
+            tasks[i] = Task.Run(() => _fileLogger.Log(this.GetType(), "test message", LoggingLevel.Error));
+        }
+
+        Task.WaitAll(tasks);
+
+        Assert.True(File.Exists(_filePath));
+        Assert.True(File.ReadAllLines(_filePath).Length == count);
+    }
+
     public void Dispose()
     {
+        if(File.Exists(_filePath))
+            File.Delete(_filePath);
     }
 }

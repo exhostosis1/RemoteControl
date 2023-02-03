@@ -88,7 +88,7 @@ public class TelegramListenerTests : IDisposable
     }
 
     [Fact]
-    public void GetContextAsyncTest()
+    public async Task GetContextAsyncTest()
     {
         const string uri = "localhost";
         const string apiKey = "apiKey";
@@ -178,11 +178,11 @@ public class TelegramListenerTests : IDisposable
 
         _listener.StartListen(param);
 
-        var context = _listener.GetContextAsync().GetAwaiter().GetResult();
+        var context = await _listener.GetContextAsync();
         Assert.True(context.BotRequest.Id == 1);
         Assert.True(context.BotRequest.Command == "test message 1");
 
-        context = _listener.GetContextAsync().GetAwaiter().GetResult();
+        context = await _listener.GetContextAsync();
         Assert.True(context.BotRequest.Id == 1);
         Assert.True(context.BotRequest.Command == "test message 2");
 
