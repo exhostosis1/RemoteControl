@@ -8,9 +8,9 @@ namespace Servers;
 
 public class SimpleServer : GenericServer<WebContext, WebConfig, WebParameters>
 {
-    public SimpleServer(IListener<WebContext, WebParameters> listener, IMiddleware<WebContext> middleware,
-        ILogger<SimpleServer> logger, WebConfig? config = null) : base(
-        listener, middleware, logger, config)
+    public SimpleServer(IWebListener listener, IWebMiddleware middleware,
+        ILogger<SimpleServer> logger) : base(
+        listener, middleware, logger)
     {
     }
 }

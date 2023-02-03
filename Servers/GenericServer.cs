@@ -8,7 +8,7 @@ namespace Servers;
 
 public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where TContext : IContext where TConfig : CommonConfig, new() where TParams: StartParameters
 {
-    public int Id { get; init; } = -1;
+    public int Id { get; set; } = -1;
     public ServerStatus Status { get; } = new();
 
     private readonly ILogger<GenericServer<TContext, TConfig, TParams>> _logger;
@@ -43,9 +43,9 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
 
     private readonly List<IObserver<TConfig>> _configObservers = new();
 
-    public GenericServer(IListener<TContext, TParams> listener, IMiddleware<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger, TConfig? config = null)
+    protected GenericServer(IListener<TContext, TParams> listener, IMiddleware<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger)
     {
-        _currentConfig = config ?? DefaultConfig;
+        _currentConfig = DefaultConfig;
 
         _logger = logger;
         _listener = listener;
@@ -111,7 +111,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
+                await _logger.LogErrorAsync(e.Message);
                 break;
             }
         }

@@ -8,9 +8,9 @@ namespace Servers;
 
 public class BotServer : GenericServer<BotContext, BotConfig, BotParameters>
 {
-    public BotServer(IListener<BotContext, BotParameters> listener, IMiddleware<BotContext> middleware,
-        ILogger<BotServer> logger, BotConfig? config = null) : base(listener,
-        middleware, logger, config)
+    public BotServer(IBotListener listener, IBotMiddleware middleware,
+        ILogger<BotServer> logger) : base(listener,
+        middleware, logger)
     {
     }
 }

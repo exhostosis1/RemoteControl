@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using ApiControllers;
+﻿using ApiControllers;
 using Listeners;
 using Servers;
 using Servers.Middleware;
@@ -21,39 +20,6 @@ namespace RemoteControlMain;
 public static class Program
 {
     private static int _id;
-
-    private static IServer CreateSimpleServer(Container container, WebConfig? config = null)
-    {
-        var result = new SimpleServer(container.GetObject<IWebListener>(), container.GetObject<IWebMiddleware>(),
-            new LogWrapper<SimpleServer>(container.GetObject<ILogger>()), config)
-        {
-            Id = _id++
-        };
-
-        return result;
-    }
-
-    private static IServer CreateTelegramBot(Container container, BotConfig? config = null)
-    {
-        var result = new BotServer(container.GetObject<IBotListener>(), container.GetObject<IBotMiddleware>(),
-            new LogWrapper<BotServer>(container.GetObject<ILogger>()), config)
-        {
-            Id = _id++
-        };
-
-        return result;
-    }
-
-    private static IEnumerable<IServer> CreateServers(AppConfig config, Container container)
-    {
-        return config.ServerConfigs.Select(x => x switch
-        {
-            WebConfig s => CreateSimpleServer(container, s),
-            BotConfig b => CreateTelegramBot(container, b),
-            _ => throw new NotSupportedException("Config not supported")
-        });
-    }
-
     private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
         new(servers.Select(x => x.Config));
 
@@ -82,14 +48,33 @@ public static class Program
             .Register<IBotApiProvider, TelegramBotApiProvider>(Lifetime.Transient)
             .Register<IBotListener, TelegramListener>(Lifetime.Transient)
             .Register<IBotMiddleware, CommandsExecutor>(Lifetime.Singleton)
-            .Register<IWebMiddleware>(apiMiddleWare);
+            .Register<IWebMiddleware>(apiMiddleWare)
+            .Register<SimpleServer, SimpleServer>(Lifetime.Transient)
+            .Register<BotServer, BotServer>(Lifetime.Transient);
 
         var ui = container.GetObject<IUserInterface>();
         var configProvider = container.GetObject<IConfigProvider>();
         var autostartService = container.GetObject<IAutostartService>();
         var config = container.GetObject<IConfigProvider>().GetConfig();
 
-        Servers = CreateServers(config, container).ToList();
+        Servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
+        {
+            switch (x)
+            {
+                case WebConfig s:
+                    var server = container.GetObject<SimpleServer>();
+                    server.CurrentConfig = s;
+                    server.Id = _id++;
+                    return server;
+                case BotConfig b:
+                    var bot = container.GetObject<BotServer>();
+                    bot.CurrentConfig = b;
+                    bot.Id = _id++;
+                    return bot;
+                default:
+                    throw new NotSupportedException("Config not supported");
+            }
+        }).ToList();
 
         Servers.ForEach(x =>
         {
@@ -125,12 +110,14 @@ public static class Program
 
         ui.OnServerAdded += (_, mode) =>
         {
-            var server = mode switch
+            IServer server = mode switch
             {
-                ServerType.Http => CreateSimpleServer(container),
-                ServerType.Bot => CreateTelegramBot(container),
+                ServerType.Http => container.GetObject<SimpleServer>(),
+                ServerType.Bot => container.GetObject<BotServer>(),
                 _ => throw new NotSupportedException()
             };
+
+            server.Id = _id++;
 
             Servers.Add(server);
             ui.AddServer(server);
@@ -173,7 +160,7 @@ public static class Program
             configProvider.SetConfig(config);
         };
 
-        ui.OnClose += (_, args) =>
+        ui.OnClose += (_, _) =>
         {
             Environment.Exit(0);
         };

@@ -27,7 +27,7 @@ public class Container
         return this;
     }
 
-    public Container Register<TInterface, TInstance>(Lifetime lifetime) where TInterface : class where TInstance : class
+    public Container Register<TInterface, TInstance>(Lifetime lifetime) where TInterface : class where TInstance : TInterface
     {
         return Register(typeof(TInterface), typeof(TInstance), lifetime);
     }
