@@ -15,7 +15,7 @@ public class LocalFileConfigProviderTests : IDisposable
     public LocalFileConfigProviderTests()
     {
         _logger = Mock.Of<ILogger<LocalFileConfigProvider>>();
-        _provider = new LocalFileConfigProvider(_filePath, _logger);
+        _provider = new LocalFileConfigProvider(_logger, _filePath);
 
         if (File.Exists(_filePath))
             File.Delete(_filePath);

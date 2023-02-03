@@ -10,11 +10,14 @@ public class LocalFileConfigProvider : IConfigProvider
     private readonly string _configPath;
     private readonly ILogger<LocalFileConfigProvider> _logger;
 
-    public LocalFileConfigProvider(string filePath, ILogger<LocalFileConfigProvider> logger)
+    public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, string filePath)
     {
         _configPath = filePath;
         _logger = logger;
     }
+
+    public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger): this(logger, Path.Combine(AppContext.BaseDirectory, "config.ini"))
+    {}
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {

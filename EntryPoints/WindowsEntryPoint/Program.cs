@@ -1,5 +1,21 @@
-﻿using Microsoft.Win32;
+﻿using Autostart;
+using ConfigProviders;
+using ControlProviders.Wrappers;
+using ControlProviders;
+using Microsoft.Win32;
+using Shared.Config;
+using Shared.ControlProviders.Input;
+using Shared.ControlProviders.Provider;
+using Shared.Logging.Interfaces;
+using Shared.UI;
+using Shared;
 using System.Runtime.InteropServices;
+using WinFormsUI;
+using Logging;
+using Shared.ConsoleWrapper;
+using Shared.Logging;
+using Shared.Wrappers.Registry;
+using Shared.Wrappers.RegistryWrapper;
 
 namespace WindowsEntryPoint;
 
@@ -10,8 +26,25 @@ public static class Program
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
-        var container = new RemoteControlContainer();
-        var logger = container.Logger;
+#if DEBUG
+        ILogger logger = new TraceLogger(new TraceWrapper());
+#else
+        ILogger logger = new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
+#endif
+
+        var container = new Container()
+            .Register<ILogger>(logger)
+            .Register(typeof(ILogger<>), typeof(LogWrapper<>), Lifetime.Singleton)
+            .Register<IConfigProvider, LocalFileConfigProvider>(Lifetime.Singleton)
+            .Register<IRegistry, RegistryWrapper>(Lifetime.Singleton)
+            .Register<IAutostartService, RegistryAutostartService>(Lifetime.Singleton)
+            .Register<IGeneralControlProvider, InputProvider>(Lifetime.Singleton)
+            .Register<IUserInterface, MainForm>(Lifetime.Singleton)
+            .Register<IKeyboardInput, User32Wrapper>(Lifetime.Singleton)
+            .Register<IMouseInput, User32Wrapper>(Lifetime.Singleton)
+            .Register<IDisplayInput, User32Wrapper>(Lifetime.Singleton)
+            .Register<IAudioInput, NAudioWrapper>(Lifetime.Singleton);
+        
         var type = typeof(Program);
 
         var indexes = new List<int>();

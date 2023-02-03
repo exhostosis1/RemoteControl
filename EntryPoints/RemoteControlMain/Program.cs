@@ -1,9 +1,20 @@
-﻿using Servers;
+﻿using System.Reflection;
+using ApiControllers;
+using Listeners;
+using Servers;
+using Servers.Middleware;
 using Shared;
+using Shared.ApiControllers;
+using Shared.Bots.Telegram;
 using Shared.Config;
+using Shared.ControlProviders.Provider;
 using Shared.Enums;
 using Shared.Logging;
+using Shared.Logging.Interfaces;
 using Shared.Server;
+using Shared.UI;
+using Shared.Wrappers.HttpClient;
+using Shared.Wrappers.HttpListener;
 
 namespace RemoteControlMain;
 
@@ -11,12 +22,10 @@ public static class Program
 {
     private static int _id;
 
-    private static IServer CreateSimpleServer(IContainer container, WebConfig? config = null)
+    private static IServer CreateSimpleServer(Container container, WebConfig? config = null)
     {
-        var result = new SimpleServer(
-            container.NewWebListener(container.NewHttpListener(container.Logger), container.Logger),
-            container.ApiMiddleware,
-            new LogWrapper<SimpleServer>(container.Logger), config)
+        var result = new SimpleServer(container.GetObject<IWebListener>(), container.GetObject<IWebMiddleware>(),
+            new LogWrapper<SimpleServer>(container.GetObject<ILogger>()), config)
         {
             Id = _id++
         };
@@ -24,12 +33,10 @@ public static class Program
         return result;
     }
 
-    private static IServer CreateTelegramBot(IContainer container, BotConfig? config = null)
+    private static IServer CreateTelegramBot(Container container, BotConfig? config = null)
     {
-        var result = new BotServer(
-            container.NewBotListener(container.NewTelegramBotApiProvider(container.NewHttpClient(), container.Logger),
-                container.Logger), container.CommandExecutor,
-            new LogWrapper<BotServer>(container.Logger), config)
+        var result = new BotServer(container.GetObject<IBotListener>(), container.GetObject<IBotMiddleware>(),
+            new LogWrapper<BotServer>(container.GetObject<ILogger>()), config)
         {
             Id = _id++
         };
@@ -37,7 +44,7 @@ public static class Program
         return result;
     }
 
-    private static IEnumerable<IServer> CreateServers(AppConfig config, IContainer container)
+    private static IEnumerable<IServer> CreateServers(AppConfig config, Container container)
     {
         return config.ServerConfigs.Select(x => x switch
         {
@@ -52,12 +59,35 @@ public static class Program
 
     public static List<IServer> Servers { get; private set; } = new();
 
-    public static void Run(IPlatformDependantContainer lesserContainer)
+    public static void Run(Container inner)
     {
-        var container = new Container(lesserContainer);
+        var audioController = new AudioController(inner.GetObject<IGeneralControlProvider>(),
+            new LogWrapper<AudioController>(inner.GetObject<ILogger>()));
+        var dispalyController = new DisplayController(inner.GetObject<IGeneralControlProvider>(),
+            new LogWrapper<DisplayController>(inner.GetObject<ILogger>()));
+        var keyboardController = new KeyboardController(inner.GetObject<IGeneralControlProvider>(),
+            new LogWrapper<KeyboardController>(inner.GetObject<ILogger>()));
+        var mouseController = new MouseController(inner.GetObject<IGeneralControlProvider>(),
+            new LogWrapper<MouseController>(inner.GetObject<ILogger>()));
 
-        var ui = container.UserInterface;
-        var config = container.ConfigProvider.GetConfig();
+        var staticMiddleware = new StaticFilesMiddleware(new LogWrapper<StaticFilesMiddleware>(inner.GetObject<ILogger>()));
+        var apiMiddleWare =
+            new ApiV1Middleware(new IApiController[] { audioController, keyboardController, mouseController, dispalyController },
+                new LogWrapper<ApiV1Middleware>(inner.GetObject<ILogger>()), staticMiddleware);
+
+        var container = inner
+            .Register<IHttpListener, HttpListenerWrapper>(Lifetime.Transient)
+            .Register<IWebListener, SimpleHttpListener>(Lifetime.Transient)
+            .Register<IHttpClient, HttpClientWrapper>(Lifetime.Transient)
+            .Register<IBotApiProvider, TelegramBotApiProvider>(Lifetime.Transient)
+            .Register<IBotListener, TelegramListener>(Lifetime.Transient)
+            .Register<IBotMiddleware, CommandsExecutor>(Lifetime.Singleton)
+            .Register<IWebMiddleware>(apiMiddleWare);
+
+        var ui = container.GetObject<IUserInterface>();
+        var configProvider = container.GetObject<IConfigProvider>();
+        var autostartService = container.GetObject<IAutostartService>();
+        var config = container.GetObject<IConfigProvider>().GetConfig();
 
         Servers = CreateServers(config, container).ToList();
 
@@ -67,7 +97,7 @@ public static class Program
                 x.Start();
         });
 
-        ui.SetAutostartValue(container.AutostartService.CheckAutostart());
+        ui.SetAutostartValue(container.GetObject<IAutostartService>().CheckAutostart());
 
         ui.OnStart += (_, id) =>
         {
@@ -115,13 +145,13 @@ public static class Program
             server.Stop();
             Servers.Remove(server);
 
-            container.ConfigProvider.SetConfig(GetConfig(Servers));
+            configProvider.SetConfig(GetConfig(Servers));
         };
 
         ui.OnAutostartChanged += (_, value) =>
         {
-            container.AutostartService.SetAutostart(value);
-            ui.SetAutostartValue(container.AutostartService.CheckAutostart());
+            autostartService.SetAutostart(value);
+            ui.SetAutostartValue(autostartService.CheckAutostart());
         };
 
         ui.OnConfigChanged += (_, configTuple) =>
@@ -140,7 +170,7 @@ public static class Program
             }
 
             config = GetConfig(Servers);
-            container.ConfigProvider.SetConfig(config);
+            configProvider.SetConfig(config);
         };
 
         ui.OnClose += (_, args) =>
