@@ -6,6 +6,7 @@ using Logging;
 using Shared;
 using Shared.Config;
 using Shared.ConsoleWrapper;
+using Shared.ControlProviders.Input;
 using Shared.ControlProviders.Provider;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -21,6 +22,10 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
     public IGeneralControlProvider ControlProvider { get; }
+    public IKeyboardInput KeyboardInput { get; }
+    public IMouseInput MouseInput { get; }
+    public IDisplayInput DisplayInput { get; }
+    public IAudioInput AudioInput { get; }
     public ILogger Logger { get; }
     public ILogger NewLogger()
     {
@@ -39,11 +44,13 @@ public class RemoteControlContainer : IPlatformDependantContainer
 
     public IUserInterface NewUserInterface() => new MainForm();
 
-    private readonly User32Wrapper _user32Wrapper = new();
-    private readonly NAudioWrapper _naudioWrapper = new();
-
     public IGeneralControlProvider NewControlProvider(ILogger logger) =>
-        new InputProvider(_user32Wrapper, _user32Wrapper, _user32Wrapper, _naudioWrapper, new LogWrapper<InputProvider>(logger));
+        new InputProvider(KeyboardInput, MouseInput, DisplayInput, AudioInput, new LogWrapper<InputProvider>(logger));
+
+    public IKeyboardInput NewKeyboardInput() => new User32Wrapper();
+    public IMouseInput NewMouseInput() => new User32Wrapper();
+    public IDisplayInput NewDisplayInput() => new User32Wrapper();
+    public IAudioInput NewAudioInput() => new NAudioWrapper();
 
     public RemoteControlContainer()
     {
@@ -52,5 +59,13 @@ public class RemoteControlContainer : IPlatformDependantContainer
         AutostartService = NewAutostartService(Logger);
         ControlProvider = NewControlProvider(Logger);
         UserInterface = NewUserInterface();
+
+        var user32Wrapper = new User32Wrapper();
+        var nAudioWrapper = new NAudioWrapper();
+
+        KeyboardInput = user32Wrapper;
+        MouseInput = user32Wrapper;
+        DisplayInput = user32Wrapper;
+        AudioInput = nAudioWrapper;
     }
 }

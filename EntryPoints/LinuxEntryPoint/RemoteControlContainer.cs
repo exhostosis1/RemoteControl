@@ -7,6 +7,7 @@ using Logging;
 using Shared;
 using Shared.Config;
 using Shared.ConsoleWrapper;
+using Shared.ControlProviders.Input;
 using Shared.ControlProviders.Provider;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -20,6 +21,10 @@ public class RemoteControlContainer : IPlatformDependantContainer
     public IAutostartService AutostartService { get; }
     public IUserInterface UserInterface { get; }
     public IGeneralControlProvider ControlProvider { get; }
+    public IKeyboardInput KeyboardInput { get; }
+    public IMouseInput MouseInput { get; }
+    public IDisplayInput DisplayInput { get; }
+    public IAudioInput AudioInput { get; }
     public ILogger Logger { get; }
     public ILogger NewLogger()
     {
@@ -38,12 +43,17 @@ public class RemoteControlContainer : IPlatformDependantContainer
 
     public IUserInterface NewUserInterface() => new MainConsole();
 
-    private readonly YdoToolWrapper _ydoToolWrapper = new();
-    private readonly DummyWrapper _dummyWrapper = new();
-
     public IGeneralControlProvider NewControlProvider(ILogger logger) =>
-        new InputProvider(_ydoToolWrapper, _ydoToolWrapper, _dummyWrapper, _dummyWrapper,
+        new InputProvider(KeyboardInput, MouseInput, DisplayInput, AudioInput,
             new LogWrapper<InputProvider>(logger));
+
+    public IKeyboardInput NewKeyboardInput() => new YdoToolWrapper();
+
+    public IMouseInput NewMouseInput() => new YdoToolWrapper();
+
+    public IDisplayInput NewDisplayInput() => new DummyWrapper();
+
+    public IAudioInput NewAudioInput() => new DummyWrapper();
 
     public RemoteControlContainer()
     {
@@ -52,5 +62,13 @@ public class RemoteControlContainer : IPlatformDependantContainer
         ConfigProvider = NewConfigProvider(Logger);
         AutostartService = NewAutostartService(Logger);
         UserInterface = NewUserInterface();
+
+        var ydoToolWrapper = new YdoToolWrapper();
+        var dummyWrapper = new DummyWrapper();
+
+        KeyboardInput = ydoToolWrapper;
+        MouseInput = ydoToolWrapper;
+        AudioInput = dummyWrapper;
+        DisplayInput = dummyWrapper;
     }
 }

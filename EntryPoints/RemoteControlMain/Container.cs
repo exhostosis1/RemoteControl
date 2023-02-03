@@ -5,6 +5,7 @@ using Shared;
 using Shared.ApiControllers;
 using Shared.Bots.Telegram;
 using Shared.Config;
+using Shared.ControlProviders.Input;
 using Shared.ControlProviders.Provider;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
@@ -23,6 +24,10 @@ internal class Container : IContainer
     public IAutostartService AutostartService => _innerContainer.AutostartService;
     public IUserInterface UserInterface => _innerContainer.UserInterface;
     public IGeneralControlProvider ControlProvider => _innerContainer.ControlProvider;
+    public IKeyboardInput KeyboardInput => _innerContainer.KeyboardInput;
+    public IMouseInput MouseInput => _innerContainer.MouseInput;
+    public IDisplayInput DisplayInput => _innerContainer.DisplayInput;
+    public IAudioInput AudioInput => _innerContainer.AudioInput;
     public ILogger Logger => _innerContainer.Logger;
     public IWebListener WebListener { get; }
     public IBotListener BotListener { get; }
@@ -42,6 +47,11 @@ internal class Container : IContainer
     public IAutostartService NewAutostartService(ILogger logger) => _innerContainer.NewAutostartService(logger);
     public IUserInterface NewUserInterface() => _innerContainer.NewUserInterface();
     public IGeneralControlProvider NewControlProvider(ILogger logger) => _innerContainer.NewControlProvider(logger);
+    public IKeyboardInput NewKeyboardInput() => _innerContainer.NewKeyboardInput();
+    public IMouseInput NewMouseInput() => _innerContainer.NewMouseInput();
+    public IDisplayInput NewDisplayInput() => _innerContainer.NewDisplayInput();
+    public IAudioInput NewAudioInput() => _innerContainer.NewAudioInput();
+
     public IWebListener NewWebListener(IHttpListener listener, ILogger logger) =>
         new SimpleHttpListener(listener, new LogWrapper<SimpleHttpListener>(logger));
     public IBotListener NewBotListener(IBotApiProvider provider, ILogger logger) =>
