@@ -29,7 +29,7 @@ public class TelegramListenerTests : IDisposable
         var usernames = new List<string> { "user1", "user2" };
 
         var param = new BotParameters(uri, apiKey, usernames);
-        var startStopMre = new ManualResetEventSlim(false);
+        var startStopMre = new AutoResetEvent(false);
         var contextMre = new ManualResetEventSlim(false);
 
         _wrapper.SetupSequence(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()))
@@ -56,8 +56,7 @@ public class TelegramListenerTests : IDisposable
 
         _listener.StartListen(param);
 
-        startStopMre.Wait();
-        startStopMre.Reset();
+        startStopMre.WaitOne();
 
         Assert.True(_listener.IsListening);
 
@@ -79,7 +78,7 @@ public class TelegramListenerTests : IDisposable
 
         _listener.StopListen();
 
-        startStopMre.Wait();
+        startStopMre.WaitOne();
 
         Assert.False(_listener.IsListening);
 

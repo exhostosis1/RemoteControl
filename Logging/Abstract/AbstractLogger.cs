@@ -15,7 +15,7 @@ public abstract class AbstractLogger : ILogger
     private int _count;
 
     private readonly ManualResetEventSlim _addEvent = new(true);
-    private readonly ManualResetEventSlim _countEvent = new(false);
+    private readonly AutoResetEvent _countEvent = new(false);
 
     protected AbstractLogger(LoggingLevel level, IMessageFormatter? formatter)
     {
@@ -51,7 +51,8 @@ public abstract class AbstractLogger : ILogger
         {
             while (_count > 0)
             {
-                _countEvent.Wait(token);
+                token.ThrowIfCancellationRequested();
+                _countEvent.WaitOne();
             }
         }
         catch (OperationCanceledException)
@@ -73,8 +74,6 @@ public abstract class AbstractLogger : ILogger
     {
         foreach (var message in _messages.GetConsumingEnumerable())
         {
-            _countEvent.Reset();
-
             switch (message.Level)
             {
                 case LoggingLevel.Error:

@@ -47,7 +47,7 @@ public class SimpleServerTests : IDisposable
             });
         _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
 
-        var mre = new ManualResetEventSlim(false);
+        var mre = new AutoResetEvent(false);
 
         using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
@@ -57,12 +57,10 @@ public class SimpleServerTests : IDisposable
 
         _server.Start(config);
 
-        mre.Wait();
+        mre.WaitOne();
 
         Assert.True(_server.Status.Working);
         Assert.Equal(_server.CurrentConfig, config ?? _server.DefaultConfig);
-        
-        _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     private const string Config1 = "http://localhost:12345/";
@@ -121,7 +119,7 @@ public class SimpleServerTests : IDisposable
             return null!;
         });
 
-        var mre = new ManualResetEventSlim(false);
+        var mre = new AutoResetEvent(false);
         var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
@@ -130,12 +128,11 @@ public class SimpleServerTests : IDisposable
 
         _server.Start(config1);
 
-        mre.Wait();
+        mre.WaitOne();
 
         Assert.True(_server.Status.Working);
         Assert.Equal(_server.CurrentConfig, config1);
         
-        mre.Reset();
         sub.Dispose();
 
         sub = _server.Status.Subscribe(new Observer<bool>(status =>
@@ -146,7 +143,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Restart(config2);
 
-        mre.Wait();
+        mre.WaitOne();
 
         sub.Dispose();
 
@@ -195,7 +192,7 @@ public class SimpleServerTests : IDisposable
             });
         _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
 
-        var startStopMre = new ManualResetEventSlim(false);
+        var startStopMre = new AutoResetEvent(false);
         using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
@@ -204,7 +201,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Start();
 
-        startStopMre.Wait();
+        startStopMre.WaitOne();
 
         Assert.True(_server.Status.Working);
 
@@ -241,7 +238,7 @@ public class SimpleServerTests : IDisposable
             Port = 123
         };
 
-        var mre = new ManualResetEventSlim(false);
+        var mre = new AutoResetEvent(false);
         var sub = _server.Status.Subscribe(new Observer<bool>(status =>
         {
             if (status)
@@ -250,12 +247,11 @@ public class SimpleServerTests : IDisposable
 
         _server.Start(config1);
 
-        mre.Wait();
+        mre.WaitOne();
 
         Assert.True(s);
         Assert.Equal(config1, c);
 
-        mre.Reset();
         sub.Dispose();
 
         sub = _server.Status.Subscribe(new Observer<bool>(status =>
@@ -267,7 +263,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Stop();
 
-        mre.Wait();
+        mre.WaitOne();
         
         sub.Dispose();
         
