@@ -45,7 +45,6 @@ public class ApiV1Tests : IDisposable
 
     private readonly ApiV1Middleware _middleware;
     private readonly ILogger<ApiV1Middleware> _logger;
-    private readonly Mock<IWebMiddleware> _next;
 
     public ApiV1Tests()
     {
@@ -56,9 +55,8 @@ public class ApiV1Tests : IDisposable
         };
 
         _logger = Mock.Of<ILogger<ApiV1Middleware>>();
-        _next = new Mock<IWebMiddleware>(MockBehavior.Strict);
 
-        _middleware = new ApiV1Middleware(controllers, _logger, _next.Object);
+        _middleware = new ApiV1Middleware(controllers, _logger);
     }
 
     [Theory]
@@ -70,7 +68,7 @@ public class ApiV1Tests : IDisposable
     public void RequestTest(string path, HttpStatusCode expectedCode, string expectedContentType, string expectedResult)
     {
         var context = new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>());
-        _middleware.ProcessRequest(context);
+        _middleware.ProcessRequest(null, context);
 
         Assert.True(context.WebResponse.StatusCode == expectedCode
                     && context.WebResponse.ContentType == expectedContentType
@@ -83,19 +81,21 @@ public class ApiV1Tests : IDisposable
     [Fact]
     public void RequestNextText()
     {
-        _next.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
+        var count = 0;
+
+        _middleware.OnNext += (_, _) => count++;
 
         var context = new WebContext(new WebContextRequest("/api/v2/first/actionone"), Mock.Of<WebContextResponse>());
-        _middleware.ProcessRequest(context);
+        _middleware.ProcessRequest(null, context);
 
-        _next.Verify(x => x.ProcessRequest(context), Times.Once);
+        Assert.True(count == 1);
     }
 
     [Fact]
     public void ErrorTest()
     {
         var context = new WebContext(new WebContextRequest("/api/v1/second/erroraction"), Mock.Of<WebContextResponse>());
-        _middleware.ProcessRequest(context);
+        _middleware.ProcessRequest(null, context);
 
         Assert.True(context.WebResponse.StatusCode == HttpStatusCode.InternalServerError &&
                     Encoding.UTF8.GetString(context.WebResponse.Payload) == "test exception");

@@ -11,18 +11,18 @@ namespace UnitTests;
 public class SimpleServerTests : IDisposable
 {
     private readonly ILogger<SimpleServer> _logger;
-    private readonly Mock<IWebMiddleware> _middleware;
     private readonly Mock<IWebListener> _listener;
+    private readonly Mock<IWebMiddlewareChain> _chain;
 
     private readonly SimpleServer _server;
 
     public SimpleServerTests()
     {
-        _middleware = new Mock<IWebMiddleware>(MockBehavior.Strict);
+        _chain = new Mock<IWebMiddlewareChain>(MockBehavior.Strict);
         _listener = new Mock<IWebListener>(MockBehavior.Strict);
         _logger = Mock.Of<ILogger<SimpleServer>>();
 
-        _server = new SimpleServer(_listener.Object, _middleware.Object, _logger);
+        _server = new SimpleServer(_listener.Object, _chain.Object, _logger);
         
         _listener.Setup(x => x.StopListen());
     }
@@ -45,7 +45,7 @@ public class SimpleServerTests : IDisposable
                 Thread.Sleep(TimeSpan.FromHours(1));
                 return null!;
             });
-        _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
+        _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
 
         var mre = new AutoResetEvent(false);
 
@@ -190,7 +190,7 @@ public class SimpleServerTests : IDisposable
                 Thread.Sleep(TimeSpan.FromHours(1));
                 return context;
             });
-        _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
+        _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
 
         var startStopMre = new AutoResetEvent(false);
         using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
@@ -211,7 +211,7 @@ public class SimpleServerTests : IDisposable
 
         _listener.Verify(x => x.StartListen(It.IsAny<WebParameters>()), Times.Once);
         _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.AtLeast(4));
-        _middleware.Verify(x => x.ProcessRequest(context), Times.AtLeast(3));
+        _chain.Verify(x => x.ChainRequest(context), Times.AtLeast(3));
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public class SimpleServerTests : IDisposable
             Thread.Sleep(50);
             return new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
         });
-        _middleware.Setup(x => x.ProcessRequest(It.IsAny<WebContext>()));
+        _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
 
         var s = false;
         WebConfig? c = null;

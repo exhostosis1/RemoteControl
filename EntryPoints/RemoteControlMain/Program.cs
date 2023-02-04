@@ -1,4 +1,5 @@
 ﻿using ApiControllers;
+using ControlProviders;
 using Listeners;
 using Servers;
 using Servers.Middleware;
@@ -6,14 +7,14 @@ using Shared;
 using Shared.ApiControllers;
 using Shared.Bots.Telegram;
 using Shared.Config;
-using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using Shared.Logging;
 using Shared.Logging.Interfaces;
+using Shared.Logging;
 using Shared.Server;
 using Shared.UI;
 using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
+using Shared.ControlProviders.Provider;
 
 namespace RemoteControlMain;
 
@@ -25,32 +26,32 @@ public static class Program
 
     public static List<IServer> Servers { get; private set; } = new();
 
-    public static void Run(Container inner)
+    public static void Run(ContainerBuilder inner)
     {
-        var audioController = new AudioController(inner.GetObject<IGeneralControlProvider>(),
-            new LogWrapper<AudioController>(inner.GetObject<ILogger>()));
-        var dispalyController = new DisplayController(inner.GetObject<IGeneralControlProvider>(),
-            new LogWrapper<DisplayController>(inner.GetObject<ILogger>()));
-        var keyboardController = new KeyboardController(inner.GetObject<IGeneralControlProvider>(),
-            new LogWrapper<KeyboardController>(inner.GetObject<ILogger>()));
-        var mouseController = new MouseController(inner.GetObject<IGeneralControlProvider>(),
-            new LogWrapper<MouseController>(inner.GetObject<ILogger>()));
-
-        var staticMiddleware = new StaticFilesMiddleware(new LogWrapper<StaticFilesMiddleware>(inner.GetObject<ILogger>()));
-        var apiMiddleWare =
-            new ApiV1Middleware(new IApiController[] { audioController, keyboardController, mouseController, dispalyController },
-                new LogWrapper<ApiV1Middleware>(inner.GetObject<ILogger>()), staticMiddleware);
-
         var container = inner
+            .Register(typeof(ILogger<>), typeof(LogWrapper<>), Lifetime.Singleton)
+            .Register<IGeneralControlProvider, InputProvider>(Lifetime.Singleton)
+            .Register<IAudioControlProvider, InputProvider>(Lifetime.Singleton)
+            .Register<IMouseControlProvider, InputProvider>(Lifetime.Singleton)
+            .Register<IKeyboardControlProvider, InputProvider>(Lifetime.Singleton)
+            .Register<IDisplayControlProvider, InputProvider>(Lifetime.Singleton)
             .Register<IHttpListener, HttpListenerWrapper>(Lifetime.Transient)
             .Register<IWebListener, SimpleHttpListener>(Lifetime.Transient)
             .Register<IHttpClient, HttpClientWrapper>(Lifetime.Transient)
             .Register<IBotApiProvider, TelegramBotApiProvider>(Lifetime.Transient)
             .Register<IBotListener, TelegramListener>(Lifetime.Transient)
             .Register<IBotMiddleware, CommandsExecutor>(Lifetime.Singleton)
-            .Register<IWebMiddleware>(apiMiddleWare)
+            .Register<IApiController, AudioController>(Lifetime.Singleton)
+            .Register<IApiController, DisplayController>(Lifetime.Singleton)
+            .Register<IApiController, MouseController>(Lifetime.Singleton)
+            .Register<IApiController, KeyboardController>(Lifetime.Singleton)
+            .Register<IWebMiddleware, ApiV1Middleware>(Lifetime.Singleton)
+            .Register<IWebMiddleware, StaticFilesMiddleware>(Lifetime.Singleton)
+            .Register<IWebMiddlewareChain, WebMiddlewareChain>(Lifetime.Singleton)
+            .Register<IBotMiddlewareChain, BotMiddlewareChain>(Lifetime.Singleton)
             .Register<SimpleServer, SimpleServer>(Lifetime.Transient)
-            .Register<BotServer, BotServer>(Lifetime.Transient);
+            .Register<BotServer, BotServer>(Lifetime.Transient)
+            .Build();
 
         var ui = container.GetObject<IUserInterface>();
         var configProvider = container.GetObject<IConfigProvider>();

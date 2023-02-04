@@ -6,7 +6,7 @@ using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class CommandsExecutor : AbstractMiddleware<BotContext>, IBotMiddleware
+public class CommandsExecutor : IBotMiddleware
 {
     private readonly ILogger<CommandsExecutor> _logger;
 
@@ -38,7 +38,9 @@ public class CommandsExecutor : AbstractMiddleware<BotContext>, IBotMiddleware
         _controlFacade = controlFacade;
     }
 
-    public override void ProcessRequest(BotContext context)
+    public event EventHandler<BotContext>? OnNext;
+
+    public void ProcessRequest(object? _, BotContext context)
     {
         _logger.LogInfo($"Executing bot command {context.BotRequest.Command}");
 

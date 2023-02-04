@@ -9,14 +9,13 @@ using System.Text;
 
 namespace Servers.Middleware;
 
-public class ApiV1Middleware : AbstractMiddleware<WebContext>, IWebMiddleware
+public class ApiV1Middleware : IWebMiddleware
 {
     private readonly ControllersWithMethods _controllers;
     private readonly ILogger<ApiV1Middleware> _logger;
     public string ApiVersion => "v1";
 
-    public ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger,
-        IWebMiddleware? next = null) : base(next)
+    public ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger)
     {
         _logger = logger;
         _controllers = controllers.GetControllersWithMethods();
@@ -24,11 +23,13 @@ public class ApiV1Middleware : AbstractMiddleware<WebContext>, IWebMiddleware
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
 
-    public override void ProcessRequest(WebContext context)
+    public event EventHandler<WebContext>? OnNext;
+
+    public void ProcessRequest(object? _, WebContext context)
     {
         if (!Utils.TryGetApiVersion(context.WebRequest.Path, out var version) || version != ApiVersion)
         {
-            Next?.ProcessRequest(context);
+            OnNext?.Invoke(null, context);
             return;
         }
 

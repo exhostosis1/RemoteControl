@@ -32,7 +32,7 @@ public class CommandExecutorTests : IDisposable
         var context = new BotContext(new BotContextRequest("", "", 0, button, DateTime.Now),
             Mock.Of<BotContextResponse>());
 
-        _executor.ProcessRequest(context);
+        _executor.ProcessRequest(null, context);
 
         _provider.Verify(x => x.KeyboardKeyPress(key, KeyPressMode.Click), Times.Once);
         Assert.True(context.BotResponse.Message == "done");
@@ -54,7 +54,7 @@ public class CommandExecutorTests : IDisposable
         var context = new BotContext(new BotContextRequest("", "", 0, button, DateTime.Now),
             Mock.Of<BotContextResponse>());
 
-        _executor.ProcessRequest(context);
+        _executor.ProcessRequest(null, context);
 
         Assert.True(context.BotResponse.Message == expected.ToString());
         Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
@@ -71,7 +71,7 @@ public class CommandExecutorTests : IDisposable
         var context = new BotContext(new BotContextRequest("", "", 0, BotButtons.Darken, DateTime.Now),
             Mock.Of<BotContextResponse>());
 
-        _executor.ProcessRequest(context);
+        _executor.ProcessRequest(null, context);
 
         Assert.True(context.BotResponse.Message == "done");
         Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
@@ -92,7 +92,7 @@ public class CommandExecutorTests : IDisposable
         var context = new BotContext(new BotContextRequest("", "", 0, value.ToString(), DateTime.Now),
             Mock.Of<BotContextResponse>());
 
-        _executor.ProcessRequest(context);
+        _executor.ProcessRequest(null, context);
 
         Assert.True(context.BotResponse.Message == "done");
         Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
@@ -108,7 +108,7 @@ public class CommandExecutorTests : IDisposable
         var context = new BotContext(new BotContextRequest("", "", 0, "absdf", DateTime.Now),
             Mock.Of<BotContextResponse>());
 
-        _executor.ProcessRequest(context);
+        _executor.ProcessRequest(null, context);
 
         Assert.True(context.BotResponse.Message == "done");
         Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);

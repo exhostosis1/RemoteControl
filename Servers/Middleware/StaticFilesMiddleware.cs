@@ -5,7 +5,7 @@ using System.Net;
 
 namespace Servers.Middleware;
 
-public class StaticFilesMiddleware : AbstractMiddleware<WebContext>, IWebMiddleware
+public class StaticFilesMiddleware : IWebMiddleware
 {
     private readonly string _contentFolder;
     private readonly ILogger<StaticFilesMiddleware> _logger;
@@ -26,7 +26,9 @@ public class StaticFilesMiddleware : AbstractMiddleware<WebContext>, IWebMiddlew
         { ".css", "text/css" }
     };
 
-    public override void ProcessRequest(WebContext context)
+    public event EventHandler<WebContext>? OnNext;
+
+    public void ProcessRequest(object? _, WebContext context)
     {
         var uriPath = context.WebRequest.Path;
 

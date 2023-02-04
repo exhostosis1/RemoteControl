@@ -14,7 +14,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
     private readonly ILogger<GenericServer<TContext, TConfig, TParams>> _logger;
 
     private readonly IListener<TContext, TParams> _listener;
-    private readonly IMiddleware<TContext> _middleware;
+    private readonly IMiddlewareChain<TContext> _middleware;
 
     private CancellationTokenSource? _cts;
     private readonly IProgress<bool> _progress;
@@ -43,7 +43,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
 
     private readonly List<IObserver<TConfig>> _configObservers = new();
 
-    protected GenericServer(IListener<TContext, TParams> listener, IMiddleware<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger)
+    protected GenericServer(IListener<TContext, TParams> listener, IMiddlewareChain<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger)
     {
         _currentConfig = DefaultConfig;
 
@@ -102,7 +102,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
             try
             {
                 var context = await _listener.GetContextAsync(token);
-                _middleware.ProcessRequest(context);
+                _middleware.ChainRequest(context);
                 context.Response.Close();
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)

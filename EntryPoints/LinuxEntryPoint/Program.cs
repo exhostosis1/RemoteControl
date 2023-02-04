@@ -1,17 +1,15 @@
 ﻿using Autostart;
 using ConfigProviders;
+using ConsoleUI;
 using ControlProviders.Wrappers;
-using ControlProviders;
 using Logging;
+using Shared;
 using Shared.Config;
 using Shared.ConsoleWrapper;
 using Shared.ControlProviders.Input;
-using Shared.ControlProviders.Provider;
 using Shared.Logging.Interfaces;
 using Shared.UI;
-using Shared;
 using System.Runtime.InteropServices;
-using ConsoleUI;
 
 namespace LinuxEntryPoint;
 
@@ -25,11 +23,10 @@ public static class Program
         ILogger logger = new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
 #endif
 
-        var container = new Container()
+        var container = new ContainerBuilder()
             .Register<ILogger>(logger)
             .Register<IConfigProvider, LocalFileConfigProvider>(Lifetime.Singleton)
             .Register<IAutostartService, DummyAutostartService>(Lifetime.Singleton)
-            .Register<IGeneralControlProvider, InputProvider>(Lifetime.Singleton)
             .Register<IUserInterface, MainConsole>(Lifetime.Singleton)
             .Register<IKeyboardInput, YdoToolWrapper>(Lifetime.Singleton)
             .Register<IMouseInput, YdoToolWrapper>(Lifetime.Singleton)

@@ -8,7 +8,7 @@ namespace Servers;
 
 public class BotServer : GenericServer<BotContext, BotConfig, BotParameters>
 {
-    public BotServer(IBotListener listener, IBotMiddleware middleware,
+    public BotServer(IBotListener listener, IBotMiddlewareChain middleware,
         ILogger<BotServer> logger) : base(listener,
         middleware, logger)
     {

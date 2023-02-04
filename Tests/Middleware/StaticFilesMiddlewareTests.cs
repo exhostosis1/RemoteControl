@@ -54,7 +54,7 @@ public class StaticFilesMiddlewareTests : IDisposable
     {
         var context = new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>());
         
-        _middleware.ProcessRequest(context);
+        _middleware.ProcessRequest(null, context);
 
         Assert.True(context.WebResponse.StatusCode == code && context.WebResponse.ContentType == type &&
                     Encoding.UTF8.GetString(context.WebResponse.Payload) ==
