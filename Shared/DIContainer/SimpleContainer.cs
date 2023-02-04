@@ -10,13 +10,11 @@ public record TypeAndLifetime(Type Type, Lifetime Lifetime);
 
 public class SimpleContainer
 {
-    private readonly Dictionary<Type, List<TypeAndLifetime>> _types;
-    private readonly Dictionary<Type, object> _cache;
+    private readonly ITypesRegistration _typesRegistration;
 
-    internal SimpleContainer(Dictionary<Type, List<TypeAndLifetime>> types, Dictionary<Type, object> cache)
+    internal SimpleContainer(ITypesRegistration typesRegistration)
     {
-        _types = types;
-        _cache = cache;
+        _typesRegistration = typesRegistration;
     }
 
     private object CreateObject(Type type)
@@ -37,12 +35,12 @@ public class SimpleContainer
 
     private object GetFromCacheOrCreate(Type type)
     {
-        if (_cache.TryGetValue(type, out var obj))
-            return obj;
+        if (_typesRegistration.TryGetCache(type, out var obj))
+            return obj!;
         else
         {
             var result = CreateObject(type);
-            _cache.Add(type, result);
+            _typesRegistration.AddCache(result);
 
             return result;
         }
@@ -54,7 +52,7 @@ public class SimpleContainer
         {
             Lifetime.Singleton => GetFromCacheOrCreate(typeAndLifetime.Type),
             Lifetime.Transient => CreateObject(typeAndLifetime.Type),
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(typeAndLifetime.Lifetime))
         };
     }
 
@@ -79,22 +77,22 @@ public class SimpleContainer
     {
         TypeAndLifetime? typeAndLifetime;
 
-        if (_types.TryGetValue(interfaceType, out var type))
+        if (_typesRegistration.TryGetResteredTypes(interfaceType, out var type))
         {
-            typeAndLifetime = type.First();
+            typeAndLifetime = type!.First();
         }
-        else if (interfaceType.IsGenericType && _types.TryGetValue(interfaceType.GetGenericTypeDefinition(), out var item))
+        else if (interfaceType.IsGenericType && _typesRegistration.TryGetResteredTypes(interfaceType.GetGenericTypeDefinition(), out var item))
         {
-            var temp = item.First();
+            var temp = item!.First();
             typeAndLifetime = temp.Type.IsGenericType ? temp with { Type = temp.Type.MakeGenericType(interfaceType.GenericTypeArguments) } : temp;
         }
-        else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && _types.TryGetValue(interfaceType.GenericTypeArguments[0], out var temp))
+        else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && _typesRegistration.TryGetResteredTypes(interfaceType.GenericTypeArguments[0], out var temp))
         {
-            return CreateEnumerable(interfaceType.GenericTypeArguments[0], temp);
+            return CreateEnumerable(interfaceType.GenericTypeArguments[0], temp!);
         }
-        else if (interfaceType.IsArray && _types.TryGetValue(interfaceType.GetElementType()!, out var elementType))
+        else if (interfaceType.IsArray && _typesRegistration.TryGetResteredTypes(interfaceType.GetElementType()!, out var elementType))
         {
-            return CreateEnumerable(interfaceType.GetElementType()!, elementType, true);
+            return CreateEnumerable(interfaceType.GetElementType()!, elementType!, true);
         }
         else
         {

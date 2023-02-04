@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using Shared.Enums;
+﻿using Shared.Enums;
+using System;
 
 namespace Shared.DIContainer;
 
 public class ContainerBuilder
 {
-    private readonly Dictionary<Type, List<TypeAndLifetime>> _types = new();
-    private readonly Dictionary<Type, object> _cache = new();
+    private readonly ITypesRegistration _typesRegistration;
+
+    public ContainerBuilder(ITypesRegistration? typesRegistration = null)
+    {
+        _typesRegistration = typesRegistration ?? new TypesRegistration();
+    }
 
     public ContainerBuilder Register(Type interfaceType, Type instanceType, Lifetime lifetime)
     {
         if (!instanceType.IsAssignableTo(interfaceType) && !interfaceType.IsGenericType && !instanceType.IsGenericType)
             throw new ArgumentException($"{instanceType.Name} cannot be assigned to {interfaceType.Name}");
 
-        _types.AddOrUpdate(interfaceType, instanceType, lifetime);
+        _typesRegistration.RegisterType(interfaceType, instanceType, lifetime);
 
         return this;
     }
@@ -31,8 +34,8 @@ public class ContainerBuilder
         if (!objType.IsAssignableTo(interfaceType))
             throw new ArgumentException($"Object of type {objType.Name} cannot be assigned to {interfaceType.Name}");
 
-        _types.AddOrUpdate(interfaceType, objType, Lifetime.Singleton);
-        _cache.Add(objType, obj);
+        _typesRegistration.RegisterType(interfaceType, objType, Lifetime.Singleton);
+        _typesRegistration.AddCache(obj);
 
         return this;
     }
@@ -43,6 +46,6 @@ public class ContainerBuilder
     }
     public SimpleContainer Build()
     {
-        return new SimpleContainer(_types, _cache);
+        return new SimpleContainer(_typesRegistration);
     }
 }

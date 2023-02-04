@@ -195,20 +195,4 @@ public static partial class Utils
 
         return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse response");
     }
-
-    public static void AddOrUpdate(this Dictionary<Type, List<TypeAndLifetime>> dict, Type interfaceType,
-        Type objectType, Lifetime lifetime)
-    {
-        if (dict.TryGetValue(interfaceType, out var item))
-        {
-            if (item.Any(x => x.Type == objectType))
-                throw new ArgumentException("Registrations already exists");
-
-            item.Add(new TypeAndLifetime(objectType, lifetime));
-        }
-        else
-        {
-            dict.Add(interfaceType, new List<TypeAndLifetime> {new (objectType, lifetime) });
-        }
-    }
 }
