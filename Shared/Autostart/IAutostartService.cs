@@ -1,4 +1,4 @@
-﻿namespace Shared;
+﻿namespace Shared.Autostart;
 
 public interface IAutostartService
 {

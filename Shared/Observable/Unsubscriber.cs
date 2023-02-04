@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Shared;
+namespace Shared.Observable;
 
 public class Unsubscriber<T> : IDisposable
 {

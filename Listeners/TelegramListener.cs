@@ -1,8 +1,9 @@
-﻿using Shared;
-using Shared.Bots.Telegram;
+﻿using Shared.Bots.Telegram;
 using Shared.DataObjects.Bot;
 using Shared.Logging.Interfaces;
 using System.Net.Sockets;
+using Shared.Observable;
+using Shared.Listener;
 
 namespace Listeners;
 
@@ -107,7 +108,7 @@ public class TelegramListener : IBotListener
             {
                 if (!internetMessageShown)
                 {
-                    _logger.LogError("Internet seems off");
+                    await _logger.LogErrorAsync("Internet seems off");
                     internetMessageShown = true;
                 }
 
@@ -119,7 +120,7 @@ public class TelegramListener : IBotListener
             }
             catch (Exception e)
             {
-                _logger.LogError(e.Message);
+                await _logger.LogErrorAsync(e.Message);
                 break;
             }
         }

@@ -8,11 +8,11 @@ public class AppConfig
 {
     public List<CommonConfig> ServerConfigs { get; init; } = new();
 
-    [JsonIgnore]
-    public IEnumerable<WebConfig> Servers => ServerConfigs.Where(x => x is WebConfig).Cast<WebConfig>();
+    [JsonIgnore] 
+    public IEnumerable<WebConfig> Servers => ServerConfigs.OfType<WebConfig>();
 
     [JsonIgnore]
-    public IEnumerable<BotConfig> Bots => ServerConfigs.Where(x => x is BotConfig).Cast<BotConfig>();
+    public IEnumerable<BotConfig> Bots => ServerConfigs.OfType<BotConfig>();
 
     public AppConfig() { }
 

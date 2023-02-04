@@ -1,4 +1,4 @@
-﻿using Shared;
+﻿using Shared.Observable;
 using Shared.Server;
 
 namespace WinFormsUI.CustomControls.MenuItems;

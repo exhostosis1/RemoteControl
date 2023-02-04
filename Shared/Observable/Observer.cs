@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shared;
+namespace Shared.Observable;
 
 public class Observer<T> : IObserver<T>
 {

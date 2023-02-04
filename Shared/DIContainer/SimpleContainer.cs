@@ -2,65 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Shared.Enums;
 
-namespace Shared;
+namespace Shared.DIContainer;
 
 public record TypeAndLifetime(Type Type, Lifetime Lifetime);
-public enum Lifetime
-{
-    Singleton,
-    Transient
-}
 
-public class ContainerBuilder
-{
-    private readonly Dictionary<Type, List<TypeAndLifetime>> _types = new();
-    private readonly Dictionary<Type, object> _cache = new();
-
-    public ContainerBuilder Register(Type interfaceType, Type instanceType, Lifetime lifetime)
-    {
-        if (!instanceType.IsAssignableTo(interfaceType) && !interfaceType.IsGenericType && !instanceType.IsGenericType)
-            throw new ArgumentException($"{instanceType.Name} cannot be assigned to {interfaceType.Name}");
-
-        _types.AddOrUpdate(interfaceType, instanceType, lifetime);
-
-        return this;
-    }
-
-    public ContainerBuilder Register<TInterface, TInstance>(Lifetime lifetime) where TInterface : class where TInstance : TInterface
-    {
-        return Register(typeof(TInterface), typeof(TInstance), lifetime);
-    }
-
-    public ContainerBuilder Register(Type interfaceType, object obj)
-    {
-        var objType = obj.GetType();
-
-        if (!objType.IsAssignableTo(interfaceType))
-            throw new ArgumentException($"Object of type {objType.Name} cannot be assigned to {interfaceType.Name}");
-
-        _types.AddOrUpdate(interfaceType, objType, Lifetime.Singleton);
-        _cache.Add(objType, obj);
-
-        return this;
-    }
-
-    public ContainerBuilder Register<TInterface>(object obj) where TInterface : class
-    {
-        return Register(typeof(TInterface), obj);
-    }
-    public Container Build()
-    {
-        return new Container(_types, _cache);
-    }
-}
-
-public class Container
+public class SimpleContainer
 {
     private readonly Dictionary<Type, List<TypeAndLifetime>> _types;
     private readonly Dictionary<Type, object> _cache;
 
-    internal Container(Dictionary<Type, List<TypeAndLifetime>> types, Dictionary<Type, object> cache)
+    internal SimpleContainer(Dictionary<Type, List<TypeAndLifetime>> types, Dictionary<Type, object> cache)
     {
         _types = types;
         _cache = cache;
@@ -84,7 +37,7 @@ public class Container
 
     private object GetFromCacheOrCreate(Type type)
     {
-        if(_cache.TryGetValue(type, out var obj))
+        if (_cache.TryGetValue(type, out var obj))
             return obj;
         else
         {
@@ -115,7 +68,7 @@ public class Container
     {
         var methodName = array ? nameof(CreateGenericArray) : nameof(CreateGenericEnumerable);
 
-        var method = this.GetType()
+        var method = GetType()
             .GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
             ?.MakeGenericMethod(type) ?? throw new Exception($"Method {methodName} not found");
 
@@ -130,7 +83,7 @@ public class Container
         {
             typeAndLifetime = type.First();
         }
-        else if(interfaceType.IsGenericType && _types.TryGetValue(interfaceType.GetGenericTypeDefinition(), out var item))
+        else if (interfaceType.IsGenericType && _types.TryGetValue(interfaceType.GetGenericTypeDefinition(), out var item))
         {
             var temp = item.First();
             typeAndLifetime = temp.Type.IsGenericType ? temp with { Type = temp.Type.MakeGenericType(interfaceType.GenericTypeArguments) } : temp;

@@ -1,4 +1,4 @@
-﻿using Shared;
+﻿using Shared.Autostart;
 using Shared.Logging.Interfaces;
 
 namespace Autostart;

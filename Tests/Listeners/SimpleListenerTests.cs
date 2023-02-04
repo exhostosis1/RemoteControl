@@ -1,7 +1,7 @@
 ﻿using Listeners;
 using Moq;
-using Shared;
 using Shared.DataObjects.Web;
+using Shared.Listener;
 using Shared.Logging.Interfaces;
 using Shared.Wrappers.HttpListener;
 

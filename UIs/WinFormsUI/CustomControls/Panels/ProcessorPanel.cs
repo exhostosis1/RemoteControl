@@ -1,5 +1,5 @@
-﻿using Shared;
-using Shared.Config;
+﻿using Shared.Config;
+using Shared.Observable;
 using Shared.Server;
 
 namespace WinFormsUI.CustomControls.Panels;

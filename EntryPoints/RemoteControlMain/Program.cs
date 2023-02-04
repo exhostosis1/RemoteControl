@@ -3,7 +3,6 @@ using ControlProviders;
 using Listeners;
 using Servers;
 using Servers.Middleware;
-using Shared;
 using Shared.ApiControllers;
 using Shared.Bots.Telegram;
 using Shared.Config;
@@ -15,6 +14,9 @@ using Shared.UI;
 using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
 using Shared.ControlProviders.Provider;
+using Shared.DIContainer;
+using Shared.Autostart;
+using Shared.Listener;
 
 namespace RemoteControlMain;
 
