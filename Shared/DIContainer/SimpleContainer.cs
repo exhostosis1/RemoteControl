@@ -77,31 +77,37 @@ public class SimpleContainer
 
     public object GetObject(Type interfaceType)
     {
-        TypeAndLifetime? typeAndLifetime;
-
         if (_typesRegistration.TryGetRegisteredTypes(interfaceType, out var type))
         {
-            typeAndLifetime = type!.First();
+            return GetObject(type!.First());
         }
-        else if (interfaceType.IsGenericType && _typesRegistration.TryGetRegisteredTypes(interfaceType.GetGenericTypeDefinition(), out var item))
-        {
-            var temp = item!.First();
-            typeAndLifetime = temp.Type.IsGenericType ? temp with { Type = temp.Type.MakeGenericType(interfaceType.GenericTypeArguments) } : temp;
-        }
-        else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && _typesRegistration.TryGetRegisteredTypes(interfaceType.GenericTypeArguments[0], out var temp))
-        {
-            return CreateEnumerable(interfaceType.GenericTypeArguments[0], temp!);
-        }
-        else if (interfaceType.IsArray && _typesRegistration.TryGetRegisteredTypes(interfaceType.GetElementType()!, out var elementType))
+        
+        if (interfaceType.IsArray && _typesRegistration.TryGetRegisteredTypes(interfaceType.GetElementType()!, out var elementType))
         {
             return CreateEnumerable(interfaceType.GetElementType()!, elementType!, true);
         }
-        else
+
+        if (interfaceType.IsGenericType)
         {
-            throw new ArgumentException($"{interfaceType.Name} is not registered");
+            if (_typesRegistration.TryGetRegisteredTypes(interfaceType.GetGenericTypeDefinition(), out var items))
+            {
+                var typeAndLifetime = items!.First();
+                return GetObject(typeAndLifetime.Type.IsGenericType
+                    ? typeAndLifetime with
+                    {
+                        Type = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments)
+                    }
+                    : typeAndLifetime);
+            }
+
+            if (interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
+                _typesRegistration.TryGetRegisteredTypes(interfaceType.GenericTypeArguments[0], out var genericTypes))
+            {
+                return CreateEnumerable(interfaceType.GenericTypeArguments[0], genericTypes!);
+            }
         }
 
-        return GetObject(typeAndLifetime);
+        throw new ArgumentException($"{interfaceType.Name} is not registered");
     }
 
     public TInterface GetObject<TInterface>() where TInterface : class => (TInterface)GetObject(typeof(TInterface));
