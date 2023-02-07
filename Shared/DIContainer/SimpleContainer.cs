@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Shared.Enums;
 
+[assembly: InternalsVisibleTo("UnitTests")]
 namespace Shared.DIContainer;
 
 public record TypeAndLifetime(Type Type, Lifetime Lifetime);
@@ -77,20 +79,20 @@ public class SimpleContainer
     {
         TypeAndLifetime? typeAndLifetime;
 
-        if (_typesRegistration.TryGetResteredTypes(interfaceType, out var type))
+        if (_typesRegistration.TryGetRegisteredTypes(interfaceType, out var type))
         {
             typeAndLifetime = type!.First();
         }
-        else if (interfaceType.IsGenericType && _typesRegistration.TryGetResteredTypes(interfaceType.GetGenericTypeDefinition(), out var item))
+        else if (interfaceType.IsGenericType && _typesRegistration.TryGetRegisteredTypes(interfaceType.GetGenericTypeDefinition(), out var item))
         {
             var temp = item!.First();
             typeAndLifetime = temp.Type.IsGenericType ? temp with { Type = temp.Type.MakeGenericType(interfaceType.GenericTypeArguments) } : temp;
         }
-        else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && _typesRegistration.TryGetResteredTypes(interfaceType.GenericTypeArguments[0], out var temp))
+        else if (interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) && _typesRegistration.TryGetRegisteredTypes(interfaceType.GenericTypeArguments[0], out var temp))
         {
             return CreateEnumerable(interfaceType.GenericTypeArguments[0], temp!);
         }
-        else if (interfaceType.IsArray && _typesRegistration.TryGetResteredTypes(interfaceType.GetElementType()!, out var elementType))
+        else if (interfaceType.IsArray && _typesRegistration.TryGetRegisteredTypes(interfaceType.GetElementType()!, out var elementType))
         {
             return CreateEnumerable(interfaceType.GetElementType()!, elementType!, true);
         }

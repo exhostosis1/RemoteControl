@@ -14,8 +14,18 @@ public class ContainerBuilder
 
     public ContainerBuilder Register(Type interfaceType, Type instanceType, Lifetime lifetime)
     {
-        if (!instanceType.IsAssignableTo(interfaceType) && !interfaceType.IsGenericType && !instanceType.IsGenericType)
-            throw new ArgumentException($"{instanceType.Name} cannot be assigned to {interfaceType.Name}");
+        if (!instanceType.IsAssignableTo(interfaceType))
+        {
+            if(!interfaceType.IsGenericType || !instanceType.IsGenericType || !instanceType.IsAssignableToGenericType(interfaceType))
+            {
+                throw new ArgumentException($"{instanceType.Name} cannot be assigned to {interfaceType.Name}");
+            }
+        }
+
+        if (instanceType.IsInterface || instanceType.IsAbstract)
+        {
+            throw new ArgumentException($"{instanceType.Name} should be instantiable type");
+        }
 
         _typesRegistration.RegisterType(interfaceType, instanceType, lifetime);
 
@@ -40,7 +50,7 @@ public class ContainerBuilder
         return this;
     }
 
-    public ContainerBuilder Register<TInterface>(object obj) where TInterface : class
+    public ContainerBuilder Register<TInterface>(TInterface obj) where TInterface : class
     {
         return Register(typeof(TInterface), obj);
     }

@@ -8,6 +8,6 @@ public interface ITypesRegistration
 {
     public void RegisterType(Type interfaceType, Type instanceType, Lifetime lifetime);
     public void AddCache(object instance);
-    public bool TryGetResteredTypes(Type type, out IEnumerable<TypeAndLifetime>? typeAndLifetime);
+    public bool TryGetRegisteredTypes(Type type, out List<TypeAndLifetime>? typeAndLifetime);
     public bool TryGetCache(Type type, out object? obj);
 }

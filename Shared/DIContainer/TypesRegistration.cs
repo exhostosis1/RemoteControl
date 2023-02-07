@@ -39,17 +39,7 @@ internal class TypesRegistration: ITypesRegistration
         }
     }
 
-    public bool TryGetResteredTypes(Type type, out IEnumerable<TypeAndLifetime>? typeAndLifetime)
-    {
-        var result = _types.TryGetValue(type, out var value);
-        typeAndLifetime = value;
-        return result;
-    }
+    public bool TryGetRegisteredTypes(Type type, out List<TypeAndLifetime>? typeAndLifetime) => _types.TryGetValue(type, out typeAndLifetime);
 
-    public bool TryGetCache(Type type, out object? obj)
-    {
-        var result = _cache.TryGetValue(type, out var value);
-        obj = value;
-        return result;
-    }
+    public bool TryGetCache(Type type, out object? obj) => _cache.TryGetValue(type, out obj);
 }
