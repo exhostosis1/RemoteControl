@@ -85,7 +85,7 @@ public static class Program
                 x.Start();
         });
 
-        ui.SetAutostartValue(container.GetObject<IAutostartService>().CheckAutostart());
+        ui.SetAutostartValue(autostartService.CheckAutostart());
 
         ui.OnStart += (_, id) =>
         {

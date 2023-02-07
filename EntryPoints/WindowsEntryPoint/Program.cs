@@ -44,7 +44,7 @@ public static class Program
         
         var type = typeof(Program);
 
-        var indexes = new List<int>();
+        var ids = new List<int>();
 
         SystemEvents.SessionSwitch += (_, args) =>
         {
@@ -54,16 +54,11 @@ public static class Program
                     {
                         logger.LogInfo(type, "Stopping servers due to logout");
 
-                        indexes.Clear();
-
-                        for (var i = 0; i < RemoteControlMain.Program.Servers.Count; i++)
+                        ids = RemoteControlMain.Program.Servers.Where(x => x.Status.Working).Select(x =>
                         {
-                            if (RemoteControlMain.Program.Servers[i].Status.Working)
-                            {
-                                indexes.Add(i);
-                                RemoteControlMain.Program.Servers[i].Stop();
-                            }
-                        }
+                            x.Stop();
+                            return x.Id;
+                        }).ToList();
 
                         break;
                     }
@@ -71,10 +66,7 @@ public static class Program
                     {
                         logger.LogInfo(type, "Resoring servers");
 
-                        foreach (var index in indexes)
-                        {
-                            RemoteControlMain.Program.Servers[index].Start();
-                        }
+                        ids.ForEach(id => RemoteControlMain.Program.Servers.Single(s => s.Id == id).Start());
                         break;
                     }
                 default:
