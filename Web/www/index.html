@@ -90,7 +90,7 @@
                     if (e.targetTouches.length === 1) {
                         this.oneFingerMove(diff.x * this.MODIFIER, diff.y * this.MODIFIER);
                     }
-                    if (e.targetTouches.length === 2 && Math.abs(diff.y) > 3) {
+                    if (e.targetTouches.length === 2) {
                         this.twoFingersMove(diff.x, diff.y);
                     }
                 }
@@ -535,7 +535,15 @@
                     oneFingerMove: (x, y) => sendRequest("mouse", "move", `${x},${y}`),
                     oneFingerDrag: e => sendRequest("mouse", e ? 'dragstart' : 'dragstop'),
                     twoFingersClick: () => sendRequest("mouse", 'right'),
-                    twoFingersMove: (x, y) => sendRequest("mouse", y > 0 ? "wheelup" : "wheeldown"),
+                    twoFingersMove: (x, y) => {
+                        let absx = Math.abs(x);
+                        let absy = Math.abs(y);
+
+                        if(absx > absy && absx > 10)
+                            sendRequest("keyboard", x < 0 ? "browserforward" : "browserback")
+                        if(absy > 3)
+                            sendRequest("mouse", y > 0 ? "wheelup" : "wheeldown");
+                    },
                     threeFingersClick: () => sendRequest("mouse", 'middle')
                 });
             }

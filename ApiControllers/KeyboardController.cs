@@ -89,6 +89,24 @@ public class KeyboardController : BaseApiController
         return Ok();
     }
 
+    public IActionResult BrowserBack(string? _)
+    {
+        _logger.LogInfo("Pressing browser back");
+
+        _provider.KeyboardKeyPress(KeysEnum.BrowserBack);
+
+        return Ok();
+    }
+
+    public IActionResult BrowserForward(string? _)
+    {
+        _logger.LogInfo("Pressing browser forward");
+
+        _provider.KeyboardKeyPress(KeysEnum.BrowserForward);
+
+        return Ok();
+    }
+
     public IActionResult Text(string? param)
     {
         string text;

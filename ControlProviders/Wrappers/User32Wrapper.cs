@@ -107,6 +107,12 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
         },
         {
             KeysEnum.Mute, User32KeyCodes.VolumeMute
+        },
+        {
+            KeysEnum.BrowserBack, User32KeyCodes.BrowserBack
+        },
+        {
+            KeysEnum.BrowserForward, User32KeyCodes.BrowserForward
         }
     };
 

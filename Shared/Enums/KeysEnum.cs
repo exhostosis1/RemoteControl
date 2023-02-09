@@ -10,5 +10,7 @@ public enum KeysEnum
     MediaPlayPause,
     VolumeUp,
     VolumeDown,
-    Mute
+    Mute,
+    BrowserBack,
+    BrowserForward
 }
