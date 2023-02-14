@@ -131,6 +131,65 @@ public class ContainerBuilderTests: IDisposable
         Assert.Throws<ArgumentException>(() => _builder.Register(type, obj));
     }
 
+    public static IEnumerable<object[]> TestFunctionData =>
+        new List<object[]>
+        {
+            new object[] { typeof(object), () => new object() },
+            new object[] { typeof(ITestInterface), () => new TestClassWithInterface() },
+            new object[] { typeof(ITestInterface), () => new TestDerivedClassWithInterfaceA() },
+            new object[] { typeof(ITestInterface), () => new TestDerivedClassWithInterfaceB() },
+            new object[] { typeof(TestClassWithoutInterface), () => new TestClassWithoutInterface() },
+            new object[] { typeof(TestClassWithoutInterface), () => new TestDerivedClassWithoutInterface() },
+        };
+
+    [Theory]
+    [MemberData(nameof(TestFunctionData))]
+    public void RegisterFunctionTest(Type interfaceType, Delegate function)
+    {
+        _registration.Setup(x =>
+            x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
+
+        _builder.Register(interfaceType, function);
+
+        _registration.Verify(x =>
+            x.RegisterType(interfaceType, function.Method.ReturnType, function, Lifetime.Transient), Times.Once);
+    }
+
+    public static IEnumerable<object[]> TestFunctionFailData =>
+        new List<object[]>
+        {
+            new object[] { typeof(ITestInterface), () => new TestClassWithoutInterface() },
+            new object[] { typeof(TestClassWithoutInterface), () => new TestDerivedClassWithInterfaceA() },
+            new object[] { typeof(TestClassWithoutInterface), () => new TestDerivedClassWithInterfaceB() },
+            new object[] { typeof(IEnumerable<ITestInterface>), () => new TestClassWithoutInterface() },
+            new object[] { typeof(ITestInterface[]), () => new TestDerivedClassWithoutInterface() },
+        };
+
+    [Theory]
+    [MemberData(nameof(TestFunctionFailData))]
+    public void RegisterFunctionFailTest(Type interfaceType, Delegate function)
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            _builder.Register(interfaceType, function));
+
+        Assert.True(exception.Message == $"Function result type {function.Method.ReturnType} cannot be assigned to {interfaceType}");
+    }
+
+    [Fact]
+    public void RegisterFunctionGenericTest()
+    {
+        _registration.Setup(x =>
+            x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
+
+        var function = () => new TestClassWithInterface();
+        _builder.Register<ITestInterface>(function);
+        _builder.Register<ITestInterface, TestClassWithInterface>(function);
+
+        _registration.Verify(
+            x => x.RegisterType(typeof(ITestInterface), typeof(TestClassWithInterface), function, Lifetime.Transient),
+            Times.Exactly(2));
+    }
+
     public void Dispose()
     {
     }

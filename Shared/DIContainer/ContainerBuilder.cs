@@ -67,9 +67,9 @@ public class ContainerBuilder : IContainerBuilder
     public IContainerBuilder Register(Type interfaceType, Delegate function)
     {
         if(!function.Method.ReturnType.IsAssignableTo(interfaceType))
-            throw new ArgumentException($"Function result type ${function.Method.ReturnType} cannot be assigned to {interfaceType}");
+            throw new ArgumentException($"Function result type {function.Method.ReturnType} cannot be assigned to {interfaceType}");
 
-        _typesRegistration.RegisterType(interfaceType, function.GetType(), function, Lifetime.Transient);
+        _typesRegistration.RegisterType(interfaceType, function.Method.ReturnType, function, Lifetime.Transient);
 
         return this;
     }
