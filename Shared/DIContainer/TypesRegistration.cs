@@ -1,4 +1,6 @@
-﻿using Shared.Enums;
+﻿using Shared.DIContainer.Interfaces;
+using Shared.DIContainer.Records;
+using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,24 +13,24 @@ internal class TypesRegistration: ITypesRegistration
     private readonly Dictionary<Type, object> _cache = new();
 
     private static void AddOrUpdate(IDictionary<Type, List<TypeAndLifetime>> dict, Type interfaceType,
-        Type objectType, Lifetime lifetime)
+        Type objectType, Delegate? constructor, Lifetime lifetime)
     {
         if (dict.TryGetValue(interfaceType, out var item))
         {
             if (item.Any(x => x.Type == objectType))
                 throw new ArgumentException("Registrations already exists");
 
-            item.Add(new TypeAndLifetime(objectType, lifetime));
+            item.Add(new TypeAndLifetime(objectType, constructor, lifetime));
         }
         else
         {
-            dict.Add(interfaceType, new List<TypeAndLifetime> { new(objectType, lifetime) });
+            dict.Add(interfaceType, new List<TypeAndLifetime> { new(objectType, constructor, lifetime) });
         }
     }
 
-    public void RegisterType(Type interfaceType, Type instanceType, Lifetime lifetime)
+    public void RegisterType(Type interfaceType, Type instanceType, Delegate? constructor, Lifetime lifetime)
     {
-        AddOrUpdate(_types, interfaceType, instanceType, lifetime);
+        AddOrUpdate(_types, interfaceType, instanceType, constructor, lifetime);
     }
 
     public void AddCache(object obj)

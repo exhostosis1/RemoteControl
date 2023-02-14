@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Shared.DIContainer;
+using Shared.DIContainer.Interfaces;
 using Shared.Enums;
 
 namespace UnitTests.Container;
@@ -26,17 +27,17 @@ public class ContainerBuilderTests: IDisposable
     [InlineData(typeof(IEnumerable<ITestInterface>), typeof(ITestInterface[]))]
     public void RegisterTest(Type interfaceType, Type instanceType)
     {
-        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Lifetime>()));
+        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
 
         _builder.Register(interfaceType, instanceType, Lifetime.Singleton);
 
-        _registration.Verify(x => x.RegisterType(interfaceType, instanceType, Lifetime.Singleton), Times.Once);
+        _registration.Verify(x => x.RegisterType(interfaceType, instanceType, It.IsAny<Delegate>(), Lifetime.Singleton), Times.Once);
     }
 
     [Fact]
     public void RegisterGenericTest()
     {
-        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Lifetime>()));
+        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
         
         _builder.Register<TestClassWithoutInterface, TestClassWithoutInterface>(Lifetime.Singleton);
         _builder.Register<TestClassWithoutInterface, TestDerivedClassWithoutInterface>(Lifetime.Singleton);
@@ -46,7 +47,7 @@ public class ContainerBuilderTests: IDisposable
         _builder.Register<TestClassWithInterface, TestDerivedClassWithInterfaceA>(Lifetime.Singleton);
         _builder.Register<IEnumerable<ITestInterface>, ITestInterface[]>(Lifetime.Singleton);
 
-        _registration.Verify(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), Lifetime.Singleton), Times.Exactly(7));
+        _registration.Verify(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), Lifetime.Singleton), Times.Exactly(7));
     }
 
     [Theory]
@@ -84,21 +85,21 @@ public class ContainerBuilderTests: IDisposable
     [MemberData(nameof(TestObjectData))]
     public void RegisterObjectTests(Type type, object obj)
     {
-        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Lifetime>()));
+        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
         _registration.Setup(x => x.AddCache(It.IsAny<object>()));
 
         _builder.Register(type, obj);
 
         var objType = obj.GetType();
 
-        _registration.Verify(x => x.RegisterType(type, objType, Lifetime.Singleton), Times.Once);
+        _registration.Verify(x => x.RegisterType(type, objType, null, Lifetime.Singleton), Times.Once);
         _registration.Verify(x => x.AddCache(obj), Times.Once);
     }
 
     [Fact]
     public void RegistareObjectGenericTests()
     {
-        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Lifetime>()));
+        _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
         _registration.Setup(x => x.AddCache(It.IsAny<object>()));
 
         _builder.Register<object>(new object());
@@ -109,7 +110,7 @@ public class ContainerBuilderTests: IDisposable
         _builder.Register<TestClassWithoutInterface>(new TestDerivedClassWithoutInterface());
         _builder.Register<IEnumerable<ITestInterface>>(new List<TestClassWithInterface>());
 
-        _registration.Verify(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Lifetime>()), Times.Exactly(7));
+        _registration.Verify(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()), Times.Exactly(7));
         _registration.Verify(x => x.AddCache(It.IsAny<object>()), Times.Exactly(7));
     }
 

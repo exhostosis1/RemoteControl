@@ -1,11 +1,10 @@
 ﻿using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
-using Shared.DIContainer;
-using Shared.Enums;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -208,5 +207,24 @@ public static partial class Utils
 
         var baseType = givenType.BaseType;
         return baseType != null && IsAssignableToGenericType(baseType, genericType);
+    }
+
+    public static ConstructorInfo GetFirstConstructor(this Type type) => type
+                                                                             .GetConstructors(BindingFlags.Public |
+                                                                                 BindingFlags.Instance).MinBy(x =>
+                                                                                 x.GetParameters().Length) ??
+                                                                         throw new Exception(
+                                                                             $"Type ${type.Name} doesn't must have public non-static constructor");
+    public static Delegate CreateDelegate(this ConstructorInfo ci)
+    {
+        var parameters = ci.GetParameters().Where(x => !x.HasDefaultValue).Select(x =>
+            Expression.Parameter(x.ParameterType, x.Name)).ToList();
+        var defaultParameters = ci.GetParameters().Where(x => x.HasDefaultValue)
+            .Select(x => Expression.Constant(x.DefaultValue));
+
+        var createExpression = Expression.New(ci, parameters.Concat<Expression>(defaultParameters));
+        var lambda = Expression.Lambda(createExpression, parameters);
+
+        return lambda.Compile();
     }
 }

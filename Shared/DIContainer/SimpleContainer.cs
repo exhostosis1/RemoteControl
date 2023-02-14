@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Shared.DIContainer.Interfaces;
+using Shared.DIContainer.Records;
+using Shared.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Shared.Enums;
 
 [assembly: InternalsVisibleTo("UnitTests")]
 namespace Shared.DIContainer;
 
-public record TypeAndLifetime(Type Type, Lifetime Lifetime);
-
-public class SimpleContainer
+public class SimpleContainer : ISimpleContainer
 {
     private readonly ITypesRegistration _typesRegistration;
 
@@ -19,29 +19,27 @@ public class SimpleContainer
         _typesRegistration = typesRegistration;
     }
 
-    private object CreateObject(Type type)
+    private object CreateObject(Delegate? constructor)
     {
-        var constructor = type.GetConstructors(BindingFlags.Instance | BindingFlags.Public)
-            .MinBy(x => x.GetParameters().Length);
-
         if (constructor == null)
-            throw new ArgumentException($"{type.Name} doesn't have a public non-static constructor");
+            throw new NullReferenceException();
 
-        var parameterTypes = constructor.GetParameters();
+        var parameterTypes = constructor.Method.GetParameters();
+
         var parameters =
-            parameterTypes.Select(
+            parameterTypes.Where(x => x.ParameterType.Namespace != "System.Runtime.CompilerServices").Select(
                 x => x.IsOptional ? x.DefaultValue : GetObject(x.ParameterType)).ToArray();
 
-        return constructor.Invoke(parameters);
+        return constructor.DynamicInvoke(parameters) ?? throw new NullReferenceException("Created object cannot be null");
     }
 
-    private object GetFromCacheOrCreate(Type type)
+    private object GetFromCacheOrCreate(TypeAndLifetime type)
     {
-        if (_typesRegistration.TryGetCache(type, out var obj))
+        if (_typesRegistration.TryGetCache(type.Type, out var obj))
             return obj!;
         else
         {
-            var result = CreateObject(type);
+            var result = CreateObject(type.Constructor);
             _typesRegistration.AddCache(result);
 
             return result;
@@ -52,8 +50,8 @@ public class SimpleContainer
     {
         return typeAndLifetime.Lifetime switch
         {
-            Lifetime.Singleton => GetFromCacheOrCreate(typeAndLifetime.Type),
-            Lifetime.Transient => CreateObject(typeAndLifetime.Type),
+            Lifetime.Singleton => GetFromCacheOrCreate(typeAndLifetime),
+            Lifetime.Transient => CreateObject(typeAndLifetime.Constructor),
             _ => throw new ArgumentOutOfRangeException(nameof(typeAndLifetime.Lifetime))
         };
     }
@@ -95,7 +93,8 @@ public class SimpleContainer
                 return GetObject(typeAndLifetime.Type.IsGenericType
                     ? typeAndLifetime with
                     {
-                        Type = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments)
+                        Type = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments),
+                        Constructor = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments).GetFirstConstructor().CreateDelegate()
                     }
                     : typeAndLifetime);
             }
@@ -107,7 +106,7 @@ public class SimpleContainer
             }
         }
 
-        throw new ArgumentException($"{interfaceType.Name} is not registered");
+        throw new ArgumentException($"{interfaceType} is not registered");
     }
 
     public TInterface GetObject<TInterface>() where TInterface : class => (TInterface)GetObject(typeof(TInterface));

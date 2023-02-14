@@ -4,19 +4,19 @@ using Listeners;
 using Servers;
 using Servers.Middleware;
 using Shared.ApiControllers;
+using Shared.Autostart;
 using Shared.Bots.Telegram;
 using Shared.Config;
+using Shared.ControlProviders.Provider;
+using Shared.DIContainer.Interfaces;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
+using Shared.Listener;
 using Shared.Logging;
+using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.UI;
 using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
-using Shared.ControlProviders.Provider;
-using Shared.DIContainer;
-using Shared.Autostart;
-using Shared.Listener;
 
 namespace RemoteControlMain;
 
@@ -28,7 +28,7 @@ public static class Program
 
     public static List<IServer> Servers { get; private set; } = new();
 
-    public static void Run(ContainerBuilder inner)
+    public static void Run(IContainerBuilder inner)
     {
         var container = inner
             .Register(typeof(ILogger<>), typeof(LogWrapper<>), Lifetime.Singleton)

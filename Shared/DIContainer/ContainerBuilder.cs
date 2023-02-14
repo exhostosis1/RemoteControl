@@ -1,9 +1,11 @@
-﻿using Shared.Enums;
+﻿using Shared.DIContainer.Interfaces;
+using Shared.Enums;
 using System;
+using System.Collections.Generic;
 
 namespace Shared.DIContainer;
 
-public class ContainerBuilder
+public class ContainerBuilder : IContainerBuilder
 {
     private readonly ITypesRegistration _typesRegistration;
 
@@ -12,7 +14,7 @@ public class ContainerBuilder
         _typesRegistration = typesRegistration ?? new TypesRegistration();
     }
 
-    public ContainerBuilder Register(Type interfaceType, Type instanceType, Lifetime lifetime)
+    public IContainerBuilder Register(Type interfaceType, Type instanceType, Lifetime lifetime)
     {
         if (!instanceType.IsAssignableTo(interfaceType))
         {
@@ -27,34 +29,64 @@ public class ContainerBuilder
             throw new ArgumentException($"{instanceType.Name} should be instantiable type");
         }
 
-        _typesRegistration.RegisterType(interfaceType, instanceType, lifetime);
+        var constructor =
+            instanceType.IsArray || (instanceType.IsGenericType &&
+                                     (instanceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) ||
+                                      instanceType.GenericTypeArguments.Length == 0))
+                ? null
+                : instanceType.GetFirstConstructor().CreateDelegate();
+
+        _typesRegistration.RegisterType(interfaceType, instanceType, constructor, lifetime);
 
         return this;
     }
 
-    public ContainerBuilder Register<TInterface, TInstance>(Lifetime lifetime) where TInterface : class where TInstance : TInterface
+    public IContainerBuilder Register<TInterface, TInstance>(Lifetime lifetime) where TInterface : class where TInstance : TInterface
     {
         return Register(typeof(TInterface), typeof(TInstance), lifetime);
     }
 
-    public ContainerBuilder Register(Type interfaceType, object obj)
+    public IContainerBuilder Register(Type interfaceType, object obj)
     {
         var objType = obj.GetType();
 
         if (!objType.IsAssignableTo(interfaceType))
             throw new ArgumentException($"Object of type {objType.Name} cannot be assigned to {interfaceType.Name}");
 
-        _typesRegistration.RegisterType(interfaceType, objType, Lifetime.Singleton);
+        _typesRegistration.RegisterType(interfaceType, objType, null, Lifetime.Singleton);
         _typesRegistration.AddCache(obj);
 
         return this;
     }
 
-    public ContainerBuilder Register<TInterface>(TInterface obj) where TInterface : class
+    public IContainerBuilder Register<TInterface>(TInterface obj) where TInterface : class
     {
         return Register(typeof(TInterface), obj);
     }
-    public SimpleContainer Build()
+
+    public IContainerBuilder Register(Type interfaceType, Delegate function)
+    {
+        if(!function.Method.ReturnType.IsAssignableTo(interfaceType))
+            throw new ArgumentException($"Function result type ${function.Method.ReturnType.Name} cannot be assigned to {interfaceType.Name}");
+
+        _typesRegistration.RegisterType(interfaceType, function.GetType(), function, Lifetime.Transient);
+
+        return this;
+    }
+
+    public IContainerBuilder Register<TInterface>(Func<TInterface> function)
+        where TInterface : class
+    {
+        return Register(typeof(TInterface), function);
+    }
+
+    public IContainerBuilder Register<TInterface, TInstance>(Func<TInstance> function)
+        where TInterface : class where TInstance : TInterface
+    {
+        return Register(typeof(TInterface), function);
+    }
+
+    public ISimpleContainer Build()
     {
         return new SimpleContainer(_typesRegistration);
     }

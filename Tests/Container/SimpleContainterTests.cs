@@ -1,5 +1,7 @@
-﻿using Moq;
+﻿using Shared;
 using Shared.DIContainer;
+using Shared.DIContainer.Interfaces;
+using Shared.DIContainer.Records;
 using Shared.Enums;
 
 namespace UnitTests.Container;
@@ -21,40 +23,40 @@ public class SimpleContainterTests: IDisposable
             {
                 typeof(object), new List<TypeAndLifetime>
                 {
-                    new(typeof(TestClassWithInterface), Lifetime.Transient)
+                    new(typeof(TestClassWithInterface), typeof(TestClassWithInterface).GetFirstConstructor().CreateDelegate(), Lifetime.Transient)
                 }
             },
             {
                 typeof(ITestInterface), new List<TypeAndLifetime>
                 {
-                    new(typeof(TestClassWithInterface), Lifetime.Transient),
-                    new(typeof(TestDerivedClassWithInterfaceA), Lifetime.Transient),
-                    new(typeof(TestDerivedClassWithInterfaceB), Lifetime.Transient)
+                    new(typeof(TestClassWithInterface), typeof(TestClassWithInterface).GetFirstConstructor().CreateDelegate(), Lifetime.Transient),
+                    new(typeof(TestDerivedClassWithInterfaceA), typeof(TestDerivedClassWithInterfaceA).GetFirstConstructor().CreateDelegate(), Lifetime.Transient),
+                    new(typeof(TestDerivedClassWithInterfaceB), typeof(TestDerivedClassWithInterfaceB).GetFirstConstructor().CreateDelegate(), Lifetime.Transient)
                 }
             },
             {
                 typeof(TestClassWithInterface), new List<TypeAndLifetime>
                 {
-                    new(typeof(TestClassWithInterface), Lifetime.Transient)
+                    new(typeof(TestClassWithInterface), typeof(TestClassWithInterface).GetFirstConstructor().CreateDelegate(), Lifetime.Transient)
                 }
             },
             {
                 typeof(TestClassWithoutInterface), new List<TypeAndLifetime>
                 {
-                    new(typeof(TestDerivedClassWithoutInterface), Lifetime.Singleton)
+                    new(typeof(TestDerivedClassWithoutInterface), typeof(TestDerivedClassWithoutInterface).GetFirstConstructor().CreateDelegate(), Lifetime.Singleton)
                 }
             },
             {
                 typeof(IGenericInterface<>), new List<TypeAndLifetime>
                 {
-                    new(typeof(GenericA<>), Lifetime.Transient)
+                    new(typeof(GenericA<>), null, Lifetime.Transient)
                 }
             }
         };
 
         private readonly Dictionary<Type, object> _cache = new();
 
-        public void RegisterType(Type interfaceType, Type instanceType, Lifetime lifetime)
+        public void RegisterType(Type interfaceType, Type instanceType, Delegate? function, Lifetime lifetime)
         {
             throw new NotImplementedException();
         }
@@ -141,7 +143,7 @@ public class SimpleContainterTests: IDisposable
         _registration.GetRegisteredTypesAllowed = true;
 
         var exception = Assert.Throws<ArgumentException>(() => _container.GetObject<TestDerivedClassWithInterfaceA>());
-        Assert.True(exception.Message == $"{ nameof(TestDerivedClassWithInterfaceA) } is not registered");
+        Assert.True(exception.Message == $"{ typeof(TestDerivedClassWithInterfaceA) } is not registered");
     }
 
     [Fact]

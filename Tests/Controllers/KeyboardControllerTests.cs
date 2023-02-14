@@ -141,7 +141,9 @@ public class KeyboardControllerTests : IDisposable
             "mediavolumeup",
             "mediavolumedown",
             "mediamute",
-            "text"
+            "text",
+            "browserback",
+            "browserforward"
         };
 
         var methods = _keyboardController.GetMethods();
