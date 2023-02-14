@@ -214,7 +214,7 @@ public static partial class Utils
                                                                                  BindingFlags.Instance).MinBy(x =>
                                                                                  x.GetParameters().Length) ??
                                                                          throw new Exception(
-                                                                             $"Type ${type.Name} doesn't must have public non-static constructor");
+                                                                             $"Type ${type} doesn't must have public non-static constructor");
     public static Delegate CreateDelegate(this ConstructorInfo ci)
     {
         var parameters = ci.GetParameters().Where(x => !x.HasDefaultValue).Select(x =>

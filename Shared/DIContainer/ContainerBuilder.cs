@@ -20,13 +20,13 @@ public class ContainerBuilder : IContainerBuilder
         {
             if(!interfaceType.IsGenericType || !instanceType.IsGenericType || !instanceType.IsAssignableToGenericType(interfaceType))
             {
-                throw new ArgumentException($"{instanceType.Name} cannot be assigned to {interfaceType.Name}");
+                throw new ArgumentException($"{instanceType} cannot be assigned to {interfaceType}");
             }
         }
 
         if (instanceType.IsInterface || instanceType.IsAbstract)
         {
-            throw new ArgumentException($"{instanceType.Name} should be instantiable type");
+            throw new ArgumentException($"{instanceType} should be instantiable type");
         }
 
         var constructor =
@@ -51,7 +51,7 @@ public class ContainerBuilder : IContainerBuilder
         var objType = obj.GetType();
 
         if (!objType.IsAssignableTo(interfaceType))
-            throw new ArgumentException($"Object of type {objType.Name} cannot be assigned to {interfaceType.Name}");
+            throw new ArgumentException($"Object of type {objType} cannot be assigned to {interfaceType}");
 
         _typesRegistration.RegisterType(interfaceType, objType, null, Lifetime.Singleton);
         _typesRegistration.AddCache(obj);
@@ -67,7 +67,7 @@ public class ContainerBuilder : IContainerBuilder
     public IContainerBuilder Register(Type interfaceType, Delegate function)
     {
         if(!function.Method.ReturnType.IsAssignableTo(interfaceType))
-            throw new ArgumentException($"Function result type ${function.Method.ReturnType.Name} cannot be assigned to {interfaceType.Name}");
+            throw new ArgumentException($"Function result type ${function.Method.ReturnType} cannot be assigned to {interfaceType}");
 
         _typesRegistration.RegisterType(interfaceType, function.GetType(), function, Lifetime.Transient);
 
