@@ -90,13 +90,20 @@ public class SimpleContainer : ISimpleContainer
             if (_typesRegistration.TryGetRegisteredTypes(interfaceType.GetGenericTypeDefinition(), out var items))
             {
                 var typeAndLifetime = items!.First();
-                return GetObject(typeAndLifetime.Type.IsGenericType
-                    ? typeAndLifetime with
+
+                if (typeAndLifetime.Type.IsGenericType)
+                {
+                    var genericType = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments);
+                    return GetObject(typeAndLifetime with
                     {
-                        Type = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments),
-                        Constructor = typeAndLifetime.Type.MakeGenericType(interfaceType.GenericTypeArguments).GetFirstConstructor().CreateDelegate()
-                    }
-                    : typeAndLifetime);
+                        Type = genericType,
+                        Constructor = genericType.GetFirstConstructor().CreateDelegate()
+                    });
+                }
+                else
+                {
+                    return GetObject(typeAndLifetime);
+                }
             }
 
             if (interfaceType.GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
