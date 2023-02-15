@@ -18,6 +18,8 @@ public class SimpleContainterTests: IDisposable
         public int GetRegisteredTypesCount;
         public int GetCacheCount;
 
+        private static int _funcCount;
+
         private readonly Dictionary<Type, List<TypeAndLifetime>> _types = new()
         {
             {
@@ -51,7 +53,13 @@ public class SimpleContainterTests: IDisposable
                 {
                     new(typeof(GenericA<>), null, Lifetime.Transient)
                 }
-            }
+            },
+            {
+                typeof(TestDerivedClassWithoutInterface), new List<TypeAndLifetime>
+                {
+                    new(typeof(TestDerivedClassWithoutInterface), () => new TestDerivedClassWithoutInterface(_funcCount++), Lifetime.Transient)
+                }
+        }
         };
 
         private readonly Dictionary<Type, object> _cache = new();
@@ -204,6 +212,30 @@ public class SimpleContainterTests: IDisposable
 
         Assert.IsType(typeof(GenericA<>).MakeGenericType(type), result);
         Assert.True(_registration.GetRegisteredTypesCount == 2);
+    }
+
+    [Fact]
+    public void GetObjectByFunctionTest()
+    {
+        _registration.GetRegisteredTypesAllowed = true;
+
+        var object1 = _container.GetObject<TestDerivedClassWithoutInterface>();
+        var object2 = _container.GetObject<TestDerivedClassWithoutInterface>();
+        var object3 = _container.GetObject<TestDerivedClassWithoutInterface>();
+
+        Assert.NotNull(object1);
+        Assert.IsType<TestDerivedClassWithoutInterface>(object1);
+        Assert.True(object1.A == 0);
+
+        Assert.NotNull(object2);
+        Assert.IsType<TestDerivedClassWithoutInterface>(object2);
+        Assert.True(object2.A == 1);
+
+        Assert.NotNull(object3);
+        Assert.IsType<TestDerivedClassWithoutInterface>(object3);
+        Assert.True(object3.A == 2);
+
+        Assert.True(_registration.GetRegisteredTypesCount == 3);
     }
 
     public void Dispose()

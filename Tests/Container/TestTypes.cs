@@ -10,7 +10,13 @@ internal class TestDerivedClassWithInterfaceB : TestClassWithInterface { }
 
 internal class TestClassWithoutInterface { }
 
-internal class TestDerivedClassWithoutInterface : TestClassWithoutInterface { }
+internal class TestDerivedClassWithoutInterface : TestClassWithoutInterface
+{
+    public int A;
+
+    public TestDerivedClassWithoutInterface(){}
+    public TestDerivedClassWithoutInterface(int a) { A = a; }
+}
 
 internal interface IGenericInterface<T> { }
 
