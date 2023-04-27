@@ -64,7 +64,7 @@ public static class Program
                     }
                 case SessionSwitchReason.SessionUnlock:
                     {
-                        logger.LogInfo(type, "Resoring servers");
+                        logger.LogInfo(type, "Restoring servers");
 
                         ids.ForEach(id => RemoteControlMain.Program.Servers.Single(s => s.Id == id).Start());
                         break;
