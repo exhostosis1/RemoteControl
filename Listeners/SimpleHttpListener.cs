@@ -50,9 +50,4 @@ public class SimpleHttpListener : IWebListener
     {
         return _listener.GetContext();
     }
-
-    public IDisposable Subscribe(IObserver<bool> observer)
-    {
-        throw new NotImplementedException();
-    }
 }
