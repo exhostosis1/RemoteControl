@@ -14,6 +14,7 @@ using Shared.UI;
 using Shared.Wrappers.Registry;
 using Shared.Wrappers.RegistryWrapper;
 using System.Runtime.InteropServices;
+using RemoteControlMain;
 using WinFormsUI;
 
 namespace WindowsEntryPoint;
@@ -31,16 +32,18 @@ public static class Program
         ILogger logger = new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
 #endif
 
-        var container = new ContainerBuilder()
-            .Register<ILogger>(logger)
-            .Register<IConfigProvider, LocalFileConfigProvider>(Lifetime.Singleton)
-            .Register<IRegistry, RegistryWrapper>(Lifetime.Singleton)
-            .Register<IAutostartService, RegistryAutostartService>(Lifetime.Singleton)
-            .Register<IUserInterface, MainForm>(Lifetime.Singleton)
-            .Register<IKeyboardInput, User32Wrapper>(Lifetime.Singleton)
-            .Register<IMouseInput, User32Wrapper>(Lifetime.Singleton)
-            .Register<IDisplayInput, User32Wrapper>(Lifetime.Singleton)
-            .Register<IAudioInput, NAudioWrapper>(Lifetime.Singleton);
+        var app = new AppBuilder(new ContainerBuilder())
+            .RegisterBasicDependencies()
+            .RegisterDependency<ILogger>(logger)
+            .RegisterDependency<IConfigProvider, LocalFileConfigProvider>(Lifetime.Singleton)
+            .RegisterDependency<IRegistry, RegistryWrapper>(Lifetime.Singleton)
+            .RegisterDependency<IAutostartService, RegistryAutostartService>(Lifetime.Singleton)
+            .RegisterDependency<IUserInterface, MainForm>(Lifetime.Singleton)
+            .RegisterDependency<IKeyboardInput, User32Wrapper>(Lifetime.Singleton)
+            .RegisterDependency<IMouseInput, User32Wrapper>(Lifetime.Singleton)
+            .RegisterDependency<IDisplayInput, User32Wrapper>(Lifetime.Singleton)
+            .RegisterDependency<IAudioInput, NAudioWrapper>(Lifetime.Singleton)
+            .Build();
         
         var type = typeof(Program);
 
@@ -54,7 +57,7 @@ public static class Program
                     {
                         logger.LogInfo(type, "Stopping servers due to logout");
 
-                        ids = RemoteControlMain.Program.Servers.Where(x => x.Status.Working).Select(x =>
+                        ids = app.Servers.Where(x => x.Status.Working).Select(x =>
                         {
                             x.Stop();
                             return x.Id;
@@ -66,7 +69,7 @@ public static class Program
                     {
                         logger.LogInfo(type, "Restoring servers");
 
-                        ids.ForEach(id => RemoteControlMain.Program.Servers.Single(s => s.Id == id).Start());
+                        ids.ForEach(id => app.Servers.Single(s => s.Id == id).Start());
                         break;
                     }
                 default:
@@ -76,7 +79,7 @@ public static class Program
 
         try
         {
-            RemoteControlMain.Program.Run(container);
+            app.Run();
         }
         catch (Exception e)
         {

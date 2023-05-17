@@ -12,6 +12,7 @@ using Shared.Enums;
 using Shared.Logging.Interfaces;
 using Shared.UI;
 using System.Runtime.InteropServices;
+using RemoteControlMain;
 
 namespace LinuxEntryPoint;
 
@@ -25,15 +26,17 @@ public static class Program
         ILogger logger = new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log"));
 #endif
 
-        var container = new ContainerBuilder()
-            .Register<ILogger>(logger)
-            .Register<IConfigProvider, LocalFileConfigProvider>(Lifetime.Singleton)
-            .Register<IAutostartService, DummyAutostartService>(Lifetime.Singleton)
-            .Register<IUserInterface, MainConsole>(Lifetime.Singleton)
-            .Register<IKeyboardInput, YdoToolWrapper>(Lifetime.Singleton)
-            .Register<IMouseInput, YdoToolWrapper>(Lifetime.Singleton)
-            .Register<IDisplayInput, DummyWrapper>(Lifetime.Singleton)
-            .Register<IAudioInput, DummyWrapper>(Lifetime.Singleton);
+        var app = new AppBuilder(new ContainerBuilder())
+            .RegisterBasicDependencies()
+            .RegisterDependency<ILogger>(logger)
+            .RegisterDependency<IConfigProvider, LocalFileConfigProvider>(Lifetime.Singleton)
+            .RegisterDependency<IAutostartService, DummyAutostartService>(Lifetime.Singleton)
+            .RegisterDependency<IUserInterface, MainConsole>(Lifetime.Singleton)
+            .RegisterDependency<IKeyboardInput, YdoToolWrapper>(Lifetime.Singleton)
+            .RegisterDependency<IMouseInput, YdoToolWrapper>(Lifetime.Singleton)
+            .RegisterDependency<IDisplayInput, DummyWrapper>(Lifetime.Singleton)
+            .RegisterDependency<IAudioInput, DummyWrapper>(Lifetime.Singleton)
+            .Build();
 
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
@@ -47,6 +50,6 @@ public static class Program
             return;
         }
 
-        RemoteControlMain.Program.Run(container);
+        app.Run();
     }
 }
