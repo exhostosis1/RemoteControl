@@ -70,6 +70,7 @@ internal abstract class ServerMenuItemGroup : IDisposable
 
     public void Dispose()
     {
+        StartStopItem.Click -= StartStopClicked;
         StatusUnsubscriber.Dispose();
 
         NameItem.Dispose();

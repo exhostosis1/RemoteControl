@@ -60,7 +60,7 @@ internal class HttpPanel : ServerPanel
         _hostTextBox.TextChanged += EnableUpdateButton;
         _portTextBox.TextChanged += EnableUpdateButton;
 
-        _portTextBox.TextChanged += (sender, args) =>
+        _portTextBox.TextChanged += (_, _) =>
         {
             _portTextBox.Text = new string(_portTextBox.Text.ToCharArray().Where(char.IsDigit).ToArray());
             if (_portTextBox.Text.Length > 5)
@@ -138,6 +138,12 @@ internal class HttpPanel : ServerPanel
 
     private void LocalDispose(object? sender, EventArgs e)
     {
+        _schemeTextBox.TextChanged -= EnableUpdateButton;
+        _hostTextBox.TextChanged -= EnableUpdateButton;
+        _portTextBox.TextChanged -= EnableUpdateButton;
+
+        Disposed -= LocalDispose;
+
         _unsubscriber.Dispose();
     }
 }

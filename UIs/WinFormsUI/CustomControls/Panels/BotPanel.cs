@@ -128,6 +128,12 @@ internal sealed class BotPanel : ServerPanel
 
     private void LocalDispose(object? sender, EventArgs args)
     {
+        _apiKeyTextBox.TextChanged -= EnableUpdateButton;
+        _apiUrlTextBox.TextChanged -= EnableUpdateButton;
+        _userIdsListBox.TextChanged -= EnableUpdateButton;
+
+        Disposed -= LocalDispose;
+
         _unsubscriber.Dispose();
     }
 }
