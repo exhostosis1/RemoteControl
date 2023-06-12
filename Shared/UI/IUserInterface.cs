@@ -1,20 +1,20 @@
 ﻿using Shared.Config;
+using Shared.Enums;
 using Shared.Server;
 using System;
 using System.Collections.Generic;
-using Shared.Enums;
 
 namespace Shared.UI;
 
 public interface IUserInterface
 {
-    public event EventHandler<int?>? OnStart;
-    public event EventHandler<int?>? OnStop;
-    public event EventHandler? OnClose;
-    public event EventHandler<bool>? OnAutostartChanged;
-    public event EventHandler<(int, CommonConfig)>? OnConfigChanged;
-    public event EventHandler<ServerType>? OnServerAdded;
-    public event EventHandler<int>? OnServerRemoved;
+    public IObservable<int?> ServerStart { get; }
+    public IObservable<int?> ServerStop { get; }
+    public IObservable<object?> AppClose { get; }
+    public IObservable<bool> AutostartChange { get; }
+    public IObservable<(int, CommonConfig)> ConfigChange { get; }
+    public IObservable<ServerType> ServerAdd { get; }
+    public IObservable<int> ServerRemove { get; }
 
     public void SetAutostartValue(bool value);
 

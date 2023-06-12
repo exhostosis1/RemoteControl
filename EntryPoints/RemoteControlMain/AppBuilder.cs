@@ -1,10 +1,15 @@
 ﻿using ApiControllers;
 using ControlProviders;
 using Listeners;
+using Logging;
 using Servers;
 using Servers.Middleware;
 using Shared.ApiControllers;
+using Shared.Autostart;
 using Shared.Bots.Telegram;
+using Shared.Config;
+using Shared.ConsoleWrapper;
+using Shared.ControlProviders.Input;
 using Shared.ControlProviders.Provider;
 using Shared.DIContainer.Interfaces;
 using Shared.Enums;
@@ -12,6 +17,7 @@ using Shared.Listener;
 using Shared.Logging;
 using Shared.Logging.Interfaces;
 using Shared.Server;
+using Shared.UI;
 using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
 
@@ -28,7 +34,12 @@ public class AppBuilder
 
     public AppBuilder RegisterBasicDependencies()
     {
-        _containerBuilder 
+        _containerBuilder
+#if DEBUG
+            .Register<ILogger>(new TraceLogger(new TraceWrapper()))
+#else
+            .Register<ILogger>(new FileLogger(Path.Combine(AppContext.BaseDirectory, "error.log")))
+#endif
             .Register(typeof(ILogger<>), typeof(LogWrapper<>), Lifetime.Singleton)
             .Register<IGeneralControlProvider, InputProvider>(Lifetime.Singleton)
             .Register<IAudioControlProvider, InputProvider>(Lifetime.Singleton)
@@ -64,6 +75,28 @@ public class AppBuilder
     public AppBuilder RegisterDependency<T>(T obj) where T: class
     {
         _containerBuilder.Register<T>(obj);
+        return this;
+    }
+
+    public AppBuilder RegisterConfig<T>() where T : IConfigProvider => RegisterDependency<IConfigProvider, T>(Lifetime.Singleton);
+
+    public AppBuilder RegisterAutostart<T>() where T : IAutostartService =>
+        RegisterDependency<IAutostartService, T>(Lifetime.Singleton);
+
+    public AppBuilder RegisterUserInterface<T>() where T : IUserInterface =>
+        RegisterDependency<IUserInterface, T>(Lifetime.Singleton);
+
+    public AppBuilder RegisterInputs<TKeyboard, TMouse, TDisplay, TAudio>() 
+        where TKeyboard : IKeyboardInput
+        where TMouse : IMouseInput
+        where TDisplay : IDisplayInput
+        where TAudio : IAudioInput
+    {
+        RegisterDependency<IKeyboardInput, TKeyboard>(Lifetime.Singleton);
+        RegisterDependency<IMouseInput, TMouse>(Lifetime.Singleton);
+        RegisterDependency<IDisplayInput, TDisplay>(Lifetime.Singleton);
+        RegisterDependency<IAudioInput, TAudio>(Lifetime.Singleton);
+
         return this;
     }
 

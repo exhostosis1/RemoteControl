@@ -106,7 +106,7 @@ internal abstract class ServerPanel : Panel
             UpdateButton
         });
 
-        Unsubscriber = Server.Status.Subscribe(new Observer<bool>(SetButtons));
+        Unsubscriber = Server.Status.Subscribe(new MyObserver<bool>(SetButtons));
         Disposed += (_, _) => Unsubscriber.Dispose();
     }
 

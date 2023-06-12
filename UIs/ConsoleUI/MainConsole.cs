@@ -1,5 +1,6 @@
 ﻿using Shared.Config;
 using Shared.Enums;
+using Shared.Observable;
 using Shared.Server;
 using Shared.UI;
 
@@ -8,13 +9,21 @@ namespace ConsoleUI;
 // ReSharper disable once InconsistentNaming
 public class MainConsole : IUserInterface
 {
-    public event EventHandler<int?>? OnStart;
-    public event EventHandler<int?>? OnStop;
-    public event EventHandler? OnClose;
-    public event EventHandler<bool>? OnAutostartChanged;
-    public event EventHandler<(int, CommonConfig)>? OnConfigChanged;
-    public event EventHandler<ServerType>? OnServerAdded;
-    public event EventHandler<int>? OnServerRemoved;
+    public IObservable<int?> ServerStart => _serverStart;
+    public IObservable<int?> ServerStop => _serverStop;
+    public IObservable<object?> AppClose => _appClose;
+    public IObservable<bool> AutostartChange => _autostartChange;
+    public IObservable<(int, CommonConfig)> ConfigChange => _configChange;
+    public IObservable<ServerType> ServerAdd => _serverAdd;
+    public IObservable<int> ServerRemove => _serverRemove;
+
+    private readonly MyObservable<int?> _serverStart = new();
+    private readonly MyObservable<int?> _serverStop = new();
+    private readonly MyObservable<object?> _appClose = new();
+    private readonly MyObservable<bool> _autostartChange = new();
+    private readonly MyObservable<(int, CommonConfig)> _configChange = new();
+    private readonly MyObservable<ServerType> _serverAdd = new();
+    private readonly MyObservable<int> _serverRemove = new();
 
     public void SetAutostartValue(bool value)
     {
@@ -37,7 +46,7 @@ public class MainConsole : IUserInterface
 
             if (key == "x")
             {
-                OnClose?.Invoke(null, EventArgs.Empty);
+                _appClose.Next(null);
                 return;
             }
 
@@ -45,12 +54,12 @@ public class MainConsole : IUserInterface
             {
                 case "s":
                     if (Model.Any(x => x.Status.Working))
-                        OnStart?.Invoke(null, null);
+                        _serverStop.Next(null);
                     else
-                        OnStart?.Invoke(null, null);
+                        _serverStart.Next(null);
                     break;
                 case "a":
-                    OnAutostartChanged?.Invoke(null, !IsAutostart);
+                    _autostartChange.Next(!IsAutostart);
                     break;
                 default:
                     continue;
@@ -72,7 +81,7 @@ public class MainConsole : IUserInterface
 
     public void AddServer(IServer server)
     {
-        OnServerAdded?.Invoke(null, ServerType.Http);
+        _serverAdd.Next(ServerType.Http);
     }
 
     private void DisplayInfo(List<IServer> dtos)
@@ -98,11 +107,11 @@ public class MainConsole : IUserInterface
 
     protected void OnProcessorRemovedEvent(int e)
     {
-        OnServerRemoved?.Invoke(this, e);
+        _serverRemove.Next(e);
     }
 
     protected void OnConfigChangedEvent((int, CommonConfig) e)
     {
-        OnConfigChanged?.Invoke(this, e);
+        _configChange.Next(e);
     }
 }

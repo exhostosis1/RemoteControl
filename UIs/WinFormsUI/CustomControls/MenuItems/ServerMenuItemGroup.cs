@@ -11,7 +11,7 @@ internal class HttpMenuItemGroup : ServerMenuItemGroup
         DescriptionItem.Text = server.CurrentConfig.Uri.ToString();
         DescriptionItem.Click += (_, _) => DescriptionClickInvoke(DescriptionItem.Text);
 
-        var configUnsubscriber = server.Subscribe(new Observer<WebConfig>(ConfigChanged));
+        var configUnsubscriber = server.Subscribe(new MyObserver<WebConfig>(ConfigChanged));
         Disposed += (_, _) => configUnsubscriber.Dispose();
     }
 

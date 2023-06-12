@@ -3,6 +3,8 @@ using Shared.Autostart;
 using Shared.Config;
 using Shared.DIContainer.Interfaces;
 using Shared.Enums;
+using Shared.Logging.Interfaces;
+using Shared.Observable;
 using Shared.Server;
 using Shared.UI;
 
@@ -18,9 +20,12 @@ public class App
 
     private readonly ISimpleContainer _container;
 
+    public ILogger Logger { get; }
+
     public App(ISimpleContainer container)
     {
         _container = container;
+        Logger = _container.GetObject<ILogger>();
     }
 
     public void Run()
@@ -57,7 +62,7 @@ public class App
 
         ui.SetAutostartValue(autostartService.CheckAutostart());
 
-        ui.OnStart += (_, id) =>
+        ui.ServerStart.Subscribe(new MyObserver<int?>( id =>
         {
             if (!id.HasValue)
             {
@@ -67,9 +72,9 @@ public class App
             {
                 Servers.FirstOrDefault(x => x.Id == id)?.Start();
             }
-        };
+        }));
 
-        ui.OnStop += (_, id) =>
+        ui.ServerStop.Subscribe(new MyObserver<int?>(id =>
         {
             if (!id.HasValue)
             {
@@ -79,9 +84,9 @@ public class App
             {
                 Servers.FirstOrDefault(x => x.Id == id)?.Stop();
             }
-        };
+        }));
 
-        ui.OnServerAdded += (_, mode) =>
+        ui.ServerAdd.Subscribe(new MyObserver<ServerType>(mode =>
         {
             IServer server = mode switch
             {
@@ -94,9 +99,9 @@ public class App
 
             Servers.Add(server);
             ui.AddServer(server);
-        };
+        }));
 
-        ui.OnServerRemoved += (_, id) =>
+        ui.ServerRemove.Subscribe(new MyObserver<int>(id =>
         {
             var server = Servers.FirstOrDefault(x => x.Id == id);
             if (server == null)
@@ -106,15 +111,15 @@ public class App
             Servers.Remove(server);
 
             configProvider.SetConfig(GetConfig(Servers));
-        };
+        }));
 
-        ui.OnAutostartChanged += (_, value) =>
+        ui.AutostartChange.Subscribe(new MyObserver<bool>(value =>
         {
             autostartService.SetAutostart(value);
             ui.SetAutostartValue(autostartService.CheckAutostart());
-        };
+        }));
 
-        ui.OnConfigChanged += (_, configTuple) =>
+        ui.ConfigChange.Subscribe(new MyObserver<(int, CommonConfig)>(configTuple =>
         {
             var server = Servers.FirstOrDefault(x => x.Id == configTuple.Item1);
             if (server == null)
@@ -131,12 +136,12 @@ public class App
 
             config = GetConfig(Servers);
             configProvider.SetConfig(config);
-        };
+        }));
 
-        ui.OnClose += (_, _) =>
+        ui.AppClose.Subscribe(new MyObserver<object?>(_ =>
         {
             Environment.Exit(0);
-        };
+        }));
 
         ui.RunUI(Servers);
     }

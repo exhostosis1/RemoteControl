@@ -50,7 +50,7 @@ public class SimpleServerTests : IDisposable
 
         var mre = new AutoResetEvent(false);
 
-        using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
+        using var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
         {
             if (status)
                 mre.Set();
@@ -121,7 +121,7 @@ public class SimpleServerTests : IDisposable
         });
 
         var mre = new AutoResetEvent(false);
-        var sub = _server.Status.Subscribe(new Observer<bool>(status =>
+        var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
         {
             if (status)
                 mre.Set();
@@ -136,7 +136,7 @@ public class SimpleServerTests : IDisposable
         
         sub.Dispose();
 
-        sub = _server.Status.Subscribe(new Observer<bool>(status =>
+        sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
         {
             if (status)
                 mre.Set();
@@ -194,7 +194,7 @@ public class SimpleServerTests : IDisposable
         _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
 
         var startStopMre = new AutoResetEvent(false);
-        using var sub = _server.Status.Subscribe(new Observer<bool>(status =>
+        using var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
         {
             if (status)
                 startStopMre.Set();
@@ -229,8 +229,8 @@ public class SimpleServerTests : IDisposable
         var s = false;
         WebConfig? c = null;
 
-        using var statusSub = _server.Status.Subscribe(new Observer<bool>(status => s = status));
-        using var configSub = _server.Subscribe(new Observer<WebConfig>(config => c = config));
+        using var statusSub = _server.Status.Subscribe(new MyObserver<bool>(status => s = status));
+        using var configSub = _server.Subscribe(new MyObserver<WebConfig>(config => c = config));
 
         var config1 = new WebConfig
         {
@@ -240,7 +240,7 @@ public class SimpleServerTests : IDisposable
         };
 
         var mre = new AutoResetEvent(false);
-        var sub = _server.Status.Subscribe(new Observer<bool>(status =>
+        var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
         {
             if (status)
                 mre.Set();
@@ -255,7 +255,7 @@ public class SimpleServerTests : IDisposable
 
         sub.Dispose();
 
-        sub = _server.Status.Subscribe(new Observer<bool>(status =>
+        sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
         {
             if (!status)
                 // ReSharper disable once AccessToDisposedClosure

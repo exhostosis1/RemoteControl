@@ -45,7 +45,7 @@ internal abstract class ServerMenuItemGroup : IDisposable
 
         Items.Add(new ToolStripSeparator());
 
-        StatusUnsubscriber = server.Status.Subscribe(new Observer<bool>(working =>
+        StatusUnsubscriber = server.Status.Subscribe(new MyObserver<bool>(working =>
         {
             StartStopItem.Text = working ? @"Stop" : @"Start";
             DescriptionItem.Enabled = working;

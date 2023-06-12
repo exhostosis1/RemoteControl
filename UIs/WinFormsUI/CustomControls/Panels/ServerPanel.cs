@@ -80,7 +80,7 @@ internal class HttpPanel : ServerPanel
             _portTextBox
         });
 
-        _unsubscriber = server.Subscribe(new Observer<WebConfig>(ConfigChanged));
+        _unsubscriber = server.Subscribe(new MyObserver<WebConfig>(ConfigChanged));
 
         Disposed += LocalDispose;
     }

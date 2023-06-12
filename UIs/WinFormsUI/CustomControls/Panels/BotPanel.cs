@@ -71,7 +71,7 @@ internal sealed class BotPanel : ServerPanel
             _userIdsListBox
         });
 
-        _unsubscriber = server.Subscribe(new Observer<BotConfig>(ConfigChanged));
+        _unsubscriber = server.Subscribe(new MyObserver<BotConfig>(ConfigChanged));
 
         Disposed += LocalDispose;
     }

@@ -43,7 +43,7 @@ public class TelegramListenerTests : IDisposable
                 return new UpdateResponse { Ok = true };
             });
 
-        var statusSub = _listener.Subscribe(new Observer<bool>(status =>
+        var statusSub = _listener.Subscribe(new MyObserver<bool>(status =>
         {
             if(status)
             {
@@ -63,7 +63,7 @@ public class TelegramListenerTests : IDisposable
 
         statusSub.Dispose();
         
-        statusSub = _listener.Subscribe(new Observer<bool>(status =>
+        statusSub = _listener.Subscribe(new MyObserver<bool>(status =>
         {
             if(status)
             {

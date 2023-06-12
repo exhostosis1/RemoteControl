@@ -10,7 +10,7 @@ internal class BotMenuItemGroup : ServerMenuItemGroup
     {
         DescriptionItem.Text = server.CurrentConfig.UsernamesString;
 
-        var configUnsubscriber = server.Subscribe(new Observer<BotConfig>(ConfigChanged));
+        var configUnsubscriber = server.Subscribe(new MyObserver<BotConfig>(ConfigChanged));
         Disposed += (_, _) => configUnsubscriber.Dispose();
     }
 
