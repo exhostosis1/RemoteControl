@@ -5,14 +5,9 @@ using System.Threading.Tasks;
 
 namespace Shared.Logging;
 
-public class LogWrapper<T> : ILogger<T> where T : class
+public class LogWrapper<T>(ILogger logger) : ILogger<T> where T : class
 {
-    private readonly ILogger _logger;
-
-    public LogWrapper(ILogger logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger _logger = logger;
 
     public Task LogAsync(Type type, string message, LoggingLevel level) => _logger.LogAsync(type, message, level);
 

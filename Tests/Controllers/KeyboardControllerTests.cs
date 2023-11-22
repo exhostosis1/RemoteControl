@@ -155,6 +155,6 @@ public class KeyboardControllerTests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

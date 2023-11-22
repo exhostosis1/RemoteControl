@@ -9,21 +9,12 @@ namespace Listeners;
 
 public class TelegramListener : IBotListener
 {
-    private class LocalResponse : BotContextResponse
+    private class LocalResponse(string apiUrl, string apiKey, int chatId, IBotApiProvider wrapper) : BotContextResponse
     {
-        private readonly string _apiKey;
-        private readonly string _apiUrl;
-        private readonly int _chatId;
-        private readonly IBotApiProvider _wrapper;
-
-        public LocalResponse(string apiUrl, string apiKey, int chatId, IBotApiProvider wrapper)
-        {
-            _apiKey = apiKey;
-            _apiUrl = apiUrl;
-            _chatId = chatId;
-
-            _wrapper = wrapper;
-        }
+        private readonly string _apiKey = apiKey;
+        private readonly string _apiUrl = apiUrl;
+        private readonly int _chatId = chatId;
+        private readonly IBotApiProvider _wrapper = wrapper;
 
         public override void Close()
         {
@@ -32,7 +23,7 @@ public class TelegramListener : IBotListener
     }
 
     public bool IsListening { get; private set; }
-    private List<string> _usernames = new();
+    private List<string> _usernames = [];
 
     private readonly ILogger<TelegramListener> _logger;
     private readonly IBotApiProvider _wrapper;

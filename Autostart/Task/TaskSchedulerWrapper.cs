@@ -2,7 +2,7 @@
 using Shared.Wrappers.TaskServiceWrapper;
 using System.Runtime.InteropServices;
 
-namespace Autostart.Task;
+namespace AutoStart.Task;
 
 public class TaskSchedulerWrapper : ITaskService
 {

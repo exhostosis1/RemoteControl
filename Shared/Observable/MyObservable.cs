@@ -5,7 +5,7 @@ namespace Shared.Observable;
 
 public class MyObservable<T>: IObservable<T>
 {
-    private readonly List<IObserver<T>> _observers = new();
+    private readonly List<IObserver<T>> _observers = [];
 
     public void Next(T value)
     {

@@ -43,7 +43,7 @@ public class LocalFileConfigProviderTests : IDisposable
       "Host": "192.168.31.12",
       "Port": 1488,
       "Name": "localhost",
-      "Autostart": true
+      "AutoStart": true
     },
     {
       "$type": "bot",
@@ -53,7 +53,7 @@ public class LocalFileConfigProviderTests : IDisposable
         "exhostosis"
       ],
       "Name": "telegram",
-      "Autostart": false
+      "AutoStart": false
     }
   ]
 }
@@ -80,13 +80,13 @@ public class LocalFileConfigProviderTests : IDisposable
                     Name = "bot1",
                     ApiKey = "key1",
                     ApiUri = "uri1",
-                    Autostart = true,
+                    AutoStart = true,
                     Usernames = new List<string>{"user1", "user2"}
                 },
                 new WebConfig
                 {
                     Name = "server1",
-                    Autostart = false,
+                    AutoStart = false,
                     Host = "host1",
                     Scheme = "scheme1",
                     Port = 1234
@@ -94,7 +94,7 @@ public class LocalFileConfigProviderTests : IDisposable
                 new WebConfig
                 {
                     Name = "server2",
-                    Autostart = false,
+                    AutoStart = false,
                     Host = "host2",
                     Scheme = "scheme2",
                     Port = 3456
@@ -113,5 +113,6 @@ public class LocalFileConfigProviderTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

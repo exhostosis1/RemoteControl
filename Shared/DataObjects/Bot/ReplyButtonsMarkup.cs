@@ -2,16 +2,11 @@
 
 namespace Shared.DataObjects.Bot;
 
-public class ReplyButtonsMarkup : ButtonsMarkup
+public class ReplyButtonsMarkup(IEnumerable<IEnumerable<SingleButton>> items) : ButtonsMarkup
 {
-    public IEnumerable<IEnumerable<SingleButton>> Items { get; set; }
+    public IEnumerable<IEnumerable<SingleButton>> Items { get; set; } = items;
 
     public bool Resize { get; set; }
     public bool Persistent { get; set; }
     public bool OneTime { get; set; }
-
-    public ReplyButtonsMarkup(IEnumerable<IEnumerable<SingleButton>> items)
-    {
-        Items = items;
-    }
 }

@@ -3,15 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace Shared.Bots.Telegram.ApiObjects.Request;
 
-public class GetUpdatesParameters
+public class GetUpdatesParameters(int? lastUpdateId)
 {
-    public GetUpdatesParameters(int? lastUpdateId)
-    {
-        Offset = lastUpdateId + 1;
-    }
-
     [JsonPropertyName("offset")]
-    public int? Offset { get; set; }
+    public int? Offset { get; set; } = lastUpdateId + 1;
 
     [JsonPropertyName("limit")]
     [Range(0, 100)]

@@ -216,7 +216,7 @@ public class SimpleServerTests : IDisposable
     }
 
     [Fact]
-    public void SubscribtionTest()
+    public void SubscriptionTest()
     {
         _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
@@ -273,6 +273,7 @@ public class SimpleServerTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _server.Stop();
     }
 }

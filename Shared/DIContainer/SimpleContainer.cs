@@ -52,7 +52,7 @@ public class SimpleContainer : ISimpleContainer
         {
             Lifetime.Singleton => GetFromCacheOrCreate(typeAndLifetime),
             Lifetime.Transient => CreateObject(typeAndLifetime.Constructor),
-            _ => throw new ArgumentOutOfRangeException(nameof(typeAndLifetime.Lifetime))
+            _ => throw new ArgumentOutOfRangeException(nameof(typeAndLifetime), nameof(typeAndLifetime.Lifetime))
         };
     }
 
@@ -70,7 +70,7 @@ public class SimpleContainer : ISimpleContainer
             .GetMethod(methodName, BindingFlags.Instance | BindingFlags.NonPublic)
             ?.MakeGenericMethod(type) ?? throw new Exception($"Method {methodName} not found");
 
-        return method.Invoke(this, new object?[] { typesAndLifetime }) ?? throw new NullReferenceException();
+        return method.Invoke(this, [typesAndLifetime]) ?? throw new NullReferenceException();
     }
 
     public object GetObject(Type interfaceType)

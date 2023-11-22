@@ -15,6 +15,7 @@ public class RegistryConfigProviderTests : IDisposable
     private readonly ILogger<RegistryConfigProvider> _logger;
     private const string KeyName = "RemoteControl";
     private const string ValueName = "Config";
+    private readonly JsonSerializerOptions _jsonOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public RegistryConfigProviderTests()
     {
@@ -47,7 +48,7 @@ public class RegistryConfigProviderTests : IDisposable
     [Fact]
     public void GetDefaultConfigTest()
     {
-        _currentKey.Setup(x => x.GetValue(It.IsAny<string>(), It.IsAny<object?>())).Returns(null);
+        _currentKey?.Setup(x => x.GetValue(It.IsAny<string>(), It.IsAny<object?>())).Returns(null);
 
         var config = _provider.GetConfig();
         var defaultConfig = new AppConfig();
@@ -70,25 +71,25 @@ public class RegistryConfigProviderTests : IDisposable
     {
         var testConfig = new AppConfig
         {
-            ServerConfigs = new List<CommonConfig>
-            {
+            ServerConfigs =
+            [
                 new BotConfig
                 {
                     Name = "newBot",
                     ApiKey = "newApiKey",
                     ApiUri = "newApiUrl",
-                    Autostart = false,
-                    Usernames = new List<string> { "newuser1", "newuser2" }
+                    AutoStart = false,
+                    Usernames = ["newuser1", "newuser2"]
                 },
                 new WebConfig
                 {
                     Name = "newServer",
-                    Autostart = false,
+                    AutoStart = false,
                     Host = "newhost",
                     Scheme = "newscheme",
                     Port = 12344
                 }
-            }
+            ]
         };
 
         var serializedConfig = JsonSerializer.Serialize(testConfig);
@@ -105,28 +106,27 @@ public class RegistryConfigProviderTests : IDisposable
     {
         var testConfig = new AppConfig
         {
-            ServerConfigs = new List<CommonConfig>
-            {
+            ServerConfigs =
+            [
                 new BotConfig
                 {
                     Name = "newBot",
                     ApiKey = "newApiKey",
                     ApiUri = "newApiUrl",
-                    Autostart = false,
-                    Usernames = new List<string> { "newuser1", "newuser2" }
+                    AutoStart = false,
+                    Usernames = ["newuser1", "newuser2"]
                 },
                 new WebConfig
                 {
                     Name = "newServer",
-                    Autostart = false,
+                    AutoStart = false,
                     Host = "newhost",
                     Scheme = "newscheme",
                     Port = 12344
                 }
-            }
+            ]
         };
-        var serializedConfig = JsonSerializer.Serialize(testConfig,
-            new JsonSerializerOptions { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull });
+        var serializedConfig = JsonSerializer.Serialize(testConfig, _jsonOptions);
 
         _currentKey.Setup(x => x.SetValue(ValueName, It.IsAny<object>(), RegValueType.String));
 
@@ -137,5 +137,6 @@ public class RegistryConfigProviderTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

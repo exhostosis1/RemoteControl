@@ -204,6 +204,6 @@ public class AudioControllerTests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

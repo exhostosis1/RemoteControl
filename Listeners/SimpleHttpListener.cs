@@ -5,18 +5,12 @@ using Shared.Wrappers.HttpListener;
 
 namespace Listeners;
 
-public class SimpleHttpListener : IWebListener
+public class SimpleHttpListener(IHttpListener listener, ILogger<SimpleHttpListener> logger) : IWebListener
 {
-    private readonly IHttpListener _listener;
-    private readonly ILogger<SimpleHttpListener> _logger;
+    private readonly IHttpListener _listener = listener;
+    private readonly ILogger<SimpleHttpListener> _logger = logger;
 
     public bool IsListening => _listener.IsListening;
-
-    public SimpleHttpListener(IHttpListener listener, ILogger<SimpleHttpListener> logger)
-    {
-        _listener = listener;
-        _logger = logger;
-    }
 
     public void StartListen(WebParameters param)
     {

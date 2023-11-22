@@ -2,22 +2,13 @@
 
 namespace Shared.DataObjects.Bot;
 
-public class BotContextRequest : IRequest
+public class BotContextRequest(string apiUrl, string apiKey, int id, string command, DateTime date) : IRequest
 {
-    public int Id { get; set; }
-    public string Command { get; set; }
+    public int Id { get; set; } = id;
+    public string Command { get; set; } = command;
 
-    public string ApiUrl { get; set; }
-    public string ApiKey { get; set; }
+    public string ApiUrl { get; set; } = apiUrl;
+    public string ApiKey { get; set; } = apiKey;
 
-    public DateTime Date { get; set; }
-
-    public BotContextRequest(string apiUrl, string apiKey, int id, string command, DateTime date)
-    {
-        Id = id;
-        Command = command;
-        ApiUrl = apiUrl;
-        ApiKey = apiKey;
-        Date = date;
-    }
+    public DateTime Date { get; set; } = date;
 }

@@ -116,6 +116,6 @@ public class CommandExecutorTests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

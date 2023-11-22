@@ -1,20 +1,14 @@
 ﻿using Shared.Wrappers.TaskServiceWrapper;
 
-namespace Autostart.Task;
+namespace AutoStart.Task;
 
-public class LocalTaskDefinition : ITaskDefinition
+public class LocalTaskDefinition(string name, string userId) : ITaskDefinition
 {
-    public string Name { get; set; }
-    public string UserId { get; set; }
+    public string Name { get; set; } = name;
+    public string UserId { get; set; } = userId;
     public bool Enabled { get; init; }
 
     public TaskTriggerCollection Triggers => new();
 
     public TaskActionCollection Actions => new();
-
-    public LocalTaskDefinition(string name, string userId)
-    {
-        Name = name;
-        UserId = userId;
-    }
 }

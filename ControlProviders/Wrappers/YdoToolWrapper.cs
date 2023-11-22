@@ -215,7 +215,7 @@ public class YdoToolWrapper : IKeyboardInput, IMouseInput
 
     public void SendMouseMove(int x, int y)
     {
-        RunYdotool($"mousemove -- {x} {y}");
+        RunYdotool($"mouse move -- {x} {y}");
     }
 
     public void SendMouseKey(MouseButtons button, KeyPressMode mode)

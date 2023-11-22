@@ -5,16 +5,10 @@ using Shared.Logging.Interfaces;
 
 namespace Logging;
 
-public class TraceLogger : AbstractLogger
+public class TraceLogger(ITrace trace, LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : AbstractLogger(level,
+        formatter)
 {
-    private readonly ITrace _trace;
-
-    public TraceLogger(ITrace trace, LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) :
-        base(level,
-            formatter)
-    {
-        _trace = trace;
-    }
+    private readonly ITrace _trace = trace;
 
     protected override void ProcessInfo(string message)
     {

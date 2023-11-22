@@ -2,14 +2,8 @@
 
 namespace Shared.ApiControllers.Results;
 
-public class TextResult : IActionResult
+public class TextResult(object result) : IActionResult
 {
-    public TextResult(object result)
-    {
-        Result = result.ToString();
-        StatusCode = HttpStatusCode.OK;
-    }
-
-    public string? Result { get; set; }
-    public HttpStatusCode StatusCode { get; set; }
+    public string? Result { get; set; } = result.ToString();
+    public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.OK;
 }

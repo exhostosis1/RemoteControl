@@ -69,6 +69,7 @@ public class StaticFilesMiddlewareTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         Directory.Delete(_path, true);
     }
 }

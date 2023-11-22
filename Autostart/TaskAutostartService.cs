@@ -1,21 +1,21 @@
-﻿using Shared.Autostart;
+﻿using Shared.AutoStart;
 using Shared.Logging.Interfaces;
 using Shared.Wrappers.TaskServiceWrapper;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
-namespace Autostart;
+namespace AutoStart;
 
-public class TaskAutostartService : IAutostartService
+public class TaskAutoStartService : IAutoStartService
 {
     private readonly ITaskService _taskServiceWrapper;
     private readonly string _taskName;
     private readonly ITaskDefinition _td;
     private readonly string _filename = Path.Combine(AppContext.BaseDirectory, "run.bat");
-    private readonly ILogger<TaskAutostartService> _logger;
+    private readonly ILogger<TaskAutoStartService> _logger;
 
-    public TaskAutostartService(ITaskService taskService, ILogger<TaskAutostartService> logger)
+    public TaskAutoStartService(ITaskService taskService, ILogger<TaskAutoStartService> logger)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             throw new Exception("OS not supported");
@@ -32,15 +32,15 @@ public class TaskAutostartService : IAutostartService
         _td.Triggers.Add(new TaskLogonTrigger(userName));
     }
 
-    public bool CheckAutostart()
+    public bool CheckAutoStart()
     {
-        _logger.LogInfo("Checking win task autostart");
+        _logger.LogInfo("Checking win task auto start");
         return (_taskServiceWrapper.FindTask(_taskName)?.Enabled ?? false) && File.Exists(_filename);
     }
 
-    public void SetAutostart(bool value)
+    public void SetAutoStart(bool value)
     {
-        _logger.LogInfo($"Setting win task autostart to {value}");
+        _logger.LogInfo($"Setting win task auto start to {value}");
 
         _taskServiceWrapper.DeleteTask(_taskName, false);
 

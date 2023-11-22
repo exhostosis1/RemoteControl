@@ -2,7 +2,6 @@
 using Moq;
 using Shared.ControlProviders.Input;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests;
 
@@ -17,13 +16,12 @@ public class InputProviderTests : IDisposable
 
     public InputProviderTests()
     {
-        var logger = Mock.Of<ILogger<InputProvider>>();
         _keyboard = Mock.Of<IKeyboardInput>();
         _mouse = Mock.Of<IMouseInput>();
         _display = Mock.Of<IDisplayInput>();
         _audio = Mock.Of<IAudioInput>();
 
-        _provider = new InputProvider(_keyboard, _mouse, _display, _audio, logger);
+        _provider = new InputProvider(_keyboard, _mouse, _display, _audio);
     }
 
     [Fact]
@@ -140,6 +138,6 @@ public class InputProviderTests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

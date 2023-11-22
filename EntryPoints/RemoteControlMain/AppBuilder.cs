@@ -5,7 +5,7 @@ using Logging;
 using Servers;
 using Servers.Middleware;
 using Shared.ApiControllers;
-using Shared.Autostart;
+using Shared.AutoStart;
 using Shared.Bots.Telegram;
 using Shared.Config;
 using Shared.ConsoleWrapper;
@@ -80,8 +80,8 @@ public class AppBuilder
 
     public AppBuilder RegisterConfig<T>() where T : IConfigProvider => RegisterDependency<IConfigProvider, T>(Lifetime.Singleton);
 
-    public AppBuilder RegisterAutostart<T>() where T : IAutostartService =>
-        RegisterDependency<IAutostartService, T>(Lifetime.Singleton);
+    public AppBuilder RegisterAutoStart<T>() where T : IAutoStartService =>
+        RegisterDependency<IAutoStartService, T>(Lifetime.Singleton);
 
     public AppBuilder RegisterUserInterface<T>() where T : IUserInterface =>
         RegisterDependency<IUserInterface, T>(Lifetime.Singleton);

@@ -42,7 +42,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         }
     }
 
-    private readonly List<IObserver<TConfig>> _configObservers = new();
+    private readonly List<IObserver<TConfig>> _configObservers = [];
 
     protected GenericServer(IListener<TContext, TParams> listener, IMiddlewareChain<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger)
     {

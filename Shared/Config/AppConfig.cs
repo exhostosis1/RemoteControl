@@ -6,7 +6,7 @@ namespace Shared.Config;
 
 public class AppConfig
 {
-    public List<CommonConfig> ServerConfigs { get; init; } = new();
+    public List<CommonConfig> ServerConfigs { get; init; } = [];
 
     [JsonIgnore] 
     public IEnumerable<WebConfig> Servers => ServerConfigs.OfType<WebConfig>();

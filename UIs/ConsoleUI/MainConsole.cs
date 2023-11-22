@@ -12,7 +12,7 @@ public class MainConsole : IUserInterface
     public IObservable<int?> ServerStart => _serverStart;
     public IObservable<int?> ServerStop => _serverStop;
     public IObservable<object?> AppClose => _appClose;
-    public IObservable<bool> AutostartChange => _autostartChange;
+    public IObservable<bool> AutoStartChange => _autoStartChange;
     public IObservable<(int, CommonConfig)> ConfigChange => _configChange;
     public IObservable<ServerType> ServerAdd => _serverAdd;
     public IObservable<int> ServerRemove => _serverRemove;
@@ -20,19 +20,19 @@ public class MainConsole : IUserInterface
     private readonly MyObservable<int?> _serverStart = new();
     private readonly MyObservable<int?> _serverStop = new();
     private readonly MyObservable<object?> _appClose = new();
-    private readonly MyObservable<bool> _autostartChange = new();
+    private readonly MyObservable<bool> _autoStartChange = new();
     private readonly MyObservable<(int, CommonConfig)> _configChange = new();
     private readonly MyObservable<ServerType> _serverAdd = new();
     private readonly MyObservable<int> _serverRemove = new();
 
-    public void SetAutostartValue(bool value)
+    public void SetAutoStartValue(bool value)
     {
-        IsAutostart = value;
+        IsAutoStart = value;
     }
 
     private List<IServer> Model { get; set; } = new();
 
-    private bool IsAutostart { get; set; }
+    private bool IsAutoStart { get; set; }
 
     // ReSharper disable once InconsistentNaming
     public void RunUI(List<IServer> processors)
@@ -59,7 +59,7 @@ public class MainConsole : IUserInterface
                         _serverStart.Next(null);
                     break;
                 case "a":
-                    _autostartChange.Next(!IsAutostart);
+                    _autoStartChange.Next(!IsAutoStart);
                     break;
                 default:
                     continue;
@@ -98,11 +98,11 @@ public class MainConsole : IUserInterface
                     break;
             }
 
-            Console.WriteLine($"Autostart {(IsAutostart ? "enabled" : "disabled")}");
+            Console.WriteLine($"AutoStart {(IsAutoStart ? "enabled" : "disabled")}");
             Console.WriteLine();
         }
 
-        Console.Write($"{(dtos.Any(x => x.Status.Working) ? "[s]top" : "[s]tart")}, [a]utostart, e[x]it:");
+        Console.Write($"{(dtos.Any(x => x.Status.Working) ? "[s]top" : "[s]tart")}, [a]utoStart, e[x]it:");
     }
 
     protected void OnProcessorRemovedEvent(int e)

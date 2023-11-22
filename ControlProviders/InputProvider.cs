@@ -6,24 +6,14 @@ using Shared.Logging.Interfaces;
 
 namespace ControlProviders;
 
-public class InputProvider : IGeneralControlProvider
+public class InputProvider(IKeyboardInput keyboardInput, IMouseInput mouseInput, IDisplayInput displayInput, IAudioInput audioInput) : IGeneralControlProvider
 {
-    private readonly ILogger<InputProvider> _logger;
-    private readonly IKeyboardInput _keyboardInput;
-    private readonly IMouseInput _mouseInput;
-    private readonly IDisplayInput _displayInput;
-    private readonly IAudioInput _audioInput;
+    private readonly IKeyboardInput _keyboardInput = keyboardInput;
+    private readonly IMouseInput _mouseInput = mouseInput;
+    private readonly IDisplayInput _displayInput = displayInput;
+    private readonly IAudioInput _audioInput = audioInput;
 
     private const int MouseWheelClickSize = 120;
-
-    public InputProvider(IKeyboardInput keyboardInput, IMouseInput mouseInput, IDisplayInput displayInput, IAudioInput audioInput, ILogger<InputProvider> logger)
-    {
-        _logger = logger;
-        _keyboardInput = keyboardInput;
-        _mouseInput = mouseInput;
-        _displayInput = displayInput;
-        _audioInput = audioInput;
-    }
 
     public int GetVolume() => _audioInput.GetVolume();
 

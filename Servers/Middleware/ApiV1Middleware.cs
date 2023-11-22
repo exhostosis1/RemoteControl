@@ -9,17 +9,11 @@ using System.Text;
 
 namespace Servers.Middleware;
 
-public class ApiV1Middleware : IWebMiddleware
+public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger) : IWebMiddleware
 {
-    private readonly ControllersWithMethods _controllers;
-    private readonly ILogger<ApiV1Middleware> _logger;
-    public string ApiVersion => "v1";
-
-    public ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger)
-    {
-        _logger = logger;
-        _controllers = controllers.GetControllersWithMethods();
-    }
+    private readonly ControllersWithMethods _controllers = controllers.GetControllersWithMethods();
+    private readonly ILogger<ApiV1Middleware> _logger = logger;
+    public static string ApiVersion => "v1";
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
 
@@ -35,8 +29,9 @@ public class ApiV1Middleware : IWebMiddleware
 
         _logger.LogInfo($"Processing api request {context.WebRequest.Path}");
 
-        if (!Utils.TryParsePath(context.WebRequest.Path, out var controller, out var action, out var param) || !_controllers.ContainsKey(controller)
-            || !_controllers[controller].ContainsKey(action))
+        if (!Utils.TryParsePath(context.WebRequest.Path, out var controllerName, out var actionName, out var param) 
+            || !_controllers.TryGetValue(controllerName, out ControllerMethods? controller) 
+            || !controller.TryGetValue(actionName, out Func<string?, IActionResult>? action))
         {
 
             context.WebResponse.StatusCode = HttpStatusCode.NotFound;
@@ -46,7 +41,7 @@ public class ApiV1Middleware : IWebMiddleware
 
         try
         {
-            var result = _controllers[controller][action](param);
+            var result = action(param);
 
             context.WebResponse.StatusCode = result.StatusCode;
             context.WebResponse.Payload = GetBytes(result.Result);

@@ -1,20 +1,15 @@
-﻿using Shared.Config;
+﻿using Shared;
+using Shared.Config;
 using Shared.Logging.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ConfigProviders;
 
-public class LocalFileConfigProvider : IConfigProvider
+public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, string filePath) : IConfigProvider
 {
-    private readonly string _configPath;
-    private readonly ILogger<LocalFileConfigProvider> _logger;
-
-    public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, string filePath)
-    {
-        _configPath = filePath;
-        _logger = logger;
-    }
+    private readonly string _configPath = filePath;
+    private readonly ILogger<LocalFileConfigProvider> _logger = logger;
 
     public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger): this(logger, Path.Combine(AppContext.BaseDirectory, "config.ini"))
     {}

@@ -4,14 +4,9 @@ using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class LoggingMiddleware : IWebMiddleware
+public class LoggingMiddleware(ILogger<LoggingMiddleware> logger) : IWebMiddleware
 {
-    private readonly ILogger<LoggingMiddleware> _logger;
-
-    public LoggingMiddleware(ILogger<LoggingMiddleware> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<LoggingMiddleware> _logger = logger;
 
     public event EventHandler<WebContext>? OnNext;
 

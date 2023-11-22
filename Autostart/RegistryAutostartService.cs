@@ -1,18 +1,18 @@
-﻿using Shared.Autostart;
+﻿using Shared.AutoStart;
 using Shared.Logging.Interfaces;
 using Shared.Wrappers.RegistryWrapper;
 using System.Diagnostics;
 
-namespace Autostart;
+namespace AutoStart;
 
-public class RegistryAutostartService : IAutostartService
+public class RegistryAutoStartService : IAutoStartService
 {
     private readonly IRegistryKey _regKey;
     private const string RegName = "Remote Control";
     private readonly string _regValue = $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? throw new NullReferenceException()}\"";
-    private readonly ILogger<RegistryAutostartService> _logger;
+    private readonly ILogger<RegistryAutoStartService> _logger;
 
-    public RegistryAutostartService(IRegistry registryWrapper, ILogger<RegistryAutostartService> logger)
+    public RegistryAutoStartService(IRegistry registryWrapper, ILogger<RegistryAutoStartService> logger)
     {
         _logger = logger;
 
@@ -20,13 +20,13 @@ public class RegistryAutostartService : IAutostartService
             ?.OpenSubKey("CurrentVersion")?.OpenSubKey("Run", true) ?? throw new NullReferenceException("Cannot open autorun registry key");
     }
 
-    public bool CheckAutostart()
+    public bool CheckAutoStart()
     {
         _logger.LogInfo("Checking win registry autorun");
         return _regKey.GetValue(RegName, "") as string == _regValue;
     }
 
-    public void SetAutostart(bool value)
+    public void SetAutoStart(bool value)
     {
         _logger.LogInfo("Setting win registry autorun");
 

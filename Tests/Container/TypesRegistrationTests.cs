@@ -24,5 +24,6 @@ public class TypesRegistrationTests: IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

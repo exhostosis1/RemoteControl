@@ -129,5 +129,6 @@ public class SimpleHttpListenerTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

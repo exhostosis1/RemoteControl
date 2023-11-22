@@ -2,14 +2,8 @@
 
 namespace Shared.ApiControllers.Results;
 
-public class ErrorResult : IActionResult
+public class ErrorResult(string? errorMessage) : IActionResult
 {
-    public ErrorResult(string? errorMessage)
-    {
-        StatusCode = HttpStatusCode.InternalServerError;
-        Result = errorMessage;
-    }
-
-    public string? Result { get; set; }
-    public HttpStatusCode StatusCode { get; set; }
+    public string? Result { get; set; } = errorMessage;
+    public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.InternalServerError;
 }

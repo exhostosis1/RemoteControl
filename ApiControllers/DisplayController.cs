@@ -4,16 +4,10 @@ using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class DisplayController : BaseApiController
+public class DisplayController(IDisplayControlProvider provider, ILogger<DisplayController> logger) : BaseApiController
 {
-    private readonly IDisplayControlProvider _provider;
-    private readonly ILogger<DisplayController> _logger;
-
-    public DisplayController(IDisplayControlProvider provider, ILogger<DisplayController> logger) : base(logger)
-    {
-        _logger = logger;
-        _provider = provider;
-    }
+    private readonly IDisplayControlProvider _provider = provider;
+    private readonly ILogger<DisplayController> _logger = logger;
 
     public IActionResult Darken(string? _)
     {

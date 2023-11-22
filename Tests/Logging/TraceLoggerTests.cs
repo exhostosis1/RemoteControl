@@ -4,15 +4,14 @@ using Moq;
 using Shared.ConsoleWrapper;
 using Shared.Enums;
 using Shared.Logging;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests.Logging;
 
 public class TraceLoggerTests : IDisposable
 {
-    private readonly ILogger _logger;
+    private readonly TraceLogger _logger;
     private readonly Mock<ITrace> _trace;
-    private readonly IMessageFormatter _formatter = new TestMessageFormatter();
+    private readonly TestMessageFormatter _formatter = new();
 
     public TraceLoggerTests()
     {
@@ -80,7 +79,7 @@ public class TraceLoggerTests : IDisposable
         var tasks = new Task[count];
         for (var i = 0; i < tasks.Length; i++)
         {
-            tasks[i] = Task.Run(() => _logger.Log(this.GetType(), "test message", LoggingLevel.Info));
+            tasks[i] = Task.Run(() => _logger.Log(GetType(), "test message", LoggingLevel.Info));
         }
 
         Task.WaitAll(tasks);
@@ -90,5 +89,6 @@ public class TraceLoggerTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

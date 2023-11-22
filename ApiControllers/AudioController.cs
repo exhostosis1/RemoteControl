@@ -4,16 +4,10 @@ using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class AudioController : BaseApiController
+public class AudioController(IAudioControlProvider provider, ILogger<AudioController> logger) : BaseApiController
 {
-    private readonly IAudioControlProvider _provider;
-    private readonly ILogger<AudioController> _logger;
-
-    public AudioController(IAudioControlProvider provider, ILogger<AudioController> logger) : base(logger)
-    {
-        _logger = logger;
-        _provider = provider;
-    }
+    private readonly IAudioControlProvider _provider = provider;
+    private readonly ILogger<AudioController> _logger = logger;
 
     public IActionResult GetDevices(string? _)
     {

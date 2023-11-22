@@ -79,7 +79,7 @@ internal sealed class BotPanel : ServerPanel
     private void ConfigChanged(BotConfig config)
     {
         NameTextBox.Text = config.Name;
-        AutostartBox.Checked = config.Autostart;
+        AutoStartBox.Checked = config.AutoStart;
         _apiUrlTextBox.Text = config.ApiUri;
         _apiKeyTextBox.Text = config.ApiKey;
         _userIdsListBox.Text = string.Join(Environment.NewLine, config.Usernames);
@@ -114,11 +114,11 @@ internal sealed class BotPanel : ServerPanel
 
         var config = new BotConfig
         {
-            Autostart = AutostartBox.Checked,
+            AutoStart = AutoStartBox.Checked,
             ApiUri = _apiUrlTextBox.Text,
             ApiKey = _apiKeyTextBox.Text,
             Name = NameTextBox.Text,
-            Usernames = _userIdsListBox.Text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList()
+            Usernames = [.. _userIdsListBox.Text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)]
         };
 
         RaiseUpdateButtonClickedEvent(config);

@@ -1,12 +1,11 @@
-﻿using System.Net;
-using System.Text;
-using Moq;
+﻿using Moq;
 using Servers.Middleware;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 using Shared.DataObjects.Web;
 using Shared.Logging.Interfaces;
-using Shared.Server;
+using System.Net;
+using System.Text;
 
 namespace UnitTests.Middleware;
 
@@ -14,11 +13,13 @@ public class ApiV1Tests : IDisposable
 {
     private class FirstController : IApiController
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ActionOne(string? _)
         {
             return new OkResult();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ActionTwo(string? _)
         {
             return new ErrorResult("test error");
@@ -27,16 +28,19 @@ public class ApiV1Tests : IDisposable
 
     private class SecondController : IApiController
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ActionThree(string? _)
         {
             return new JsonResult("new");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ActionFour(string? _)
         {
             return new TextResult("text");
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ErrorAction(string? _)
         {
             throw new Exception("test exception");
@@ -105,6 +109,6 @@ public class ApiV1Tests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

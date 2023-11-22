@@ -48,5 +48,6 @@ public class DisplayControllerTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

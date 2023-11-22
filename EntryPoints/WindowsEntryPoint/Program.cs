@@ -1,4 +1,4 @@
-﻿using Autostart;
+﻿using AutoStart;
 using ConfigProviders;
 using ControlProviders.Wrappers;
 using Microsoft.Win32;
@@ -24,7 +24,7 @@ public static class Program
             .RegisterConfig<LocalFileConfigProvider>()
             .RegisterUserInterface<MainForm>()
             .RegisterInputs<User32Wrapper, User32Wrapper, User32Wrapper, NAudioWrapper>()
-            .RegisterAutostart<RegistryAutostartService>()
+            .RegisterAutoStart<RegistryAutoStartService>()
             .RegisterDependency<IRegistry, RegistryWrapper>(Lifetime.Singleton)
             .Build();
         

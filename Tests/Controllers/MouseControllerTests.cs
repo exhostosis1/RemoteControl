@@ -139,6 +139,6 @@ public class MouseControllerTests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

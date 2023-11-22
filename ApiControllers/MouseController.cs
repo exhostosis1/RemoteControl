@@ -6,16 +6,10 @@ using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class MouseController : BaseApiController
+public class MouseController(IMouseControlProvider provider, ILogger<MouseController> logger) : BaseApiController
 {
-    private readonly IMouseControlProvider _provider;
-    private readonly ILogger<MouseController> _logger;
-
-    public MouseController(IMouseControlProvider provider, ILogger<MouseController> logger) : base(logger)
-    {
-        _logger = logger;
-        _provider = provider;
-    }
+    private readonly IMouseControlProvider _provider = provider;
+    private readonly ILogger<MouseController> _logger = logger;
 
     public IActionResult Left(string? _)
     {

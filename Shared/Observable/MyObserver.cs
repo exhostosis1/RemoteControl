@@ -2,18 +2,11 @@
 
 namespace Shared.Observable;
 
-public class MyObserver<T> : IObserver<T>
+public class MyObserver<T>(Action<T> next, Action? completed = null, Action<Exception>? error = null) : IObserver<T>
 {
-    private readonly Action<T> _next;
-    private readonly Action? _completed;
-    private readonly Action<Exception>? _error;
-
-    public MyObserver(Action<T> next, Action? completed = null, Action<Exception>? error = null)
-    {
-        _next = next;
-        _completed = completed;
-        _error = error;
-    }
+    private readonly Action<T> _next = next;
+    private readonly Action? _completed = completed;
+    private readonly Action<Exception>? _error = error;
 
     public void OnCompleted()
     {

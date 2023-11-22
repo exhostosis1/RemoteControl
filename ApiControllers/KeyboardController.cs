@@ -6,16 +6,10 @@ using System.Net;
 
 namespace ApiControllers;
 
-public class KeyboardController : BaseApiController
+public class KeyboardController(IKeyboardControlProvider provider, ILogger<KeyboardController> logger) : BaseApiController
 {
-    private readonly IKeyboardControlProvider _provider;
-    private readonly ILogger<KeyboardController> _logger;
-
-    public KeyboardController(IKeyboardControlProvider provider, ILogger<KeyboardController> logger) : base(logger)
-    {
-        _logger = logger;
-        _provider = provider;
-    }
+    private readonly IKeyboardControlProvider _provider = provider;
+    private readonly ILogger<KeyboardController> _logger = logger;
 
     public IActionResult Back(string? _)
     {

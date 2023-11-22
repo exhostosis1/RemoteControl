@@ -1,17 +1,17 @@
 ﻿using System.Diagnostics;
 using System.Linq.Expressions;
-using Autostart;
+using AutoStart;
 using Moq;
 using Shared.Logging.Interfaces;
 using Shared.Wrappers.RegistryWrapper;
 
-namespace UnitTests.Autostart;
+namespace UnitTests.AutoStart;
 
-public class RegistryAutostartServiceTests : IDisposable
+public class RegistryAutoStartServiceTests : IDisposable
 {
-    private readonly RegistryAutostartService _service;
+    private readonly RegistryAutoStartService _service;
     private readonly Mock<IRegistryKey> _runKeyMock;
-    private readonly ILogger<RegistryAutostartService> _logger;
+    private readonly ILogger<RegistryAutoStartService> _logger;
 
     private const string RegName = "Remote Control";
     private readonly string _regValue = $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? throw new NullReferenceException()}\"";
@@ -20,9 +20,9 @@ public class RegistryAutostartServiceTests : IDisposable
     private readonly Expression<Action<IRegistryKey>> _deleteExpression = x => x.DeleteValue(RegName, false);
     private readonly Expression<Action<IRegistryKey>> _setExpression;
 
-    public RegistryAutostartServiceTests()
+    public RegistryAutoStartServiceTests()
     {
-        _logger = Mock.Of<ILogger<RegistryAutostartService>>();
+        _logger = Mock.Of<ILogger<RegistryAutoStartService>>();
         Mock<IRegistry> registryMock = new(MockBehavior.Strict);
         _runKeyMock = new Mock<IRegistryKey>(MockBehavior.Strict);
 
@@ -32,7 +32,7 @@ public class RegistryAutostartServiceTests : IDisposable
 
         registryMock.Setup(reg => reg.CurrentUser).Returns(registryKeyMock.Object);
 
-        _service = new RegistryAutostartService(registryMock.Object, _logger);
+        _service = new RegistryAutoStartService(registryMock.Object, _logger);
 
         _setExpression = x => x.SetValue(RegName, _regValue, RegValueType.String);
     }
@@ -45,40 +45,40 @@ public class RegistryAutostartServiceTests : IDisposable
         regKey.Setup(x => x.OpenSubKey(It.IsAny<string>(), It.IsAny<bool>())).Returns((IRegistryKey?)null);
         reg.SetupGet(x => x.CurrentUser).Returns(regKey.Object);
 
-        Assert.Throws<NullReferenceException>(() => new RegistryAutostartService(reg.Object, _logger));
+        Assert.Throws<NullReferenceException>(() => new RegistryAutoStartService(reg.Object, _logger));
     }
 
     [Fact]
-    public void CheckAutostartValueTest()
+    public void CheckAutoStartValueTest()
     {
         _runKeyMock.Setup(_getExpression).Returns(_regValue);
 
-        var result = _service.CheckAutostart();
+        var result = _service.CheckAutoStart();
         Assert.True(result);
 
         _runKeyMock.Verify(_getExpression, Times.Once);
     }
 
     [Fact]
-    public void CheckAutostartNullTest()
+    public void CheckAutoStartNullTest()
     {
         _runKeyMock.Setup(_getExpression).Returns(null as object);
 
-        var result = _service.CheckAutostart();
+        var result = _service.CheckAutoStart();
         Assert.False(result);
 
         _runKeyMock.Verify(_getExpression, Times.Once);
     }
 
     [Fact]
-    public void SetAutostartTrueTest()
+    public void SetAutoStartTrueTest()
     {
         var value = "initial value";
 
         _runKeyMock.Setup(_deleteExpression).Callback(() => value = null);
         _runKeyMock.Setup(_setExpression).Callback(() => value = _regValue);
 
-        _service.SetAutostart(true);
+        _service.SetAutoStart(true);
 
         _runKeyMock.Verify(_deleteExpression, Times.Once);
         _runKeyMock.Verify(_setExpression, Times.Once);
@@ -87,14 +87,14 @@ public class RegistryAutostartServiceTests : IDisposable
     }
 
     [Fact]
-    public void SetAutostartFalseTest()
+    public void SetAutoStartFalseTest()
     {
         var value = "initial value";
 
         _runKeyMock.Setup(_deleteExpression).Callback(() => value = null);
         _runKeyMock.Setup(_setExpression).Callback(() => value = _regValue);
 
-        _service.SetAutostart(false);
+        _service.SetAutoStart(false);
 
         _runKeyMock.Verify(_deleteExpression, Times.Once);
         _runKeyMock.Verify(_setExpression, Times.Never);
@@ -103,13 +103,13 @@ public class RegistryAutostartServiceTests : IDisposable
     }
 
     [Fact]
-    public void SetAutostartExceptionTest()
+    public void SetAutoStartExceptionTest()
     {
         _runKeyMock.Setup(_deleteExpression);
         _runKeyMock.Setup(_setExpression)
             .Throws(new Exception("test exception"));
 
-        _service.SetAutostart(true);
+        _service.SetAutoStart(true);
 
         _runKeyMock.Verify(_deleteExpression, Times.Once);
         _runKeyMock.Verify(_setExpression, Times.Once);
@@ -119,5 +119,6 @@ public class RegistryAutostartServiceTests : IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

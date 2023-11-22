@@ -66,7 +66,7 @@
             this.AutostartStripMenuItem.Name = "AutostartStripMenuItem";
             this.AutostartStripMenuItem.Size = new System.Drawing.Size(160, 22);
             this.AutostartStripMenuItem.Text = "Autostart";
-            this.AutostartStripMenuItem.Click += new System.EventHandler(this.AutostartStripMenuItem_Click);
+            this.AutostartStripMenuItem.Click += new System.EventHandler(this.AutoStartStripMenuItem_Click);
             // 
             // CloseToolStripMenuItem
             // 

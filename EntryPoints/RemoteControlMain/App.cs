@@ -1,5 +1,5 @@
 ﻿using Servers;
-using Shared.Autostart;
+using Shared.AutoStart;
 using Shared.Config;
 using Shared.DIContainer.Interfaces;
 using Shared.Enums;
@@ -16,7 +16,7 @@ public class App
     private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
         new(servers.Select(x => x.Config));
 
-    public List<IServer> Servers { get; set; } = new();
+    public List<IServer> Servers { get; set; } = [];
 
     private readonly ISimpleContainer _container;
 
@@ -32,7 +32,7 @@ public class App
     {
         var ui = _container.GetObject<IUserInterface>();
         var configProvider = _container.GetObject<IConfigProvider>();
-        var autostartService = _container.GetObject<IAutostartService>();
+        var autoStartService = _container.GetObject<IAutoStartService>();
         var config = configProvider.GetConfig();
 
         Servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
@@ -56,11 +56,11 @@ public class App
 
         Servers.ForEach(x =>
         {
-            if (x.Config.Autostart)
+            if (x.Config.AutoStart)
                 x.Start();
         });
 
-        ui.SetAutostartValue(autostartService.CheckAutostart());
+        ui.SetAutoStartValue(autoStartService.CheckAutoStart());
 
         ui.ServerStart.Subscribe(new MyObserver<int?>( id =>
         {
@@ -113,10 +113,10 @@ public class App
             configProvider.SetConfig(GetConfig(Servers));
         }));
 
-        ui.AutostartChange.Subscribe(new MyObserver<bool>(value =>
+        ui.AutoStartChange.Subscribe(new MyObserver<bool>(value =>
         {
-            autostartService.SetAutostart(value);
-            ui.SetAutostartValue(autostartService.CheckAutostart());
+            autoStartService.SetAutoStart(value);
+            ui.SetAutoStartValue(autoStartService.CheckAutoStart());
         }));
 
         ui.ConfigChange.Subscribe(new MyObserver<(int, CommonConfig)>(configTuple =>

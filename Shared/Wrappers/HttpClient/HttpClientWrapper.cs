@@ -23,8 +23,10 @@ public class HttpClientWrapper : IHttpClient
 
     public IHttpClientResponse Send(IHttpClientRequest request)
     {
-        var newRequest = new HttpRequestMessage(request.Method, request.RequestUri);
-        newRequest.Content = new StringContent(request.Content ?? string.Empty, Encoding.UTF8, "application/json");
+        var newRequest = new HttpRequestMessage(request.Method, request.RequestUri)
+        {
+            Content = new StringContent(request.Content ?? string.Empty, Encoding.UTF8, "application/json")
+        };
 
         var response = _client.Send(newRequest);
 

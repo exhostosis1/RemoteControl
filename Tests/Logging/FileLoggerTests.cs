@@ -1,17 +1,15 @@
 using Logging;
 using Logging.Formatters;
-using Moq;
 using Shared.Enums;
 using Shared.Logging;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests.Logging;
 
 public class FileLoggerTests : IDisposable
 {
-    private readonly ILogger _fileLogger;
+    private readonly FileLogger _fileLogger;
     private readonly string _filePath = Path.Combine(AppContext.BaseDirectory, "log");
-    private readonly IMessageFormatter _formatter = new TestMessageFormatter();
+    private readonly TestMessageFormatter _formatter = new();
 
     public FileLoggerTests()
     {
@@ -84,7 +82,9 @@ public class FileLoggerTests : IDisposable
 
     public void Dispose()
     {
-        if(File.Exists(_filePath))
+        GC.SuppressFinalize(this);
+
+        if (File.Exists(_filePath))
             File.Delete(_filePath);
     }
 }

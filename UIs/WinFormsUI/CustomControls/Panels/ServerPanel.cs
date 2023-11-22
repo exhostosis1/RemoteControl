@@ -88,7 +88,7 @@ internal class HttpPanel : ServerPanel
     private void ConfigChanged(WebConfig config)
     {
         NameTextBox.Text = config.Name;
-        AutostartBox.Checked = config.Autostart;
+        AutoStartBox.Checked = config.AutoStart;
         _schemeTextBox.Text = config.Scheme;
         _hostTextBox.Text = config.Host;
         _portTextBox.Text = config.Port.ToString();
@@ -126,7 +126,7 @@ internal class HttpPanel : ServerPanel
 
         var config = new WebConfig
         {
-            Autostart = AutostartBox.Checked,
+            AutoStart = AutoStartBox.Checked,
             Uri = uri,
             Name = NameTextBox.Text
         };

@@ -11,12 +11,12 @@ public interface IUserInterface
     public IObservable<int?> ServerStart { get; }
     public IObservable<int?> ServerStop { get; }
     public IObservable<object?> AppClose { get; }
-    public IObservable<bool> AutostartChange { get; }
+    public IObservable<bool> AutoStartChange { get; }
     public IObservable<(int, CommonConfig)> ConfigChange { get; }
     public IObservable<ServerType> ServerAdd { get; }
     public IObservable<int> ServerRemove { get; }
 
-    public void SetAutostartValue(bool value);
+    public void SetAutoStartValue(bool value);
 
     // ReSharper disable once InconsistentNaming
     public void RunUI(List<IServer> servers);

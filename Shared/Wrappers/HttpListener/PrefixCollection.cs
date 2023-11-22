@@ -2,14 +2,9 @@
 
 namespace Shared.Wrappers.HttpListener;
 
-public class PrefixCollection : IPrefixesCollection
+public class PrefixCollection(HttpListenerPrefixCollection collection) : IPrefixesCollection
 {
-    private readonly HttpListenerPrefixCollection _collection;
-
-    public PrefixCollection(HttpListenerPrefixCollection collection)
-    {
-        _collection = collection;
-    }
+    private readonly HttpListenerPrefixCollection _collection = collection;
 
     public void Add(string prefix) => _collection.Add(prefix);
 }

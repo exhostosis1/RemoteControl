@@ -6,7 +6,7 @@ namespace Shared.Server;
 
 public class ServerStatus : IObservable<bool>
 {
-    private readonly List<IObserver<bool>> _statusObservers = new();
+    private readonly List<IObserver<bool>> _statusObservers = [];
 
     private bool _working;
 

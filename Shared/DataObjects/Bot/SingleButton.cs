@@ -1,11 +1,6 @@
 ﻿namespace Shared.DataObjects.Bot;
 
-public class SingleButton
+public class SingleButton(string text)
 {
-    public string Text { get; set; }
-
-    public SingleButton(string text)
-    {
-        Text = text;
-    }
+    public string Text { get; set; } = text;
 }

@@ -6,26 +6,19 @@ using System.Text.Json.Serialization;
 
 namespace ConfigProviders;
 
-public class RegistryConfigProvider : IConfigProvider
+public class RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigProvider> logger) : IConfigProvider
 {
-    private readonly IRegistryKey _regKey;
+    private readonly IRegistryKey _regKey = registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey(KeyName, true) ??
+                  registry.CurrentUser.OpenSubKey("SOFTWARE", true)?.CreateSubKey(KeyName, true) ??
+                  throw new Exception("Registry branch not found");
     private const string ValueName = "Config";
     private const string KeyName = "RemoteControl";
-    private readonly ILogger<RegistryConfigProvider> _logger;
+    private readonly ILogger<RegistryConfigProvider> _logger = logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
-
-    public RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigProvider> logger)
-    {
-        _logger = logger;
-
-        _regKey = registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey(KeyName, true) ??
-                  registry.CurrentUser.OpenSubKey("SOFTWARE", true)?.CreateSubKey(KeyName, true) ??
-                  throw new Exception("Registry branch not found");
-    }
 
     public AppConfig GetConfig()
     {

@@ -5,14 +5,9 @@ using System.Collections.Generic;
 
 namespace Shared.DIContainer;
 
-public class ContainerBuilder : IContainerBuilder
+public class ContainerBuilder(ITypesRegistration? typesRegistration = null) : IContainerBuilder
 {
-    private readonly ITypesRegistration _typesRegistration;
-
-    public ContainerBuilder(ITypesRegistration? typesRegistration = null)
-    {
-        _typesRegistration = typesRegistration ?? new TypesRegistration();
-    }
+    private readonly ITypesRegistration _typesRegistration = typesRegistration ?? new TypesRegistration();
 
     public IContainerBuilder Register(Type interfaceType, Type instanceType, Lifetime lifetime)
     {

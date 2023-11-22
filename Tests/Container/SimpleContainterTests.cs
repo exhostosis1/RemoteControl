@@ -6,7 +6,7 @@ using Shared.Enums;
 
 namespace UnitTests.Container;
 
-public class SimpleContainterTests: IDisposable
+public class SimpleContainerTests: IDisposable
 {
     private class RegistrationMock : ITypesRegistration
     {
@@ -62,7 +62,7 @@ public class SimpleContainterTests: IDisposable
         }
         };
 
-        private readonly Dictionary<Type, object> _cache = new();
+        private readonly Dictionary<Type, object> _cache = [];
 
         public void RegisterType(Type interfaceType, Type instanceType, Delegate? function, Lifetime lifetime)
         {
@@ -101,7 +101,7 @@ public class SimpleContainterTests: IDisposable
     private readonly SimpleContainer _container;
     private readonly RegistrationMock _registration = new();
 
-    public SimpleContainterTests()
+    public SimpleContainerTests()
     {
         _container = new SimpleContainer(_registration);
     }
@@ -240,5 +240,6 @@ public class SimpleContainterTests: IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

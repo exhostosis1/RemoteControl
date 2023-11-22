@@ -16,7 +16,7 @@ internal abstract class ServerMenuItemGroup : IDisposable
     protected readonly ToolStripMenuItem StartStopItem = new();
     protected readonly ToolStripMenuItem DescriptionItem = new();
 
-    protected readonly List<ToolStripItem> Items = new();
+    protected readonly List<ToolStripItem> Items = [];
 
     public ToolStripItem[] ItemsArray => Items.ToArray();
 
@@ -65,8 +65,6 @@ internal abstract class ServerMenuItemGroup : IDisposable
     }
 
     protected void DescriptionClickInvoke(string value) => OnDescriptionClick?.Invoke(null, value);
-
-
 
     public void Dispose()
     {

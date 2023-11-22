@@ -9,10 +9,10 @@ namespace Shared.DIContainer;
 
 internal class TypesRegistration: ITypesRegistration
 {
-    private readonly Dictionary<Type, List<TypeAndLifetime>> _types = new();
-    private readonly Dictionary<Type, object> _cache = new();
+    private readonly Dictionary<Type, List<TypeAndLifetime>> _types = [];
+    private readonly Dictionary<Type, object> _cache = [];
 
-    private static void AddOrUpdate(IDictionary<Type, List<TypeAndLifetime>> dict, Type interfaceType,
+    private static void AddOrUpdate(Dictionary<Type, List<TypeAndLifetime>> dict, Type interfaceType,
         Type objectType, Delegate? constructor, Lifetime lifetime)
     {
         if (dict.TryGetValue(interfaceType, out var item))
@@ -24,7 +24,7 @@ internal class TypesRegistration: ITypesRegistration
         }
         else
         {
-            dict.Add(interfaceType, new List<TypeAndLifetime> { new(objectType, constructor, lifetime) });
+            dict.Add(interfaceType, [new(objectType, constructor, lifetime)]);
         }
     }
 

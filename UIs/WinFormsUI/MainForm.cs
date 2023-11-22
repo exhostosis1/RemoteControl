@@ -18,7 +18,7 @@ public sealed partial class MainForm : Form, IUserInterface
     public IObservable<int?> ServerStart => _serverStart;
     public IObservable<int?> ServerStop => _serverStop;
     public IObservable<object?> AppClose => _appClose;
-    public IObservable<bool> AutostartChange => _autostartChange;
+    public IObservable<bool> AutoStartChange => _autoStartChange;
     public IObservable<(int, CommonConfig)> ConfigChange => _configChange;
     public IObservable<ServerType> ServerAdd => _serverAdd;
     public IObservable<int> ServerRemove => _serverRemove;
@@ -26,17 +26,17 @@ public sealed partial class MainForm : Form, IUserInterface
     private readonly MyObservable<int?> _serverStart = new();
     private readonly MyObservable<int?> _serverStop = new();
     private readonly MyObservable<object?> _appClose = new();
-    private readonly MyObservable<bool> _autostartChange = new();
+    private readonly MyObservable<bool> _autoStartChange = new();
     private readonly MyObservable<(int, CommonConfig)> _configChange = new();
     private readonly MyObservable<ServerType> _serverAdd = new();
     private readonly MyObservable<int> _serverRemove = new();
 
     private const int GroupMargin = 6;
-    private bool IsAutostart { get; set; }
+    private bool IsAutoStart { get; set; }
 
-    private List<IServer> _model = new();
-    private readonly List<ServerMenuItemGroup> _toolStripGroups = new();
-    private readonly List<ServerPanel> _windowPanels = new();
+    private List<IServer> _model = [];
+    private readonly List<ServerMenuItemGroup> _toolStripGroups = [];
+    private readonly List<ServerPanel> _windowPanels = [];
 
     private readonly Theme _lightTheme = new()
     {
@@ -64,14 +64,14 @@ public sealed partial class MainForm : Form, IUserInterface
     {
         InitializeComponent();
 
-        _commonMenuItems = new ToolStripItem[]
-        {
+        _commonMenuItems =
+        [
             new ToolStripMenuItem("Start all", null, StartAllToolStripMenuItem_Click),
             new ToolStripMenuItem("Stop all", null, StopAllToolStripMenuItem_Click),
             AutostartStripMenuItem,
             AddFirewallRuleToolStripMenuItem,
             CloseToolStripMenuItem
-        };
+        ];
 
         Width = 550;
         Height = 40;
@@ -96,7 +96,7 @@ public sealed partial class MainForm : Form, IUserInterface
     }
 
     private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
-    private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGrup));
+    private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGroup));
 
     private ServerPanel CreatePanel(IServer server)
     {
@@ -111,8 +111,10 @@ public sealed partial class MainForm : Form, IUserInterface
         panel.StopButtonClicked += (_, id) => _serverStop.Next(id);
         panel.UpdateButtonClicked += (_, config) => _configChange.Next(config);
 
-        var menu = new ContextMenuStrip();
-        menu.RenderMode = ToolStripRenderMode.System;
+        var menu = new ContextMenuStrip
+        {
+            RenderMode = ToolStripRenderMode.System
+        };
         menu.Items.Add(new ToolStripMenuItem("Remove", null, (_, _) => RemoveClicked(server.Id)));
 
         panel.ContextMenuStrip = menu;
@@ -120,7 +122,7 @@ public sealed partial class MainForm : Form, IUserInterface
         return panel;
     }
 
-    private ServerMenuItemGroup CreateMenuItemGrup(IServer server)
+    private ServerMenuItemGroup CreateMenuItemGroup(IServer server)
     {
         ServerMenuItemGroup group = server switch
         {
@@ -139,7 +141,7 @@ public sealed partial class MainForm : Form, IUserInterface
     public void AddServer(IServer server)
     {
         _windowPanels.Add(CreatePanel(server));
-        _toolStripGroups.Add(CreateMenuItemGrup(server));
+        _toolStripGroups.Add(CreateMenuItemGroup(server));
 
         DrawWindow();
         SetContextMenu();
@@ -181,7 +183,7 @@ public sealed partial class MainForm : Form, IUserInterface
             MainContextMenuStrip.Items.AddRange(toolStripMenuItemGroup.ItemsArray);
         }
 
-        AutostartStripMenuItem.Checked = IsAutostart;
+        AutostartStripMenuItem.Checked = IsAutoStart;
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
     }
 
@@ -234,9 +236,9 @@ public sealed partial class MainForm : Form, IUserInterface
         Hide();
     }
 
-    private void AutostartStripMenuItem_Click(object sender, EventArgs e)
+    private void AutoStartStripMenuItem_Click(object sender, EventArgs e)
     {
-        _autostartChange.Next(!IsAutostart);
+        _autoStartChange.Next(!IsAutoStart);
     }
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -302,7 +304,7 @@ public sealed partial class MainForm : Form, IUserInterface
         }
     }
 
-    public void SetAutostartValue(bool value) => IsAutostart = value;
+    public void SetAutoStartValue(bool value) => IsAutoStart = value;
 
     public void ShowError(string message)
     {

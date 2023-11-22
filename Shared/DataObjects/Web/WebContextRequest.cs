@@ -1,8 +1,6 @@
 ﻿namespace Shared.DataObjects.Web;
 
-public class WebContextRequest : IRequest
+public class WebContextRequest(string path) : IRequest
 {
-    public string Path { get; set; }
-
-    public WebContextRequest(string path) => Path = path;
+    public string Path { get; set; } = path;
 }

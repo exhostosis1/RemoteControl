@@ -5,17 +5,10 @@ using System.Net;
 
 namespace Servers.Middleware;
 
-public class StaticFilesMiddleware : IWebMiddleware
+public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string directory = "www") : IWebMiddleware
 {
-    private readonly string _contentFolder;
-    private readonly ILogger<StaticFilesMiddleware> _logger;
-
-    public StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string directory = "www")
-    {
-        _logger = logger;
-        _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
-    }
-
+    private readonly string _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
+    private readonly ILogger<StaticFilesMiddleware> _logger = logger;
     private static readonly Dictionary<string, string> ContentTypes = new()
     {
         { ".html", "text/html" },

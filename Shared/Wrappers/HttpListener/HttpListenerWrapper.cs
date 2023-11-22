@@ -11,14 +11,9 @@ namespace Shared.Wrappers.HttpListener;
 
 public class HttpListenerWrapper : IHttpListener
 {
-    class LocalResponse : WebContextResponse
+    class LocalResponse(HttpListenerResponse response) : WebContextResponse
     {
-        private readonly HttpListenerResponse _response;
-
-        public LocalResponse(HttpListenerResponse response)
-        {
-            _response = response;
-        }
+        private readonly HttpListenerResponse _response = response;
 
         public override void Close()
         {
@@ -102,7 +97,7 @@ public class HttpListenerWrapper : IHttpListener
         Prefixes = new PrefixCollection(_listener.Prefixes);
     }
 
-    private WebContext ConvertContext(HttpListenerContext context)
+    private static WebContext ConvertContext(HttpListenerContext context)
     {
         var request = new WebContextRequest(context.Request.RawUrl ?? string.Empty);
         var response = new LocalResponse(context.Response);

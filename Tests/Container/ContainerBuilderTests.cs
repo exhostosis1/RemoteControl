@@ -73,7 +73,7 @@ public class ContainerBuilderTests: IDisposable
     public static IEnumerable<object[]> TestObjectData =>
         new List<object[]>
         {
-            new object[] { typeof(object), new object() },
+            new object[] { typeof(object), new() },
             new object[] { typeof(ITestInterface), new TestClassWithInterface() },
             new object[] { typeof(ITestInterface), new TestDerivedClassWithInterfaceA() },
             new object[] { typeof(ITestInterface), new TestDerivedClassWithInterfaceB() },
@@ -97,7 +97,7 @@ public class ContainerBuilderTests: IDisposable
     }
 
     [Fact]
-    public void RegistareObjectGenericTests()
+    public void RegisterObjectGenericTests()
     {
         _registration.Setup(x => x.RegisterType(It.IsAny<Type>(), It.IsAny<Type>(), It.IsAny<Delegate>(), It.IsAny<Lifetime>()));
         _registration.Setup(x => x.AddCache(It.IsAny<object>()));
@@ -192,5 +192,6 @@ public class ContainerBuilderTests: IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

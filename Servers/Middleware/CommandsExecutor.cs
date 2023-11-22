@@ -6,11 +6,11 @@ using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class CommandsExecutor : IBotMiddleware
+public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<CommandsExecutor> logger) : IBotMiddleware
 {
-    private readonly ILogger<CommandsExecutor> _logger;
+    private readonly ILogger<CommandsExecutor> _logger = logger;
 
-    private readonly IGeneralControlProvider _controlFacade;
+    private readonly IGeneralControlProvider _controlFacade = controlFacade;
 
     private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
@@ -31,12 +31,6 @@ public class CommandsExecutor : IBotMiddleware
         Resize = true,
         Persistent = true
     };
-
-    public CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<CommandsExecutor> logger)
-    {
-        _logger = logger;
-        _controlFacade = controlFacade;
-    }
 
     public event EventHandler<BotContext>? OnNext;
 

@@ -45,6 +45,6 @@ public class LoggingMiddlewareTests : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }

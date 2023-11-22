@@ -24,18 +24,10 @@ public class MiddlewareChain<T>: IMiddlewareChain<T> where T: IContext
     }
 }
 
-public class WebMiddlewareChain: MiddlewareChain<WebContext>, IWebMiddlewareChain
+public class WebMiddlewareChain(IWebMiddleware[] middleware) : MiddlewareChain<WebContext>(middleware), IWebMiddlewareChain
 {
-    // ReSharper disable once CoVariantArrayConversion
-    public WebMiddlewareChain(IWebMiddleware[] middleware) : base(middleware)
-    {
-    }
 }
 
-public class BotMiddlewareChain: MiddlewareChain<BotContext>, IBotMiddlewareChain
+public class BotMiddlewareChain(IBotMiddleware[] middleware) : MiddlewareChain<BotContext>(middleware), IBotMiddlewareChain
 {
-    // ReSharper disable once CoVariantArrayConversion
-    public BotMiddlewareChain(IBotMiddleware[] middleware) : base(middleware)
-    {
-    }
 }

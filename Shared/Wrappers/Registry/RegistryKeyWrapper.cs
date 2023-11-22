@@ -42,6 +42,7 @@ public class RegistryKeyWrapper : IRegistryKey
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _key.Dispose();
     }
 }

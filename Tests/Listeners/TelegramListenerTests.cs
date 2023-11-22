@@ -103,8 +103,8 @@ public class TelegramListenerTests : IDisposable
             {
                 return new UpdateResponse
                 {
-                    Ok = true, Result = new[]
-                    {
+                    Ok = true, Result =
+                    [
                         new Update
                         {
                             Message = new Message
@@ -121,7 +121,7 @@ public class TelegramListenerTests : IDisposable
                                 ParsedDate = DateTime.Now
                             }
                         }
-                    }
+                    ]
                 };
             })
             .ReturnsAsync(() =>
@@ -129,8 +129,8 @@ public class TelegramListenerTests : IDisposable
                 return new UpdateResponse
                 {
                     Ok = true,
-                    Result = new[]
-                    {
+                    Result =
+                    [
                         new Update
                         {
                             Message = new Message
@@ -147,7 +147,7 @@ public class TelegramListenerTests : IDisposable
                                 ParsedDate = DateTime.Now
                             }
                         }
-                    }
+                    ]
                 };
             })
             .ReturnsAsync(() =>
@@ -155,8 +155,8 @@ public class TelegramListenerTests : IDisposable
                 return new UpdateResponse
                 {
                     Ok = true,
-                    Result = new[]
-                    {
+                    Result =
+                    [
                         new Update
                         {
                             Message = new Message
@@ -173,7 +173,7 @@ public class TelegramListenerTests : IDisposable
                                 ParsedDate = DateTime.Now
                             }
                         }
-                    }
+                    ]
                 };
             });
 
@@ -200,14 +200,14 @@ public class TelegramListenerTests : IDisposable
                 return null!;
             });
 
-        _listener.StartListen(new BotParameters("", "", new List<string>()));
+        _listener.StartListen(new BotParameters("", "", []));
 
         Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await _listener.GetContextAsync(new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token));
     }
 
-
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 }

@@ -5,7 +5,7 @@ namespace Shared.Wrappers.TaskServiceWrapper;
 
 public class TaskTriggerCollection : IEnumerable<TaskTrigger>
 {
-    private readonly List<TaskTrigger> _triggers = new();
+    private readonly List<TaskTrigger> _triggers = [];
 
     public virtual void Add(TaskTrigger trigger) => _triggers.Add(trigger);
 

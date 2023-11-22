@@ -26,9 +26,9 @@ internal abstract class ServerPanel : Panel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    protected readonly CheckBox AutostartBox = new()
+    protected readonly CheckBox AutoStartBox = new()
     {
-        Text = @"Autostart",
+        Text = @"AutoStart",
         Location = new Point(419, 34),
         Size = new Size(75, 19),
     };
@@ -91,20 +91,20 @@ internal abstract class ServerPanel : Panel
         StopButton.Click += StopButtonClick;
         UpdateButton.Click += UpdateButtonClick;
 
-        AutostartBox.Checked = server.Config.Autostart;
+        AutoStartBox.Checked = server.Config.AutoStart;
 
         NameTextBox.TextChanged += EnableUpdateButton;
-        AutostartBox.CheckedChanged += EnableUpdateButton;
+        AutoStartBox.CheckedChanged += EnableUpdateButton;
 
-        Controls.AddRange(new Control[]
-        {
+        Controls.AddRange(
+        [
             NameLabel,
             NameTextBox,
-            AutostartBox,
+            AutoStartBox,
             StartButton,
             StopButton,
             UpdateButton
-        });
+        ]);
 
         Unsubscriber = Server.Status.Subscribe(new MyObserver<bool>(SetButtons));
         Disposed += (_, _) => Unsubscriber.Dispose();

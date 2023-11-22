@@ -26,7 +26,7 @@ public class WebConfig : CommonConfig
         if (ReferenceEquals(this, other)) return true;
         if (other is not WebConfig that) return false;
 
-        return Name == that.Name && Autostart == that.Autostart && Scheme == that.Scheme &&
+        return Name == that.Name && AutoStart == that.AutoStart && Scheme == that.Scheme &&
                Host == that.Host && Port == that.Port;
     }
 

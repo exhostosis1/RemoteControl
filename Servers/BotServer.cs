@@ -6,11 +6,8 @@ using Shared.Server;
 
 namespace Servers;
 
-public class BotServer : GenericServer<BotContext, BotConfig, BotParameters>
+public class BotServer(IBotListener listener, IBotMiddlewareChain middleware,
+    ILogger<BotServer> logger) : GenericServer<BotContext, BotConfig, BotParameters>(listener,
+    middleware, logger)
 {
-    public BotServer(IBotListener listener, IBotMiddlewareChain middleware,
-        ILogger<BotServer> logger) : base(listener,
-        middleware, logger)
-    {
-    }
 }

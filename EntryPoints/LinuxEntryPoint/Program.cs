@@ -1,4 +1,4 @@
-﻿using Autostart;
+﻿using AutoStart;
 using ConfigProviders;
 using ConsoleUI;
 using ControlProviders.Wrappers;
@@ -15,7 +15,7 @@ public static class Program
         var app = new AppBuilder(new ContainerBuilder())
             .RegisterBasicDependencies()
             .RegisterConfig<LocalFileConfigProvider>()
-            .RegisterAutostart<DummyAutostartService>()
+            .RegisterAutoStart<DummyAutoStartService>()
             .RegisterUserInterface<MainConsole>()
             .RegisterInputs<YdoToolWrapper, YdoToolWrapper, DummyWrapper, DummyWrapper>()
             .Build();

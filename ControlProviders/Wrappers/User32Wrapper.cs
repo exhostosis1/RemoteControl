@@ -21,7 +21,7 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
     private record struct UniversalInput
     {
         [FieldOffset(0)]
-        public Mouseinput Mouse;
+        public MouseInput Mouse;
 
         [FieldOffset(0)]
         public KeyboardInput Keyboard;
@@ -36,7 +36,7 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
         public nint ExtraInfo;
     }
 
-    private record struct Mouseinput
+    private record struct MouseInput
     {
         public int X;
         public int Y;
@@ -199,7 +199,7 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
     {
         _buffer[0].Type = (uint)InputType.Mouse;
 
-        _buffer[0].Data.Mouse = new Mouseinput
+        _buffer[0].Data.Mouse = new MouseInput
         {
             Flags = (uint)MouseFlag.Move,
             X = x,
@@ -223,7 +223,7 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
 
         _buffer[0].Type = (uint)InputType.Mouse;
 
-        _buffer[0].Data.Mouse = new Mouseinput
+        _buffer[0].Data.Mouse = new MouseInput
         {
             Flags = (uint)user32Button,
         };
@@ -235,7 +235,7 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
     {
         _buffer[0].Type = (uint)InputType.Mouse;
 
-        _buffer[0].Data.Mouse = new Mouseinput
+        _buffer[0].Data.Mouse = new MouseInput
         {
             Flags = (uint)MouseFlag.VerticalWheel,
             MouseData = (uint)scrollAmount,

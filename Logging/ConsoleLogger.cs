@@ -5,15 +5,9 @@ using Shared.Logging.Interfaces;
 
 namespace Logging;
 
-public class ConsoleLogger : AbstractLogger
+public class ConsoleLogger(IConsole console, LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null) : AbstractLogger(level, formatter)
 {
-    private readonly IConsole _console;
-
-    public ConsoleLogger(IConsole console, LoggingLevel level = LoggingLevel.Info, IMessageFormatter? formatter = null)
-        : base(level, formatter)
-    {
-        _console = console;
-    }
+    private readonly IConsole _console = console;
 
     protected override void ProcessInfo(string message)
     {

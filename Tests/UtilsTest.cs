@@ -106,12 +106,14 @@ public class UtilsTest : IDisposable
 
     private class Api1Controller : IApiController
     {
-        public IActionResult Method1(string? p)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public IActionResult Method1(string? _)
         {
             return new OkResult();
         }
 
-        public IActionResult Method2(string? p)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public IActionResult Method2(string? _)
         {
             return new OkResult();
         }
@@ -119,25 +121,23 @@ public class UtilsTest : IDisposable
 
     private class Api2Controller : IApiController
     {
-        public IActionResult Method2(string? p)
-        {
-            return new OkResult();
-        }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public IActionResult Method2(string? _) => new OkResult();
     }
 
     private class Api3Controller : IApiController
     {
-        public int Method3(string? p)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public int Method3(string? _)
         {
             return 0;
         }
 
-        public IActionResult Method4(string? p)
-        {
-            return new OkResult();
-        }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public IActionResult Method4(string? _) => new OkResult();
 
-        public IActionResult Method5(int p)
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
+        public IActionResult Method5(int _)
         {
             return new OkResult();
         }
@@ -168,6 +168,6 @@ public class UtilsTest : IDisposable
 
     public void Dispose()
     {
-
+        GC.SuppressFinalize(this);
     }
 }
