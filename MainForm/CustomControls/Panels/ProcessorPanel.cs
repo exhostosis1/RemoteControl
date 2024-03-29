@@ -1,5 +1,5 @@
-﻿using Shared.Config;
-using Shared.Observable;
+﻿using System.ComponentModel;
+using Shared.Config;
 using Shared.Server;
 
 namespace MainUI.CustomControls.Panels;
@@ -9,7 +9,6 @@ internal abstract class ServerPanel : Panel
     public int Id { get; init; }
     protected readonly IServer Server;
     protected readonly SynchronizationContext? SynchronizationContext;
-    protected readonly IDisposable Unsubscriber;
     protected Theme Theme { get; set; } = new();
 
     protected readonly Label NameLabel = new()
@@ -78,7 +77,7 @@ internal abstract class ServerPanel : Panel
 
         SynchronizationContext = SynchronizationContext.Current;
 
-        if (server.Status.Working)
+        if (server.Status)
         {
             StopButton.Visible = true;
         }
@@ -106,8 +105,8 @@ internal abstract class ServerPanel : Panel
             UpdateButton
         ]);
 
-        Unsubscriber = Server.Status.Subscribe(new MyObserver<bool>(SetButtons));
-        Disposed += (_, _) => Unsubscriber.Dispose();
+        Server.PropertyChanged += SetButtons;
+        Disposed += (_, _) => Server.PropertyChanged -= SetButtons;
     }
 
     public void ApplyTheme(Theme theme)
@@ -141,10 +140,12 @@ internal abstract class ServerPanel : Panel
         StopButton.Enabled = false;
     }
 
-    private void SetButtons(bool working)
+    private void SetButtons(object? _, PropertyChangedEventArgs args)
     {
-        var buttonToDisable = working ? StartButton : StopButton;
-        var buttonToEnable = working ? StopButton : StartButton;
+        if(args.PropertyName != nameof(Server.Status)) return;
+
+        var buttonToDisable = Server.Status ? StartButton : StopButton;
+        var buttonToEnable = Server.Status ? StopButton : StartButton;
 
         SynchronizationContext?.Post(_ =>
         {

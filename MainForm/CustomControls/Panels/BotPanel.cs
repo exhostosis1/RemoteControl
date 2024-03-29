@@ -1,5 +1,4 @@
 ﻿using Shared.Config;
-using Shared.Observable;
 using Shared.Server;
 
 namespace MainUI.CustomControls.Panels;
@@ -49,8 +48,6 @@ internal sealed class BotPanel : ServerPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    private readonly IDisposable _unsubscriber;
-
     public BotPanel(IServer<BotConfig> server) : base(server)
     {
         _apiUrlTextBox.Text = server.CurrentConfig.ApiUri;
@@ -61,28 +58,27 @@ internal sealed class BotPanel : ServerPanel
         _apiUrlTextBox.TextChanged += EnableUpdateButton;
         _userIdsListBox.TextChanged += EnableUpdateButton;
 
-        Controls.AddRange(new Control[]
-        {
+        Controls.AddRange(
+        [
             _apiUrlLabel,
             _apiUrlTextBox,
             _apiKeyLabel,
             _apiKeyTextBox,
             _userIdsLabel,
             _userIdsListBox
-        });
+        ]);
 
-        _unsubscriber = server.Subscribe(new MyObserver<BotConfig>(ConfigChanged));
+        server.PropertyChanged += (_, args) =>
+        {
+            if(args.PropertyName != nameof(server.Config)) return;
 
+            NameTextBox.Text = server.CurrentConfig.Name;
+            AutoStartBox.Checked = server.CurrentConfig.AutoStart;
+            _apiUrlTextBox.Text = server.CurrentConfig.ApiUri;
+            _apiKeyTextBox.Text = server.CurrentConfig.ApiKey;
+            _userIdsListBox.Text = string.Join(Environment.NewLine, server.CurrentConfig.Usernames);
+        };
         Disposed += LocalDispose;
-    }
-
-    private void ConfigChanged(BotConfig config)
-    {
-        NameTextBox.Text = config.Name;
-        AutoStartBox.Checked = config.AutoStart;
-        _apiUrlTextBox.Text = config.ApiUri;
-        _apiKeyTextBox.Text = config.ApiKey;
-        _userIdsListBox.Text = string.Join(Environment.NewLine, config.Usernames);
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)
@@ -133,7 +129,5 @@ internal sealed class BotPanel : ServerPanel
         _userIdsListBox.TextChanged -= EnableUpdateButton;
 
         Disposed -= LocalDispose;
-
-        _unsubscriber.Dispose();
     }
 }

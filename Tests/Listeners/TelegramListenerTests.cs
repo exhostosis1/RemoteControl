@@ -4,7 +4,6 @@ using Shared.Bots.Telegram;
 using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.Listener;
 using Shared.Logging.Interfaces;
-using Shared.Observable;
 
 namespace UnitTests.Listeners;
 

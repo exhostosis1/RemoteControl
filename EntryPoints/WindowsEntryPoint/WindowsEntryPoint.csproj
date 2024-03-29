@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0-windows10.0.22000.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
@@ -19,16 +19,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Win32.SystemEvents" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\ApiControllers\ApiControllers.csproj" />
     <ProjectReference Include="..\..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\..\ConfigProviders\ConfigProviders.csproj" />
     <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" />
-    <ProjectReference Include="..\..\MainForm\MainUI.csproj" />
     <ProjectReference Include="..\..\Servers\Servers.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
-    <ProjectReference Include="..\..\Web\Web.csproj" />
   </ItemGroup>
 
 </Project>

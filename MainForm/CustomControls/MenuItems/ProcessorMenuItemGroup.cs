@@ -1,5 +1,4 @@
-﻿using Shared.Observable;
-using Shared.Server;
+﻿using Shared.Server;
 
 namespace MainUI.CustomControls.MenuItems;
 
@@ -20,13 +19,9 @@ internal abstract class ServerMenuItemGroup : IDisposable
 
     public ToolStripItem[] ItemsArray => [.. Items];
 
-    protected readonly IDisposable StatusUnsubscriber;
-
     public event EventHandler<string>? OnDescriptionClick;
     public event EventHandler<int>? OnStartClick;
     public event EventHandler<int>? OnStopClick;
-
-    protected event EventHandler? Disposed;
 
     protected ServerMenuItemGroup(IServer server)
     {
@@ -36,20 +31,22 @@ internal abstract class ServerMenuItemGroup : IDisposable
         NameItem.Text = server.Config.Name;
         Items.Add(NameItem);
 
-        DescriptionItem.Enabled = server.Status.Working;
+        DescriptionItem.Enabled = server.Status;
         Items.Add(DescriptionItem);
 
-        StartStopItem.Text = !server.Status.Working ? @"Start" : @"Stop";
+        StartStopItem.Text = !server.Status ? @"Start" : @"Stop";
         StartStopItem.Click += StartStopClicked;
         Items.Add(StartStopItem);
 
         Items.Add(new ToolStripSeparator());
 
-        StatusUnsubscriber = server.Status.Subscribe(new MyObserver<bool>(working =>
+        server.PropertyChanged += (_, args) =>
         {
-            StartStopItem.Text = working ? @"Stop" : @"Start";
-            DescriptionItem.Enabled = working;
-        }));
+            if(args.PropertyName != nameof(server.Status)) return;
+            
+            StartStopItem.Text = server.Status ? @"Stop" : @"Start";
+            DescriptionItem.Enabled = server.Status;
+        };
     }
 
     private void StartStopClicked(object? _, EventArgs args)
@@ -69,11 +66,8 @@ internal abstract class ServerMenuItemGroup : IDisposable
     public void Dispose()
     {
         StartStopItem.Click -= StartStopClicked;
-        StatusUnsubscriber.Dispose();
 
         NameItem.Dispose();
         DescriptionItem.Dispose();
-
-        Disposed?.Invoke(this, EventArgs.Empty);
     }
 }

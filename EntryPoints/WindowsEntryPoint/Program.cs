@@ -9,16 +9,25 @@ using Shared.Logging;
 using Shared.Server;
 using Shared.Wrappers.Registry;
 using System.Runtime.InteropServices;
+using Shared.Logging.Interfaces;
 
 namespace WindowsEntryPoint;
 
-public static class Program
+public class Main
 {
-    private static int _id;
-    private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
-        new(servers.Select(x => x.Config));
+    private int _id = 0;
+    private List<int> _ids = [];
+    private readonly List<IServer> _servers;
+    private readonly ILogger<Main> _logger;
+    private readonly ServerFactory _serverFactory;
+    private readonly LocalFileConfigProvider _configProvider;
+    private readonly RegistryAutoStartService _autoStartService;
 
-    public static void Main()
+    public event EventHandler<IServer>? ServerAdded;
+    public event EventHandler<bool>? AutostartChanged;
+    public event EventHandler<List<IServer>>? ServersReady;
+
+    public Main()
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
@@ -29,30 +38,25 @@ public static class Program
         var logger = new FileLogger("error.log");
 #endif
 
-        var ui = new MainUI.MainForm();
-        var configProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger), "config.ini");
-        var autoStartService =
+        _configProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger), "config.ini");
+        _autoStartService =
             new RegistryAutoStartService(new RegistryWrapper(), new LogWrapper<RegistryAutoStartService>(logger));
 
-        var serverFactory = new ServerFactory(logger);
-        
-        var type = typeof(Program);
+        _serverFactory = new ServerFactory(logger);
 
-        var ids = new List<int>();
+        var config = _configProvider.GetConfig();
 
-        var config = configProvider.GetConfig();
-
-        var servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
+        _servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
         {
             switch (x)
             {
                 case WebConfig s:
-                    var server = serverFactory.GetServer();
+                    var server = _serverFactory.GetServer();
                     server.CurrentConfig = s;
                     server.Id = _id++;
                     return server;
                 case BotConfig b:
-                    var bot = serverFactory.GetBot();
+                    var bot = _serverFactory.GetBot();
                     bot.CurrentConfig = b;
                     bot.Id = _id++;
                     return bot;
@@ -61,15 +65,105 @@ public static class Program
             }
         }).ToList();
 
+        _logger = new LogWrapper<Main>(logger);
+    }
+
+    private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
+        new(servers.Select(x => x.Config));
+
+    public void ServerStart(int? id)
+    {
+        if (!id.HasValue)
+        {
+            _servers.ForEach(x => x.Start());
+        }
+        else
+        {
+            _servers.FirstOrDefault(x => x.Id == id)?.Start();
+        }
+    }
+
+    public void ServerStop(int? id)
+    {
+        if (!id.HasValue)
+        {
+            _servers.ForEach(x => x.Stop());
+        }
+        else
+        {
+            _servers.FirstOrDefault(x => x.Id == id)?.Stop();
+        }
+    }
+
+    public void ServerAdd(ServerType mode)
+    {
+        IServer server = mode switch
+        {
+            ServerType.Http => _serverFactory.GetServer(),
+            ServerType.Bot => _serverFactory.GetBot(),
+            _ => throw new NotSupportedException()
+        };
+
+        server.Id = _id++;
+
+        _servers.Add(server);
+        ServerAdded?.Invoke(this, server);
+    }
+
+    public void ServerRemove(int id)
+    {
+        var server = _servers.FirstOrDefault(x => x.Id == id);
+        if (server == null)
+            return;
+
+        server.Stop();
+        _servers.Remove(server);
+
+        _configProvider.SetConfig(GetConfig(_servers));
+    }
+
+    public void AutoStartChange(bool value)
+    {
+        _autoStartService.SetAutoStart(value);
+        AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
+    }
+
+    public void ConfigChange((int, CommonConfig) configTuple)
+    {
+        var server = _servers.FirstOrDefault(x => x.Id == configTuple.Item1);
+        if (server == null)
+            return;
+
+        if (server.Status)
+        {
+            server.Restart(configTuple.Item2);
+        }
+        else
+        {
+            server.Config = configTuple.Item2;
+        }
+
+        var config = GetConfig(_servers);
+        _configProvider.SetConfig(config);
+    }
+
+    public void AppClose(object? _)
+    {
+        Environment.Exit(0);
+    }
+
+    public void Run()
+    {
         SystemEvents.SessionSwitch += (_, args) =>
         {
             switch (args.Reason)
             {
                 case SessionSwitchReason.SessionLock:
                     {
-                        logger.Log(type, "Stopping servers due to logout", LoggingLevel.Info);
+                        _logger.LogInfo("Stopping servers due to logout");
 
-                        ids = servers.Where(x => x.Status.Working).Select(x =>
+
+                        _ids = _servers.Where(x => x.Status).Select(x =>
                         {
                             x.Stop();
                             return x.Id;
@@ -79,9 +173,9 @@ public static class Program
                     }
                 case SessionSwitchReason.SessionUnlock:
                     {
-                        logger.Log(type, "Restoring servers", LoggingLevel.Info);
+                        _logger.LogInfo("Restoring servers");
 
-                        ids.ForEach(id => servers.Single(s => s.Id == id).Start());
+                        _ids.ForEach(id => _servers.Single(s => s.Id == id).Start());
                         break;
                     }
                 case SessionSwitchReason.ConsoleConnect:
@@ -98,100 +192,19 @@ public static class Program
 
         try
         {
-            servers.ForEach(x =>
+            _servers.ForEach(x =>
             {
                 if (x.Config.AutoStart)
                     x.Start();
             });
 
-            ui.SetAutoStartValue(autoStartService.CheckAutoStart());
+            AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
 
-            ui.ServerStart.Subscribe(new MyObserver<int?>(id =>
-            {
-                if (!id.HasValue)
-                {
-                    servers.ForEach(x => x.Start());
-                }
-                else
-                {
-                    servers.FirstOrDefault(x => x.Id == id)?.Start();
-                }
-            }));
-
-            ui.ServerStop.Subscribe(new MyObserver<int?>(id =>
-            {
-                if (!id.HasValue)
-                {
-                    servers.ForEach(x => x.Stop());
-                }
-                else
-                {
-                    servers.FirstOrDefault(x => x.Id == id)?.Stop();
-                }
-            }));
-
-            ui.ServerAdd.Subscribe(new MyObserver<ServerType>(mode =>
-            {
-                IServer server = mode switch
-                {
-                    ServerType.Http => serverFactory.GetServer(),
-                    ServerType.Bot => serverFactory.GetBot(),
-                    _ => throw new NotSupportedException()
-                };
-
-                server.Id = _id++;
-
-                servers.Add(server);
-                ui.AddServer(server);
-            }));
-
-            ui.ServerRemove.Subscribe(new MyObserver<int>(id =>
-            {
-                var server = servers.FirstOrDefault(x => x.Id == id);
-                if (server == null)
-                    return;
-
-                server.Stop();
-                servers.Remove(server);
-
-                configProvider.SetConfig(GetConfig(servers));
-            }));
-
-            ui.AutoStartChange.Subscribe(new MyObserver<bool>(value =>
-            {
-                autoStartService.SetAutoStart(value);
-                ui.SetAutoStartValue(autoStartService.CheckAutoStart());
-            }));
-
-            ui.ConfigChange.Subscribe(new MyObserver<(int, CommonConfig)>(configTuple =>
-            {
-                var server = servers.FirstOrDefault(x => x.Id == configTuple.Item1);
-                if (server == null)
-                    return;
-
-                if (server.Status.Working)
-                {
-                    server.Restart(configTuple.Item2);
-                }
-                else
-                {
-                    server.Config = configTuple.Item2;
-                }
-
-                config = GetConfig(servers);
-                configProvider.SetConfig(config);
-            }));
-
-            ui.AppClose.Subscribe(new MyObserver<object?>(_ =>
-            {
-                Environment.Exit(0);
-            }));
-
-            ui.RunUI(servers);
+            ServersReady?.Invoke(this, _servers);
         }
         catch (Exception e)
         {
-            logger.Log(type, e.Message, LoggingLevel.Error);
+            _logger.LogError(e.Message);
         }
     }
 }

@@ -17,8 +17,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Listeners", "Listeners\List
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{65364FAB-64F4-4ACF-BEEF-F34E03486E06}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EntryPoints", "EntryPoints", "{AB452149-3967-40C1-92A2-E0CE199B7869}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiControllers", "ApiControllers\ApiControllers.csproj", "{508AC867-4A87-458D-BA6B-3BB6F1CD82AF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsEntryPoint", "EntryPoints\WindowsEntryPoint\WindowsEntryPoint.csproj", "{415B78B5-812F-4B4C-BF05-25AC78E1A034}"
@@ -27,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "Tests\UnitTest
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Servers", "Servers\Servers.csproj", "{9022D531-CCF6-4F0B-BC8A-2809C3F29BFB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MainUI", "MainForm\MainUI.csproj", "{DB85D866-CC20-4897-9022-7EAAB5767940}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainUI", "MainForm\MainUI.csproj", "{DB85D866-CC20-4897-9022-7EAAB5767940}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -286,9 +284,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{415B78B5-812F-4B4C-BF05-25AC78E1A034} = {AB452149-3967-40C1-92A2-E0CE199B7869}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7E9C0543-58E3-4745-AFC1-0BF303A4B24E}

@@ -1,5 +1,4 @@
 ﻿using Shared.Config;
-using Shared.Observable;
 using Shared.Server;
 
 namespace MainUI.CustomControls.Panels;
@@ -80,18 +79,18 @@ internal class HttpPanel : ServerPanel
             _portTextBox
         });
 
-        _unsubscriber = server.Subscribe(new MyObserver<WebConfig>(ConfigChanged));
+        server.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(server.Config)) return;
+
+            NameTextBox.Text = server.Config.Name;
+            AutoStartBox.Checked = server.CurrentConfig.AutoStart;
+            _schemeTextBox.Text = server.CurrentConfig.Scheme;
+            _hostTextBox.Text = server.CurrentConfig.Host;
+            _portTextBox.Text = server.CurrentConfig.Port.ToString();
+        };
 
         Disposed += LocalDispose;
-    }
-
-    private void ConfigChanged(WebConfig config)
-    {
-        NameTextBox.Text = config.Name;
-        AutoStartBox.Checked = config.AutoStart;
-        _schemeTextBox.Text = config.Scheme;
-        _hostTextBox.Text = config.Host;
-        _portTextBox.Text = config.Port.ToString();
     }
 
     protected override void UpdateButtonClick(object? sender, EventArgs e)

@@ -1,8 +1,8 @@
-﻿using Shared.Config;
+﻿using System.ComponentModel;
+using Shared.Config;
 using Shared.DataObjects;
 using Shared.Listener;
 using Shared.Logging.Interfaces;
-using Shared.Observable;
 using Shared.Server;
 
 namespace Servers;
@@ -10,7 +10,7 @@ namespace Servers;
 public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where TContext : IContext where TConfig : CommonConfig, new() where TParams: StartParameters
 {
     public int Id { get; set; } = -1;
-    public ServerStatus Status { get; } = new();
+    public bool Status { get; private set; } = false;
 
     private readonly ILogger<GenericServer<TContext, TConfig, TParams>> _logger;
 
@@ -32,17 +32,17 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
 
     private TConfig _currentConfig;
 
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public TConfig CurrentConfig
     {
         get => _currentConfig;
         set
         {
             _currentConfig = value;
-            _configObservers.ForEach(x => x.OnNext(value));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Config)));
         }
     }
-
-    private readonly List<IObserver<TConfig>> _configObservers = [];
 
     protected GenericServer(IListener<TContext, TParams> listener, IMiddlewareChain<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger)
     {
@@ -52,7 +52,11 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         _listener = listener;
         _middleware = middleware;
 
-        _progress = new Progress<bool>(status => Status.Working = status);
+        _progress = new Progress<bool>(status =>
+        {
+            Status = status;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
+        });
     }
 
     public void Start(TConfig? config)
@@ -60,7 +64,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         if (config != null)
             CurrentConfig = config;
 
-        if (Status.Working)
+        if (Status)
         {
             Stop();
         }
@@ -133,7 +137,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
 
     public void Stop()
     {
-        if (!Status.Working) return;
+        if (!Status) return;
 
         try
         {
@@ -143,11 +147,5 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         catch (ObjectDisposedException) { }
 
         _listener.StopListen();
-    }
-
-    public IDisposable Subscribe(IObserver<TConfig> observer)
-    {
-        _configObservers.Add(observer);
-        return new Unsubscriber<TConfig>(_configObservers, observer);
     }
 }

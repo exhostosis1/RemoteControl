@@ -1,8 +1,8 @@
-﻿using System;
-using Shared.DataObjects.Bot;
+﻿using Shared.DataObjects.Bot;
+using System.ComponentModel;
 
 namespace Shared.Listener;
 
-public interface IBotListener : IListener<BotContext, BotParameters>, IObservable<bool>
+public interface IBotListener : IListener<BotContext, BotParameters>, INotifyPropertyChanged
 {
 }

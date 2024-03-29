@@ -1,5 +1,4 @@
 ﻿using Shared.Config;
-using Shared.Observable;
 using Shared.Server;
 
 namespace MainUI.CustomControls.MenuItems;
@@ -10,8 +9,12 @@ internal class BotMenuItemGroup : ServerMenuItemGroup
     {
         DescriptionItem.Text = server.CurrentConfig.UsernamesString;
 
-        var configUnsubscriber = server.Subscribe(new MyObserver<BotConfig>(ConfigChanged));
-        Disposed += (_, _) => configUnsubscriber.Dispose();
+        server.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(server.Config)) return;
+
+            ConfigChanged(server.CurrentConfig);
+        };
     }
 
     private void ConfigChanged(BotConfig config)

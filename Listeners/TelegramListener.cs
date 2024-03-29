@@ -1,9 +1,9 @@
 ﻿using Shared.Bots.Telegram;
 using Shared.DataObjects.Bot;
-using Shared.Logging.Interfaces;
-using System.Net.Sockets;
-using Shared.Observable;
 using Shared.Listener;
+using Shared.Logging.Interfaces;
+using System.ComponentModel;
+using System.Net.Sockets;
 
 namespace Listeners;
 
@@ -32,7 +32,7 @@ public class TelegramListener : IBotListener
     private readonly Queue<BotContextRequest> _updates = new();
     private readonly SemaphoreSlim _semaphore = new(0);
 
-    private readonly List<IObserver<bool>> _statusObservers = [];
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public TelegramListener(IBotApiProvider wrapper, ILogger<TelegramListener> logger)
     {
@@ -43,7 +43,7 @@ public class TelegramListener : IBotListener
         {
             _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
             IsListening = result;
-            _statusObservers.ForEach(x => x.OnNext(result));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
         });
     }
 
@@ -161,11 +161,5 @@ public class TelegramListener : IBotListener
         }
 
         throw new OperationCanceledException();
-    }
-
-    public IDisposable Subscribe(IObserver<bool> observer)
-    {
-        _statusObservers.Add(observer);
-        return new Unsubscriber<bool>(_statusObservers, observer);
     }
 }

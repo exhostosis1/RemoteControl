@@ -1,5 +1,4 @@
 ﻿using Shared.Config;
-using Shared.Observable;
 using Shared.Server;
 
 namespace MainUI.CustomControls.MenuItems;
@@ -11,8 +10,11 @@ internal class HttpMenuItemGroup : ServerMenuItemGroup
         DescriptionItem.Text = server.CurrentConfig.Uri.ToString();
         DescriptionItem.Click += (_, _) => DescriptionClickInvoke(DescriptionItem.Text);
 
-        var configUnsubscriber = server.Subscribe(new MyObserver<WebConfig>(ConfigChanged));
-        Disposed += (_, _) => configUnsubscriber.Dispose();
+        server.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName != nameof(server.Config)) return;
+            ConfigChanged(server.CurrentConfig);
+        };
     }
 
     private void ConfigChanged(WebConfig config)

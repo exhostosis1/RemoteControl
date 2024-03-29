@@ -4,48 +4,10 @@ using Shared;
 using Shared.Config;
 using Shared.Enums;
 using Shared.Server;
-using Shared.UI;
 using Windows.UI.ViewManagement;
+using WindowsEntryPoint;
 
 namespace MainUI;
-
-public class ViewModel()
-{
-    public void ServerStart(int? id)
-    {
-
-    }
-
-    public void ServerStop(int? id)
-    {
-
-    }
-
-    public void AppClose(object? _)
-    {
-
-    }
-
-    public void AutoStartChange(bool value)
-    {
-        
-    }
-
-    public void ConfigChange((int, CommonConfig) value)
-    {
-
-    }
-
-    public void ServerAdd(ServerType type)
-    {
-
-    }
-
-    public void ServerRemove(int id)
-    {
-        
-    }
-}
 
 // ReSharper disable once InconsistentNaming
 public sealed partial class MainForm : Form
@@ -81,9 +43,9 @@ public sealed partial class MainForm : Form
     private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico"));
     private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico"));
 
-    private readonly ViewModel _viewModel;
+    private readonly Main _viewModel;
 
-    public MainForm(ViewModel vm)
+    public MainForm(Main app)
     {
         InitializeComponent();
 
@@ -100,12 +62,7 @@ public sealed partial class MainForm : Form
         Height = 40;
 
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
-        _viewModel = vm;
-    }
-
-    public void RunUI(List<IServer> servers)
-    {
-        _model = servers;
+        _viewModel = app;
 
         PopulateWindowPanels();
         PopulateContextMenuGroups();
@@ -115,8 +72,9 @@ public sealed partial class MainForm : Form
 
         ApplyTheme();
 
-        Application.EnableVisualStyles();
-        Application.Run(this);
+        app.ServersReady += (_, servers) => _model = servers;
+        app.ServerAdded += AddServer;
+        app.AutostartChanged += SetAutoStartValue;
     }
 
     private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
@@ -162,7 +120,7 @@ public sealed partial class MainForm : Form
         return group;
     }
 
-    public void AddServer(IServer server)
+    private void AddServer(object? _, IServer server)
     {
         _windowPanels.Add(CreatePanel(server));
         _toolStripGroups.Add(CreateMenuItemGroup(server));
@@ -267,7 +225,7 @@ public sealed partial class MainForm : Form
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var uris = _model.Where(x => x.Status.Working && x is IServer<WebConfig>)
+        var uris = _model.Where(x => x.Status && x is IServer<WebConfig>)
             .Select(x => ((IServer<WebConfig>)x).CurrentConfig.Uri);
         Utils.AddFirewallRule(uris);
     }
@@ -330,10 +288,5 @@ public sealed partial class MainForm : Form
         }
     }
 
-    public void SetAutoStartValue(bool value) => IsAutoStart = value;
-
-    public static void ShowError(string message)
-    {
-        MessageBox.Show(message, @"Error", MessageBoxButtons.OK);
-    }
+    private void SetAutoStartValue(object? _, bool value) => IsAutoStart = value;
 }
