@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace Shared.Wrappers.TaskServiceWrapper;
+namespace Shared.Wrappers.TaskService;
 
 public class TaskActionCollection : IEnumerable<TaskAction>
 {

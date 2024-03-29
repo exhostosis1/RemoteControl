@@ -33,7 +33,7 @@ public static partial class Utils
     public static partial Regex CoordRegex();
 
     [GeneratedRegex(
-        $"(?<={ApiPath}v\\d+)\\/(?<{ControllerGroupName}>[a-z]+)\\/(?<{ActionGroupName}>[a-z]+)\\/?(?<{ParamGroupName}>.*?)(?=\\/|$)",
+        $@"(?<={ApiPath}v\d+)\/(?<{ControllerGroupName}>[a-z]+)\/(?<{ActionGroupName}>[a-z]+)\/?(?<{ParamGroupName}>.*?)(?=\/|$)",
         RegexOptions.IgnoreCase)]
     public static partial Regex ApiRegex();
 

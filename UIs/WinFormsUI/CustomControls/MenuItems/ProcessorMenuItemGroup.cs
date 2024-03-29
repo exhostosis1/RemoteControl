@@ -18,7 +18,7 @@ internal abstract class ServerMenuItemGroup : IDisposable
 
     protected readonly List<ToolStripItem> Items = [];
 
-    public ToolStripItem[] ItemsArray => Items.ToArray();
+    public ToolStripItem[] ItemsArray => [.. Items];
 
     protected readonly IDisposable StatusUnsubscriber;
 

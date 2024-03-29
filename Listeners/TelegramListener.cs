@@ -11,14 +11,9 @@ public class TelegramListener : IBotListener
 {
     private class LocalResponse(string apiUrl, string apiKey, int chatId, IBotApiProvider wrapper) : BotContextResponse
     {
-        private readonly string _apiKey = apiKey;
-        private readonly string _apiUrl = apiUrl;
-        private readonly int _chatId = chatId;
-        private readonly IBotApiProvider _wrapper = wrapper;
-
         public override void Close()
         {
-            _wrapper.SendResponse(_apiUrl, _apiKey, _chatId, Message, Buttons);
+            wrapper.SendResponse(apiUrl, apiKey, chatId, Message, Buttons);
         }
     }
 
@@ -37,7 +32,7 @@ public class TelegramListener : IBotListener
     private readonly Queue<BotContextRequest> _updates = new();
     private readonly SemaphoreSlim _semaphore = new(0);
 
-    private readonly List<IObserver<bool>> _statusObservers = new();
+    private readonly List<IObserver<bool>> _statusObservers = [];
 
     public TelegramListener(IBotApiProvider wrapper, ILogger<TelegramListener> logger)
     {
@@ -82,13 +77,12 @@ public class TelegramListener : IBotListener
 
                 foreach (var update in updates.Result)
                 {
-                    if (_usernames.Exists(x => x == update.Message?.From?.Username) &&
-                        update.Message?.Chat?.Id != null &&
-                        !string.IsNullOrWhiteSpace(update.Message.Text))
-                    {
-                        _updates.Enqueue(new BotContextRequest(apiUrl, apiKey, update.Message.Chat.Id, update.Message.Text, update.Message.ParsedDate));
-                        _semaphore.Release();
-                    }
+                    if (!_usernames.Exists(x => x == update.Message?.From?.Username) ||
+                        update.Message?.Chat?.Id == null ||
+                        string.IsNullOrWhiteSpace(update.Message.Text)) continue;
+
+                    _updates.Enqueue(new BotContextRequest(apiUrl, apiKey, update.Message.Chat.Id, update.Message.Text, update.Message.ParsedDate));
+                    _semaphore.Release();
                 }
 
                 internetMessageShown = false;

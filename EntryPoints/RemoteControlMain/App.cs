@@ -16,7 +16,7 @@ public class App
     private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
         new(servers.Select(x => x.Config));
 
-    public List<IServer> Servers { get; set; } = [];
+    public List<IServer> Servers { get; private set; } = [];
 
     private readonly ISimpleContainer _container;
 

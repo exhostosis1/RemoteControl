@@ -12,7 +12,6 @@ namespace Servers.Middleware;
 public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger) : IWebMiddleware
 {
     private readonly ControllersWithMethods _controllers = controllers.GetControllersWithMethods();
-    private readonly ILogger<ApiV1Middleware> _logger = logger;
     public static string ApiVersion => "v1";
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
@@ -27,15 +26,15 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<Ap
             return;
         }
 
-        _logger.LogInfo($"Processing api request {context.WebRequest.Path}");
+        logger.LogInfo($"Processing api request {context.WebRequest.Path}");
 
         if (!Utils.TryParsePath(context.WebRequest.Path, out var controllerName, out var actionName, out var param) 
-            || !_controllers.TryGetValue(controllerName, out ControllerMethods? controller) 
-            || !controller.TryGetValue(actionName, out Func<string?, IActionResult>? action))
+            || !_controllers.TryGetValue(controllerName, out var controller) 
+            || !controller.TryGetValue(actionName, out var action))
         {
 
             context.WebResponse.StatusCode = HttpStatusCode.NotFound;
-            _logger.LogError("Api method not found");
+            logger.LogError("Api method not found");
             return;
         }
 
@@ -51,7 +50,7 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<Ap
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
+            logger.LogError(e.Message);
 
             context.WebResponse.StatusCode = HttpStatusCode.InternalServerError;
             context.WebResponse.Payload = Encoding.UTF8.GetBytes(e.Message);

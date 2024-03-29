@@ -1,9 +1,9 @@
 ﻿using Shared.AutoStart;
 using Shared.Logging.Interfaces;
-using Shared.Wrappers.TaskServiceWrapper;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
+using Shared.Wrappers.TaskService;
 
 namespace AutoStart;
 

@@ -11,7 +11,7 @@ namespace Shared.Wrappers.HttpListener;
 
 public class HttpListenerWrapper : IHttpListener
 {
-    class LocalResponse(HttpListenerResponse response) : WebContextResponse
+    private class LocalResponse(HttpListenerResponse response) : WebContextResponse
     {
         private readonly HttpListenerResponse _response = response;
 

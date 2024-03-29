@@ -3,6 +3,7 @@ using System.Linq.Expressions;
 using AutoStart;
 using Moq;
 using Shared.Logging.Interfaces;
+using Shared.Wrappers.Registry;
 using Shared.Wrappers.RegistryWrapper;
 
 namespace UnitTests.AutoStart;

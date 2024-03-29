@@ -23,18 +23,11 @@ using Shared.Wrappers.HttpListener;
 
 namespace RemoteControlMain;
 
-public class AppBuilder
+public class AppBuilder(IContainerBuilder containerBuilder)
 {
-    private readonly IContainerBuilder _containerBuilder;
-
-    public AppBuilder(IContainerBuilder containerBuilder)
-    {
-        _containerBuilder = containerBuilder;
-    }
-
     public AppBuilder RegisterBasicDependencies()
     {
-        _containerBuilder
+        containerBuilder
 #if DEBUG
             .Register<ILogger>(new TraceLogger(new TraceWrapper()))
 #else
@@ -68,13 +61,13 @@ public class AppBuilder
 
     public AppBuilder RegisterDependency<TIn, TOut>(Lifetime lifetime) where TIn: class where TOut : TIn
     {
-        _containerBuilder.Register<TIn, TOut>(lifetime);
+        containerBuilder.Register<TIn, TOut>(lifetime);
         return this;
     }
 
     public AppBuilder RegisterDependency<T>(T obj) where T: class
     {
-        _containerBuilder.Register<T>(obj);
+        containerBuilder.Register<T>(obj);
         return this;
     }
 
@@ -103,6 +96,6 @@ public class AppBuilder
 
     public App Build()
     {
-        return new App(_containerBuilder.Build());
+        return new App(containerBuilder.Build());
     }
 }

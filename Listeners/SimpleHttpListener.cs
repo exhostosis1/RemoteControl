@@ -7,41 +7,38 @@ namespace Listeners;
 
 public class SimpleHttpListener(IHttpListener listener, ILogger<SimpleHttpListener> logger) : IWebListener
 {
-    private readonly IHttpListener _listener = listener;
-    private readonly ILogger<SimpleHttpListener> _logger = logger;
-
-    public bool IsListening => _listener.IsListening;
+    public bool IsListening => listener.IsListening;
 
     public void StartListen(WebParameters param)
     {
-        if (_listener.IsListening)
+        if (listener.IsListening)
         {
-            _listener.Stop();
+            listener.Stop();
         }
 
-        _listener.GetNew();
-        _listener.Prefixes.Add(param.Uri);
+        listener.GetNew();
+        listener.Prefixes.Add(param.Uri);
 
-        _listener.Start();
+        listener.Start();
 
-        _logger.LogInfo($"Http listener started listening on {param.Uri}");
+        logger.LogInfo($"Http listener started listening on {param.Uri}");
     }
 
     public void StopListen()
     {
-        if (_listener.IsListening)
-            _listener.Stop();
+        if (listener.IsListening)
+            listener.Stop();
 
-        _logger.LogInfo("Http listener stopped");
+        logger.LogInfo("Http listener stopped");
     }
 
     public async Task<WebContext> GetContextAsync(CancellationToken token = default)
     {
-        return await _listener.GetContextAsync();
+        return await listener.GetContextAsync();
     }
 
     public WebContext GetContext()
     {
-        return _listener.GetContext();
+        return listener.GetContext();
     }
 }

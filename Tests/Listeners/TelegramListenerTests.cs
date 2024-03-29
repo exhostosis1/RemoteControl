@@ -11,15 +11,14 @@ namespace UnitTests.Listeners;
 public class TelegramListenerTests : IDisposable
 {
     private readonly TelegramListener _listener;
-    private readonly ILogger<TelegramListener> _logger;
     private readonly Mock<IBotApiProvider> _wrapper;
 
     public TelegramListenerTests()
     {
         _wrapper = new Mock<IBotApiProvider>(MockBehavior.Strict);
-        _logger = Mock.Of<ILogger<TelegramListener>>();
+        var logger = Mock.Of<ILogger<TelegramListener>>();
 
-        _listener = new TelegramListener(_wrapper.Object, _logger);
+        _listener = new TelegramListener(_wrapper.Object, logger);
     }
 
     [Fact]
@@ -99,99 +98,90 @@ public class TelegramListenerTests : IDisposable
 
         _wrapper.SetupSequence(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => new UpdateResponse { Ok = true })
-            .ReturnsAsync(() =>
+            .ReturnsAsync(() => new UpdateResponse
             {
-                return new UpdateResponse
-                {
-                    Ok = true, Result =
-                    [
-                        new Update
+                Ok = true, Result =
+                [
+                    new Update
+                    {
+                        Message = new Message
                         {
-                            Message = new Message
+                            Chat = new Chat
                             {
-                                Chat = new Chat
-                                {
-                                    Id = 1,
-                                },
-                                From = new User
-                                {
-                                    Username = "user1"
-                                },
-                                Text = "test message 1",
-                                ParsedDate = DateTime.Now
-                            }
+                                Id = 1,
+                            },
+                            From = new User
+                            {
+                                Username = "user1"
+                            },
+                            Text = "test message 1",
+                            ParsedDate = DateTime.Now
                         }
-                    ]
-                };
+                    }
+                ]
             })
-            .ReturnsAsync(() =>
+            .ReturnsAsync(() => new UpdateResponse
             {
-                return new UpdateResponse
-                {
-                    Ok = true,
-                    Result =
-                    [
-                        new Update
+                Ok = true,
+                Result =
+                [
+                    new Update
+                    {
+                        Message = new Message
                         {
-                            Message = new Message
+                            Chat = new Chat
                             {
-                                Chat = new Chat
-                                {
-                                    Id = 1,
-                                },
-                                From = new User
-                                {
-                                    Username = "user2"
-                                },
-                                Text = "test message 2",
-                                ParsedDate = DateTime.Now
-                            }
+                                Id = 1,
+                            },
+                            From = new User
+                            {
+                                Username = "user2"
+                            },
+                            Text = "test message 2",
+                            ParsedDate = DateTime.Now
                         }
-                    ]
-                };
+                    }
+                ]
             })
-            .ReturnsAsync(() =>
+            .ReturnsAsync(() => new UpdateResponse
             {
-                return new UpdateResponse
-                {
-                    Ok = true,
-                    Result =
-                    [
-                        new Update
+                Ok = true,
+                Result =
+                [
+                    new Update
+                    {
+                        Message = new Message
                         {
-                            Message = new Message
+                            Chat = new Chat
                             {
-                                Chat = new Chat
-                                {
-                                    Id = 1,
-                                },
-                                From = new User
-                                {
-                                    Username = "user3"
-                                },
-                                Text = "test message 3",
-                                ParsedDate = DateTime.Now
-                            }
+                                Id = 1,
+                            },
+                            From = new User
+                            {
+                                Username = "user3"
+                            },
+                            Text = "test message 3",
+                            ParsedDate = DateTime.Now
                         }
-                    ]
-                };
+                    }
+                ]
             });
 
         _listener.StartListen(param);
 
         var context = await _listener.GetContextAsync();
-        Assert.True(context.BotRequest.Id == 1);
-        Assert.True(context.BotRequest.Command == "test message 1");
+        Assert.Equal(1, context.BotRequest.Id);
+        Assert.Equal("test message 1", context.BotRequest.Command);
 
         context = await _listener.GetContextAsync();
-        Assert.True(context.BotRequest.Id == 1);
-        Assert.True(context.BotRequest.Command == "test message 2");
+        Assert.Equal(1, context.BotRequest.Id);
+        Assert.Equal("test message 2", context.BotRequest.Command);
 
         _listener.StopListen();
     }
 
     [Fact]
-    public void GetContextTimeoutTest()
+    public async Task GetContextTimeoutTest()
     {
         _wrapper.Setup(x => x.GetUpdatesAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
@@ -202,7 +192,7 @@ public class TelegramListenerTests : IDisposable
 
         _listener.StartListen(new BotParameters("", "", []));
 
-        Assert.ThrowsAsync<OperationCanceledException>(async () =>
+        await Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await _listener.GetContextAsync(new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token));
     }
 

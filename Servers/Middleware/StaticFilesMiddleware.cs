@@ -8,7 +8,7 @@ namespace Servers.Middleware;
 public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string directory = "www") : IWebMiddleware
 {
     private readonly string _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
-    private readonly ILogger<StaticFilesMiddleware> _logger = logger;
+
     private static readonly Dictionary<string, string> ContentTypes = new()
     {
         { ".html", "text/html" },
@@ -25,7 +25,7 @@ public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string
     {
         var uriPath = context.WebRequest.Path;
 
-        _logger.LogInfo($"Processing file request {uriPath}");
+        logger.LogInfo($"Processing file request {uriPath}");
 
         if (uriPath.Contains(".."))
         {
@@ -42,7 +42,7 @@ public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string
 
         var extension = Path.GetExtension(path);
 
-        context.WebResponse.ContentType = ContentTypes.TryGetValue(extension, out var value) ? value : "text/plain";
+        context.WebResponse.ContentType = ContentTypes.GetValueOrDefault(extension, "text/plain");
 
         if (File.Exists(path))
         {
@@ -50,7 +50,7 @@ public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string
         }
         else
         {
-            _logger.LogError($"File not found {path}");
+            logger.LogError($"File not found {path}");
             context.WebResponse.StatusCode = HttpStatusCode.NotFound;
         }
     }

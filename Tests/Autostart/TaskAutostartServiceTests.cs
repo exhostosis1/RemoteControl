@@ -2,7 +2,7 @@
 using AutoStart;
 using Moq;
 using Shared.Logging.Interfaces;
-using Shared.Wrappers.TaskServiceWrapper;
+using Shared.Wrappers.TaskService;
 
 namespace UnitTests.AutoStart;
 

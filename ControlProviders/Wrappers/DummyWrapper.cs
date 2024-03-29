@@ -42,7 +42,7 @@ public class DummyWrapper : IKeyboardInput, IMouseInput, IDisplayInput, IAudioIn
 
     public IEnumerable<IAudioDevice> GetDevices()
     {
-        return Enumerable.Empty<IAudioDevice>();
+        return [];
     }
 
     public void SetCurrentDevice(IAudioDevice device)

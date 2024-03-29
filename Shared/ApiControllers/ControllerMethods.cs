@@ -4,11 +4,5 @@ using System.Collections.Generic;
 
 namespace Shared.ApiControllers;
 
-public class ControllerMethods : Dictionary<string, Func<string?, IActionResult>>
-{
-    public ControllerMethods() { }
-
-    public ControllerMethods(IDictionary<string, Func<string?, IActionResult>> input) : base(input)
-    {
-    }
-}
+public class ControllerMethods(IDictionary<string, Func<string?, IActionResult>> input)
+    : Dictionary<string, Func<string?, IActionResult>>(input);

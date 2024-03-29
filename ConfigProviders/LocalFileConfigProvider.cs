@@ -1,5 +1,4 @@
-﻿using Shared;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.Logging.Interfaces;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,12 +7,6 @@ namespace ConfigProviders;
 
 public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, string filePath) : IConfigProvider
 {
-    private readonly string _configPath = filePath;
-    private readonly ILogger<LocalFileConfigProvider> _logger = logger;
-
-    public LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger): this(logger, Path.Combine(AppContext.BaseDirectory, "config.ini"))
-    {}
-
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
         WriteIndented = true,
@@ -22,11 +15,11 @@ public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, st
 
     public AppConfig GetConfig()
     {
-        _logger.LogInfo($"Getting config from file {_configPath}");
+        logger.LogInfo($"Getting config from file {filePath}");
 
-        if (!File.Exists(_configPath))
+        if (!File.Exists(filePath))
         {
-            _logger.LogWarn("No config file");
+            logger.LogWarn("No config file");
             return new AppConfig();
         }
 
@@ -34,11 +27,11 @@ public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, st
 
         try
         {
-            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(_configPath));
+            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(filePath));
         }
         catch (JsonException e)
         {
-            _logger.LogError(e.Message);
+            logger.LogError(e.Message);
         }
 
         return result ?? new AppConfig();
@@ -46,9 +39,9 @@ public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, st
 
     public void SetConfig(AppConfig appConfig)
     {
-        _logger.LogInfo($"Writing config to file {_configPath}");
+        logger.LogInfo($"Writing config to file {filePath}");
 
-        File.WriteAllText(_configPath,
+        File.WriteAllText(filePath,
             JsonSerializer.Serialize(appConfig, _jsonOptions));
     }
 }

@@ -3,6 +3,7 @@ using Shared.Logging.Interfaces;
 using Shared.Wrappers.RegistryWrapper;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Shared.Wrappers.Registry;
 
 namespace ConfigProviders;
 
@@ -13,7 +14,6 @@ public class RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigPr
                   throw new Exception("Registry branch not found");
     private const string ValueName = "Config";
     private const string KeyName = "RemoteControl";
-    private readonly ILogger<RegistryConfigProvider> _logger = logger;
 
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -22,22 +22,20 @@ public class RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigPr
 
     public AppConfig GetConfig()
     {
-        _logger.LogInfo($"Getting config from registry {_regKey}");
+        logger.LogInfo($"Getting config from registry {_regKey}");
 
         var value = _regKey.GetValue(ValueName, null) as string;
 
         AppConfig? result = null;
 
-        if (!string.IsNullOrWhiteSpace(value))
+        if (string.IsNullOrWhiteSpace(value)) return result ?? new AppConfig();
+        try
         {
-            try
-            {
-                result = JsonSerializer.Deserialize<AppConfig>(value);
-            }
-            catch (JsonException e)
-            {
-                _logger.LogError(e.Message);
-            }
+            result = JsonSerializer.Deserialize<AppConfig>(value);
+        }
+        catch (JsonException e)
+        {
+            logger.LogError(e.Message);
         }
 
         return result ?? new AppConfig();
@@ -45,7 +43,7 @@ public class RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigPr
 
     public void SetConfig(AppConfig config)
     {
-        _logger.LogInfo($"Writing config to registry {_regKey}");
+        logger.LogInfo($"Writing config to registry {_regKey}");
 
         _regKey.SetValue(ValueName, JsonSerializer.Serialize(config, _jsonOptions), RegValueType.String);
     }

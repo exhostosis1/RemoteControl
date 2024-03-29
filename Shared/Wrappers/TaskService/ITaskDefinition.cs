@@ -1,4 +1,4 @@
-﻿namespace Shared.Wrappers.TaskServiceWrapper;
+﻿namespace Shared.Wrappers.TaskService;
 
 public interface ITaskDefinition
 {

@@ -8,10 +8,6 @@ namespace Servers.Middleware;
 
 public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<CommandsExecutor> logger) : IBotMiddleware
 {
-    private readonly ILogger<CommandsExecutor> _logger = logger;
-
-    private readonly IGeneralControlProvider _controlFacade = controlFacade;
-
     private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
         new()
@@ -36,43 +32,43 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<Com
 
     public void ProcessRequest(object? _, BotContext context)
     {
-        _logger.LogInfo($"Executing bot command {context.BotRequest.Command}");
+        logger.LogInfo($"Executing bot command {context.BotRequest.Command}");
 
         context.BotResponse.Buttons = _buttons;
 
         switch (context.BotRequest.Command)
         {
             case BotButtons.Pause:
-                _controlFacade.KeyboardKeyPress(KeysEnum.MediaPlayPause);
+                controlFacade.KeyboardKeyPress(KeysEnum.MediaPlayPause);
                 break;
             case BotButtons.MediaBack:
-                _controlFacade.KeyboardKeyPress(KeysEnum.MediaPrev);
+                controlFacade.KeyboardKeyPress(KeysEnum.MediaPrev);
                 break;
             case BotButtons.MediaForth:
-                _controlFacade.KeyboardKeyPress(KeysEnum.MediaNext);
+                controlFacade.KeyboardKeyPress(KeysEnum.MediaNext);
                 break;
             case BotButtons.VolumeUp:
-                var volume = _controlFacade.GetVolume();
+                var volume = controlFacade.GetVolume();
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
-                _controlFacade.SetVolume(volume);
+                controlFacade.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
                 return;
             case BotButtons.VolumeDown:
-                volume = _controlFacade.GetVolume();
+                volume = controlFacade.GetVolume();
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
-                _controlFacade.SetVolume(volume);
+                controlFacade.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
                 return;
             case BotButtons.Darken:
-                _controlFacade.DisplayOff();
+                controlFacade.DisplayOff();
                 break;
             default:
                 if (int.TryParse(context.BotRequest.Command, out volume))
                 {
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
-                    _controlFacade.SetVolume(volume);
+                    controlFacade.SetVolume(volume);
                 }
                 break;
         }

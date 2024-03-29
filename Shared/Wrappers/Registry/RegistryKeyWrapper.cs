@@ -1,5 +1,4 @@
 ﻿using Microsoft.Win32;
-using Shared.Wrappers.RegistryWrapper;
 using System;
 using System.Runtime.InteropServices;
 

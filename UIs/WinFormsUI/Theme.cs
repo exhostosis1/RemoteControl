@@ -17,6 +17,8 @@ internal class Theme
             SetThemeLocal();
         }
 
+        return;
+
         void SetThemeLocal()
         {
             item.BackColor = item is TextBox ? TextBoxBackgroundColor : BackgroundColor;

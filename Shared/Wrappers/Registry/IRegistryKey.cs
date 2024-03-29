@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Shared.Wrappers.RegistryWrapper;
+namespace Shared.Wrappers.Registry;
 
 public enum RegValueType
 {

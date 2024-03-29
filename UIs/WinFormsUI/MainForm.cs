@@ -288,12 +288,6 @@ public sealed partial class MainForm : Form, IUserInterface
             SetIconAndBarLocal();
         }
 
-        void SetIconAndBarLocal()
-        {
-            Icon = darkMode ? _lightIcon : _darkIcon;
-            DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
-        }
-
         theme.ApplyTheme(this);
         theme.ApplyTheme(MainContextMenuStrip);
 
@@ -301,6 +295,14 @@ public sealed partial class MainForm : Form, IUserInterface
         {
             if (control is ServerPanel panel)
                 panel.ApplyTheme(theme);
+        }
+
+        return;
+
+        void SetIconAndBarLocal()
+        {
+            Icon = darkMode ? _lightIcon : _darkIcon;
+            DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
         }
     }
 

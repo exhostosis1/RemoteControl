@@ -1,4 +1,6 @@
-﻿namespace Shared.Wrappers.RegistryWrapper;
+﻿using Shared.Wrappers.Registry;
+
+namespace Shared.Wrappers.RegistryWrapper;
 
 public interface IRegistry
 {

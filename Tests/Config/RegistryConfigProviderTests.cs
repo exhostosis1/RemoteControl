@@ -4,6 +4,7 @@ using ConfigProviders;
 using Moq;
 using Shared.Config;
 using Shared.Logging.Interfaces;
+using Shared.Wrappers.Registry;
 using Shared.Wrappers.RegistryWrapper;
 
 namespace UnitTests.Config;

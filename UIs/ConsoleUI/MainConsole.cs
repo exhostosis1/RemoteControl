@@ -30,7 +30,7 @@ public class MainConsole : IUserInterface
         IsAutoStart = value;
     }
 
-    private List<IServer> Model { get; set; } = new();
+    private List<IServer> Model { get; set; } = [];
 
     private bool IsAutoStart { get; set; }
 
