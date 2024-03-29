@@ -19,14 +19,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\ApiControllers\ApiControllers.csproj" />
     <ProjectReference Include="..\..\Autostart\Autostart.csproj" />
     <ProjectReference Include="..\..\ConfigProviders\ConfigProviders.csproj" />
     <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
+    <ProjectReference Include="..\..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" />
+    <ProjectReference Include="..\..\Servers\Servers.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
     <ProjectReference Include="..\..\UIs\WinFormsUI\WinFormsUI.csproj" />
     <ProjectReference Include="..\..\Web\Web.csproj" />
-    <ProjectReference Include="..\RemoteControlMain\RemoteControlMain.csproj" />
   </ItemGroup>
 
 </Project>

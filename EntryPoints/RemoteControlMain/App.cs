@@ -1,16 +1,13 @@
-﻿using Servers;
-using Shared.AutoStart;
+﻿using Shared.AutoStart;
 using Shared.Config;
-using Shared.DIContainer.Interfaces;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 using Shared.Observable;
 using Shared.Server;
 using Shared.UI;
 
 namespace RemoteControlMain;
 
-public class App
+public class App(IUserInterface ui, IConfigProvider configProvider, IAutoStartService autoStartService, ServerFactory serverFactory)
 {
     private int _id;
     private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
@@ -18,21 +15,8 @@ public class App
 
     public List<IServer> Servers { get; private set; } = [];
 
-    private readonly ISimpleContainer _container;
-
-    public ILogger Logger { get; }
-
-    public App(ISimpleContainer container)
-    {
-        _container = container;
-        Logger = _container.GetObject<ILogger>();
-    }
-
     public void Run()
     {
-        var ui = _container.GetObject<IUserInterface>();
-        var configProvider = _container.GetObject<IConfigProvider>();
-        var autoStartService = _container.GetObject<IAutoStartService>();
         var config = configProvider.GetConfig();
 
         Servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
@@ -40,12 +24,12 @@ public class App
             switch (x)
             {
                 case WebConfig s:
-                    var server = _container.GetObject<SimpleServer>();
+                    var server = serverFactory.GetServer();
                     server.CurrentConfig = s;
                     server.Id = _id++;
                     return server;
                 case BotConfig b:
-                    var bot = _container.GetObject<BotServer>();
+                    var bot = serverFactory.GetBot();
                     bot.CurrentConfig = b;
                     bot.Id = _id++;
                     return bot;
@@ -90,8 +74,8 @@ public class App
         {
             IServer server = mode switch
             {
-                ServerType.Http => _container.GetObject<SimpleServer>(),
-                ServerType.Bot => _container.GetObject<BotServer>(),
+                ServerType.Http => serverFactory.GetServer(),
+                ServerType.Bot => serverFactory.GetBot(),
                 _ => throw new NotSupportedException()
             };
 
