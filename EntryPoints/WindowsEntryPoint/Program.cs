@@ -6,10 +6,10 @@ using Shared.Config;
 using Shared.ConsoleWrapper;
 using Shared.Enums;
 using Shared.Logging;
+using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.Wrappers.Registry;
 using System.Runtime.InteropServices;
-using Shared.Logging.Interfaces;
 
 namespace WindowsEntryPoint;
 
@@ -33,12 +33,12 @@ public class Main
             return;
 
 #if DEBUG
-        var logger = new ConsoleLogger(new ConsoleWrapper());
+        var logger = new TraceLogger(new TraceWrapper());
 #else
         var logger = new FileLogger("error.log");
 #endif
 
-        _configProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger), "config.ini");
+        _configProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger), Path.Combine(Environment.CurrentDirectory, "config.ini"));
         _autoStartService =
             new RegistryAutoStartService(new RegistryWrapper(), new LogWrapper<RegistryAutoStartService>(logger));
 
@@ -151,7 +151,7 @@ public class Main
     {
         Environment.Exit(0);
     }
-
+    
     public void Run()
     {
         SystemEvents.SessionSwitch += (_, args) =>

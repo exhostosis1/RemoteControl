@@ -1,4 +1,5 @@
-﻿using Listeners;
+﻿using System.ComponentModel;
+using Listeners;
 using Moq;
 using Shared.Bots.Telegram;
 using Shared.Bots.Telegram.ApiObjects.Response;
@@ -41,9 +42,13 @@ public class TelegramListenerTests : IDisposable
                 return new UpdateResponse { Ok = true };
             });
 
-        var statusSub = _listener.Subscribe(new MyObserver<bool>(status =>
+        _listener.PropertyChanged += Handler;
+        
+        void Handler(object? _, PropertyChangedEventArgs args)
         {
-            if(status)
+            if(args.PropertyName != nameof(_listener.IsListening)) return;
+
+            if(_listener.IsListening)
             {
                 startStopMre.Set();
             }
@@ -51,7 +56,7 @@ public class TelegramListenerTests : IDisposable
             {
                 startStopMre.Reset();
             }
-        }));
+        };
 
         _listener.StartListen(param);
 
@@ -59,11 +64,15 @@ public class TelegramListenerTests : IDisposable
 
         Assert.True(_listener.IsListening);
 
-        statusSub.Dispose();
+        _listener.PropertyChanged -= Handler;
+
+        _listener.PropertyChanged += Handler2;
         
-        statusSub = _listener.Subscribe(new MyObserver<bool>(status =>
+        void Handler2(object? _, PropertyChangedEventArgs args)
         {
-            if(status)
+            if (args.PropertyName != nameof(_listener.IsListening)) return;
+
+            if (_listener.IsListening)
             {
                 startStopMre.Reset();
             }
@@ -71,7 +80,7 @@ public class TelegramListenerTests : IDisposable
             {
                 startStopMre.Set();
             }
-        }));
+        }
 
         contextMre.Wait();
 
@@ -81,7 +90,7 @@ public class TelegramListenerTests : IDisposable
 
         Assert.False(_listener.IsListening);
 
-        statusSub.Dispose();
+        _listener.PropertyChanged -= Handler2;
 
         _wrapper.Verify(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()), Times.Exactly(4));
     }

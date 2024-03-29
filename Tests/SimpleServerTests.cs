@@ -1,10 +1,10 @@
-﻿using Moq;
+﻿using System.ComponentModel;
+using Moq;
 using Servers;
 using Shared.Config;
 using Shared.DataObjects.Web;
 using Shared.Listener;
 using Shared.Logging.Interfaces;
-using Shared.Observable;
 using Shared.Server;
 
 namespace UnitTests;
@@ -50,17 +50,19 @@ public class SimpleServerTests : IDisposable
 
         var mre = new AutoResetEvent(false);
 
-        using var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
+        _server.PropertyChanged += (_, args) =>
         {
-            if (status)
+            if(args.PropertyName != nameof(_server.Status)) return;
+
+            if (_server.Status)
                 mre.Set();
-        }));
+        };
 
         _server.Start(config);
 
         mre.WaitOne();
 
-        Assert.True(_server.Status.Working);
+        Assert.True(_server.Status);
         Assert.Equal(_server.CurrentConfig, config ?? _server.DefaultConfig);
     }
 
@@ -121,34 +123,34 @@ public class SimpleServerTests : IDisposable
         });
 
         var mre = new AutoResetEvent(false);
-        var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
+        _server.PropertyChanged += Handler;
+        
+        void Handler(object? _, PropertyChangedEventArgs args)
         {
-            if (status)
+            if(args.PropertyName != nameof(_server.Status)) return;
+
+            if (_server.Status)
                 mre.Set();
-        }));
+        };
 
         _server.Start(config1);
 
         mre.WaitOne();
 
-        Assert.True(_server.Status.Working);
+        Assert.True(_server.Status);
         Assert.Equal(_server.CurrentConfig, config1);
-        
-        sub.Dispose();
 
-        sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
-        {
-            if (status)
-                mre.Set();
-        }));
+        _server.PropertyChanged -= Handler;
+
+        _server.PropertyChanged += Handler;
 
         _server.Restart(config2);
 
         mre.WaitOne();
 
-        sub.Dispose();
+        _server.PropertyChanged -= Handler;
 
-        Assert.True(_server.Status.Working);
+        Assert.True(_server.Status);
         Assert.Equal(_server.CurrentConfig, config2);
 
         _listener.Verify(x => x.StartListen(new WebParameters(config1.Uri.ToString())), Times.Once);
@@ -194,17 +196,19 @@ public class SimpleServerTests : IDisposable
         _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
 
         var startStopMre = new AutoResetEvent(false);
-        using var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
+        _server.PropertyChanged += (_, args) =>
         {
-            if (status)
+            if (args.PropertyName != nameof(_server.Status)) return;
+
+            if (_server.Status)
                 startStopMre.Set();
-        }));
+        };
 
         _server.Start();
 
         startStopMre.WaitOne();
 
-        Assert.True(_server.Status.Working);
+        Assert.True(_server.Status);
 
         contextMre.Wait();
 
@@ -229,8 +233,20 @@ public class SimpleServerTests : IDisposable
         var s = false;
         WebConfig? c = null;
 
-        using var statusSub = _server.Status.Subscribe(new MyObserver<bool>(status => s = status));
-        using var configSub = _server.Subscribe(new MyObserver<WebConfig>(config => c = config));
+        _server.PropertyChanged += (_, args) =>
+        {
+            switch (args.PropertyName)
+            {
+                case nameof(_server.Status):
+                    s = _server.Status;
+                    break;
+                case nameof(_server.Config):
+                    c = _server.CurrentConfig;
+                    break;
+                default:
+                    break;
+            }
+        };
 
         var config1 = new WebConfig
         {
@@ -240,11 +256,15 @@ public class SimpleServerTests : IDisposable
         };
 
         var mre = new AutoResetEvent(false);
-        var sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
+        _server.PropertyChanged += Handler;
+            
+        void Handler(object? _, PropertyChangedEventArgs args)
         {
-            if (status)
+            if(args.PropertyName != nameof(_server.Status)) return;
+
+            if (_server.Status)
                 mre.Set();
-        }));
+        };
 
         _server.Start(config1);
 
@@ -253,20 +273,22 @@ public class SimpleServerTests : IDisposable
         Assert.True(s);
         Assert.Equal(config1, c);
 
-        sub.Dispose();
+        _server.PropertyChanged -= Handler;
 
-        sub = _server.Status.Subscribe(new MyObserver<bool>(status =>
+        _server.PropertyChanged += Handler2;
+
+        void Handler2(object? _, PropertyChangedEventArgs args)
         {
-            if (!status)
+            if (args.PropertyName != nameof(_server.Status)) return;
+
+            if (!_server.Status)
                 // ReSharper disable once AccessToDisposedClosure
                 mre.Set();
-        }));
+        };
 
         _server.Stop();
 
         mre.WaitOne();
-        
-        sub.Dispose();
         
         Assert.False(s);
     }

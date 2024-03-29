@@ -64,6 +64,12 @@ public sealed partial class MainForm : Form
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
         _viewModel = app;
 
+        app.ServersReady += (_, servers) => _model = servers;
+        app.ServerAdded += AddServer;
+        app.AutostartChanged += SetAutoStartValue;
+
+        app.Run();
+
         PopulateWindowPanels();
         PopulateContextMenuGroups();
 
@@ -71,10 +77,6 @@ public sealed partial class MainForm : Form
         SetContextMenu();
 
         ApplyTheme();
-
-        app.ServersReady += (_, servers) => _model = servers;
-        app.ServerAdded += AddServer;
-        app.AutostartChanged += SetAutoStartValue;
     }
 
     private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
