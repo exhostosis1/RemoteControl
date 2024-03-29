@@ -6,11 +6,9 @@ using Shared.Config;
 using Shared.ConsoleWrapper;
 using Shared.Enums;
 using Shared.Logging;
-using Shared.Observable;
 using Shared.Server;
 using Shared.Wrappers.Registry;
 using System.Runtime.InteropServices;
-using WinFormsUI;
 
 namespace WindowsEntryPoint;
 
@@ -31,7 +29,7 @@ public static class Program
         var logger = new FileLogger("error.log");
 #endif
 
-        var ui = new MainForm();
+        var ui = new MainUI.MainForm();
         var configProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger), "config.ini");
         var autoStartService =
             new RegistryAutoStartService(new RegistryWrapper(), new LogWrapper<RegistryAutoStartService>(logger));

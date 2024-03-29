@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0-windows10.0.22621.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -25,9 +25,9 @@
     <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\..\Logging\Logging.csproj" />
+    <ProjectReference Include="..\..\MainForm\MainUI.csproj" />
     <ProjectReference Include="..\..\Servers\Servers.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
-    <ProjectReference Include="..\..\UIs\WinFormsUI\WinFormsUI.csproj" />
     <ProjectReference Include="..\..\Web\Web.csproj" />
   </ItemGroup>
 
