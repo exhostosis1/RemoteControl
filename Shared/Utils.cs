@@ -209,12 +209,14 @@ public static partial class Utils
         return baseType != null && IsAssignableToGenericType(baseType, genericType);
     }
 
-    public static ConstructorInfo GetFirstConstructor(this Type type) => type
-                                                                             .GetConstructors(BindingFlags.Public |
-                                                                                 BindingFlags.Instance).MinBy(x =>
-                                                                                 x.GetParameters().Length) ??
-                                                                         throw new Exception(
-                                                                             $"Type ${type} must have public non-static constructor");
+    public static ConstructorInfo GetFirstConstructor(this Type type)
+    {
+        return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
+                   .MinBy(x => x.GetParameters().Length) ??
+            throw new Exception(
+                $"Type ${type} must have public non-static constructor");
+    }
+
     public static Delegate CreateDelegate(this ConstructorInfo ci)
     {
         var parameters = ci.GetParameters().Where(x => !x.HasDefaultValue).Select(x =>

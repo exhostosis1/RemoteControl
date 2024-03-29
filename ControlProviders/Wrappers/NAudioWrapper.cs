@@ -29,8 +29,8 @@ public class NAudioWrapper : IAudioInput
     {
         return id == null
             ? (int)(_defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar * 100)
-            : (int)(_devices.FirstOrDefault(x => x.ID == id.ToString())?.AudioEndpointVolume.MasterVolumeLevelScalar *
-                100 ?? 0);
+            : (int)(_devices.FirstOrDefault(x => x.ID == id.ToString())
+                    ?.AudioEndpointVolume.MasterVolumeLevelScalar * 100 ?? 0);
     }
 
     public void SetVolume(int volume, Guid? id = null)
