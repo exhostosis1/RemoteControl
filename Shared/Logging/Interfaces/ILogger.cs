@@ -8,6 +8,7 @@ public interface ILogger
 {
     public Task LogAsync(Type type, string message, LoggingLevel level);
     public void Log(Type type, string message, LoggingLevel level);
+    public ILogger<T> WrapLogger<T>() where T:class;
 
     public Task LogInfoAsync(Type type, string message) => LogAsync(type, message, LoggingLevel.Info);
     public Task LogErrorAsync(Type type, string message) => LogAsync(type, message, LoggingLevel.Error);

@@ -5,5 +5,5 @@ namespace Logging.Formatters;
 
 public class DefaultMessageFormatter : IMessageFormatter
 {
-    public string Format(LogMessage message) => $@"{message.Date:G} {message.Level} {message.CallerType} {message.Message}";
+    public string Format(LogMessage message) => $"{message.Date:G} {message.Level} {message.CallerType} {message.Message}";
 }

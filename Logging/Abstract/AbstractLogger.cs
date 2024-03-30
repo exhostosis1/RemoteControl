@@ -22,6 +22,11 @@ public abstract class AbstractLogger(LoggingLevel currentLoggingLevel, IMessageF
         }
     }
 
+    public ILogger<T> WrapLogger<T>() where T:class
+    {
+        return new LogWrapper<T>(this);
+    }
+
     private void WriteMessage(LogMessage message)
     {
         switch (message.Level)
@@ -34,6 +39,8 @@ public abstract class AbstractLogger(LoggingLevel currentLoggingLevel, IMessageF
                 break;
             case LoggingLevel.Info:
                 ProcessInfo(_formatter.Format(message));
+                break;
+            default:
                 break;
         }
     }

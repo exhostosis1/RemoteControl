@@ -1,9 +1,7 @@
 ﻿using Shared.Enums;
 using Shared.Logging.Interfaces;
-using System;
-using System.Threading.Tasks;
 
-namespace Shared.Logging;
+namespace Logging.Abstract;
 
 internal class LogWrapper<T>(ILogger logger) : ILogger<T> where T : class
 {

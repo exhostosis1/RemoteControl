@@ -38,9 +38,9 @@ public class Main
         var logger = new FileLogger("error.log");
 #endif
 
-        _configProvider = new LocalFileConfigProvider(new LogWrapper<LocalFileConfigProvider>(logger), Path.Combine(Environment.CurrentDirectory, "config.ini"));
+        _configProvider = new LocalFileConfigProvider(logger.WrapLogger<LocalFileConfigProvider>(), Path.Combine(Environment.CurrentDirectory, "config.ini"));
         _autoStartService =
-            new RegistryAutoStartService(new RegistryWrapper(), new LogWrapper<RegistryAutoStartService>(logger));
+            new RegistryAutoStartService(new RegistryWrapper(), logger.WrapLogger<RegistryAutoStartService>());
 
         _serverFactory = new ServerFactory(logger);
 
@@ -65,7 +65,7 @@ public class Main
             }
         }).ToList();
 
-        _logger = new LogWrapper<Main>(logger);
+        _logger = logger.WrapLogger<Main>();
     }
 
     private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
