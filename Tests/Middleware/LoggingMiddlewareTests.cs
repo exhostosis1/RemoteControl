@@ -39,8 +39,8 @@ public class LoggingMiddlewareTests : IDisposable
         var context = new WebContext(new WebContextRequest("http://yo"), Mock.Of<WebContextResponse>());
         _middleware.ProcessRequest(null, context);
 
-        Mock.Get(_logger).Verify(x => x.LogInfo(context.WebRequest.Path), Times.Once);
-        Mock.Get(_logger).Verify(x => x.LogInfo($"{context.WebResponse.StatusCode}\n{context.WebResponse.ContentType}\n{context.WebResponse.Payload}"), Times.Once);
+        Mock.Get(_logger).Verify(x => x.LogInformation(context.WebRequest.Path), Times.Once);
+        Mock.Get(_logger).Verify(x => x.LogInformation($"{context.WebResponse.StatusCode}\n{context.WebResponse.ContentType}\n{context.WebResponse.Payload}"), Times.Once);
     }
 
     public void Dispose()

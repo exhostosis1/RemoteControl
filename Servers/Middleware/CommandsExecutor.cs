@@ -1,12 +1,12 @@
-﻿using Shared.ControlProviders.Provider;
+﻿using Microsoft.Extensions.Logging;
+using Shared.ControlProviders.Provider;
 using Shared.DataObjects.Bot;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<CommandsExecutor> logger) : IBotMiddleware
+public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger logger) : IBotMiddleware
 {
     private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
@@ -32,7 +32,7 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger<Com
 
     public void ProcessRequest(object? _, BotContext context)
     {
-        logger.LogInfo($"Executing bot command {context.BotRequest.Command}");
+        logger.LogInformation("Executing bot command {command}", context.BotRequest.Command);
 
         context.BotResponse.Buttons = _buttons;
 

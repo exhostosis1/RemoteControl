@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Shared.AutoStart;
 using Shared.Wrappers.Registry;
 using Shared.Wrappers.RegistryWrapper;
-using System.Diagnostics;
 
-namespace AutoStart;
+namespace WindowsEntryPoint;
 
 public class RegistryAutoStartService(IRegistry registryWrapper, ILogger logger)
     : IAutoStartService

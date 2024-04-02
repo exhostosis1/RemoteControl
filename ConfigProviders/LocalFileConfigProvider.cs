@@ -15,7 +15,7 @@ public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, st
 
     public AppConfig GetConfig()
     {
-        logger.LogInfo($"Getting config from file {filePath}");
+        logger.LogInformation($"Getting config from file {filePath}");
 
         if (!File.Exists(filePath))
         {
@@ -39,7 +39,7 @@ public class LocalFileConfigProvider(ILogger<LocalFileConfigProvider> logger, st
 
     public void SetConfig(AppConfig appConfig)
     {
-        logger.LogInfo($"Writing config to file {filePath}");
+        logger.LogInformation($"Writing config to file {filePath}");
 
         File.WriteAllText(filePath,
             JsonSerializer.Serialize(appConfig, _jsonOptions));

@@ -1,11 +1,11 @@
-﻿using Shared.Logging.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using Shared.DataObjects.Web;
 using System;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Shared.DataObjects.Web;
 
 namespace Shared.Wrappers.HttpListener;
 
@@ -30,9 +30,9 @@ public class HttpListenerWrapper : IHttpListener
     private System.Net.HttpListener _listener = new();
     public bool IsListening => _listener.IsListening;
     public IPrefixesCollection Prefixes { get; private set; }
-    private readonly ILogger<HttpListenerWrapper> _logger;
+    private readonly ILogger _logger;
 
-    public HttpListenerWrapper(ILogger<HttpListenerWrapper> logger)
+    public HttpListenerWrapper(ILogger logger)
     {
         Prefixes = new PrefixCollection(_listener.Prefixes);
         _logger = logger;
@@ -66,7 +66,7 @@ public class HttpListenerWrapper : IHttpListener
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 throw;
 
-            _logger.LogWarn("Trying to add listening permissions to user");
+            _logger.LogWarning("Trying to add listening permissions to user");
 
             var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
             var translatedValue = sid.Translate(typeof(NTAccount)).Value;

@@ -1,11 +1,11 @@
-﻿using Shared.DataObjects.Web;
-using Shared.Logging.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using Shared.DataObjects.Web;
 using Shared.Server;
 using System.Net;
 
 namespace Servers.Middleware;
 
-public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string directory = "www") : IWebMiddleware
+public class StaticFilesMiddleware(ILogger logger, string directory = "www") : IWebMiddleware
 {
     private readonly string _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
 
@@ -25,7 +25,7 @@ public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string
     {
         var uriPath = context.WebRequest.Path;
 
-        logger.LogInfo($"Processing file request {uriPath}");
+        logger.LogInformation("Processing file request {uriPath}", uriPath);
 
         if (uriPath.Contains(".."))
         {
@@ -50,7 +50,7 @@ public class StaticFilesMiddleware(ILogger<StaticFilesMiddleware> logger, string
         }
         else
         {
-            logger.LogError($"File not found {path}");
+            logger.LogError("File not found {path}", path);
             context.WebResponse.StatusCode = HttpStatusCode.NotFound;
         }
     }

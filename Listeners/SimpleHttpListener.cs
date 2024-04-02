@@ -1,11 +1,11 @@
-﻿using Shared.DataObjects.Web;
+﻿using Microsoft.Extensions.Logging;
+using Shared.DataObjects.Web;
 using Shared.Listener;
-using Shared.Logging.Interfaces;
 using Shared.Wrappers.HttpListener;
 
 namespace Listeners;
 
-public class SimpleHttpListener(IHttpListener listener, ILogger<SimpleHttpListener> logger) : IWebListener
+public class SimpleHttpListener(IHttpListener listener, ILogger logger) : IWebListener
 {
     public bool IsListening => listener.IsListening;
 
@@ -21,7 +21,7 @@ public class SimpleHttpListener(IHttpListener listener, ILogger<SimpleHttpListen
 
         listener.Start();
 
-        logger.LogInfo($"Http listener started listening on {param.Uri}");
+        logger.LogInformation("Http listener started listening on {uri}", param.Uri);
     }
 
     public void StopListen()
@@ -29,7 +29,7 @@ public class SimpleHttpListener(IHttpListener listener, ILogger<SimpleHttpListen
         if (listener.IsListening)
             listener.Stop();
 
-        logger.LogInfo("Http listener stopped");
+        logger.LogInformation("Http listener stopped");
     }
 
     public async Task<WebContext> GetContextAsync(CancellationToken token = default)

@@ -1,21 +1,21 @@
-﻿using Shared.ApiControllers.Results;
+﻿using Microsoft.Extensions.Logging;
+using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
-using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class AudioController(IAudioControlProvider provider, ILogger<AudioController> logger) : BaseApiController
+public class AudioController(IAudioControlProvider provider, ILogger logger) : BaseApiController
 {
     public IActionResult GetDevices(string? _)
     {
-        logger.LogInfo("Getting devices");
+        logger.LogInformation("Getting devices");
 
         return Json(provider.GetAudioDevices());
     }
 
     public IActionResult SetDevice(string? param)
     {
-        logger.LogInfo($"Setting device to {param}");
+        logger.LogInformation("Setting device to {param}", param);
 
         if (Guid.TryParse(param, out var guid))
         {
@@ -23,24 +23,24 @@ public class AudioController(IAudioControlProvider provider, ILogger<AudioContro
             return Ok();
         }
 
-        logger.LogError($"Cannot set device to {param}");
+        logger.LogError("Cannot set device to {param}", param);
         return Error("No such device");
     }
 
     public IActionResult GetVolume(string? _)
     {
-        logger.LogInfo("Getting volume");
+        logger.LogInformation("Getting volume");
 
         return Text(provider.GetVolume());
     }
 
     public IActionResult SetVolume(string? param)
     {
-        logger.LogInfo($"Setting volume to {param}");
+        logger.LogInformation("Setting volume to {param}", param);
 
         if (!int.TryParse(param, out var result))
         {
-            logger.LogError($"Cannot set volume to {param}");
+            logger.LogError("Cannot set volume to {param}", param);
             return Error("Wrong volume format");
         }
 
@@ -53,7 +53,7 @@ public class AudioController(IAudioControlProvider provider, ILogger<AudioContro
 
     public IActionResult IncreaseBy5(string? _)
     {
-        logger.LogInfo("Increasing volume by 5");
+        logger.LogInformation("Increasing volume by 5");
 
         var vol = provider.GetVolume();
         vol += 5;
@@ -66,7 +66,7 @@ public class AudioController(IAudioControlProvider provider, ILogger<AudioContro
 
     public IActionResult DecreaseBy5(string? _)
     {
-        logger.LogInfo("Decreasing volume by 5");
+        logger.LogInformation("Decreasing volume by 5");
 
         var vol = provider.GetVolume();
         vol -= 5;
@@ -79,7 +79,7 @@ public class AudioController(IAudioControlProvider provider, ILogger<AudioContro
 
     public IActionResult Mute(string? _)
     {
-        logger.LogInfo("Toggling mute status");
+        logger.LogInformation("Toggling mute status");
 
         if (provider.IsMuted)
             provider.Unmute();

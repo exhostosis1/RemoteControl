@@ -24,11 +24,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ApiControllers\ApiControllers.csproj" />
-    <ProjectReference Include="..\Autostart\Autostart.csproj" />
-    <ProjectReference Include="..\ConfigProviders\ConfigProviders.csproj" />
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
+    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\WindowsEntryPoint.csproj" />
     <ProjectReference Include="..\Listeners\Listeners.csproj" />
-    <ProjectReference Include="..\Logging\Logging.csproj" />
     <ProjectReference Include="..\Servers\Servers.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>

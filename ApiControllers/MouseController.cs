@@ -1,16 +1,16 @@
-﻿using Shared;
+﻿using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 
 namespace ApiControllers;
 
-public class MouseController(IMouseControlProvider provider, ILogger<MouseController> logger) : BaseApiController
+public class MouseController(IMouseControlProvider provider, ILogger logger) : BaseApiController
 {
     public IActionResult Left(string? _)
     {
-        logger.LogInfo("Pressing left mouse button");
+        logger.LogInformation("Pressing left mouse button");
 
         provider.MouseKeyPress();
 
@@ -19,7 +19,7 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
 
     public IActionResult Right(string? _)
     {
-        logger.LogInfo("Pressing right mouse button");
+        logger.LogInformation("Pressing right mouse button");
 
         provider.MouseKeyPress(MouseButtons.Right);
 
@@ -28,7 +28,7 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
 
     public IActionResult Middle(string? _)
     {
-        logger.LogInfo("Pressing middle mouse button");
+        logger.LogInformation("Pressing middle mouse button");
 
         provider.MouseKeyPress(MouseButtons.Middle);
 
@@ -37,7 +37,7 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
 
     public IActionResult WheelUp(string? _)
     {
-        logger.LogInfo("Turning wheel up");
+        logger.LogInformation("Turning wheel up");
 
         provider.MouseWheel(true);
 
@@ -46,7 +46,7 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
 
     public IActionResult WheelDown(string? _)
     {
-        logger.LogInfo("Turning wheel down");
+        logger.LogInformation("Turning wheel down");
 
         provider.MouseWheel(false);
 
@@ -55,14 +55,14 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
 
     public IActionResult DragStart(string? _)
     {
-        logger.LogInfo("Starting drag");
+        logger.LogInformation("Starting drag");
 
         provider.MouseKeyPress(MouseButtons.Left, KeyPressMode.Down);
         Task.Run(async () =>
         {
             await Task.Delay(5_000);
 
-            logger.LogInfo("Stopping drag");
+            logger.LogInformation("Stopping drag");
             provider.MouseKeyPress(MouseButtons.Left, KeyPressMode.Up);
         });
 
@@ -71,7 +71,7 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
 
     public IActionResult DragStop(string? _)
     {
-        logger.LogInfo("Stopping drag");
+        logger.LogInformation("Stopping drag");
 
         provider.MouseKeyPress(MouseButtons.Left, KeyPressMode.Up);
 
@@ -82,11 +82,11 @@ public class MouseController(IMouseControlProvider provider, ILogger<MouseContro
     {
         if (string.IsNullOrWhiteSpace(param) || !Utils.TryGetCoords(param, out var x, out var y))
         {
-            logger.LogError($"Cannot move mouse by {param}");
+            logger.LogError("Cannot move mouse by {param}", param);
             return Error("Wrong coordinates");
         }
 
-        logger.LogInfo($"Moving mouse by {param}");
+        logger.LogInformation("Moving mouse by {param}", param);
         
         provider.MouseMove(x, y);
 

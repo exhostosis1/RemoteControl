@@ -1,10 +1,9 @@
-﻿using System.Diagnostics;
-using System.Linq.Expressions;
-using AutoStart;
-using Moq;
-using Shared.Logging.Interfaces;
+﻿using Moq;
 using Shared.Wrappers.Registry;
 using Shared.Wrappers.RegistryWrapper;
+using System.Diagnostics;
+using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 
 namespace UnitTests.AutoStart;
 
@@ -12,7 +11,7 @@ public class RegistryAutoStartServiceTests : IDisposable
 {
     private readonly RegistryAutoStartService _service;
     private readonly Mock<IRegistryKey> _runKeyMock;
-    private readonly ILogger<RegistryAutoStartService> _logger;
+    private readonly ILogger _logger;
 
     private const string RegName = "Remote Control";
     private readonly string _regValue = $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? throw new NullReferenceException()}\"";
@@ -23,7 +22,7 @@ public class RegistryAutoStartServiceTests : IDisposable
 
     public RegistryAutoStartServiceTests()
     {
-        _logger = Mock.Of<ILogger<RegistryAutoStartService>>();
+        _logger = Mock.Of<ILogger>();
         Mock<IRegistry> registryMock = new(MockBehavior.Strict);
         _runKeyMock = new Mock<IRegistryKey>(MockBehavior.Strict);
 

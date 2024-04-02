@@ -1,16 +1,16 @@
-﻿using Shared.ApiControllers.Results;
+﻿using Microsoft.Extensions.Logging;
+using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 using System.Net;
 
 namespace ApiControllers;
 
-public class KeyboardController(IKeyboardControlProvider provider, ILogger<KeyboardController> logger) : BaseApiController
+public class KeyboardController(IKeyboardControlProvider provider, ILogger logger) : BaseApiController
 {
     public IActionResult Back(string? _)
     {
-        logger.LogInfo("Pressing arrow left");
+        logger.LogInformation("Pressing arrow left");
 
         provider.KeyboardKeyPress(KeysEnum.ArrowLeft);
 
@@ -19,7 +19,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult Forth(string? _)
     {
-        logger.LogInfo("Pressing arrow right");
+        logger.LogInformation("Pressing arrow right");
 
         provider.KeyboardKeyPress(KeysEnum.ArrowRight);
 
@@ -28,7 +28,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult Pause(string? _)
     {
-        logger.LogInfo("Pressing pause");
+        logger.LogInformation("Pressing pause");
 
         provider.KeyboardKeyPress(KeysEnum.MediaPlayPause);
 
@@ -37,7 +37,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult MediaBack(string? _)
     {
-        logger.LogInfo("Pressing previous");
+        logger.LogInformation("Pressing previous");
 
         provider.KeyboardKeyPress(KeysEnum.MediaPrev);
 
@@ -46,7 +46,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult MediaForth(string? _)
     {
-        logger.LogInfo("Pressing next");
+        logger.LogInformation("Pressing next");
 
         provider.KeyboardKeyPress(KeysEnum.MediaNext);
 
@@ -55,7 +55,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult MediaVolumeUp(string? _)
     {
-        logger.LogInfo("Pressing volume up");
+        logger.LogInformation("Pressing volume up");
 
         provider.KeyboardKeyPress(KeysEnum.VolumeUp);
 
@@ -64,7 +64,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult MediaVolumeDown(string? _)
     {
-        logger.LogInfo("Pressing volume down");
+        logger.LogInformation("Pressing volume down");
 
         provider.KeyboardKeyPress(KeysEnum.VolumeDown);
 
@@ -73,7 +73,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult MediaMute(string? _)
     {
-        logger.LogInfo("Pressing mute");
+        logger.LogInformation("Pressing mute");
 
         provider.KeyboardKeyPress(KeysEnum.Mute);
 
@@ -82,7 +82,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult BrowserBack(string? _)
     {
-        logger.LogInfo("Pressing browser back");
+        logger.LogInformation("Pressing browser back");
 
         provider.KeyboardKeyPress(KeysEnum.BrowserBack);
 
@@ -91,7 +91,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
     public IActionResult BrowserForward(string? _)
     {
-        logger.LogInfo("Pressing browser forward");
+        logger.LogInformation("Pressing browser forward");
 
         provider.KeyboardKeyPress(KeysEnum.BrowserForward);
 
@@ -104,15 +104,15 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger<Keybo
 
         try
         {
-            text = WebUtility.UrlDecode(param) ?? throw new ArgumentException(nameof(param));
+            text = WebUtility.UrlDecode(param) ?? throw new ArgumentException("Cannot decode text", nameof(param));
         }
         catch (Exception e)
         {
-            logger.LogError($"Cannot decode text {param}");
+            logger.LogError("Cannot decode text {param}", param);
             return Error(e.Message);
         }
 
-        logger.LogInfo($"Inputing text {text}");
+        logger.LogInformation("Inputting text {text}", text);
 
         provider.TextInput(text);
         provider.KeyboardKeyPress(KeysEnum.Enter);

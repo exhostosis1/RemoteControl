@@ -1,7 +1,7 @@
-﻿using Shared.Bots.Telegram;
+﻿using Microsoft.Extensions.Logging;
+using Shared.Bots.Telegram;
 using Shared.DataObjects.Bot;
 using Shared.Listener;
-using Shared.Logging.Interfaces;
 using System.ComponentModel;
 using System.Net.Sockets;
 
@@ -20,7 +20,7 @@ public class TelegramListener : IBotListener
     public bool IsListening { get; private set; }
     private List<string> _usernames = [];
 
-    private readonly ILogger<TelegramListener> _logger;
+    private readonly ILogger _logger;
     private readonly IBotApiProvider _wrapper;
 
     private CancellationTokenSource? _cst;
@@ -34,14 +34,14 @@ public class TelegramListener : IBotListener
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public TelegramListener(IBotApiProvider wrapper, ILogger<TelegramListener> logger)
+    public TelegramListener(IBotApiProvider wrapper, ILogger logger)
     {
         _logger = logger;
         _wrapper = wrapper;
 
         _progress = new Progress<bool>(result =>
         {
-            _logger.LogInfo(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
+            _logger.LogInformation(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
             IsListening = result;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
         });
@@ -93,7 +93,7 @@ public class TelegramListener : IBotListener
             {
                 if (!internetMessageShown)
                 {
-                    await _logger.LogErrorAsync("Internet seems off");
+                    _logger.LogError("Internet seems off");
                     internetMessageShown = true;
                 }
 
@@ -105,7 +105,7 @@ public class TelegramListener : IBotListener
             }
             catch (Exception e)
             {
-                await _logger.LogErrorAsync(e.Message);
+                _logger.LogError("{error}", e.Message);
                 break;
             }
         }

@@ -1,9 +1,9 @@
-﻿using System.ComponentModel;
-using Shared.Config;
+﻿using Shared.Config;
 using Shared.DataObjects;
 using Shared.Listener;
-using Shared.Logging.Interfaces;
 using Shared.Server;
+using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace Servers;
 
@@ -12,7 +12,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
     public int Id { get; set; } = -1;
     public bool Status { get; private set; } = false;
 
-    private readonly ILogger<GenericServer<TContext, TConfig, TParams>> _logger;
+    private readonly ILogger _logger;
 
     private readonly IListener<TContext, TParams> _listener;
     private readonly IMiddlewareChain<TContext> _middleware;
@@ -44,7 +44,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         }
     }
 
-    protected GenericServer(IListener<TContext, TParams> listener, IMiddlewareChain<TContext> middleware, ILogger<GenericServer<TContext, TConfig, TParams>> logger)
+    protected GenericServer(IListener<TContext, TParams> listener, IMiddlewareChain<TContext> middleware, ILogger logger)
     {
         _currentConfig = DefaultConfig;
 
@@ -84,7 +84,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
+            _logger.LogError("{e.Message}", e.Message);
             return;
         }
 
@@ -116,7 +116,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
             }
             catch (Exception e)
             {
-                await _logger.LogErrorAsync(e.Message);
+                _logger.LogError("{e.Message}", e.Message);
                 break;
             }
         }

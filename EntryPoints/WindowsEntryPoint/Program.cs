@@ -1,14 +1,11 @@
-﻿using AutoStart;
-using ConfigProviders;
-using Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
 using Microsoft.Win32;
 using Shared.Config;
-using Shared.ConsoleWrapper;
 using Shared.Enums;
-using Shared.Logging;
-using Shared.Logging.Interfaces;
 using Shared.Server;
 using Shared.Wrappers.Registry;
+using System.Configuration;
 using System.Runtime.InteropServices;
 
 namespace WindowsEntryPoint;
@@ -18,9 +15,8 @@ public class Main
     private int _id = 0;
     private List<int> _ids = [];
     private readonly List<IServer> _servers;
-    private readonly ILogger<Main> _logger;
+    private readonly ILogger _logger;
     private readonly ServerFactory _serverFactory;
-    private readonly LocalFileConfigProvider _configProvider;
     private readonly RegistryAutoStartService _autoStartService;
 
     public event EventHandler<IServer>? ServerAdded;
@@ -32,19 +28,22 @@ public class Main
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
-#if DEBUG
-        var logger = new TraceLogger(new TraceWrapper());
-#else
-        var logger = new FileLogger("error.log");
-#endif
+        var loggingProvider = new DebugLoggerProvider();
 
-        _configProvider = new LocalFileConfigProvider(logger.WrapLogger<LocalFileConfigProvider>(), Path.Combine(Environment.CurrentDirectory, "config.ini"));
         _autoStartService =
-            new RegistryAutoStartService(new RegistryWrapper(), logger.WrapLogger<RegistryAutoStartService>());
+            new RegistryAutoStartService(new RegistryWrapper(), loggingProvider.CreateLogger(nameof(RegistryAutoStartService)));
 
-        _serverFactory = new ServerFactory(logger);
+        _serverFactory = new ServerFactory(loggingProvider);
 
-        var config = _configProvider.GetConfig();
+        var configUri = new Uri(ConfigurationManager.AppSettings["uri"] ?? "");
+        var config = new AppConfig([new WebConfig()
+        {
+            AutoStart = true,
+            Host = configUri.Host,
+            Name = "localhost",
+            Port = configUri.Port,
+            Scheme = configUri.Scheme
+        }]);
 
         _servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
         {
@@ -65,7 +64,7 @@ public class Main
             }
         }).ToList();
 
-        _logger = logger.WrapLogger<Main>();
+        _logger = loggingProvider.CreateLogger(nameof(Main));
     }
 
     private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
@@ -119,7 +118,7 @@ public class Main
         server.Stop();
         _servers.Remove(server);
 
-        _configProvider.SetConfig(GetConfig(_servers));
+ //       _configProvider.SetConfig(GetConfig(_servers));
     }
 
     public void AutoStartChange(bool value)
@@ -144,7 +143,7 @@ public class Main
         }
 
         var config = GetConfig(_servers);
-        _configProvider.SetConfig(config);
+ //       _configProvider.SetConfig(config);
     }
 
     public void AppClose(object? _)
@@ -160,7 +159,7 @@ public class Main
             {
                 case SessionSwitchReason.SessionLock:
                     {
-                        _logger.LogInfo("Stopping servers due to logout");
+                        _logger.LogInformation("Stopping servers due to logout");
 
 
                         _ids = _servers.Where(x => x.Status).Select(x =>
@@ -173,7 +172,7 @@ public class Main
                     }
                 case SessionSwitchReason.SessionUnlock:
                     {
-                        _logger.LogInfo("Restoring servers");
+                        _logger.LogInformation("Restoring servers");
 
                         _ids.ForEach(id => _servers.Single(s => s.Id == id).Start());
                         break;
@@ -204,7 +203,7 @@ public class Main
         }
         catch (Exception e)
         {
-            _logger.LogError(e.Message);
+            _logger.LogError("{e.Message}", e.Message);
         }
     }
 }

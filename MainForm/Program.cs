@@ -8,7 +8,7 @@ internal static class Program
     ///  The main entry point for the application.
     /// </summary>
     [STAThread]
-    static void Main()
+    private static void Main()
     {
         var app = Task.Run(() => new Main()).Result;
 

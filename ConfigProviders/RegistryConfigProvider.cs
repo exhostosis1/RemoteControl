@@ -22,7 +22,7 @@ public class RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigPr
 
     public AppConfig GetConfig()
     {
-        logger.LogInfo($"Getting config from registry {_regKey}");
+        logger.LogInformation($"Getting config from registry {_regKey}");
 
         var value = _regKey.GetValue(ValueName, null) as string;
 
@@ -43,7 +43,7 @@ public class RegistryConfigProvider(IRegistry registry, ILogger<RegistryConfigPr
 
     public void SetConfig(AppConfig config)
     {
-        logger.LogInfo($"Writing config to registry {_regKey}");
+        logger.LogInformation($"Writing config to registry {_regKey}");
 
         _regKey.SetValue(ValueName, JsonSerializer.Serialize(config, _jsonOptions), RegValueType.String);
     }

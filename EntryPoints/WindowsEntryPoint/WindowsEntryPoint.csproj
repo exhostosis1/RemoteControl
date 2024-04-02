@@ -19,16 +19,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageReference Include="Microsoft.Win32.SystemEvents" Version="8.0.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\ApiControllers\ApiControllers.csproj" />
-    <ProjectReference Include="..\..\Autostart\Autostart.csproj" />
-    <ProjectReference Include="..\..\ConfigProviders\ConfigProviders.csproj" />
     <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\..\Listeners\Listeners.csproj" />
-    <ProjectReference Include="..\..\Logging\Logging.csproj" />
     <ProjectReference Include="..\..\Servers\Servers.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>

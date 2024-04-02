@@ -2,7 +2,6 @@
 using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.Bots.Telegram.ApiObjects.Response.Keyboard;
 using Shared.DataObjects.Bot;
-using Shared.Logging.Interfaces;
 using Shared.Wrappers.HttpClient;
 using System;
 using System.Linq;

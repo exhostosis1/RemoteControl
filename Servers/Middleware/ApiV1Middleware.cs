@@ -1,15 +1,15 @@
-﻿using Shared;
+﻿using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 using Shared.DataObjects.Web;
-using Shared.Logging.Interfaces;
 using Shared.Server;
 using System.Net;
 using System.Text;
 
 namespace Servers.Middleware;
 
-public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<ApiV1Middleware> logger) : IWebMiddleware
+public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger logger) : IWebMiddleware
 {
     private readonly ControllersWithMethods _controllers = controllers.GetControllersWithMethods();
     public static string ApiVersion => "v1";
@@ -26,7 +26,7 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<Ap
             return;
         }
 
-        logger.LogInfo($"Processing api request {context.WebRequest.Path}");
+        logger.LogInformation("Processing api request {path}", context.WebRequest.Path);
 
         if (!Utils.TryParsePath(context.WebRequest.Path, out var controllerName, out var actionName, out var param) 
             || !_controllers.TryGetValue(controllerName, out var controller) 
@@ -50,7 +50,7 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger<Ap
         }
         catch (Exception e)
         {
-            logger.LogError(e.Message);
+            logger.LogError("{message}", e.Message);
 
             context.WebResponse.StatusCode = HttpStatusCode.InternalServerError;
             context.WebResponse.Payload = Encoding.UTF8.GetBytes(e.Message);
