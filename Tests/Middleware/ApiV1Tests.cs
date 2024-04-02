@@ -3,9 +3,9 @@ using Servers.Middleware;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 using Shared.DataObjects.Web;
-using Shared.Logging.Interfaces;
 using System.Net;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace UnitTests.Middleware;
 
@@ -48,7 +48,7 @@ public class ApiV1Tests : IDisposable
     }
 
     private readonly ApiV1Middleware _middleware;
-    private readonly ILogger<ApiV1Middleware> _logger;
+    private readonly ILogger _logger;
 
     public ApiV1Tests()
     {
@@ -58,7 +58,7 @@ public class ApiV1Tests : IDisposable
             new SecondController()
         };
 
-        _logger = Mock.Of<ILogger<ApiV1Middleware>>();
+        _logger = Mock.Of<ILogger>();
 
         _middleware = new ApiV1Middleware(controllers, _logger);
     }
@@ -77,9 +77,6 @@ public class ApiV1Tests : IDisposable
         Assert.True(context.WebResponse.StatusCode == expectedCode
                     && context.WebResponse.ContentType == expectedContentType
                     && Encoding.UTF8.GetString(context.WebResponse.Payload) == expectedResult);
-
-        if(expectedCode == HttpStatusCode.NotFound)
-            Mock.Get(_logger).Verify(x => x.LogError("Api method not found"), Times.Once);
     }
 
     [Fact]
@@ -103,8 +100,6 @@ public class ApiV1Tests : IDisposable
 
         Assert.True(context.WebResponse.StatusCode == HttpStatusCode.InternalServerError &&
                     Encoding.UTF8.GetString(context.WebResponse.Payload) == "test exception");
-
-        Mock.Get(_logger).Verify(x => x.LogError("test exception"), Times.Once);
     }
 
     public void Dispose()

@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
-using Listeners;
+﻿using Listeners;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shared.Bots.Telegram;
 using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.Listener;
-using Shared.Logging.Interfaces;
+using System.ComponentModel;
 
 namespace UnitTests.Listeners;
 
@@ -16,7 +16,7 @@ public class TelegramListenerTests : IDisposable
     public TelegramListenerTests()
     {
         _wrapper = new Mock<IBotApiProvider>(MockBehavior.Strict);
-        var logger = Mock.Of<ILogger<TelegramListener>>();
+        var logger = Mock.Of<ILogger>();
 
         _listener = new TelegramListener(_wrapper.Object, logger);
     }

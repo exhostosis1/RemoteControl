@@ -1,10 +1,10 @@
 ﻿using ApiControllers;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests.Controllers;
 
@@ -12,11 +12,11 @@ public class KeyboardControllerTests : IDisposable
 {
     private readonly KeyboardController _keyboardController;
     private readonly Mock<IKeyboardControlProvider> _keyboardControlProvider;
-    private readonly ILogger<KeyboardController> _logger;
+    private readonly ILogger _logger;
 
     public KeyboardControllerTests()
     {
-        _logger = Mock.Of<ILogger<KeyboardController>>();
+        _logger = Mock.Of<ILogger>();
         _keyboardControlProvider = new Mock<IKeyboardControlProvider>(MockBehavior.Strict);
         _keyboardController = new KeyboardController(_keyboardControlProvider.Object, _logger);
     }
@@ -124,8 +124,6 @@ public class KeyboardControllerTests : IDisposable
     {
         var result = _keyboardController.Text(null);
         Assert.True(result is ErrorResult);
-
-        Mock.Get(_logger).Verify(x => x.LogError($"Cannot decode text {null}"));
     }
 
     [Fact]

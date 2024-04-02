@@ -4,6 +4,7 @@ using Shared.Wrappers.RegistryWrapper;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using Microsoft.Extensions.Logging;
+using WindowsEntryPoint;
 
 namespace UnitTests.AutoStart;
 
@@ -113,8 +114,6 @@ public class RegistryAutoStartServiceTests : IDisposable
 
         _runKeyMock.Verify(_deleteExpression, Times.Once);
         _runKeyMock.Verify(_setExpression, Times.Once);
-
-        Mock.Get(_logger).Verify(x => x.LogError("test exception"), Times.Once);
     }
 
     public void Dispose()

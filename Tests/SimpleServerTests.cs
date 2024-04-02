@@ -1,17 +1,17 @@
-﻿using System.ComponentModel;
-using Moq;
+﻿using Moq;
 using Servers;
 using Shared.Config;
 using Shared.DataObjects.Web;
 using Shared.Listener;
-using Shared.Logging.Interfaces;
 using Shared.Server;
+using System.ComponentModel;
+using Microsoft.Extensions.Logging;
 
 namespace UnitTests;
 
 public class SimpleServerTests : IDisposable
 {
-    private readonly ILogger<SimpleServer> _logger;
+    private readonly ILogger _logger;
     private readonly Mock<IWebListener> _listener;
     private readonly Mock<IWebMiddlewareChain> _chain;
 
@@ -21,7 +21,7 @@ public class SimpleServerTests : IDisposable
     {
         _chain = new Mock<IWebMiddlewareChain>(MockBehavior.Strict);
         _listener = new Mock<IWebListener>(MockBehavior.Strict);
-        _logger = Mock.Of<ILogger<SimpleServer>>();
+        _logger = Mock.Of<ILogger>();
 
         _server = new SimpleServer(_listener.Object, _chain.Object, _logger);
         
@@ -94,7 +94,6 @@ public class SimpleServerTests : IDisposable
 
         _server.Start();
 
-        Mock.Get(_logger).Verify(x => x.LogError(exceptionMessage), Times.Once);
         _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
 

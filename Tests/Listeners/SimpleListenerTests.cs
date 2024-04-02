@@ -1,8 +1,8 @@
 ﻿using Listeners;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shared.DataObjects.Web;
 using Shared.Listener;
-using Shared.Logging.Interfaces;
 using Shared.Wrappers.HttpListener;
 
 namespace UnitTests.Listeners;
@@ -15,7 +15,7 @@ public class SimpleHttpListenerTests : IDisposable
     public SimpleHttpListenerTests()
     {
         _wrapper = new Mock<IHttpListener>(MockBehavior.Strict);
-        var logger = Mock.Of<ILogger<SimpleHttpListener>>();
+        var logger = Mock.Of<ILogger>();
 
         _listener = new SimpleHttpListener(_wrapper.Object, logger);
     }

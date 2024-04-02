@@ -1,15 +1,15 @@
 ﻿using Moq;
 using Servers.Middleware;
 using Shared.DataObjects.Web;
-using Shared.Logging.Interfaces;
 using System.Net;
 using System.Text;
+using Microsoft.Extensions.Logging;
 
 namespace UnitTests.Middleware;
 
 public class StaticFilesMiddlewareTests : IDisposable
 {
-    private readonly ILogger<StaticFilesMiddleware> _logger;
+    private readonly ILogger _logger;
     private readonly StaticFilesMiddleware _middleware;
     private const string Dir = "www";
     private readonly string _path = Path.Combine(AppContext.BaseDirectory, Dir);
@@ -25,7 +25,7 @@ public class StaticFilesMiddlewareTests : IDisposable
 
     public StaticFilesMiddlewareTests()
     {
-        _logger = Mock.Of<ILogger<StaticFilesMiddleware>>();
+        _logger = Mock.Of<ILogger>();
         _middleware = new StaticFilesMiddleware(_logger, Dir);
 
         if (!Directory.Exists(_path))
@@ -59,12 +59,6 @@ public class StaticFilesMiddlewareTests : IDisposable
         Assert.True(context.WebResponse.StatusCode == code && context.WebResponse.ContentType == type &&
                     Encoding.UTF8.GetString(context.WebResponse.Payload) ==
                     response);
-
-        if (path != ".." && code == HttpStatusCode.NotFound)
-            Mock.Get(_logger)
-                .Verify(
-                    x => x.LogError($"File not found {Path.Combine(_path, path.Replace("\\", "").Replace("/", ""))}"),
-                    Times.Once);
     }
 
     public void Dispose()

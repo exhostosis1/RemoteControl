@@ -1,11 +1,11 @@
-﻿using System.Text.Json;
-using ApiControllers;
+﻿using ApiControllers;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Devices;
 using Shared.ControlProviders.Provider;
-using Shared.Logging.Interfaces;
+using System.Text.Json;
 
 namespace UnitTests.Controllers;
 
@@ -13,11 +13,11 @@ public class AudioControllerTests : IDisposable
 {
     private readonly AudioController _audioController;
     private readonly Mock<IAudioControlProvider> _audioControlProvider;
-    private readonly ILogger<AudioController> _logger;
+    private readonly ILogger _logger;
 
     public AudioControllerTests()
     {
-        _logger = Mock.Of<ILogger<AudioController>>();
+        _logger = Mock.Of<ILogger>();
         _audioControlProvider = new Mock<IAudioControlProvider>(MockBehavior.Strict);
         _audioController = new AudioController(_audioControlProvider.Object, _logger);
     }
@@ -78,8 +78,6 @@ public class AudioControllerTests : IDisposable
         result = _audioController.SetDevice(invalidGuid);
         Assert.True(result is ErrorResult {Result: "No such device"});
 
-        Mock.Get(_logger).Verify(x => x.LogError($"Cannot set device to {invalidGuid}"));
-
         _audioControlProvider.Verify(x => x.SetAudioDevice(It.IsAny<Guid>()), Times.Exactly(2));
     }
 
@@ -121,8 +119,6 @@ public class AudioControllerTests : IDisposable
 
         var result = _audioController.SetVolume(input);
         Assert.True(result is ErrorResult{Result: "Wrong volume format" });
-
-        Mock.Get(_logger).Verify(x => x.LogError($"Cannot set volume to {input}"));
     }
 
     [Theory]

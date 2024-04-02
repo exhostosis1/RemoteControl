@@ -1,9 +1,9 @@
 ﻿using ApiControllers;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests.Controllers;
 
@@ -14,7 +14,7 @@ public class DisplayControllerTests : IDisposable
 
     public DisplayControllerTests()
     {
-        var logger = Mock.Of<ILogger<DisplayController>>();
+        var logger = Mock.Of<ILogger>();
         _provider = new Mock<IDisplayControlProvider>(MockBehavior.Strict);
 
         _controller = new DisplayController(_provider.Object, logger);

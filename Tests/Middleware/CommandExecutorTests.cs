@@ -1,21 +1,21 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
 using Servers.Middleware;
 using Shared.ControlProviders.Provider;
 using Shared.DataObjects.Bot;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests.Middleware;
 
 public class CommandExecutorTests : IDisposable
 {
-    private readonly ILogger<CommandsExecutor> _logger;
+    private readonly ILogger _logger;
     private readonly Mock<IGeneralControlProvider> _provider;
     private readonly CommandsExecutor _executor;
 
     public CommandExecutorTests()
     {
-        _logger = Mock.Of<ILogger<CommandsExecutor>>();
+        _logger = Mock.Of<ILogger>();
         _provider = new Mock<IGeneralControlProvider>(MockBehavior.Strict);
 
         _executor = new CommandsExecutor(_provider.Object, _logger);

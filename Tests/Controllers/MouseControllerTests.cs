@@ -1,10 +1,10 @@
 ﻿using ApiControllers;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using Shared.Logging.Interfaces;
 
 namespace UnitTests.Controllers;
 
@@ -12,11 +12,11 @@ public class MouseControllerTests : IDisposable
 {
     private readonly MouseController _mouseController;
     private readonly Mock<IMouseControlProvider> _mouseControlProvider;
-    private readonly ILogger<MouseController> _logger;
+    private readonly ILogger _logger;
 
     public MouseControllerTests()
     {
-        _logger = Mock.Of<ILogger<MouseController>>();
+        _logger = Mock.Of<ILogger>();
         _mouseControlProvider = new Mock<IMouseControlProvider>(MockBehavior.Strict);
         _mouseController = new MouseController(_mouseControlProvider.Object, _logger);
     }
@@ -112,7 +112,6 @@ public class MouseControllerTests : IDisposable
     {
         var result = _mouseController.Move(input);
         Assert.True(result is ErrorResult {Result: "Wrong coordinates" });
-        Mock.Get(_logger).Verify(x => x.LogError($"Cannot move mouse by {input}"));
     }
 
     [Fact]
