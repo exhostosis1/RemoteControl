@@ -341,3 +341,4 @@ ASALocalRun/
 healthchecksdb
 /ConfigProviders/config.ini
 /ConfigProviders/regvalues.reg
+/MainForm/appsettings.json
