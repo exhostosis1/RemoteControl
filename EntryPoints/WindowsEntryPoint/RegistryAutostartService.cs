@@ -1,15 +1,14 @@
-﻿using System.Diagnostics;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using Shared.AutoStart;
-using Shared.Wrappers.Registry;
-using Shared.Wrappers.RegistryWrapper;
+using System.Diagnostics;
 
 namespace WindowsEntryPoint;
 
-public class RegistryAutoStartService(IRegistry registryWrapper, ILogger logger)
+public class RegistryAutoStartService(ILogger logger)
     : IAutoStartService
 {
-    private readonly IRegistryKey _regKey = registryWrapper.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey("Microsoft")?.OpenSubKey("Windows")
+    private readonly RegistryKey _regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey("Microsoft")?.OpenSubKey("Windows")
         ?.OpenSubKey("CurrentVersion")?.OpenSubKey("Run", true) ?? throw new NullReferenceException("Cannot open autorun registry key");
     private const string RegName = "Remote Control";
     private readonly string _regValue = $"\"{Process.GetCurrentProcess().MainModule?.FileName ?? throw new NullReferenceException()}\"";
@@ -29,11 +28,11 @@ public class RegistryAutoStartService(IRegistry registryWrapper, ILogger logger)
         if (!value) return;
         try
         {
-            _regKey.SetValue(RegName, _regValue, RegValueType.String);
+            _regKey.SetValue(RegName, _regValue, RegistryValueKind.String);
         }
         catch (Exception e)
         {
-            logger.LogError(e.Message);
+            logger.LogError("{message}", e.Message);
         }
     }
 }

@@ -32,6 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Icons\Device.theme-dark.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

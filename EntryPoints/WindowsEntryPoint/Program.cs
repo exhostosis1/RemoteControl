@@ -1,12 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Debug;
 using Microsoft.Win32;
 using Shared.Config;
 using Shared.Enums;
 using Shared.Server;
-using Shared.Wrappers.Registry;
-using System.Configuration;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Configuration;
+
+#if DEBUG
+using Microsoft.Extensions.Logging.Debug;
+#else
+using NReco.Logging.File;
+#endif
+
 
 namespace WindowsEntryPoint;
 
@@ -28,24 +33,58 @@ public class Main
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             return;
 
+#if DEBUG
         var loggingProvider = new DebugLoggerProvider();
+#else
+        var loggingProvider = new FileLoggerProvider(Path.Combine(Environment.CurrentDirectory, "error.log"), new FileLoggerOptions
+        {
+            Append = true,
+            MinLevel = LogLevel.Error
+        });
+#endif
 
-        _autoStartService =
-            new RegistryAutoStartService(new RegistryWrapper(), loggingProvider.CreateLogger(nameof(RegistryAutoStartService)));
+        _autoStartService = new RegistryAutoStartService(loggingProvider.CreateLogger(nameof(RegistryAutoStartService)));
 
         _serverFactory = new ServerFactory(loggingProvider);
 
-        var configUri = new Uri(ConfigurationManager.AppSettings["uri"] ?? "");
-        var config = new AppConfig([new WebConfig()
-        {
-            AutoStart = true,
-            Host = configUri.Host,
-            Name = "localhost",
-            Port = configUri.Port,
-            Scheme = configUri.Scheme
-        }]);
+        var c = new ConfigurationBuilder()
+            .AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"))
+            .Build();
 
-        _servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
+        var serverConfigs = c.GetSection("ServerConfigs").GetChildren();
+
+        var servers = new List<CommonConfig>();
+
+        foreach (var configurationSection in serverConfigs)
+        {
+            switch (configurationSection["$type"])
+            {
+                case "web":
+                    servers.Add(new WebConfig
+                    {
+                        AutoStart = bool.Parse(configurationSection["AutoStart"] ?? "false"),
+                        Host = configurationSection["Host"] ?? "localhost",
+                        Name = configurationSection["Name"] ?? "Name",
+                        Port = int.Parse(configurationSection["Port"] ?? "80"),
+                        Scheme = configurationSection["Scheme"] ?? "http"
+                    });
+                    break;
+                case "bot":
+                    servers.Add(new BotConfig
+                    {
+                        AutoStart = bool.Parse(configurationSection["AutoStart"] ?? "false"),
+                        ApiKey = configurationSection["ApiKey"] ?? "",
+                        ApiUri = configurationSection["ApiUrl"] ?? "",
+                        Name = configurationSection["Name"] ?? "Name",
+                        Usernames = configurationSection.GetSection("Usernames").GetChildren().Select(x => x.Value ?? "").ToList() ?? []
+                    });
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        _servers = servers.Select<CommonConfig, IServer>(x =>
         {
             switch (x)
             {
