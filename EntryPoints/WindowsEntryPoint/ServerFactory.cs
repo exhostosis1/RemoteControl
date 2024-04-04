@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Servers;
 using Servers.Middleware;
 using Shared.Bots.Telegram;
+using Shared.Config;
 using Shared.Listener;
 using Shared.Server;
 using Shared.Wrappers.HttpClient;
@@ -54,9 +55,27 @@ public class ServerFactory
     {
         return new SimpleServer(_webListener, _webMiddlewareChain, _loggerProvider.CreateLogger(nameof(SimpleServer)));
     }
-    
+
+    public SimpleServer GetServer(WebConfig config, int id = 0)
+    {
+        var server = GetServer();
+        server.CurrentConfig = config;
+        server.Id = id;
+
+        return server;
+    }
+
     public BotServer GetBot()
     {
         return new BotServer(_botListener, _botMiddlewareChain, _loggerProvider.CreateLogger(nameof(BotServer)));
+    }
+    
+    public BotServer GetBot(BotConfig config, int id)
+    {
+        var bot = GetBot();
+        bot.CurrentConfig = config;
+        bot.Id = id;
+
+        return bot;
     }
 }

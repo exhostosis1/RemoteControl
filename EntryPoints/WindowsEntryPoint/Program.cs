@@ -3,8 +3,6 @@ using Microsoft.Win32;
 using Shared.Config;
 using Shared.Enums;
 using Shared.Server;
-using System.Runtime.InteropServices;
-using Microsoft.Extensions.Configuration;
 
 #if DEBUG
 using Microsoft.Extensions.Logging.Debug;
@@ -30,9 +28,6 @@ public class Main
 
     public Main()
     {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            return;
-
 #if DEBUG
         var loggingProvider = new DebugLoggerProvider();
 #else
@@ -44,63 +39,16 @@ public class Main
 #endif
 
         _autoStartService = new RegistryAutoStartService(loggingProvider.CreateLogger(nameof(RegistryAutoStartService)));
-
         _serverFactory = new ServerFactory(loggingProvider);
-
-        var c = new ConfigurationBuilder()
-            .AddJsonFile(Path.Combine(Environment.CurrentDirectory, "appsettings.json"))
-            .Build();
-
-        var serverConfigs = c.GetSection("ServerConfigs").GetChildren();
-
-        var servers = new List<CommonConfig>();
-
-        foreach (var configurationSection in serverConfigs)
+        
+        _servers = Configuration.GetServersConfigurations().Servers.Select<CommonConfig, IServer>(x =>
         {
-            switch (configurationSection["$type"])
+            return x switch
             {
-                case "web":
-                    servers.Add(new WebConfig
-                    {
-                        AutoStart = bool.Parse(configurationSection["AutoStart"] ?? "false"),
-                        Host = configurationSection["Host"] ?? "localhost",
-                        Name = configurationSection["Name"] ?? "Name",
-                        Port = int.Parse(configurationSection["Port"] ?? "80"),
-                        Scheme = configurationSection["Scheme"] ?? "http"
-                    });
-                    break;
-                case "bot":
-                    servers.Add(new BotConfig
-                    {
-                        AutoStart = bool.Parse(configurationSection["AutoStart"] ?? "false"),
-                        ApiKey = configurationSection["ApiKey"] ?? "",
-                        ApiUri = configurationSection["ApiUrl"] ?? "",
-                        Name = configurationSection["Name"] ?? "Name",
-                        Usernames = configurationSection.GetSection("Usernames").GetChildren().Select(x => x.Value ?? "").ToList() ?? []
-                    });
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        _servers = servers.Select<CommonConfig, IServer>(x =>
-        {
-            switch (x)
-            {
-                case WebConfig s:
-                    var server = _serverFactory.GetServer();
-                    server.CurrentConfig = s;
-                    server.Id = _id++;
-                    return server;
-                case BotConfig b:
-                    var bot = _serverFactory.GetBot();
-                    bot.CurrentConfig = b;
-                    bot.Id = _id++;
-                    return bot;
-                default:
-                    throw new NotSupportedException("Config not supported");
-            }
+                WebConfig s => _serverFactory.GetServer(s, _id++),
+                BotConfig b => _serverFactory.GetBot(b, _id++),
+                _ => throw new NotSupportedException("Config not supported")
+            };
         }).ToList();
 
         _logger = loggingProvider.CreateLogger(nameof(Main));
