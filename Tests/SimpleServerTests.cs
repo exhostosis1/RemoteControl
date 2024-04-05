@@ -6,24 +6,24 @@ using Shared.Listener;
 using Shared.Server;
 using System.ComponentModel;
 using Microsoft.Extensions.Logging;
+using Shared.DataObjects;
 
 namespace UnitTests;
 
 public class SimpleServerTests : IDisposable
 {
-    private readonly ILogger _logger;
-    private readonly Mock<IWebListener> _listener;
-    private readonly Mock<IWebMiddlewareChain> _chain;
+    private readonly Mock<IListener> _listener;
+    private readonly Mock<IMiddleware> _middleware;
 
-    private readonly SimpleServer _server;
+    private readonly Server _server;
 
     public SimpleServerTests()
     {
-        _chain = new Mock<IWebMiddlewareChain>(MockBehavior.Strict);
-        _listener = new Mock<IWebListener>(MockBehavior.Strict);
-        _logger = Mock.Of<ILogger>();
+        _listener = new Mock<IListener>(MockBehavior.Strict);
+        var logger = Mock.Of<ILogger>();
+        _middleware = new Mock<IMiddleware>(MockBehavior.Strict);
 
-        _server = new SimpleServer(_listener.Object, _chain.Object, _logger);
+        _server = new Server(ServerType.Web, _listener.Object, [_middleware.Object], logger);
         
         _listener.Setup(x => x.StopListen());
     }
@@ -31,14 +31,14 @@ public class SimpleServerTests : IDisposable
     [Fact]
     public void StartWithoutConfigTest()
     {
-        _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
 
         StartTestLocal();
 
-        _listener.Verify(x => x.StartListen(It.IsAny<WebParameters>()), Times.Once);
+        _listener.Verify(x => x.StartListen(It.IsAny<StartParameters>()), Times.Once);
     }
 
-    private void StartTestLocal(WebConfig? config = null)
+    private void StartTestLocal(ServerConfig? config = null)
     {
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
@@ -46,7 +46,7 @@ public class SimpleServerTests : IDisposable
                 Thread.Sleep(TimeSpan.FromHours(1));
                 return null!;
             });
-        _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<Func<IContext, Task>>()));
 
         var mre = new AutoResetEvent(false);
 
@@ -63,7 +63,10 @@ public class SimpleServerTests : IDisposable
         mre.WaitOne();
 
         Assert.True(_server.Status);
-        Assert.Equal(_server.CurrentConfig, config ?? _server.DefaultConfig);
+
+        config ??= _server.DefaultConfig;
+
+        Assert.Equal(_server.Config.Type, config.Type);
     }
 
     private const string Config1 = "http://localhost:12345/";
@@ -75,8 +78,8 @@ public class SimpleServerTests : IDisposable
     [InlineData(null)]
     public void StartWithConfigTest(string? uri)
     {
-        var config = uri == null ? null : new WebConfig { Uri = new Uri(uri) };
-        var parameters = new WebParameters(config?.Uri.ToString() ?? _server.CurrentConfig.Uri.ToString());
+        var config = uri == null ? null : new ServerConfig(ServerType.Web) { Uri = new Uri(uri) };
+        var parameters = new StartParameters(config?.Uri.ToString() ?? _server.Config.Uri.ToString());
 
         _listener.Setup(x => x.StartListen(parameters));
 
@@ -90,7 +93,7 @@ public class SimpleServerTests : IDisposable
     {
         const string exceptionMessage = "test message";
 
-        _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>())).Throws(new Exception(exceptionMessage));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>())).Throws(new Exception(exceptionMessage));
 
         _server.Start();
 
@@ -100,21 +103,21 @@ public class SimpleServerTests : IDisposable
     [Fact]
     public void RestartTest()
     {
-        var config1 = new WebConfig
+        var config1 = new ServerConfig(ServerType.Web)
         {
             Scheme = "http",
             Host = "localhost",
             Port = 123
         };
 
-        var config2 = new WebConfig
+        var config2 = new ServerConfig(ServerType.Web)
         {
             Scheme = "https",
             Host = "192.168.0.1",
             Port = 451
         };
 
-        _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
         {
             Thread.Sleep(TimeSpan.FromHours(1));
@@ -123,21 +126,13 @@ public class SimpleServerTests : IDisposable
 
         var mre = new AutoResetEvent(false);
         _server.PropertyChanged += Handler;
-        
-        void Handler(object? _, PropertyChangedEventArgs args)
-        {
-            if(args.PropertyName != nameof(_server.Status)) return;
-
-            if (_server.Status)
-                mre.Set();
-        };
 
         _server.Start(config1);
 
         mre.WaitOne();
 
         Assert.True(_server.Status);
-        Assert.Equal(_server.CurrentConfig, config1);
+        Assert.Equal(_server.Config, config1);
 
         _server.PropertyChanged -= Handler;
 
@@ -150,11 +145,20 @@ public class SimpleServerTests : IDisposable
         _server.PropertyChanged -= Handler;
 
         Assert.True(_server.Status);
-        Assert.Equal(_server.CurrentConfig, config2);
+        Assert.Equal(_server.Config, config2);
 
-        _listener.Verify(x => x.StartListen(new WebParameters(config1.Uri.ToString())), Times.Once);
-        _listener.Verify(x => x.StartListen(new WebParameters(config2.Uri.ToString())), Times.Once);
+        _listener.Verify(x => x.StartListen(new StartParameters(config1.Uri.ToString(), null, null)), Times.Once);
+        _listener.Verify(x => x.StartListen(new StartParameters(config2.Uri.ToString(), null, null)), Times.Once);
         _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.Exactly(2));
+        return;
+
+        void Handler(object? _, PropertyChangedEventArgs args)
+        {
+            if(args.PropertyName != nameof(_server.Status)) return;
+
+            if (_server.Status)
+                mre.Set();
+        }
     }
 
 
@@ -164,7 +168,7 @@ public class SimpleServerTests : IDisposable
         var context = new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
         var contextMre = new ManualResetEventSlim(false);
 
-        _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
         _listener.SetupSequence(x => x.GetContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
             {
@@ -183,16 +187,16 @@ public class SimpleServerTests : IDisposable
             })
             .ReturnsAsync(() =>
             {
-                contextMre.Set();
                 Thread.Sleep(100);
+                contextMre.Set();
                 return context;
             })
             .ReturnsAsync(() =>
             {
-                Thread.Sleep(TimeSpan.FromHours(1));
+                throw new Exception("Should not be called");
                 return context;
             });
-        _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<Func<IContext, Task>>())).Returns(Task.CompletedTask);
 
         var startStopMre = new AutoResetEvent(false);
         _server.PropertyChanged += (_, args) =>
@@ -213,24 +217,24 @@ public class SimpleServerTests : IDisposable
 
         _server.Stop();
 
-        _listener.Verify(x => x.StartListen(It.IsAny<WebParameters>()), Times.Once);
+        _listener.Verify(x => x.StartListen(It.IsAny<StartParameters>()), Times.Once);
         _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.AtLeast(4));
-        _chain.Verify(x => x.ChainRequest(context), Times.AtLeast(3));
+        _middleware.Verify(x => x.ProcessRequestAsync(context, It.IsAny<Func<IContext, Task>>()), Times.AtLeast(3));
     }
 
     [Fact]
     public void SubscriptionTest()
     {
-        _listener.Setup(x => x.StartListen(It.IsAny<WebParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
         {
             Thread.Sleep(50);
             return new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
         });
-        _chain.Setup(x => x.ChainRequest(It.IsAny<WebContext>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<Func<IContext, Task>>()));
 
         var s = false;
-        WebConfig? c = null;
+        ServerConfig? c = null;
 
         _server.PropertyChanged += (_, args) =>
         {
@@ -240,14 +244,14 @@ public class SimpleServerTests : IDisposable
                     s = _server.Status;
                     break;
                 case nameof(_server.Config):
-                    c = _server.CurrentConfig;
+                    c = _server.Config;
                     break;
                 default:
                     break;
             }
         };
 
-        var config1 = new WebConfig
+        var config1 = new ServerConfig(ServerType.Web)
         {
             Scheme = "http",
             Host = "host",
@@ -256,14 +260,6 @@ public class SimpleServerTests : IDisposable
 
         var mre = new AutoResetEvent(false);
         _server.PropertyChanged += Handler;
-            
-        void Handler(object? _, PropertyChangedEventArgs args)
-        {
-            if(args.PropertyName != nameof(_server.Status)) return;
-
-            if (_server.Status)
-                mre.Set();
-        };
 
         _server.Start(config1);
 
@@ -276,6 +272,13 @@ public class SimpleServerTests : IDisposable
 
         _server.PropertyChanged += Handler2;
 
+        _server.Stop();
+
+        mre.WaitOne();
+        
+        Assert.False(s);
+        return;
+
         void Handler2(object? _, PropertyChangedEventArgs args)
         {
             if (args.PropertyName != nameof(_server.Status)) return;
@@ -283,13 +286,15 @@ public class SimpleServerTests : IDisposable
             if (!_server.Status)
                 // ReSharper disable once AccessToDisposedClosure
                 mre.Set();
-        };
+        }
 
-        _server.Stop();
+        void Handler(object? _, PropertyChangedEventArgs args)
+        {
+            if(args.PropertyName != nameof(_server.Status)) return;
 
-        mre.WaitOne();
-        
-        Assert.False(s);
+            if (_server.Status)
+                mre.Set();
+        }
     }
 
     public void Dispose()

@@ -1,15 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
+using Shared.DataObjects;
 using Shared.DataObjects.Web;
 using Shared.Listener;
 using Shared.Wrappers.HttpListener;
 
 namespace Listeners;
 
-public class SimpleHttpListener(IHttpListener listener, ILogger logger) : IWebListener
+public class SimpleHttpListener(IHttpListener listener, ILogger logger) : IListener
 {
     public bool IsListening => listener.IsListening;
 
-    public void StartListen(WebParameters param)
+    public void StartListen(StartParameters param)
     {
         if (listener.IsListening)
         {
@@ -32,12 +33,12 @@ public class SimpleHttpListener(IHttpListener listener, ILogger logger) : IWebLi
         logger.LogInformation("Http listener stopped");
     }
 
-    public async Task<WebContext> GetContextAsync(CancellationToken token = default)
+    public async Task<IContext> GetContextAsync(CancellationToken token = default)
     {
         return await listener.GetContextAsync();
     }
 
-    public WebContext GetContext()
+    public IContext GetContext()
     {
         return listener.GetContext();
     }

@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
+using Servers;
 using Shared.Config;
-using Shared.Enums;
-using Shared.Server;
 
 namespace AppHost;
 
@@ -15,12 +14,12 @@ public  class AppHost
 
     private int _id = 0;
     private List<int> _ids = [];
-    private readonly List<IServer> _servers;
+    private readonly List<Server> _servers;
 
 
-    public event EventHandler<IServer>? ServerAdded;
+    public event EventHandler<Server>? ServerAdded;
     public event EventHandler<bool>? AutostartChanged;
-    public event EventHandler<List<IServer>>? ServersReady;
+    public event EventHandler<List<Server>>? ServersReady;
 
     #region Constructor
     internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
@@ -33,12 +32,12 @@ public  class AppHost
 
         var config = _configProvider.GetConfig();
 
-        _servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
+        _servers = config.ServerConfigs.Select<ServerConfig, Server>(x =>
         {
-            return x switch
+            return x.Type switch
             {
-                WebConfig s => _serverFactory.GetServer(s, _id++),
-                BotConfig b => _serverFactory.GetBot(b, _id++),
+                ServerType.Web => _serverFactory.GetServer(x, _id++),
+                ServerType.Bot => _serverFactory.GetBot(x, _id++),
                 _ => throw new NotSupportedException("Config not supported")
             };
         }).ToList();
@@ -94,9 +93,9 @@ public  class AppHost
 
     public void ServerAdd(ServerType mode)
     {
-        IServer server = mode switch
+        Server server = mode switch
         {
-            ServerType.Http => _serverFactory.GetServer(),
+            ServerType.Web => _serverFactory.GetServer(),
             ServerType.Bot => _serverFactory.GetBot(),
             _ => throw new NotSupportedException()
         };
@@ -125,7 +124,7 @@ public  class AppHost
         AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
     }
 
-    public void ConfigChange((int, CommonConfig) configTuple)
+    public void ConfigChange((int, ServerConfig) configTuple)
     {
         var server = _servers.FirstOrDefault(x => x.Id == configTuple.Item1);
         if (server == null)
@@ -152,8 +151,8 @@ public  class AppHost
 
 
     #region Private methods
-    private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
-        new(servers.Select(x => x.Config));
+    private static AppConfig GetConfig(IEnumerable<Server> servers) =>
+        new(servers.Select(x => x.Config).ToList());
 
     private void SetSystemEvents()
     {

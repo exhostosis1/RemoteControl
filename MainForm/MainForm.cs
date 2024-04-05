@@ -1,11 +1,9 @@
 ﻿using MainUI.CustomControls.MenuItems;
 using MainUI.CustomControls.Panels;
+using Servers;
 using Shared;
 using Shared.Config;
-using Shared.Enums;
-using Shared.Server;
 using Windows.UI.ViewManagement;
-using AppHost;
 
 namespace MainUI;
 
@@ -17,7 +15,7 @@ public sealed partial class MainForm : Form
     private const int GroupMargin = 6;
     private bool IsAutoStart { get; set; }
 
-    private List<IServer> _model = [];
+    private List<Server> _model = [];
     private readonly List<ServerMenuItemGroup> _toolStripGroups = [];
     private readonly List<ServerPanel> _windowPanels = [];
 
@@ -82,12 +80,12 @@ public sealed partial class MainForm : Form
     private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
     private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGroup));
 
-    private ServerPanel CreatePanel(IServer server)
+    private ServerPanel CreatePanel(Server server)
     {
-        ServerPanel panel = server switch
+        ServerPanel panel = server.Type switch
         {
-            IServer<WebConfig> s => new HttpPanel(s),
-            IServer<BotConfig> b => new BotPanel(b),
+            ServerType.Web => new HttpPanel(server),
+            ServerType.Bot => new BotPanel(server),
             _ => throw new NotSupportedException()
         };
 
@@ -106,12 +104,12 @@ public sealed partial class MainForm : Form
         return panel;
     }
 
-    private ServerMenuItemGroup CreateMenuItemGroup(IServer server)
+    private ServerMenuItemGroup CreateMenuItemGroup(Server server)
     {
-        ServerMenuItemGroup group = server switch
+        ServerMenuItemGroup group = server.Type switch
         {
-            IServer<WebConfig> s => new HttpMenuItemGroup(s),
-            IServer<BotConfig> b => new BotMenuItemGroup(b),
+            ServerType.Web => new HttpMenuItemGroup(server),
+            ServerType.Bot => new BotMenuItemGroup(server),
             _ => throw new NotSupportedException()
         };
 
@@ -122,7 +120,7 @@ public sealed partial class MainForm : Form
         return group;
     }
 
-    private void AddServer(object? _, IServer server)
+    private void AddServer(object? _, Server server)
     {
         _windowPanels.Add(CreatePanel(server));
         _toolStripGroups.Add(CreateMenuItemGroup(server));
@@ -227,8 +225,8 @@ public sealed partial class MainForm : Form
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var uris = _model.Where(x => x.Status && x is IServer<WebConfig>)
-            .Select(x => ((IServer<WebConfig>)x).CurrentConfig.Uri);
+        var uris = _model.Where(x => x.Status)
+            .Select(x => x.Config.Uri);
         Utils.AddFirewallRule(uris);
     }
 
@@ -248,7 +246,7 @@ public sealed partial class MainForm : Form
 
     private void AddServerButton_Click(object sender, EventArgs e)
     {
-        _viewModel.ServerAdd(ServerType.Http);
+        _viewModel.ServerAdd(ServerType.Web);
     }
 
     private void AddBotButton_Click(object sender, EventArgs e)

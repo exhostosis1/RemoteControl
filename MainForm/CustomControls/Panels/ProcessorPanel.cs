@@ -1,13 +1,13 @@
-﻿using System.ComponentModel;
+﻿using Servers;
 using Shared.Config;
-using Shared.Server;
+using System.ComponentModel;
 
 namespace MainUI.CustomControls.Panels;
 
 internal abstract class ServerPanel : Panel
 {
     public int Id { get; init; }
-    protected readonly IServer Server;
+    protected readonly Server Server;
     protected readonly SynchronizationContext? SynchronizationContext;
     protected Theme Theme { get; set; } = new();
 
@@ -62,9 +62,9 @@ internal abstract class ServerPanel : Panel
 
     public event EventHandler<int>? StartButtonClicked;
     public event EventHandler<int>? StopButtonClicked;
-    public event EventHandler<(int, CommonConfig)>? UpdateButtonClicked;
+    public event EventHandler<(int, ServerConfig)>? UpdateButtonClicked;
 
-    protected ServerPanel(IServer server)
+    protected ServerPanel(Server server)
     {
         Width = 508;
         Height = 90;
@@ -123,7 +123,7 @@ internal abstract class ServerPanel : Panel
 
     protected void EnableUpdateButton(object? sender, EventArgs e) => UpdateButton.Enabled = true;
 
-    protected void RaiseUpdateButtonClickedEvent(CommonConfig config) =>
+    protected void RaiseUpdateButtonClickedEvent(ServerConfig config) =>
         UpdateButtonClicked?.Invoke(null, (Id, config));
 
     protected abstract void UpdateButtonClick(object? sender, EventArgs e);

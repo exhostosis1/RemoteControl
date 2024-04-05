@@ -1,12 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared.ControlProviders.Provider;
+using Shared.DataObjects;
 using Shared.DataObjects.Bot;
 using Shared.Enums;
 using Shared.Server;
 
 namespace Servers.Middleware;
 
-public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger logger) : IBotMiddleware
+public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger logger) : IMiddleware
 {
     private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
@@ -28,10 +29,10 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger log
         Persistent = true
     };
 
-    public event EventHandler<BotContext>? OnNext;
-
-    public void ProcessRequest(object? _, BotContext context)
+    public Task ProcessRequestAsync(IContext contextParam, Func<IContext, Task> _)
     {
+        var context = (BotContext)contextParam;
+
         logger.LogInformation("Executing bot command {command}", context.BotRequest.Command);
 
         context.BotResponse.Buttons = _buttons;
@@ -53,14 +54,14 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger log
                 volume = volume > 100 ? 100 : volume;
                 controlFacade.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
-                return;
+                return Task.CompletedTask;
             case BotButtons.VolumeDown:
                 volume = controlFacade.GetVolume();
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                 controlFacade.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
-                return;
+                return Task.CompletedTask;
             case BotButtons.Darken:
                 controlFacade.DisplayOff();
                 break;
@@ -74,5 +75,7 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger log
         }
 
         context.BotResponse.Message = "done";
+
+        return Task.CompletedTask;
     }
 }

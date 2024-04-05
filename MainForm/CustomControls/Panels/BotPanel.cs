@@ -1,4 +1,5 @@
-﻿using Shared.Config;
+﻿using Servers;
+using Shared.Config;
 using Shared.Server;
 
 namespace MainUI.CustomControls.Panels;
@@ -48,11 +49,11 @@ internal sealed class BotPanel : ServerPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    public BotPanel(IServer<BotConfig> server) : base(server)
+    public BotPanel(Server server) : base(server)
     {
-        _apiUrlTextBox.Text = server.CurrentConfig.ApiUri;
-        _apiKeyTextBox.Text = server.CurrentConfig.ApiKey;
-        _userIdsListBox.Text = string.Join(Environment.NewLine, server.CurrentConfig.Usernames);
+        _apiUrlTextBox.Text = server.Config.ApiUri;
+        _apiKeyTextBox.Text = server.Config.ApiKey;
+        _userIdsListBox.Text = string.Join(Environment.NewLine, server.Config.Usernames);
 
         _apiKeyTextBox.TextChanged += EnableUpdateButton;
         _apiUrlTextBox.TextChanged += EnableUpdateButton;
@@ -72,11 +73,11 @@ internal sealed class BotPanel : ServerPanel
         {
             if(args.PropertyName != nameof(server.Config)) return;
 
-            NameTextBox.Text = server.CurrentConfig.Name;
-            AutoStartBox.Checked = server.CurrentConfig.AutoStart;
-            _apiUrlTextBox.Text = server.CurrentConfig.ApiUri;
-            _apiKeyTextBox.Text = server.CurrentConfig.ApiKey;
-            _userIdsListBox.Text = string.Join(Environment.NewLine, server.CurrentConfig.Usernames);
+            NameTextBox.Text = server.Config.Name;
+            AutoStartBox.Checked = server.Config.AutoStart;
+            _apiUrlTextBox.Text = server.Config.ApiUri;
+            _apiKeyTextBox.Text = server.Config.ApiKey;
+            _userIdsListBox.Text = string.Join(Environment.NewLine, server.Config.Usernames);
         };
         Disposed += LocalDispose;
     }
@@ -108,7 +109,7 @@ internal sealed class BotPanel : ServerPanel
             _userIdsLabel.ForeColor = Color.OrangeRed;
         }
 
-        var config = new BotConfig
+        var config = new ServerConfig(ServerType.Web)
         {
             AutoStart = AutoStartBox.Checked,
             ApiUri = _apiUrlTextBox.Text,

@@ -5,6 +5,7 @@ using Shared.Bots.Telegram;
 using Shared.Bots.Telegram.ApiObjects.Response;
 using Shared.Listener;
 using System.ComponentModel;
+using Shared.DataObjects.Bot;
 
 namespace UnitTests.Listeners;
 
@@ -28,7 +29,7 @@ public class TelegramListenerTests : IDisposable
         const string apiKey = "apiKey";
         var usernames = new List<string> { "user1", "user2" };
 
-        var param = new BotParameters(uri, apiKey, usernames);
+        var param = new StartParameters(uri, apiKey, usernames);
         var startStopMre = new AutoResetEvent(false);
         var contextMre = new ManualResetEventSlim(false);
 
@@ -102,7 +103,7 @@ public class TelegramListenerTests : IDisposable
         const string apiKey = "apiKey";
         var usernames = new List<string> { "user1", "user2" };
 
-        var param = new BotParameters(uri, apiKey, usernames);
+        var param = new StartParameters(uri, apiKey, usernames);
 
         _wrapper.SetupSequence(x => x.GetUpdatesAsync(uri, apiKey, It.IsAny<CancellationToken>()))
             .ReturnsAsync(() => new UpdateResponse { Ok = true })
@@ -177,13 +178,13 @@ public class TelegramListenerTests : IDisposable
 
         _listener.StartListen(param);
 
-        var context = await _listener.GetContextAsync();
-        Assert.Equal(1, context.BotRequest.Id);
-        Assert.Equal("test message 1", context.BotRequest.Command);
+        var context = await _listener.GetContextAsync() as BotContext;
+        Assert.Equal(1, context?.BotRequest.Id);
+        Assert.Equal("test message 1", context?.BotRequest.Command);
 
-        context = await _listener.GetContextAsync();
-        Assert.Equal(1, context.BotRequest.Id);
-        Assert.Equal("test message 2", context.BotRequest.Command);
+        context = await _listener.GetContextAsync() as BotContext;
+        Assert.Equal(1, context?.BotRequest.Id);
+        Assert.Equal("test message 2", context?.BotRequest.Command);
 
         _listener.StopListen();
     }
@@ -198,7 +199,7 @@ public class TelegramListenerTests : IDisposable
                 return null!;
             });
 
-        _listener.StartListen(new BotParameters("", "", []));
+        _listener.StartListen(new StartParameters("", "", []));
 
         await Assert.ThrowsAsync<OperationCanceledException>(async () =>
             await _listener.GetContextAsync(new CancellationTokenSource(TimeSpan.FromSeconds(2)).Token));

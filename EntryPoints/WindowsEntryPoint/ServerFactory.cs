@@ -16,10 +16,10 @@ namespace AppHost;
 
 public class ServerFactory
 {
-    private readonly IWebListener _webListener;
-    private readonly IWebMiddlewareChain _webMiddlewareChain;
-    private readonly IBotListener _botListener;
-    private readonly IBotMiddlewareChain _botMiddlewareChain;
+    private readonly IListener _webListener;
+    private readonly IMiddleware[] _webMiddlewareChain;
+    private readonly IListener _botListener;
+    private readonly IMiddleware[] _botMiddlewareChain;
     private readonly ILoggerProvider _loggerProvider;
 
     public ServerFactory(ILoggerProvider loggingProvider)
@@ -42,38 +42,38 @@ public class ServerFactory
             new ApiV1Middleware([audioController, mouseController, keyboardController, displayController],
                 loggingProvider.CreateLogger(nameof(ApiV1Middleware)));
 
-        _webMiddlewareChain = new WebMiddlewareChain([apiMiddleware, staticMiddleware]);
+        _webMiddlewareChain = [apiMiddleware, staticMiddleware];
         _webListener = new SimpleHttpListener(new HttpListenerWrapper(loggingProvider.CreateLogger(nameof(HttpListenerWrapper))),
             loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
 
         _botListener = new TelegramListener(new TelegramBotApiProvider(new HttpClientWrapper()),
             loggingProvider.CreateLogger(nameof(TelegramListener)));
-        _botMiddlewareChain = new BotMiddlewareChain([new CommandsExecutor(generalInput, loggingProvider.CreateLogger(nameof(CommandsExecutor)))]);
+        _botMiddlewareChain = [new CommandsExecutor(generalInput, loggingProvider.CreateLogger(nameof(CommandsExecutor)))];
     }
 
-    public SimpleServer GetServer()
+    public Server GetServer()
     {
-        return new SimpleServer(_webListener, _webMiddlewareChain, _loggerProvider.CreateLogger(nameof(SimpleServer)));
+        return new Server(ServerType.Web, _webListener, _webMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)));
     }
 
-    public SimpleServer GetServer(WebConfig config, int id = 0)
+    public Server GetServer(ServerConfig config, int id = 0)
     {
         var server = GetServer();
-        server.CurrentConfig = config;
+        server.Config = config;
         server.Id = id;
 
         return server;
     }
 
-    public BotServer GetBot()
+    public Server GetBot()
     {
-        return new BotServer(_botListener, _botMiddlewareChain, _loggerProvider.CreateLogger(nameof(BotServer)));
+        return new Server(ServerType.Bot, _botListener, _botMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)));
     }
     
-    public BotServer GetBot(BotConfig config, int id)
+    public Server GetBot(ServerConfig config, int id)
     {
         var bot = GetBot();
-        bot.CurrentConfig = config;
+        bot.Config = config;
         bot.Id = id;
 
         return bot;

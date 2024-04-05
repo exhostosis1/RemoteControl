@@ -69,10 +69,10 @@ public class ApiV1Tests : IDisposable
     [InlineData("/api/v1/second/actionthree", HttpStatusCode.OK, "application/json", "\"new\"")]
     [InlineData("/api/v1/second/actionfour", HttpStatusCode.OK, "text/plain", "text")]
     [InlineData("/api/v1/second/actionfive", HttpStatusCode.NotFound, "text/plain", "")]
-    public void RequestTest(string path, HttpStatusCode expectedCode, string expectedContentType, string expectedResult)
+    public async Task RequestTest(string path, HttpStatusCode expectedCode, string expectedContentType, string expectedResult)
     {
         var context = new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>());
-        _middleware.ProcessRequest(null, context);
+        await _middleware.ProcessRequestAsync(context, null!);
 
         Assert.True(context.WebResponse.StatusCode == expectedCode
                     && context.WebResponse.ContentType == expectedContentType
@@ -80,23 +80,25 @@ public class ApiV1Tests : IDisposable
     }
 
     [Fact]
-    public void RequestNextText()
+    public async Task RequestNextText()
     {
         var count = 0;
 
-        _middleware.OnNext += (_, _) => count++;
-
         var context = new WebContext(new WebContextRequest("/api/v2/first/actionone"), Mock.Of<WebContextResponse>());
-        _middleware.ProcessRequest(null, context);
+        await _middleware.ProcessRequestAsync(context, _ =>
+        {
+            count++;
+            return Task.CompletedTask;
+        });
 
-        Assert.True(count == 1);
+        Assert.Equal(1, count);
     }
 
     [Fact]
-    public void ErrorTest()
+    public async Task ErrorTest()
     {
         var context = new WebContext(new WebContextRequest("/api/v1/second/erroraction"), Mock.Of<WebContextResponse>());
-        _middleware.ProcessRequest(null, context);
+        await _middleware.ProcessRequestAsync(context, null!);
 
         Assert.True(context.WebResponse.StatusCode == HttpStatusCode.InternalServerError &&
                     Encoding.UTF8.GetString(context.WebResponse.Payload) == "test exception");

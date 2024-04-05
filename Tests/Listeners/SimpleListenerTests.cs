@@ -38,7 +38,7 @@ public class SimpleHttpListenerTests : IDisposable
 
         const string uri = "http://localhost.com";
 
-        _listener.StartListen(new WebParameters(uri));
+        _listener.StartListen(new StartParameters(uri));
 
         Assert.True(listening);
 
@@ -81,14 +81,14 @@ public class SimpleHttpListenerTests : IDisposable
             .Returns(GetContext(value3))
             .Throws<IndexOutOfRangeException>();
 
-        var result = _listener.GetContext();
-        Assert.Equal(value1, result.WebRequest.Path);
+        var result = _listener.GetContext() as WebContext;
+        Assert.Equal(value1, result?.WebRequest.Path);
 
-        result = _listener.GetContext();
-        Assert.Equal(value2, result.WebRequest.Path);
+        result = _listener.GetContext() as WebContext;
+        Assert.Equal(value2, result?.WebRequest.Path);
 
-        result = _listener.GetContext();
-        Assert.Equal(value3, result.WebRequest.Path);
+        result = _listener.GetContext() as WebContext;
+        Assert.Equal(value3, result?.WebRequest.Path);
 
         Assert.Throws<IndexOutOfRangeException>(() => _listener.GetContext());
 
@@ -103,28 +103,28 @@ public class SimpleHttpListenerTests : IDisposable
         const string value2 = "path2";
         const string value3 = "path3";
 
-        static Task<WebContext> GetContext(string path) =>
-            Task.FromResult(new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>()));
-
         _wrapper.SetupSequence(x => x.GetContextAsync())
             .Returns(GetContext(value1))
             .Returns(GetContext(value2))
             .Returns(GetContext(value3))
             .Throws<IndexOutOfRangeException>();
 
-        var result = await _listener.GetContextAsync();
-        Assert.Equal(value1, result.WebRequest.Path);
+        var result = await _listener.GetContextAsync() as WebContext;
+        Assert.Equal(value1, result?.WebRequest.Path);
 
-        result = await _listener.GetContextAsync();
-        Assert.Equal(value2, result.WebRequest.Path);
+        result = await _listener.GetContextAsync() as WebContext;
+        Assert.Equal(value2, result?.WebRequest.Path);
 
-        result = await _listener.GetContextAsync();
-        Assert.Equal(value3, result.WebRequest.Path);
+        result = await _listener.GetContextAsync() as WebContext;
+        Assert.Equal(value3, result?.WebRequest.Path);
 
         await Assert.ThrowsAsync<IndexOutOfRangeException>(async () => await _listener.GetContextAsync());
 
         _wrapper.Verify(x => x.GetContextAsync(), Times.Exactly(4));
+        return;
 
+        static Task<WebContext> GetContext(string path) =>
+            Task.FromResult(new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>()));
     }
 
     public void Dispose()

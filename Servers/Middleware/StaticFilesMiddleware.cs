@@ -2,10 +2,11 @@
 using Shared.DataObjects.Web;
 using Shared.Server;
 using System.Net;
+using Shared.DataObjects;
 
 namespace Servers.Middleware;
 
-public class StaticFilesMiddleware(ILogger logger, string directory = "www") : IWebMiddleware
+public class StaticFilesMiddleware(ILogger logger, string directory = "www") : IMiddleware
 {
     private readonly string _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
 
@@ -18,11 +19,11 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
         { ".mjs", "text/javascript" },
         { ".css", "text/css" }
     };
-
-    public event EventHandler<WebContext>? OnNext;
-
-    public void ProcessRequest(object? _, WebContext context)
+    
+    public async Task ProcessRequestAsync(IContext contextParam, Func<IContext, Task> _)
     {
+        var context = (WebContext)contextParam;
+
         var uriPath = context.WebRequest.Path;
 
         logger.LogInformation("Processing file request {uriPath}", uriPath);
@@ -46,7 +47,7 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
 
         if (File.Exists(path))
         {
-            context.WebResponse.Payload = File.ReadAllBytes(path);
+            context.WebResponse.Payload = await File.ReadAllBytesAsync(path);
         }
         else
         {

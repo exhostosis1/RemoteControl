@@ -1,11 +1,11 @@
-﻿using Shared.Server;
+﻿using Servers;
 
 namespace MainUI.CustomControls.MenuItems;
 
 internal abstract class ServerMenuItemGroup : IDisposable
 {
     public int Id { get; init; }
-    protected readonly IServer Server;
+    protected readonly Server Server;
 
     protected readonly ToolStripMenuItem NameItem = new()
     {
@@ -23,7 +23,7 @@ internal abstract class ServerMenuItemGroup : IDisposable
     public event EventHandler<int>? OnStartClick;
     public event EventHandler<int>? OnStopClick;
 
-    protected ServerMenuItemGroup(IServer server)
+    protected ServerMenuItemGroup(Server server)
     {
         Id = server.Id;
         Server = server;

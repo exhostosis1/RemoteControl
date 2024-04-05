@@ -1,40 +1,35 @@
-﻿using Shared.Config;
-using Shared.DataObjects;
+﻿using Microsoft.Extensions.Logging;
+using Shared.Config;
 using Shared.Listener;
 using Shared.Server;
 using System.ComponentModel;
-using Microsoft.Extensions.Logging;
+using Shared.DataObjects;
 
 namespace Servers;
 
-public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where TContext : IContext where TConfig : CommonConfig, new() where TParams: StartParameters
+public class Server: INotifyPropertyChanged
 {
+    public ServerType Type { get; set;  }
     public int Id { get; set; } = -1;
     public bool Status { get; private set; } = false;
 
     private readonly ILogger _logger;
 
-    private readonly IListener<TContext, TParams> _listener;
-    private readonly IMiddlewareChain<TContext> _middleware;
+    private readonly IListener _listener;
+    private readonly Func<IContext, Task> _middleware;
 
     private CancellationTokenSource? _cts;
     private readonly IProgress<bool> _progress;
 
     private readonly TaskFactory _factory = new();
 
-    public TConfig DefaultConfig { get; } = new();
+    public ServerConfig DefaultConfig { get; init; }
 
-    public CommonConfig Config
-    {
-        get => CurrentConfig;
-        set => CurrentConfig = value as TConfig ?? CurrentConfig;
-    }
-
-    private TConfig _currentConfig;
+    private ServerConfig _currentConfig;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public TConfig CurrentConfig
+    public ServerConfig Config
     {
         get => _currentConfig;
         set
@@ -44,13 +39,25 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         }
     }
 
-    protected GenericServer(IListener<TContext, TParams> listener, IMiddlewareChain<TContext> middleware, ILogger logger)
+    public Server(ServerType type, IListener listener, IMiddleware[] middlewares, ILogger logger)
     {
+        Type = type;
+        DefaultConfig = new ServerConfig(type);
         _currentConfig = DefaultConfig;
 
         _logger = logger;
         _listener = listener;
-        _middleware = middleware;
+
+        var action = (IContext context) => Task.FromException(new Exception("Should never be called"));
+
+        for (var i = middlewares.Length - 1; i >= 0; i--)
+        {
+            var middleware = middlewares[i];
+            var act = action;
+            action = context => middleware.ProcessRequestAsync(context, act);
+        }
+
+        _middleware = action;
 
         _progress = new Progress<bool>(status =>
         {
@@ -59,25 +66,23 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         });
     }
 
-    public void Start(TConfig? config)
+    public void Start(ServerConfig? config = null)
     {
         if (config != null)
-            CurrentConfig = config;
+            Config = config;
 
         if (Status)
         {
             Stop();
         }
 
-        var param = CurrentConfig switch
+        var param = Config.Type switch
         {
-            WebConfig s => new WebParameters(s.Uri.ToString()) as TParams,
-            BotConfig b => new BotParameters(b.ApiUri, b.ApiKey, b.Usernames) as TParams,
+            ServerType.Web => new StartParameters(Config.Uri.ToString()),
+            ServerType.Bot => new StartParameters(Config.ApiUri, Config.ApiKey, Config.Usernames),
             _ => throw new NotSupportedException("Config type not supported")
         };
-
-        if (param == null) return;
-
+        
         try
         {
             _listener.StartListen(param);
@@ -93,7 +98,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         _factory.StartNew(async () => await ProcessRequestAsync(_cts.Token), TaskCreationOptions.LongRunning);
     }
 
-    public void Restart(TConfig? config)
+    public void Restart(ServerConfig? config = null)
     {
         Stop();
         Start(config);
@@ -107,7 +112,7 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
             try
             {
                 var context = await _listener.GetContextAsync(token);
-                _middleware.ChainRequest(context);
+                await _middleware(context);
                 context.Response.Close();
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)
@@ -122,17 +127,6 @@ public class GenericServer<TContext, TConfig, TParams> : IServer<TConfig> where 
         }
 
         _progress.Report(false);
-    }
-
-    public void Start(CommonConfig? config = null)
-    {
-        Start(config as TConfig);
-    }
-
-    public void Restart(CommonConfig? config = null)
-    {
-        Stop();
-        Start(config);
     }
 
     public void Stop()

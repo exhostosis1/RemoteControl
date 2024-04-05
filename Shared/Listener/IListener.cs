@@ -4,11 +4,11 @@ using System.Threading.Tasks;
 
 namespace Shared.Listener;
 
-public interface IListener<TContext, in TParam> where TContext : IContext where TParam : StartParameters
+public interface IListener
 {
     public bool IsListening { get; }
-    public void StartListen(TParam param);
+    public void StartListen(StartParameters param);
     public void StopListen();
-    public Task<TContext> GetContextAsync(CancellationToken token = default);
-    public TContext GetContext();
+    public Task<IContext> GetContextAsync(CancellationToken token = default);
+    public IContext GetContext();
 }

@@ -6,23 +6,24 @@ using Shared.DataObjects.Web;
 using Shared.Server;
 using System.Net;
 using System.Text;
+using Shared.DataObjects;
 
 namespace Servers.Middleware;
 
-public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger logger) : IWebMiddleware
+public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger logger) : IMiddleware
 {
     private readonly ControllersWithMethods _controllers = controllers.GetControllersWithMethods();
     public static string ApiVersion => "v1";
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
-
-    public event EventHandler<WebContext>? OnNext;
-
-    public void ProcessRequest(object? _, WebContext context)
+    
+    public async Task ProcessRequestAsync(IContext contextParam, Func<IContext, Task> next)
     {
+        var context = (WebContext)contextParam;
+
         if (!Utils.TryGetApiVersion(context.WebRequest.Path, out var version) || version != ApiVersion)
         {
-            OnNext?.Invoke(null, context);
+            await next(contextParam);
             return;
         }
 

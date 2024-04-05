@@ -4,10 +4,11 @@ using Shared.DataObjects.Bot;
 using Shared.Listener;
 using System.ComponentModel;
 using System.Net.Sockets;
+using Shared.DataObjects;
 
 namespace Listeners;
 
-public class TelegramListener : IBotListener
+public class TelegramListener : IListener
 {
     private class LocalResponse(string apiUrl, string apiKey, int chatId, IBotApiProvider wrapper) : BotContextResponse
     {
@@ -47,11 +48,11 @@ public class TelegramListener : IBotListener
         });
     }
 
-    public void StartListen(BotParameters param)
+    public void StartListen(StartParameters param)
     {
         if (IsListening) return;
             
-        _usernames = param.Usernames;
+        _usernames = param.Usernames ?? [];
 
         _cst = new CancellationTokenSource();
         _factory.StartNew(async () => await ListenAsync(param.Uri, param.ApiKey ?? "", _cst.Token), TaskCreationOptions.LongRunning);
@@ -131,7 +132,7 @@ public class TelegramListener : IBotListener
 
     private BotContext CreateContext(BotContextRequest request) => new(request, new LocalResponse(request.ApiUrl, request.ApiKey, request.Id, _wrapper));
 
-    public async Task<BotContext> GetContextAsync(CancellationToken token = default)
+    public async Task<IContext> GetContextAsync(CancellationToken token = default)
     {
         while (!token.IsCancellationRequested)
         {
@@ -147,7 +148,7 @@ public class TelegramListener : IBotListener
         throw new OperationCanceledException();
     }
 
-    public BotContext GetContext()
+    public IContext GetContext()
     {
         while (IsListening)
         {

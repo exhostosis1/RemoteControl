@@ -50,11 +50,11 @@ public class StaticFilesMiddlewareTests : IDisposable
     [InlineData("/file.css", HttpStatusCode.OK, "text/css", FileContents)]
     [InlineData("..", HttpStatusCode.NotFound, "text/plain", "")]
     [InlineData("/unexdisting.file", HttpStatusCode.NotFound, "text/plain", "")]
-    public void RequestTest(string path, HttpStatusCode code, string type, string response)
+    public async Task RequestTest(string path, HttpStatusCode code, string type, string response)
     {
         var context = new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>());
         
-        _middleware.ProcessRequest(null, context);
+        await _middleware.ProcessRequestAsync(context, null!);
 
         Assert.True(context.WebResponse.StatusCode == code && context.WebResponse.ContentType == type &&
                     Encoding.UTF8.GetString(context.WebResponse.Payload) ==

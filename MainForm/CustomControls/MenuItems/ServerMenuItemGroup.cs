@@ -1,23 +1,23 @@
-﻿using Shared.Config;
-using Shared.Server;
+﻿using Servers;
+using Shared.Config;
 
 namespace MainUI.CustomControls.MenuItems;
 
 internal class HttpMenuItemGroup : ServerMenuItemGroup
 {
-    public HttpMenuItemGroup(IServer<WebConfig> server) : base(server)
+    public HttpMenuItemGroup(Server server) : base(server)
     {
-        DescriptionItem.Text = server.CurrentConfig.Uri.ToString();
+        DescriptionItem.Text = server.Config.Uri.ToString();
         DescriptionItem.Click += (_, _) => DescriptionClickInvoke(DescriptionItem.Text);
 
         server.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName != nameof(server.Config)) return;
-            ConfigChanged(server.CurrentConfig);
+            ConfigChanged(server.Config);
         };
     }
 
-    private void ConfigChanged(WebConfig config)
+    private void ConfigChanged(ServerConfig config)
     {
         NameItem.Text = config.Name;
         DescriptionItem.Text = config.Uri.ToString();

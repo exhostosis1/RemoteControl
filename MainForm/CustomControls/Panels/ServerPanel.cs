@@ -1,5 +1,5 @@
-﻿using Shared.Config;
-using Shared.Server;
+﻿using Servers;
+using Shared.Config;
 
 namespace MainUI.CustomControls.Panels;
 
@@ -49,11 +49,11 @@ internal class HttpPanel : ServerPanel
 
     private readonly IDisposable _unsubscriber;
 
-    public HttpPanel(IServer<WebConfig> server) : base(server)
+    public HttpPanel(Server server) : base(server)
     {
-        _schemeTextBox.Text = server.CurrentConfig.Scheme;
-        _hostTextBox.Text = server.CurrentConfig.Host;
-        _portTextBox.Text = server.CurrentConfig.Port.ToString();
+        _schemeTextBox.Text = server.Config.Scheme;
+        _hostTextBox.Text = server.Config.Host;
+        _portTextBox.Text = server.Config.Port.ToString();
 
         _schemeTextBox.TextChanged += EnableUpdateButton;
         _hostTextBox.TextChanged += EnableUpdateButton;
@@ -84,10 +84,10 @@ internal class HttpPanel : ServerPanel
             if (args.PropertyName != nameof(server.Config)) return;
 
             NameTextBox.Text = server.Config.Name;
-            AutoStartBox.Checked = server.CurrentConfig.AutoStart;
-            _schemeTextBox.Text = server.CurrentConfig.Scheme;
-            _hostTextBox.Text = server.CurrentConfig.Host;
-            _portTextBox.Text = server.CurrentConfig.Port.ToString();
+            AutoStartBox.Checked = server.Config.AutoStart;
+            _schemeTextBox.Text = server.Config.Scheme;
+            _hostTextBox.Text = server.Config.Host;
+            _portTextBox.Text = server.Config.Port.ToString();
         };
 
         Disposed += LocalDispose;
@@ -123,7 +123,7 @@ internal class HttpPanel : ServerPanel
             return;
         }
 
-        var config = new WebConfig
+        var config = new ServerConfig(ServerType.Bot)
         {
             AutoStart = AutoStartBox.Checked,
             Uri = uri,

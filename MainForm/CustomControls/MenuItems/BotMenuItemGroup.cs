@@ -1,23 +1,23 @@
-﻿using Shared.Config;
-using Shared.Server;
+﻿using Servers;
+using Shared.Config;
 
 namespace MainUI.CustomControls.MenuItems;
 
 internal class BotMenuItemGroup : ServerMenuItemGroup
 {
-    public BotMenuItemGroup(IServer<BotConfig> server) : base(server)
+    public BotMenuItemGroup(Server server) : base(server)
     {
-        DescriptionItem.Text = server.CurrentConfig.UsernamesString;
+        DescriptionItem.Text = server.Config.UsernamesString;
 
         server.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName != nameof(server.Config)) return;
 
-            ConfigChanged(server.CurrentConfig);
+            ConfigChanged(server.Config);
         };
     }
 
-    private void ConfigChanged(BotConfig config)
+    private void ConfigChanged(ServerConfig config)
     {
         NameItem.Text = config.Name;
         DescriptionItem.Text = config.UsernamesString;
