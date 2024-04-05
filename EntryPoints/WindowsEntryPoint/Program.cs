@@ -21,6 +21,7 @@ public class Main
     private readonly ILogger _logger;
     private readonly ServerFactory _serverFactory;
     private readonly RegistryAutoStartService _autoStartService;
+    private readonly IConfigProvider _configProvider;
 
     public event EventHandler<IServer>? ServerAdded;
     public event EventHandler<bool>? AutostartChanged;
@@ -40,8 +41,12 @@ public class Main
 
         _autoStartService = new RegistryAutoStartService(loggingProvider.CreateLogger(nameof(RegistryAutoStartService)));
         _serverFactory = new ServerFactory(loggingProvider);
-        
-        _servers = Configuration.GetServersConfigurations().Servers.Select<CommonConfig, IServer>(x =>
+        _configProvider = new JsonConfigurationProvider(loggingProvider.CreateLogger(nameof(JsonConfigurationProvider)),
+            Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+
+
+
+        _servers = _configProvider.GetConfig().Servers.Select<CommonConfig, IServer>(x =>
         {
             return x switch
             {
@@ -105,7 +110,7 @@ public class Main
         server.Stop();
         _servers.Remove(server);
 
- //       _configProvider.SetConfig(GetConfig(_servers));
+        _configProvider.SetConfig(GetConfig(_servers));
     }
 
     public void AutoStartChange(bool value)
@@ -130,7 +135,7 @@ public class Main
         }
 
         var config = GetConfig(_servers);
- //       _configProvider.SetConfig(config);
+        _configProvider.SetConfig(config);
     }
 
     public void AppClose(object? _)

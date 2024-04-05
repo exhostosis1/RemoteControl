@@ -1,75 +1,47 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Primitives;
-using Shared.Config;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
+using Shared.Config;
 
 namespace WindowsEntryPoint;
 
-internal class JsonConfigurationProvider(string path) : IConfigurationProvider, IConfigurationSource
+public class JsonConfigurationProvider(ILogger logger, string filePath) : IConfigProvider
 {
-    public bool TryGet(string key, out string? value)
+    private readonly JsonSerializerOptions _jsonOptions = new()
     {
-        throw new NotImplementedException();
-    }
+        WriteIndented = true,
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
 
-    public void Set(string key, string? value)
+    public AppConfig GetConfig()
     {
-        throw new NotImplementedException();
-    }
+        logger.LogInformation("Getting config from file {filePath}", filePath);
 
-    public IChangeToken GetReloadToken()
-    {
-        throw new NotImplementedException();
-    }
+        if (!File.Exists(filePath))
+        {
+            logger.LogWarning("No config file");
+            return new AppConfig();
+        }
 
-    public void Load()
-    {
-        throw new NotImplementedException();
-    }
+        AppConfig? result = null;
 
-    public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
-    {
-        throw new NotImplementedException();
-    }
-
-    public AppConfig GetJson()
-    {
         try
         {
-            var json = File.ReadAllText(path);
-            return JsonSerializer.Deserialize<AppConfig>(json) ?? throw new NullReferenceException();
+            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(filePath));
         }
-        catch (Exception e)
+        catch (JsonException e)
         {
-            
+            logger.LogError("{message}", e.Message);
         }
 
-        return new AppConfig();
+        return result ?? new AppConfig();
     }
 
-    public void WriteJson(AppConfig config)
+    public void SetConfig(AppConfig appConfig)
     {
-        try
-        {
-            var json = JsonSerializer.Serialize(config, new JsonSerializerOptions
-            {
-                AllowTrailingCommas = true,
-                WriteIndented = true,
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            });
+        logger.LogInformation("Writing config to file {filePath}", filePath);
 
-            File.WriteAllText(path, json);
-        }
-        catch (Exception e)
-        {
-            
-        }
-    }
-
-    public IConfigurationProvider Build(IConfigurationBuilder builder)
-    {
-        return this;
+        File.WriteAllText(filePath,
+            JsonSerializer.Serialize(appConfig, _jsonOptions));
     }
 }
