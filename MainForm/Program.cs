@@ -1,4 +1,4 @@
-using WindowsEntryPoint;
+using AppHost;
 
 namespace MainUI;
 
@@ -10,7 +10,9 @@ internal static class Program
     [STAThread]
     private static void Main()
     {
-        var app = Task.Run(() => new Main()).Result;
+        var appBuilder = new AppHostBuilder();
+
+        var app = Task.Run(() => appBuilder.Build()).Result;
 
         // To customize application configuration such as set high DPI settings or default font,
         // see https://aka.ms/applicationconfiguration.

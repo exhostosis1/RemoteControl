@@ -25,7 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ApiControllers\ApiControllers.csproj" />
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
-    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\WindowsEntryPoint.csproj" />
+    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\AppHost.csproj" />
     <ProjectReference Include="..\Listeners\Listeners.csproj" />
     <ProjectReference Include="..\Servers\Servers.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />

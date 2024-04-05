@@ -10,10 +10,11 @@
 	  <Platforms>AnyCPU;x64</Platforms>
 	  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	  <SupportedOSPlatformVersion>10.0.22000.0</SupportedOSPlatformVersion>
+	  <ApplicationIcon>Icons\grey.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\WindowsEntryPoint.csproj" />
+    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\AppHost.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
     <ProjectReference Include="..\Web\Web.csproj" />
   </ItemGroup>
@@ -39,6 +40,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Icons\Device.theme-light.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Icons\grey.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

@@ -5,7 +5,7 @@ using Shared.Config;
 using Shared.Enums;
 using Shared.Server;
 using Windows.UI.ViewManagement;
-using WindowsEntryPoint;
+using AppHost;
 
 namespace MainUI;
 
@@ -43,9 +43,9 @@ public sealed partial class MainForm : Form
     private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico"));
     private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico"));
 
-    private readonly Main _viewModel;
+    private readonly AppHost.AppHost _viewModel;
 
-    public MainForm(Main app)
+    public MainForm(AppHost.AppHost app)
     {
         InitializeComponent();
 

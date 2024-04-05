@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Shared.AutoStart;
-using System.Diagnostics;
 
-namespace WindowsEntryPoint;
+namespace AppHost;
 
 public class RegistryAutoStartService(ILogger logger)
     : IAutoStartService

@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Web", "Web\Web.csproj", "{6
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ApiControllers", "ApiControllers\ApiControllers.csproj", "{508AC867-4A87-458D-BA6B-3BB6F1CD82AF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WindowsEntryPoint", "EntryPoints\WindowsEntryPoint\WindowsEntryPoint.csproj", "{415B78B5-812F-4B4C-BF05-25AC78E1A034}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AppHost", "EntryPoints\WindowsEntryPoint\AppHost.csproj", "{415B78B5-812F-4B4C-BF05-25AC78E1A034}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "Tests\UnitTests.csproj", "{1323904A-8699-4410-8874-CE1F830D84C7}"
 EndProject

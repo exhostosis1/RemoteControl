@@ -4,49 +4,36 @@ using Shared.Config;
 using Shared.Enums;
 using Shared.Server;
 
-#if DEBUG
-using Microsoft.Extensions.Logging.Debug;
-#else
-using NReco.Logging.File;
-#endif
+namespace AppHost;
 
-
-namespace WindowsEntryPoint;
-
-public class Main
+public  class AppHost
 {
-    private int _id = 0;
-    private List<int> _ids = [];
-    private readonly List<IServer> _servers;
     private readonly ILogger _logger;
     private readonly ServerFactory _serverFactory;
     private readonly RegistryAutoStartService _autoStartService;
     private readonly IConfigProvider _configProvider;
 
+    private int _id = 0;
+    private List<int> _ids = [];
+    private readonly List<IServer> _servers;
+
+
     public event EventHandler<IServer>? ServerAdded;
     public event EventHandler<bool>? AutostartChanged;
     public event EventHandler<List<IServer>>? ServersReady;
 
-    public Main()
+    #region Constructor
+    internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
+        RegistryAutoStartService autoStartService, IConfigProvider configProvider)
     {
-#if DEBUG
-        var loggingProvider = new DebugLoggerProvider();
-#else
-        var loggingProvider = new FileLoggerProvider(Path.Combine(Environment.CurrentDirectory, "error.log"), new FileLoggerOptions
-        {
-            Append = true,
-            MinLevel = LogLevel.Error
-        });
-#endif
+        _logger = loggerProvider.CreateLogger(nameof(AppHost));
+        _serverFactory = serverFactory;
+        _autoStartService = autoStartService;
+        _configProvider = configProvider;
 
-        _autoStartService = new RegistryAutoStartService(loggingProvider.CreateLogger(nameof(RegistryAutoStartService)));
-        _serverFactory = new ServerFactory(loggingProvider);
-        _configProvider = new JsonConfigurationProvider(loggingProvider.CreateLogger(nameof(JsonConfigurationProvider)),
-            Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+        var config = _configProvider.GetConfig();
 
-
-
-        _servers = _configProvider.GetConfig().Servers.Select<CommonConfig, IServer>(x =>
+        _servers = config.ServerConfigs.Select<CommonConfig, IServer>(x =>
         {
             return x switch
             {
@@ -56,11 +43,30 @@ public class Main
             };
         }).ToList();
 
-        _logger = loggingProvider.CreateLogger(nameof(Main));
+        SetSystemEvents();
     }
+    #endregion
 
-    private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
-        new(servers.Select(x => x.Config));
+    #region Public methods
+    public void Run()
+    {
+        try
+        {
+            _servers.ForEach(x =>
+            {
+                if (x.Config.AutoStart)
+                    x.Start();
+            });
+
+            AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
+
+            ServersReady?.Invoke(this, _servers);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{e.Message}", e.Message);
+        }
+    }
 
     public void ServerStart(int? id)
     {
@@ -142,33 +148,39 @@ public class Main
     {
         Environment.Exit(0);
     }
-    
-    public void Run()
+    #endregion
+
+
+    #region Private methods
+    private static AppConfig GetConfig(IEnumerable<IServer> servers) =>
+        new(servers.Select(x => x.Config));
+
+    private void SetSystemEvents()
     {
         SystemEvents.SessionSwitch += (_, args) =>
         {
             switch (args.Reason)
             {
                 case SessionSwitchReason.SessionLock:
+                {
+                    _logger.LogInformation("Stopping servers due to logout");
+
+
+                    _ids = _servers.Where(x => x.Status).Select(x =>
                     {
-                        _logger.LogInformation("Stopping servers due to logout");
+                        x.Stop();
+                        return x.Id;
+                    }).ToList();
 
-
-                        _ids = _servers.Where(x => x.Status).Select(x =>
-                        {
-                            x.Stop();
-                            return x.Id;
-                        }).ToList();
-
-                        break;
-                    }
+                    break;
+                }
                 case SessionSwitchReason.SessionUnlock:
-                    {
-                        _logger.LogInformation("Restoring servers");
+                {
+                    _logger.LogInformation("Restoring servers");
 
-                        _ids.ForEach(id => _servers.Single(s => s.Id == id).Start());
-                        break;
-                    }
+                    _ids.ForEach(id => _servers.Single(s => s.Id == id).Start());
+                    break;
+                }
                 case SessionSwitchReason.ConsoleConnect:
                 case SessionSwitchReason.ConsoleDisconnect:
                 case SessionSwitchReason.RemoteConnect:
@@ -180,22 +192,6 @@ public class Main
                     break;
             }
         };
-
-        try
-        {
-            _servers.ForEach(x =>
-            {
-                if (x.Config.AutoStart)
-                    x.Start();
-            });
-
-            AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
-
-            ServersReady?.Invoke(this, _servers);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("{e.Message}", e.Message);
-        }
     }
+    #endregion
 }

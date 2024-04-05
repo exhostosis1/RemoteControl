@@ -12,7 +12,7 @@ using Shared.Server;
 using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
 
-namespace WindowsEntryPoint;
+namespace AppHost;
 
 public class ServerFactory
 {
