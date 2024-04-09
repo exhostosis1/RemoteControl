@@ -1,7 +1,8 @@
-﻿using Shared.ApiControllers;
+﻿using Servers.Results;
+using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 
-namespace ApiControllers;
+namespace Servers.ApiControllers;
 
 public abstract class BaseApiController : IApiController
 {

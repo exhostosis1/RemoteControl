@@ -2,7 +2,7 @@
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 
-namespace ApiControllers;
+namespace Servers.ApiControllers;
 
 public class DisplayController(IDisplayControlProvider provider, ILogger logger) : BaseApiController
 {

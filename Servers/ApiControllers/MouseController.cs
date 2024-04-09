@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
 
 [assembly: InternalsVisibleTo("UnitTests")]
 
-namespace ApiControllers;
+namespace Servers.ApiControllers;
 
 internal static partial class CoordsHelper
 {

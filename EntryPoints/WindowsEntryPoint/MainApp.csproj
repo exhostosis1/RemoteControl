@@ -23,7 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ApiControllers\ApiControllers.csproj" />
     <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\..\Servers\Servers.csproj" />
     <ProjectReference Include="..\..\Shared\Shared.csproj" />

@@ -1,6 +1,7 @@
 ﻿using System.Net;
+using Shared.ApiControllers.Results;
 
-namespace Shared.ApiControllers.Results;
+namespace Servers.Results;
 
 public class TextResult(object result) : IActionResult
 {

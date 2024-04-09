@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Net;
+using Microsoft.Extensions.Logging;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
-using System.Net;
 
-namespace ApiControllers;
+namespace Servers.ApiControllers;
 
 public class KeyboardController(IKeyboardControlProvider provider, ILogger logger) : BaseApiController
 {
