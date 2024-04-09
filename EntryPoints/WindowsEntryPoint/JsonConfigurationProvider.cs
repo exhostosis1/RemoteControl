@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Shared.Config;
 
-namespace AppHost;
+namespace MainApp;
 
 public class JsonConfigurationProvider(ILogger logger, string filePath) : IConfigProvider
 {

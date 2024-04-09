@@ -1,45 +1,44 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared.DataObjects;
-using Shared.DataObjects.Web;
 using Shared.Listener;
 using Shared.Wrappers.HttpListener;
 
 namespace Listeners;
 
-public class SimpleHttpListener(IHttpListener listener, ILogger logger) : IListener
+public class SimpleHttpListener(IHttpListener wrapper, ILogger logger): IListener
 {
-    public bool IsListening => listener.IsListening;
+    public bool IsListening => wrapper.IsListening;
 
     public void StartListen(StartParameters param)
     {
-        if (listener.IsListening)
+        if (wrapper.IsListening)
         {
-            listener.Stop();
+            wrapper.Stop();
         }
 
-        listener.GetNew();
-        listener.Prefixes.Add(param.Uri);
+        wrapper.GetNew();
+        wrapper.Prefixes.Add(param.Uri);
 
-        listener.Start();
+        wrapper.Start();
 
         logger.LogInformation("Http listener started listening on {uri}", param.Uri);
     }
 
     public void StopListen()
     {
-        if (listener.IsListening)
-            listener.Stop();
+        if (wrapper.IsListening)
+            wrapper.Stop();
 
         logger.LogInformation("Http listener stopped");
     }
 
     public async Task<IContext> GetContextAsync(CancellationToken token = default)
     {
-        return await listener.GetContextAsync();
+        return await wrapper.GetContextAsync();
     }
 
     public IContext GetContext()
     {
-        return listener.GetContext();
+        return wrapper.GetContext();
     }
 }

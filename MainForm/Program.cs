@@ -1,4 +1,4 @@
-using AppHost;
+using MainApp;
 
 namespace MainUI;
 

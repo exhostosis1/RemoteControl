@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.Config;
 using Shared.Listener;
-using Shared.Server;
 using System.ComponentModel;
-using Shared.DataObjects;
 
 namespace Servers;
 
@@ -16,7 +15,7 @@ public class Server: INotifyPropertyChanged
     private readonly ILogger _logger;
 
     private readonly IListener _listener;
-    private readonly Func<IContext, Task> _middleware;
+    private readonly RequestDelegate _middleware;
 
     private CancellationTokenSource? _cts;
     private readonly IProgress<bool> _progress;
@@ -39,7 +38,13 @@ public class Server: INotifyPropertyChanged
         }
     }
 
-    public Server(ServerType type, IListener listener, IMiddleware[] middlewares, ILogger logger)
+    private static Func<RequestDelegate, RequestDelegate> GetFunction(IMiddleware middleware)
+        => next =>
+            context => middleware.ProcessRequestAsync(context, next);
+
+    private static IEnumerable<Func<RequestDelegate, RequestDelegate>> GetFunctions(IEnumerable<IMiddleware> middlewares) => middlewares.Reverse().Select(GetFunction);
+
+    public Server(ServerType type, IListener listener, IEnumerable<IMiddleware> middlewares, ILogger logger)
     {
         Type = type;
         DefaultConfig = new ServerConfig(type);
@@ -48,14 +53,8 @@ public class Server: INotifyPropertyChanged
         _logger = logger;
         _listener = listener;
 
-        var action = (IContext context) => Task.FromException(new Exception("Should never be called"));
-
-        for (var i = middlewares.Length - 1; i >= 0; i--)
-        {
-            var middleware = middlewares[i];
-            var act = action;
-            action = context => middleware.ProcessRequestAsync(context, act);
-        }
+        RequestDelegate action = (_) => Task.FromException(new Exception("Should never be called"));
+        action = GetFunctions(middlewares).Aggregate(action, (current, func) => func(current));
 
         _middleware = action;
 

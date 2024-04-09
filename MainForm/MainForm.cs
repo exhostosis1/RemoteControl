@@ -41,9 +41,9 @@ public sealed partial class MainForm : Form
     private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico"));
     private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico"));
 
-    private readonly AppHost.AppHost _viewModel;
+    private readonly MainApp.AppHost _viewModel;
 
-    public MainForm(AppHost.AppHost app)
+    public MainForm(MainApp.AppHost app)
     {
         InitializeComponent();
 
@@ -193,7 +193,7 @@ public sealed partial class MainForm : Form
 
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        _viewModel.AppClose(null);
+        MainApp.AppHost.AppClose(null);
     }
 
     private static void IpToolStripMenuItem_Click(object? sender, string input)

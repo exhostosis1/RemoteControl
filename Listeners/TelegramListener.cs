@@ -8,7 +8,7 @@ using Shared.DataObjects;
 
 namespace Listeners;
 
-public class TelegramListener : IListener
+public class TelegramListener: IListener
 {
     private class LocalResponse(string apiUrl, string apiKey, int chatId, IBotApiProvider wrapper) : BotContextResponse
     {
@@ -35,10 +35,10 @@ public class TelegramListener : IListener
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public TelegramListener(IBotApiProvider wrapper, ILogger logger)
+    public TelegramListener(IBotApiProvider provider, ILogger logger)
     {
         _logger = logger;
-        _wrapper = wrapper;
+        _wrapper = provider;
 
         _progress = new Progress<bool>(result =>
         {

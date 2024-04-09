@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\AppHost.csproj" />
+    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\MainApp.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
     <ProjectReference Include="..\Web\Web.csproj" />
   </ItemGroup>

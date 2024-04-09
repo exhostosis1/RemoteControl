@@ -1,14 +1,13 @@
-﻿
-using Microsoft.Extensions.Logging;
-using Shared.Config;
-
-#if DEBUG
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
+using Shared.Config;
+#if DEBUG
+
 #else
 using NReco.Logging.File;
 #endif
 
-namespace AppHost;
+namespace MainApp;
 
 public class AppHostBuilder
 {
@@ -29,7 +28,7 @@ public class AppHostBuilder
         return this;
     }
 
-    public AppHost Build()
+    public MainApp.AppHost Build()
     {
 #if DEBUG
         _loggerProvider ??= new DebugLoggerProvider();
@@ -47,6 +46,6 @@ public class AppHostBuilder
             _loggerProvider.CreateLogger(nameof(JsonConfigurationProvider)),
             Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
 
-        return new AppHost(_loggerProvider, _serverFactory, _autoStartService, _configProvider);
+        return new MainApp.AppHost(_loggerProvider, _serverFactory, _autoStartService, _configProvider);
     }
 }

@@ -3,10 +3,10 @@ using Servers;
 using Shared.Config;
 using Shared.DataObjects.Web;
 using Shared.Listener;
-using Shared.Server;
 using System.ComponentModel;
 using Microsoft.Extensions.Logging;
 using Shared.DataObjects;
+using Shared;
 
 namespace UnitTests;
 
@@ -46,7 +46,7 @@ public class SimpleServerTests : IDisposable
                 Thread.Sleep(TimeSpan.FromHours(1));
                 return null!;
             });
-        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<Func<IContext, Task>>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<RequestDelegate>()));
 
         var mre = new AutoResetEvent(false);
 
@@ -196,7 +196,7 @@ public class SimpleServerTests : IDisposable
                 throw new Exception("Should not be called");
                 return context;
             });
-        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<Func<IContext, Task>>())).Returns(Task.CompletedTask);
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<RequestDelegate>())).Returns(Task.CompletedTask);
 
         var startStopMre = new AutoResetEvent(false);
         _server.PropertyChanged += (_, args) =>
@@ -219,7 +219,7 @@ public class SimpleServerTests : IDisposable
 
         _listener.Verify(x => x.StartListen(It.IsAny<StartParameters>()), Times.Once);
         _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.AtLeast(4));
-        _middleware.Verify(x => x.ProcessRequestAsync(context, It.IsAny<Func<IContext, Task>>()), Times.AtLeast(3));
+        _middleware.Verify(x => x.ProcessRequestAsync(context, It.IsAny<RequestDelegate>()), Times.AtLeast(3));
     }
 
     [Fact]
@@ -231,7 +231,7 @@ public class SimpleServerTests : IDisposable
             Thread.Sleep(50);
             return new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
         });
-        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<Func<IContext, Task>>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<RequestDelegate>()));
 
         var s = false;
         ServerConfig? c = null;

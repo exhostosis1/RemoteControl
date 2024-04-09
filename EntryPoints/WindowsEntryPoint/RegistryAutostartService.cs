@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Shared.AutoStart;
 
-namespace AppHost;
+namespace MainApp;
 
 public class RegistryAutoStartService(ILogger logger)
     : IAutoStartService

@@ -1,9 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Shared;
 using Shared.ControlProviders.Provider;
 using Shared.DataObjects;
 using Shared.DataObjects.Bot;
 using Shared.Enums;
-using Shared.Server;
 
 namespace Servers.Middleware;
 
@@ -29,7 +29,7 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger log
         Persistent = true
     };
 
-    public Task ProcessRequestAsync(IContext contextParam, Func<IContext, Task> _)
+    public Task ProcessRequestAsync(IContext contextParam, RequestDelegate _)
     {
         var context = (BotContext)contextParam;
 

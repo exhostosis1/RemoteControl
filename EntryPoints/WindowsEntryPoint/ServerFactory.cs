@@ -5,20 +5,19 @@ using Listeners;
 using Microsoft.Extensions.Logging;
 using Servers;
 using Servers.Middleware;
+using Shared;
 using Shared.Bots.Telegram;
 using Shared.Config;
-using Shared.Listener;
-using Shared.Server;
 using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
 
-namespace AppHost;
+namespace MainApp;
 
 public class ServerFactory
 {
-    private readonly IListener _webListener;
+    private readonly SimpleHttpListener _webListener;
     private readonly IMiddleware[] _webMiddlewareChain;
-    private readonly IListener _botListener;
+    private readonly TelegramListener _botListener;
     private readonly IMiddleware[] _botMiddlewareChain;
     private readonly ILoggerProvider _loggerProvider;
 
@@ -43,11 +42,9 @@ public class ServerFactory
                 loggingProvider.CreateLogger(nameof(ApiV1Middleware)));
 
         _webMiddlewareChain = [apiMiddleware, staticMiddleware];
-        _webListener = new SimpleHttpListener(new HttpListenerWrapper(loggingProvider.CreateLogger(nameof(HttpListenerWrapper))),
-            loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
+        _webListener = new SimpleHttpListener(new HttpListenerWrapper(loggingProvider.CreateLogger(nameof(HttpListenerWrapper))), loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
 
-        _botListener = new TelegramListener(new TelegramBotApiProvider(new HttpClientWrapper()),
-            loggingProvider.CreateLogger(nameof(TelegramListener)));
+        _botListener = new TelegramListener(new TelegramBotApiProvider(), loggingProvider.CreateLogger(nameof(TelegramListener)));
         _botMiddlewareChain = [new CommandsExecutor(generalInput, loggingProvider.CreateLogger(nameof(CommandsExecutor)))];
     }
 

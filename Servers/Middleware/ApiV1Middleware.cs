@@ -3,7 +3,6 @@ using Shared;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 using Shared.DataObjects.Web;
-using Shared.Server;
 using System.Net;
 using System.Text;
 using Shared.DataObjects;
@@ -17,7 +16,7 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger lo
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
     
-    public async Task ProcessRequestAsync(IContext contextParam, Func<IContext, Task> next)
+    public async Task ProcessRequestAsync(IContext contextParam, RequestDelegate next)
     {
         var context = (WebContext)contextParam;
 

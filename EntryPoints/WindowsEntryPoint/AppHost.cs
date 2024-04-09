@@ -3,7 +3,7 @@ using Microsoft.Win32;
 using Servers;
 using Shared.Config;
 
-namespace AppHost;
+namespace MainApp;
 
 public  class AppHost
 {
@@ -15,7 +15,6 @@ public  class AppHost
     private int _id = 0;
     private List<int> _ids = [];
     private readonly List<Server> _servers;
-
 
     public event EventHandler<Server>? ServerAdded;
     public event EventHandler<bool>? AutostartChanged;
@@ -143,7 +142,7 @@ public  class AppHost
         _configProvider.SetConfig(config);
     }
 
-    public void AppClose(object? _)
+    public static void AppClose(object? _)
     {
         Environment.Exit(0);
     }

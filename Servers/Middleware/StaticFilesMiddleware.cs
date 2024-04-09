@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared.DataObjects.Web;
-using Shared.Server;
 using System.Net;
 using Shared.DataObjects;
+using Shared;
 
 namespace Servers.Middleware;
 
@@ -20,7 +20,7 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
         { ".css", "text/css" }
     };
     
-    public async Task ProcessRequestAsync(IContext contextParam, Func<IContext, Task> _)
+    public async Task ProcessRequestAsync(IContext contextParam, RequestDelegate _)
     {
         var context = (WebContext)contextParam;
 
