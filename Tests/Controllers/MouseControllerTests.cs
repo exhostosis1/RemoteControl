@@ -27,7 +27,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseKeyPress(MouseButtons.Left, KeyPressMode.Click));
 
-        var result = _mouseController.Left(null);
+        var result = _mouseController.Left();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseKeyPress(MouseButtons.Left, KeyPressMode.Click), Times.Once);
     }
@@ -37,7 +37,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseKeyPress(MouseButtons.Right, KeyPressMode.Click));
 
-        var result = _mouseController.Right(null);
+        var result = _mouseController.Right();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseKeyPress(MouseButtons.Right, KeyPressMode.Click), Times.Once);
     }
@@ -47,7 +47,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseKeyPress(MouseButtons.Middle, KeyPressMode.Click));
 
-        var result = _mouseController.Middle(null);
+        var result = _mouseController.Middle();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseKeyPress(MouseButtons.Middle, KeyPressMode.Click), Times.Once);
     }
@@ -57,7 +57,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseWheel(true));
 
-        var result = _mouseController.WheelUp(null);
+        var result = _mouseController.WheelUp();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseWheel(true), Times.Once);
     }
@@ -67,7 +67,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseWheel(false));
 
-        var result = _mouseController.WheelDown(null);
+        var result = _mouseController.WheelDown();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseWheel(false), Times.Once);
     }
@@ -77,7 +77,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseKeyPress(MouseButtons.Left, KeyPressMode.Down));
 
-        var result = _mouseController.DragStart(null);
+        var result = _mouseController.DragStart();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseKeyPress(MouseButtons.Left, KeyPressMode.Down), Times.Once);
     }
@@ -87,7 +87,7 @@ public class MouseControllerTests : IDisposable
     {
         _mouseControlProvider.Setup(x => x.MouseKeyPress(MouseButtons.Left, KeyPressMode.Up));
 
-        var result = _mouseController.DragStop(null);
+        var result = _mouseController.DragStop();
         Assert.True(result is OkResult);
         _mouseControlProvider.Verify(x => x.MouseKeyPress(MouseButtons.Left, KeyPressMode.Up), Times.Once);
     }
@@ -132,7 +132,7 @@ public class MouseControllerTests : IDisposable
 
         var methods = _mouseController.GetActions();
         Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
-            x => x.Value.ReturnType == typeof(IActionResult)));
+            x => x.Value.Method.ReturnType == typeof(IActionResult)));
     }
 
     public void Dispose()

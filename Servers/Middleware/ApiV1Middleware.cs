@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Linq.Expressions;
+using Microsoft.Extensions.Logging;
 using Shared;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
@@ -68,14 +69,18 @@ internal static partial class ApiUtils
 
     public static Dictionary<string, Delegate> GetActions(this IApiController controller)
     {
-        return controller.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(
-            x => x.ReturnType == typeof(IActionResult)
-        ).ToDictionary<MethodInfo, string, Delegate>(x => x.Name.ToLower(), y =>
+        var methods = controller.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
+            .Where(x => x.ReturnType == typeof(IActionResult));
+
+        return methods.ToDictionary(method => method.Name.ToLower(), method =>
         {
-            if (y.GetParameters().Length == 0)
-                return y.CreateDelegate<Func<IActionResult>>(controller);
-            else
-                return y.CreateDelegate<Func<string, IActionResult>>(controller);
+            var paramsExpr = method.GetParameters().Select(x => Expression.Parameter(x.ParameterType, x.Name))
+                .ToArray();
+
+            var contExpr = Expression.Constant(controller);
+            var callExpr = Expression.Call(contExpr, method, paramsExpr as Expression[]);
+
+            return Expression.Lambda(callExpr, paramsExpr).Compile();
         });
     }
 }
@@ -91,7 +96,7 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger lo
     {
         var context = (WebContext)contextParam;
 
-        if (!ApiUtils.TryGetApiVersion(context.WebRequest.Path, out var version) && version != ApiVersion)
+        if (!ApiUtils.TryGetApiVersion(context.WebRequest.Path, out var version) || version != ApiVersion)
         {
             await next(contextParam);
             return;
@@ -111,9 +116,7 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger lo
 
         try
         {
-            var result =
-                (string.IsNullOrEmpty(param) ? action.DynamicInvoke() : action.DynamicInvoke(param)) as IActionResult ??
-                throw new NullReferenceException("Action must return IActionResult");
+            var result = action.DynamicInvoke(string.IsNullOrEmpty(param) ? [] : [param]) as IActionResult ?? throw new NullReferenceException("Action must return IActionResult");
 
             context.WebResponse.StatusCode = result.StatusCode;
             context.WebResponse.Payload = GetBytes(result.Result);
@@ -123,10 +126,10 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger lo
         }
         catch (Exception e)
         {
-            logger.LogError("{message}", e.Message);
+            logger.LogError("{message}", e.InnerException?.Message);
 
             context.WebResponse.StatusCode = HttpStatusCode.InternalServerError;
-            context.WebResponse.Payload = Encoding.UTF8.GetBytes(e.Message);
+            context.WebResponse.Payload = Encoding.UTF8.GetBytes(e.InnerException?.Message ?? "");
         }
     }
 }

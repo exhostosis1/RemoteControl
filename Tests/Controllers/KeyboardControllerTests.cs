@@ -27,7 +27,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.ArrowLeft, KeyPressMode.Click));
 
-        var result = _keyboardController.Back(null);
+        var result = _keyboardController.Back();
         Assert.True(result is OkResult);
 
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.ArrowLeft, KeyPressMode.Click), Times.Once);
@@ -38,7 +38,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.ArrowRight, KeyPressMode.Click));
 
-        var result = _keyboardController.Forth(null);
+        var result = _keyboardController.Forth();
         Assert.True(result is OkResult);
 
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.ArrowRight, KeyPressMode.Click), Times.Once);
@@ -49,7 +49,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.MediaPrev, KeyPressMode.Click));
 
-        var result = _keyboardController.MediaBack(null);
+        var result = _keyboardController.MediaBack();
         Assert.True(result is OkResult);
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.MediaPrev, KeyPressMode.Click), Times.Once);
     }
@@ -59,7 +59,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.MediaNext, KeyPressMode.Click));
 
-        var result = _keyboardController.MediaForth(null);
+        var result = _keyboardController.MediaForth();
         Assert.True(result is OkResult);
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.MediaNext, KeyPressMode.Click), Times.Once);
     }
@@ -69,7 +69,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.MediaPlayPause, KeyPressMode.Click));
 
-        var result = _keyboardController.Pause(null);
+        var result = _keyboardController.Pause();
         Assert.True(result is OkResult);
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.MediaPlayPause, KeyPressMode.Click), Times.Once);
     }
@@ -79,7 +79,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.VolumeUp, KeyPressMode.Click));
 
-        var result = _keyboardController.MediaVolumeUp(null);
+        var result = _keyboardController.MediaVolumeUp();
         Assert.True(result is OkResult);
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.VolumeUp, KeyPressMode.Click), Times.Once);
     }
@@ -89,7 +89,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.VolumeDown, KeyPressMode.Click));
 
-        var result = _keyboardController.MediaVolumeDown(null);
+        var result = _keyboardController.MediaVolumeDown();
         Assert.True(result is OkResult);
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.VolumeDown, KeyPressMode.Click), Times.Once);
     }
@@ -99,7 +99,7 @@ public class KeyboardControllerTests : IDisposable
     {
         _keyboardControlProvider.Setup(x => x.KeyboardKeyPress(KeysEnum.Mute, KeyPressMode.Click));
 
-        var result = _keyboardController.MediaMute(null);
+        var result = _keyboardController.MediaMute();
         Assert.True(result is OkResult);
         _keyboardControlProvider.Verify(x => x.KeyboardKeyPress(KeysEnum.Mute, KeyPressMode.Click), Times.Once);
     }
@@ -123,7 +123,7 @@ public class KeyboardControllerTests : IDisposable
     [Fact]
     public void TextErrorTest()
     {
-        var result = _keyboardController.Text(null);
+        var result = _keyboardController.Text(null!);
         Assert.True(result is ErrorResult);
     }
 
@@ -147,7 +147,7 @@ public class KeyboardControllerTests : IDisposable
 
         var methods = _keyboardController.GetActions();
         Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
-            x => x.Value.ReturnType == typeof(IActionResult)));
+            x => x.Value.Method.ReturnType == typeof(IActionResult)));
     }
 
     public void Dispose()

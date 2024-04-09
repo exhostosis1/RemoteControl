@@ -26,7 +26,7 @@ public class DisplayControllerTests : IDisposable
     {
         _provider.Setup(x => x.DisplayOff());
 
-        var result = _controller.Darken(null);
+        var result = _controller.Darken();
         Assert.True(result is OkResult);
 
         _provider.Verify(x => x.DisplayOff(), Times.Once);
@@ -42,7 +42,7 @@ public class DisplayControllerTests : IDisposable
 
         var methods = _controller.GetActions();
         Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
-            x => x.Value.ReturnType == typeof(IActionResult)));
+            x => x.Value.Method.ReturnType == typeof(IActionResult)));
     }
 
     public void Dispose()

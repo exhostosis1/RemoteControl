@@ -157,14 +157,14 @@ public class UtilsTest : IDisposable
 
         var result = controllers.GetControllersWithActions();
 
-        Assert.True(result.Count == 3);
+        Assert.Equal(3, result.Count);
 
-        Assert.Equal(result["api1"].Count, 2);
+        Assert.Equal(2, result["api1"].Count);
         Assert.Single(result["api2"]);
-        Assert.Equal(result["api3"].Count, 2);
+        Assert.Equal(2, result["api3"].Count);
 
         Assert.True(result.All(x => x.Value.All(x =>
-            x.Value.ReturnType == typeof(IActionResult))));
+            x.Value.Method.ReturnType == typeof(IActionResult))));
     }
 
     public void Dispose()

@@ -51,7 +51,7 @@ public class AudioControllerTests : IDisposable
 
         _audioControlProvider.Setup(x => x.GetAudioDevices()).Returns(devices);
 
-        var result = _audioController.GetDevices(null);
+        var result = _audioController.GetDevices();
 
         var expectedJson = JsonSerializer.Serialize(devices);
 
@@ -90,7 +90,7 @@ public class AudioControllerTests : IDisposable
     {
         _audioControlProvider.Setup(x => x.GetVolume()).Returns(value);
 
-        var result = _audioController.GetVolume(null);
+        var result = _audioController.GetVolume();
         Assert.True(result is TextResult && result.Result == value.ToString());
 
         _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
@@ -135,7 +135,7 @@ public class AudioControllerTests : IDisposable
         var expectedVolume = volume + 5;
         expectedVolume = expectedVolume > 100 ? 100 : expectedVolume < 0 ? 0 : expectedVolume;
 
-        var result = _audioController.IncreaseBy5(null);
+        var result = _audioController.IncreaseBy5();
         Assert.True(result is TextResult && result.Result == expectedVolume.ToString());
 
         _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
@@ -155,7 +155,7 @@ public class AudioControllerTests : IDisposable
         var expectedVolume = volume - 5;
         expectedVolume = expectedVolume > 100 ? 100 : expectedVolume < 0 ? 0 : expectedVolume;
 
-        var result = _audioController.DecreaseBy5(null);
+        var result = _audioController.DecreaseBy5();
         Assert.True(result is TextResult && result.Result == expectedVolume.ToString());
 
         _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
@@ -171,7 +171,7 @@ public class AudioControllerTests : IDisposable
         _audioControlProvider.Setup(x => x.Mute());
         _audioControlProvider.Setup(x => x.Unmute());
 
-        var result = _audioController.Mute(null);
+        var result = _audioController.Mute();
         Assert.True(result is OkResult);
 
         _audioControlProvider.Verify(x => x.Mute(), value ? Times.Never : Times.Once);
@@ -194,7 +194,7 @@ public class AudioControllerTests : IDisposable
 
         var methods = _audioController.GetActions();
         Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
-            x => x.Value.ReturnType == typeof(IActionResult)));
+            x => x.Value.Method.ReturnType == typeof(IActionResult)));
     }
 
     public void Dispose()

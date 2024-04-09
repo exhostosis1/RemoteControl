@@ -14,13 +14,13 @@ public class ApiV1Tests : IDisposable
     private class FirstController : IApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public IActionResult ActionOne(string? _)
+        public IActionResult ActionOne()
         {
             return new OkResult();
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public IActionResult ActionTwo(string? _)
+        public IActionResult ActionTwo()
         {
             return new ErrorResult("test error");
         }
@@ -29,26 +29,25 @@ public class ApiV1Tests : IDisposable
     private class SecondController : IApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public IActionResult ActionThree(string? _)
+        public IActionResult ActionThree()
         {
             return new JsonResult("new");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public IActionResult ActionFour(string? _)
+        public IActionResult ActionFour()
         {
             return new TextResult("text");
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
-        public IActionResult ErrorAction(string? _)
+        public IActionResult ErrorAction()
         {
             throw new Exception("test exception");
         }
     }
 
     private readonly ApiV1Middleware _middleware;
-    private readonly ILogger _logger;
 
     public ApiV1Tests()
     {
@@ -58,9 +57,9 @@ public class ApiV1Tests : IDisposable
             new SecondController()
         };
 
-        _logger = Mock.Of<ILogger>();
+        var logger = Mock.Of<ILogger>();
 
-        _middleware = new ApiV1Middleware(controllers, _logger);
+        _middleware = new ApiV1Middleware(controllers, logger);
     }
 
     [Theory]
@@ -80,7 +79,7 @@ public class ApiV1Tests : IDisposable
     }
 
     [Fact]
-    public async Task RequestNextText()
+    public async Task RequestNextTest()
     {
         var count = 0;
 
@@ -100,8 +99,10 @@ public class ApiV1Tests : IDisposable
         var context = new WebContext(new WebContextRequest("/api/v1/second/erroraction"), Mock.Of<WebContextResponse>());
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.True(context.WebResponse.StatusCode == HttpStatusCode.InternalServerError &&
-                    Encoding.UTF8.GetString(context.WebResponse.Payload) == "test exception");
+        Assert.Equal(HttpStatusCode.InternalServerError, context.WebResponse.StatusCode);
+
+        var res = Encoding.UTF8.GetString(context.WebResponse.Payload);
+        Assert.Equal("test exception", res);
     }
 
     public void Dispose()
