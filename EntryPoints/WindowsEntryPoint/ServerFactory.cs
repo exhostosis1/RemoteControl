@@ -1,14 +1,12 @@
 ﻿using ApiControllers;
 using ControlProviders;
 using ControlProviders.Wrappers;
-using Listeners;
 using Microsoft.Extensions.Logging;
 using Servers;
+using Servers.Listeners;
 using Servers.Middleware;
 using Shared;
-using Shared.Bots.Telegram;
 using Shared.Config;
-using Shared.Wrappers.HttpListener;
 
 namespace MainApp;
 
@@ -41,9 +39,9 @@ public class ServerFactory
                 loggingProvider.CreateLogger(nameof(ApiV1Middleware)));
 
         _webMiddlewareChain = [apiMiddleware, staticMiddleware];
-        _webListener = new SimpleHttpListener(new HttpListenerWrapper(loggingProvider.CreateLogger(nameof(HttpListenerWrapper))), loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
+        _webListener = new SimpleHttpListener(loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
 
-        _botListener = new TelegramListener(new TelegramBotApiProvider(), loggingProvider.CreateLogger(nameof(TelegramListener)));
+        _botListener = new TelegramListener(loggingProvider.CreateLogger(nameof(TelegramListener)));
         _botMiddlewareChain = [new CommandsExecutor(generalInput, loggingProvider.CreateLogger(nameof(CommandsExecutor)))];
     }
 

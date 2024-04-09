@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Shared;
 using Shared.Config;
-using Shared.Listener;
 using System.ComponentModel;
 
 namespace Servers;
