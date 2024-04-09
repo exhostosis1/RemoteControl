@@ -1,7 +1,6 @@
-﻿using Shared.DataObjects;
-using System.Threading.Tasks;
+﻿using Servers.DataObjects;
 
-namespace Shared;
+namespace Servers.Middleware;
 
 public interface IMiddleware
 {

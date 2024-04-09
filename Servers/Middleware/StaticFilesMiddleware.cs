@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared.DataObjects.Web;
+using Servers.DataObjects;
+using Servers.DataObjects.Web;
 using System.Net;
-using Shared.DataObjects;
-using Shared;
 
 namespace Servers.Middleware;
 

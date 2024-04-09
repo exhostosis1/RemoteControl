@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Shared.ApiControllers.Results;
+namespace Servers.Results;
 
 public interface IActionResult
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Servers.DataObjects;
+using Servers.DataObjects.Bot;
 using Servers.Listeners.Telegram;
-using Shared.DataObjects;
-using Shared.DataObjects.Bot;
 using System.ComponentModel;
 using System.Net.Sockets;
 

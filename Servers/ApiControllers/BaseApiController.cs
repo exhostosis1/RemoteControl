@@ -1,6 +1,4 @@
 ﻿using Servers.Results;
-using Shared.ApiControllers;
-using Shared.ApiControllers.Results;
 
 namespace Servers.ApiControllers;
 

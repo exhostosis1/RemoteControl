@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared;
+using Servers.DataObjects;
+using Servers.DataObjects.Bot;
 using Shared.ControlProviders.Provider;
-using Shared.DataObjects;
-using Shared.DataObjects.Bot;
 using Shared.Enums;
 
 namespace Servers.Middleware;

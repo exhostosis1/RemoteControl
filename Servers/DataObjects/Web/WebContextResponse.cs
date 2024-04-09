@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace Shared.DataObjects.Web;
+namespace Servers.DataObjects.Web;
 
 public abstract class WebContextResponse : IResponse
 {

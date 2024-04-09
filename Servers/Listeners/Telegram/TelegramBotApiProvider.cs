@@ -2,11 +2,11 @@
 using Servers.Listeners.Telegram.ApiObjects.Response;
 using Servers.Listeners.Telegram.ApiObjects.Response.Keyboard;
 using Shared;
-using Shared.DataObjects.Bot;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Servers.DataObjects.Bot;
 
 namespace Servers.Listeners.Telegram;
 

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Shared.DataObjects.Bot;
+﻿namespace Servers.DataObjects.Bot;
 
 public class ReplyButtonsMarkup(IEnumerable<IEnumerable<SingleButton>> items) : ButtonsMarkup
 {

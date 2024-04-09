@@ -1,4 +1,4 @@
-﻿namespace Shared.DataObjects.Web;
+﻿namespace Servers.DataObjects.Web;
 
 public class WebContextRequest(string path) : IRequest
 {

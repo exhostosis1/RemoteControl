@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using Microsoft.Extensions.Logging;
-using Shared.ApiControllers.Results;
+using Servers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
 

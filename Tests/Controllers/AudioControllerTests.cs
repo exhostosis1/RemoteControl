@@ -2,7 +2,6 @@
 using Moq;
 using Servers.ApiControllers;
 using Servers.Middleware;
-using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Devices;
 using Shared.ControlProviders.Provider;
 using System.Text.Json;

@@ -1,4 +1,4 @@
-﻿namespace Shared.DataObjects;
+﻿namespace Servers.DataObjects;
 
 public interface IContext
 {

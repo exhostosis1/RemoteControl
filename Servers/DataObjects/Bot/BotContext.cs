@@ -1,4 +1,4 @@
-﻿namespace Shared.DataObjects.Bot;
+﻿namespace Servers.DataObjects.Bot;
 
 public class BotContext(BotContextRequest request, BotContextResponse response) : IContext
 {

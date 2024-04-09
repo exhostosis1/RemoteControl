@@ -1,4 +1,4 @@
-﻿namespace Shared.DataObjects.Bot;
+﻿namespace Servers.DataObjects.Bot;
 
 public class RemoveButtonsMarkup : ButtonsMarkup
 {

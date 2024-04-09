@@ -2,9 +2,6 @@
 using Servers.Middleware;
 using Servers.Results;
 using Shared;
-using Shared.ApiControllers;
-using Shared.ApiControllers.Results;
-using CoordsHelper = Servers.ApiControllers.CoordsHelper;
 
 namespace UnitTests;
 

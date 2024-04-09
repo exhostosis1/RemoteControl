@@ -1,13 +1,11 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
+using Servers.ApiControllers;
 using Servers.Middleware;
-using Shared.ApiControllers;
-using Shared.ApiControllers.Results;
-using Shared.DataObjects.Web;
+using Servers.Results;
 using System.Net;
 using System.Text;
-using Microsoft.Extensions.Logging;
-using Servers.ApiControllers;
-using Servers.Results;
+using Servers.DataObjects.Web;
 
 namespace UnitTests.Middleware;
 

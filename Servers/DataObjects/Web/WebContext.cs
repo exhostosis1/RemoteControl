@@ -1,4 +1,4 @@
-﻿namespace Shared.DataObjects.Web;
+﻿namespace Servers.DataObjects.Web;
 
 public class WebContext(WebContextRequest request, WebContextResponse response) : IContext
 {

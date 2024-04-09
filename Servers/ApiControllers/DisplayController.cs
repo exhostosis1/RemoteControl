@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared.ApiControllers.Results;
+using Servers.Results;
 using Shared.ControlProviders.Provider;
 
 namespace Servers.ApiControllers;

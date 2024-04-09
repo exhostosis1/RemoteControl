@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Servers.DataObjects;
+using Servers.DataObjects.Web;
 using Shared;
-using Shared.DataObjects;
-using Shared.DataObjects.Web;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security.Principal;

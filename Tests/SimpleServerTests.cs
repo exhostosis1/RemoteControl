@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
 using Servers;
-using Shared;
+using Servers.DataObjects;
+using Servers.DataObjects.Web;
+using Servers.Middleware;
 using Shared.Config;
-using Shared.DataObjects;
-using Shared.DataObjects.Web;
 using System.ComponentModel;
 
 namespace UnitTests;

@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Shared.ApiControllers.Results;
 
 namespace Servers.Results;
 

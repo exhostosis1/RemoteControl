@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Shared.DataObjects.Bot;
+﻿namespace Servers.DataObjects.Bot;
 
 public class BotContextRequest(string apiUrl, string apiKey, int id, string command, DateTime date) : IRequest
 {

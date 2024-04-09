@@ -26,9 +26,6 @@ public static partial class Utils
     public static void RunWindowsCommandAsAdmin(string command) =>
         RunCommand(command, OSPlatform.Windows, out _, out _, true);
 
-    public static void RunLinuxCommand(string command, out string result, out string error) =>
-        RunCommand(command, OSPlatform.Linux, out result!, out error!, false);
-
     public static void RunCommand(string command, OSPlatform platform, out string? result, out string? error,
         bool elevated)
     {
