@@ -6,7 +6,7 @@ using Shared.Enums;
 
 namespace Servers.Middleware;
 
-public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger logger) : IMiddleware
+public class CommandsExecutor(IKeyboardControlProvider keyboard, IDisplayControlProvider display, IAudioControlProvider audio, ILogger logger) : IMiddleware
 {
     private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
@@ -39,36 +39,36 @@ public class CommandsExecutor(IGeneralControlProvider controlFacade, ILogger log
         switch (context.BotRequest.Command)
         {
             case BotButtons.Pause:
-                controlFacade.KeyboardKeyPress(KeysEnum.MediaPlayPause);
+                keyboard.KeyboardKeyPress(KeysEnum.MediaPlayPause);
                 break;
             case BotButtons.MediaBack:
-                controlFacade.KeyboardKeyPress(KeysEnum.MediaPrev);
+                keyboard.KeyboardKeyPress(KeysEnum.MediaPrev);
                 break;
             case BotButtons.MediaForth:
-                controlFacade.KeyboardKeyPress(KeysEnum.MediaNext);
+                keyboard.KeyboardKeyPress(KeysEnum.MediaNext);
                 break;
             case BotButtons.VolumeUp:
-                var volume = controlFacade.GetVolume();
+                var volume = audio.GetVolume();
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
-                controlFacade.SetVolume(volume);
+                audio.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
                 return Task.CompletedTask;
             case BotButtons.VolumeDown:
-                volume = controlFacade.GetVolume();
+                volume = audio.GetVolume();
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
-                controlFacade.SetVolume(volume);
+                audio.SetVolume(volume);
                 context.BotResponse.Message = volume.ToString();
                 return Task.CompletedTask;
             case BotButtons.Darken:
-                controlFacade.DisplayOff();
+                display.DisplayOff();
                 break;
             default:
                 if (int.TryParse(context.BotRequest.Command, out volume))
                 {
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
-                    controlFacade.SetVolume(volume);
+                    audio.SetVolume(volume);
                 }
                 break;
         }

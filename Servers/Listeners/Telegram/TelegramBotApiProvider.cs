@@ -1,14 +1,41 @@
-﻿using Servers.Listeners.Telegram.ApiObjects.Request;
+﻿using Servers.DataObjects.Bot;
+using Servers.Listeners.Telegram.ApiObjects.Request;
 using Servers.Listeners.Telegram.ApiObjects.Response;
 using Servers.Listeners.Telegram.ApiObjects.Response.Keyboard;
-using Shared;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Servers.DataObjects.Bot;
 
 namespace Servers.Listeners.Telegram;
+
+internal static class HttpClientExtensions
+{
+    public static async Task<T> PostAsJsonAndGetResultAsync<T>(this HttpClient client, string? uri, object content,
+        JsonSerializerOptions? options = null, CancellationToken token = default)
+    {
+        HttpResponseMessage response;
+
+        try
+        {
+            response = await client.PostAsJsonAsync(uri, content, options, token);
+        }
+        catch (TaskCanceledException e)
+        {
+            if (e.InnerException is TimeoutException)
+                throw e.InnerException;
+
+            throw;
+        }
+
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new HttpRequestException("Error sending request", null, response.StatusCode);
+        }
+
+        return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse response");
+    }
+}
 
 public class TelegramBotApiProvider
 {

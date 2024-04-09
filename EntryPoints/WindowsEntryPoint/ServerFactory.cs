@@ -1,12 +1,11 @@
 ﻿using ControlProviders;
-using ControlProviders.Wrappers;
 using Microsoft.Extensions.Logging;
 using Servers;
 using Servers.ApiControllers;
 using Servers.Listeners;
 using Servers.Middleware;
-using Shared;
 using Shared.Config;
+using User32Wrapper = ControlProviders.User32Wrapper;
 
 namespace MainApp;
 
@@ -25,12 +24,10 @@ public class ServerFactory
         var inputProvider = new User32Wrapper();
         var audioProvider = new NAudioWrapper();
 
-        var generalInput = new InputProvider(inputProvider, inputProvider, inputProvider, audioProvider);
-
-        var audioController = new AudioController(generalInput, loggingProvider.CreateLogger(nameof(AudioController)));
-        var mouseController = new MouseController(generalInput, loggingProvider.CreateLogger(nameof(MouseController)));
-        var keyboardController = new KeyboardController(generalInput, loggingProvider.CreateLogger(nameof(KeyboardController)));
-        var displayController = new DisplayController(generalInput, loggingProvider.CreateLogger(nameof(DisplayController)));
+        var audioController = new AudioController(audioProvider, loggingProvider.CreateLogger(nameof(AudioController)));
+        var mouseController = new MouseController(inputProvider, loggingProvider.CreateLogger(nameof(MouseController)));
+        var keyboardController = new KeyboardController(inputProvider, loggingProvider.CreateLogger(nameof(KeyboardController)));
+        var displayController = new DisplayController(inputProvider, loggingProvider.CreateLogger(nameof(DisplayController)));
 
         var staticMiddleware = new StaticFilesMiddleware(loggingProvider.CreateLogger(nameof(StaticFilesMiddleware)));
 
@@ -42,7 +39,7 @@ public class ServerFactory
         _webListener = new SimpleHttpListener(loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
 
         _botListener = new TelegramListener(loggingProvider.CreateLogger(nameof(TelegramListener)));
-        _botMiddlewareChain = [new CommandsExecutor(generalInput, loggingProvider.CreateLogger(nameof(CommandsExecutor)))];
+        _botMiddlewareChain = [new CommandsExecutor(inputProvider, inputProvider, audioProvider, loggingProvider.CreateLogger(nameof(CommandsExecutor)))];
     }
 
     public Server GetServer()

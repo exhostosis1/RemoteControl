@@ -1,6 +1,6 @@
 ﻿using Servers.DataObjects;
 
-namespace Servers;
+namespace Servers.Listeners;
 
 public interface IListener
 {

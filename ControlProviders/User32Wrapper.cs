@@ -1,10 +1,10 @@
-﻿using Shared.ControlProviders.Input;
-using Shared.Enums;
+﻿using Shared.Enums;
 using System.Runtime.InteropServices;
+using Shared.ControlProviders.Provider;
 
-namespace ControlProviders.Wrappers;
+namespace ControlProviders;
 
-public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
+public partial class User32Wrapper : IKeyboardControlProvider, IDisplayControlProvider, IMouseControlProvider
 {
     private const uint Length = 1;
     private readonly Input[] _buffer = new Input[Length];
@@ -243,4 +243,17 @@ public partial class User32Wrapper : IKeyboardInput, IDisplayInput, IMouseInput
 
         DispatchInput();
     }
+
+    public void KeyboardKeyPress(KeysEnum key, KeyPressMode mode = KeyPressMode.Click) => SendKey(key, mode);
+
+    public void TextInput(string text) => SendText(text);
+
+    public void DisplayOff() => SetState(MonitorState.MonitorStateOff);
+
+    public void MouseMove(int x, int y) => SendMouseMove(x, y);
+
+    public void MouseKeyPress(MouseButtons button = MouseButtons.Left, KeyPressMode mode = KeyPressMode.Click) =>
+        SendMouseKey(button, mode);
+
+    public void MouseWheel(bool up) => SendScroll(up ? 1 : -1);
 }

@@ -1,7 +1,7 @@
 ﻿using Servers.ApiControllers;
 using Servers.Middleware;
 using Servers.Results;
-using Shared;
+using ControlProviders;
 
 namespace UnitTests;
 

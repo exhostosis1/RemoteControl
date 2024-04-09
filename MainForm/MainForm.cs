@@ -1,8 +1,12 @@
 ﻿using MainUI.CustomControls.MenuItems;
 using MainUI.CustomControls.Panels;
 using Servers;
+using Servers.Listeners;
 using Shared;
 using Shared.Config;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 using Windows.UI.ViewManagement;
 
 namespace MainUI;
@@ -200,7 +204,7 @@ public sealed partial class MainForm : Form
     {
         var address = input.Replace("&", "^&");
 
-        Utils.RunWindowsCommand($"start {address}", out _, out _);
+        RunCommand($"start {address}");
     }
 
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
@@ -225,9 +229,23 @@ public sealed partial class MainForm : Form
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var uris = _model.Where(x => x.Status)
+        var uris = _model.Where(x => x is { Type: ServerType.Web })
             .Select(x => x.Config.Uri);
-        Utils.AddFirewallRule(uris);
+
+        var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+        var translatedValue = sid.Translate(typeof(NTAccount)).Value;
+
+        foreach (var uri in uris)
+        {
+            var command =
+                $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
+
+            RunCommand(command, true);
+
+            command = $"netsh http add urlacl url={uri} user={translatedValue}";
+
+            RunCommand(command, true);
+        }
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -289,4 +307,20 @@ public sealed partial class MainForm : Form
     }
 
     private void SetAutoStartValue(object? _, bool value) => IsAutoStart = value;
+
+    private static void RunCommand(string command, bool elevated = false)
+    {
+        var proc = new Process();
+
+        proc.StartInfo.FileName = "cmd";
+        proc.StartInfo.Arguments = $"/c \"{command}\"";
+        proc.StartInfo.CreateNoWindow = true;
+        proc.StartInfo.UseShellExecute = elevated;
+
+        if (elevated) proc.StartInfo.Verb = "runas";
+
+        proc.Start();
+
+        proc.WaitForExit();
+    }
 }

@@ -1,8 +1,8 @@
 ﻿using Shared.ControlProviders.Devices;
 
-namespace ControlProviders.Devices;
+namespace ControlProviders;
 
-internal class AudioDevice : IAudioDevice
+internal class AudioDevice: IAudioDevice
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = "";

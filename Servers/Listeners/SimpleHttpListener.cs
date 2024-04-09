@@ -3,6 +3,7 @@ using Servers.DataObjects;
 using Servers.DataObjects.Web;
 using Shared;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 
@@ -28,6 +29,9 @@ public class SimpleHttpListener(ILogger logger) : IListener
 
     public bool IsListening => _listener.IsListening;
 
+    private static IEnumerable<string> GetCurrentIPs() =>
+        Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
+
     public void StartListen(StartParameters param)
     {
         if (_listener.IsListening)
@@ -52,7 +56,7 @@ public class SimpleHttpListener(ILogger logger) : IListener
                 return;
             }
 
-            var currentIps = Utils.GetCurrentIPs();
+            var currentIps = GetCurrentIPs();
             var unavailableIps = _listener.Prefixes.Where(x => !currentIps.Contains(new Uri(x).Host)).ToList();
 
             if (unavailableIps.Count > 0)
@@ -61,22 +65,7 @@ public class SimpleHttpListener(ILogger logger) : IListener
                 return;
             }
 
-            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                throw;
-
-            logger.LogWarning("Trying to add listening permissions to user");
-
-            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
-            var translatedValue = sid.Translate(typeof(NTAccount)).Value;
-
-            foreach (var prefix in _listener.Prefixes)
-            {
-                var command = $"netsh http add urlacl url={prefix} user={translatedValue}";
-
-                Utils.RunWindowsCommandAsAdmin(command);
-            }
-
-            _listener.Start();
+            throw;
         }
 
         logger.LogInformation("Http listener started listening on {uri}", param.Uri);

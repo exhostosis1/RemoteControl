@@ -1,13 +1,21 @@
-﻿using ControlProviders.Devices;
-using NAudio.CoreAudioApi;
-using Shared;
+﻿using NAudio.CoreAudioApi;
 using Shared.ControlProviders.Devices;
-using Shared.ControlProviders.Input;
+using Shared.ControlProviders.Provider;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
-namespace ControlProviders.Wrappers;
+[assembly: InternalsVisibleTo("UnitTests")]
 
-public class NAudioWrapper : IAudioInput
+namespace ControlProviders;
+
+internal static partial class Utils
+{
+    [GeneratedRegex("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase)]
+    public static partial Regex GuidRegex();
+}
+
+public class NAudioWrapper : IAudioControlProvider
 {
     private static readonly MMDeviceEnumerator Enumerator = new();
 
@@ -25,7 +33,9 @@ public class NAudioWrapper : IAudioInput
 
     private static Guid GetGuid(string input) => new(Utils.GuidRegex().Match(input).Value);
 
-    public int GetVolume(Guid? id = null)
+    public int GetVolume() => GetVolume(null);
+
+    private int GetVolume(Guid? id)
     {
         return id == null
             ? (int)(_defaultDevice.AudioEndpointVolume.MasterVolumeLevelScalar * 100)
@@ -33,7 +43,9 @@ public class NAudioWrapper : IAudioInput
                     ?.AudioEndpointVolume.MasterVolumeLevelScalar * 100 ?? 0);
     }
 
-    public void SetVolume(int volume, Guid? id = null)
+    public void SetVolume(int volume) => SetVolume(volume, null);
+
+    public void SetVolume(int volume, Guid? id)
     {
         if (volume is < 0 or > 100) throw new ArgumentOutOfRangeException(nameof(volume));
 
@@ -42,13 +54,12 @@ public class NAudioWrapper : IAudioInput
     }
 
 
-    public bool IsMute
-    {
-        get => _defaultDevice.AudioEndpointVolume.Mute;
-        set => _defaultDevice.AudioEndpointVolume.Mute = value;
-    }
+    public void Mute() => _defaultDevice.AudioEndpointVolume.Mute = true;
+    public void Unmute() => _defaultDevice.AudioEndpointVolume.Mute = false;
 
-    public IEnumerable<IAudioDevice> GetDevices()
+    public bool IsMuted => _defaultDevice.AudioEndpointVolume.Mute;
+
+    public IEnumerable<IAudioDevice> GetAudioDevices()
     {
         return _devices.Select(x =>
             new AudioDevice
@@ -59,10 +70,10 @@ public class NAudioWrapper : IAudioInput
             });
     }
 
-    public void SetCurrentDevice(Guid id)
+    public void SetAudioDevice(Guid id)
     {
         _defaultDevice = _devices.First(x => GetGuid(x.ID) == id);
     }
 
-    public void SetCurrentDevice(IAudioDevice device) => SetCurrentDevice(device.Id);
+    public void SetAudioDevice(IAudioDevice device) => SetAudioDevice(device.Id);
 }
