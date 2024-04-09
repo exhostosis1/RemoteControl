@@ -6,7 +6,7 @@ namespace ApiControllers;
 
 public class DisplayController(IDisplayControlProvider provider, ILogger logger) : BaseApiController
 {
-    public IActionResult Darken(string? _)
+    public IActionResult Darken()
     {
         logger.LogInformation("Turning off display");
 

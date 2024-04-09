@@ -6,14 +6,14 @@ namespace ApiControllers;
 
 public class AudioController(IAudioControlProvider provider, ILogger logger) : BaseApiController
 {
-    public IActionResult GetDevices(string? _)
+    public IActionResult GetDevices()
     {
         logger.LogInformation("Getting devices");
 
         return Json(provider.GetAudioDevices());
     }
 
-    public IActionResult SetDevice(string? param)
+    public IActionResult SetDevice(string param)
     {
         logger.LogInformation("Setting device to {param}", param);
 
@@ -27,14 +27,14 @@ public class AudioController(IAudioControlProvider provider, ILogger logger) : B
         return Error("No such device");
     }
 
-    public IActionResult GetVolume(string? _)
+    public IActionResult GetVolume()
     {
         logger.LogInformation("Getting volume");
 
         return Text(provider.GetVolume());
     }
 
-    public IActionResult SetVolume(string? param)
+    public IActionResult SetVolume(string param)
     {
         logger.LogInformation("Setting volume to {param}", param);
 
@@ -51,7 +51,7 @@ public class AudioController(IAudioControlProvider provider, ILogger logger) : B
         return Text(result);
     }
 
-    public IActionResult IncreaseBy5(string? _)
+    public IActionResult IncreaseBy5()
     {
         logger.LogInformation("Increasing volume by 5");
 
@@ -64,7 +64,7 @@ public class AudioController(IAudioControlProvider provider, ILogger logger) : B
         return Text(vol);
     }
 
-    public IActionResult DecreaseBy5(string? _)
+    public IActionResult DecreaseBy5()
     {
         logger.LogInformation("Decreasing volume by 5");
 
@@ -77,7 +77,7 @@ public class AudioController(IAudioControlProvider provider, ILogger logger) : B
         return Text(vol);
     }
 
-    public IActionResult Mute(string? _)
+    public IActionResult Mute()
     {
         logger.LogInformation("Toggling mute status");
 

@@ -1,4 +1,6 @@
-﻿using Shared;
+﻿using ApiControllers;
+using Servers.Middleware;
+using Shared;
 using Shared.ApiControllers;
 using Shared.ApiControllers.Results;
 
@@ -36,7 +38,7 @@ public class UtilsTest : IDisposable
     [InlineData("/api/v1/controller/action/parameter/asdf", "controller", "action", "parameter")]
     public void ApiRegexTest(string input, string resultController, string resultAction, string resultParameter)
     {
-        var result = Utils.TryParsePath(input, out var controller, out var action, out var parameter);
+        var result = ApiUtils.TryParsePath(input, out var controller, out var action, out var parameter);
 
         Assert.True(result);
 
@@ -51,7 +53,7 @@ public class UtilsTest : IDisposable
     [InlineData("/api/1/controller/action/parameter")]
     public void ApiRegexFailTest(string input)
     {
-        var result = Utils.TryParsePath(input, out _, out _, out _);
+        var result = ApiUtils.TryParsePath(input, out _, out _, out _);
 
         Assert.False(result);
     }
@@ -63,7 +65,7 @@ public class UtilsTest : IDisposable
     [InlineData("/api/v5/controller/action/parameter", "v5")]
     public void ApiVersionRegexTest(string input, string resultVersion)
     {
-        var result = Utils.TryGetApiVersion(input, out var version);
+        var result = ApiUtils.TryGetApiVersion(input, out var version);
 
         Assert.True(result);
         Assert.Equal(version, resultVersion);
@@ -76,7 +78,7 @@ public class UtilsTest : IDisposable
     [InlineData("/api/v/controller/action/parameter")]
     public void ApiRegexVersionFailTest(string input)
     {
-        var result = Utils.TryGetApiVersion(input, out _);
+        var result = ApiUtils.TryGetApiVersion(input, out _);
         Assert.False(result);
     }
 
@@ -87,7 +89,7 @@ public class UtilsTest : IDisposable
     [InlineData("{1,2,3,4,5}", 1, 2)]
     public void TryGetCoordsTest(string input, int resultX, int resultY)
     {
-        var result = Utils.TryGetCoords(input, out var x, out var y);
+        var result = CoordsHelper.TryGetCoords(input, out var x, out var y);
 
         Assert.True(result);
         Assert.Equal(resultX, x);
@@ -100,7 +102,7 @@ public class UtilsTest : IDisposable
     [InlineData("{ feadf, 3 }")]
     public void TryGetCoordsFailTest(string input)
     {
-        var result = Utils.TryGetCoords(input, out _, out _);
+        var result = CoordsHelper.TryGetCoords(input, out _, out _);
         Assert.False(result);
     }
 
@@ -153,17 +155,16 @@ public class UtilsTest : IDisposable
             new Api3Controller()
         };
 
-        var result = controllers.GetControllersWithMethods();
+        var result = controllers.GetControllersWithActions();
 
         Assert.True(result.Count == 3);
 
-        Assert.True(result["api1"].Count == 2);
-        Assert.True(result["api2"].Count == 1);
-        Assert.True(result["api3"].Count == 1);
+        Assert.Equal(result["api1"].Count, 2);
+        Assert.Single(result["api2"]);
+        Assert.Equal(result["api3"].Count, 2);
 
         Assert.True(result.All(x => x.Value.All(x =>
-            x.Value.Method.ReturnType == typeof(IActionResult) && x.Value.Method.GetParameters().Length == 1 &&
-            x.Value.Method.GetParameters()[0].ParameterType == typeof(string))));
+            x.Value.ReturnType == typeof(IActionResult))));
     }
 
     public void Dispose()

@@ -8,7 +8,6 @@ using Servers.Middleware;
 using Shared;
 using Shared.Bots.Telegram;
 using Shared.Config;
-using Shared.Wrappers.HttpClient;
 using Shared.Wrappers.HttpListener;
 
 namespace MainApp;

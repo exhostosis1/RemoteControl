@@ -1,14 +1,37 @@
 ﻿using Microsoft.Extensions.Logging;
-using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
 using Shared.Enums;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+
+[assembly: InternalsVisibleTo("UnitTests")]
 
 namespace ApiControllers;
 
+internal static partial class CoordsHelper
+{
+    [GeneratedRegex("[-0-9]+")]
+    public static partial Regex CoordRegex();
+
+    public static bool TryGetCoords(string input, out int x, out int y)
+    {
+        x = 0;
+        y = 0;
+
+        var matches = CoordRegex().Matches(input);
+        if (matches.Count < 2) return false;
+
+        x = Convert.ToInt32(matches[0].Value);
+        y = Convert.ToInt32(matches[1].Value);
+
+        return true;
+    }
+}
+
 public class MouseController(IMouseControlProvider provider, ILogger logger) : BaseApiController
 {
-    public IActionResult Left(string? _)
+    public IActionResult Left()
     {
         logger.LogInformation("Pressing left mouse button");
 
@@ -17,7 +40,7 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult Right(string? _)
+    public IActionResult Right()
     {
         logger.LogInformation("Pressing right mouse button");
 
@@ -26,7 +49,7 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult Middle(string? _)
+    public IActionResult Middle()
     {
         logger.LogInformation("Pressing middle mouse button");
 
@@ -35,7 +58,7 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult WheelUp(string? _)
+    public IActionResult WheelUp()
     {
         logger.LogInformation("Turning wheel up");
 
@@ -44,7 +67,7 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult WheelDown(string? _)
+    public IActionResult WheelDown()
     {
         logger.LogInformation("Turning wheel down");
 
@@ -53,7 +76,7 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult DragStart(string? _)
+    public IActionResult DragStart()
     {
         logger.LogInformation("Starting drag");
 
@@ -69,7 +92,7 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult DragStop(string? _)
+    public IActionResult DragStop()
     {
         logger.LogInformation("Stopping drag");
 
@@ -78,9 +101,9 @@ public class MouseController(IMouseControlProvider provider, ILogger logger) : B
         return Ok();
     }
 
-    public IActionResult Move(string? param)
+    public IActionResult Move(string param)
     {
-        if (string.IsNullOrWhiteSpace(param) || !Utils.TryGetCoords(param, out var x, out var y))
+        if (string.IsNullOrWhiteSpace(param) || !CoordsHelper.TryGetCoords(param, out var x, out var y))
         {
             logger.LogError("Cannot move mouse by {param}", param);
             return Error("Wrong coordinates");

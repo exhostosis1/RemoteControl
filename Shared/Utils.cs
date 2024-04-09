@@ -21,66 +21,8 @@ namespace Shared;
 
 public static partial class Utils
 {
-    private const string ApiPath = "/api/";
-    private const string ControllerGroupName = "controller";
-    private const string ActionGroupName = "action";
-    private const string ParamGroupName = "param";
-
     [GeneratedRegex("[0-9A-F]{8}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{4}[-][0-9A-F]{12}", RegexOptions.IgnoreCase)]
     public static partial Regex GuidRegex();
-
-    [GeneratedRegex("[-0-9]+")]
-    public static partial Regex CoordRegex();
-
-    [GeneratedRegex(
-        $@"(?<={ApiPath}v\d+)\/(?<{ControllerGroupName}>[a-z]+)\/(?<{ActionGroupName}>[a-z]+)\/?(?<{ParamGroupName}>.*?)(?=\/|$)",
-        RegexOptions.IgnoreCase)]
-    public static partial Regex ApiRegex();
-
-    [GeneratedRegex($"(?<={ApiPath})v\\d+", RegexOptions.IgnoreCase)]
-    public static partial Regex ApiVersionRegex();
-
-    public static bool TryGetCoords(string input, out int x, out int y)
-    {
-        x = 0;
-        y = 0;
-
-        var matches = CoordRegex().Matches(input);
-        if (matches.Count < 2) return false;
-
-        x = Convert.ToInt32(matches[0].Value);
-        y = Convert.ToInt32(matches[1].Value);
-
-        return true;
-    }
-
-    public static bool TryGetApiVersion(string path, out string? version)
-    {
-        version = null;
-        var match = ApiVersionRegex().Match(path);
-
-        if (!match.Success) return false;
-
-        version = match.Value;
-        return true;
-    }
-
-    public static bool TryParsePath(string path, out string controller, out string action, out string parameter)
-    {
-        var match = ApiRegex().Match(path);
-
-        controller = string.Empty;
-        action = string.Empty;
-        parameter = string.Empty;
-
-        if (!match.Success) return false;
-
-        controller = match.Groups[ControllerGroupName].Value.ToLower();
-        action = match.Groups[ActionGroupName].Value.ToLower();
-        parameter = match.Groups[ParamGroupName].Value;
-
-        return true;
-    }
 
     public static void RunWindowsCommand(string command, out string result, out string error) =>
         RunCommand(command, OSPlatform.Windows, out result!, out error!, false);
@@ -134,23 +76,6 @@ public static partial class Utils
     public static IEnumerable<string> GetCurrentIPs() =>
         Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
 
-    public static ControllersWithMethods GetControllersWithMethods(this IEnumerable<IApiController> controllers)
-    {
-        return new ControllersWithMethods(controllers.ToDictionary(
-            x => x.GetType().Name.Replace("controller", "", StringComparison.OrdinalIgnoreCase).ToLower(),
-            x => x.GetMethods()));
-    }
-
-    public static ControllerMethods GetMethods(this IApiController controller)
-    {
-        return new ControllerMethods(controller.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public).Where(x =>
-        {
-            var parameters = x.GetParameters();
-            return x.ReturnType == typeof(IActionResult) && parameters.Length == 1 &&
-                   parameters[0].ParameterType == typeof(string);
-        }).ToDictionary(x => x.Name.ToLower(), x => x.CreateDelegate<Func<string?, IActionResult>>(controller)));
-    }
-
     public static void AddFirewallRule(Uri uri)
     {
         if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -193,40 +118,5 @@ public static partial class Utils
         }
 
         return JsonSerializer.Deserialize<T>(await response.Content.ReadAsStringAsync(token)) ?? throw new JsonException("Cannot parse response");
-    }
-
-    public static bool IsAssignableToGenericType(this Type givenType, Type genericType)
-    {
-        var interfaceTypes = givenType.GetInterfaces();
-
-        if (interfaceTypes.Any(it => it.IsGenericType && it.GetGenericTypeDefinition() == genericType))
-            return true;
-
-        if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericType)
-            return true;
-
-        var baseType = givenType.BaseType;
-        return baseType != null && IsAssignableToGenericType(baseType, genericType);
-    }
-
-    public static ConstructorInfo GetFirstConstructor(this Type type)
-    {
-        return type.GetConstructors(BindingFlags.Public | BindingFlags.Instance)
-                   .MinBy(x => x.GetParameters().Length) ??
-            throw new Exception(
-                $"Type ${type} must have public non-static constructor");
-    }
-
-    public static Delegate CreateDelegate(this ConstructorInfo ci)
-    {
-        var parameters = ci.GetParameters().Where(x => !x.HasDefaultValue).Select(x =>
-            Expression.Parameter(x.ParameterType, x.Name)).ToList();
-        var defaultParameters = ci.GetParameters().Where(x => x.HasDefaultValue)
-            .Select(x => Expression.Constant(x.DefaultValue));
-
-        var createExpression = Expression.New(ci, parameters.Concat<Expression>(defaultParameters));
-        var lambda = Expression.Lambda(createExpression, parameters);
-
-        return lambda.Compile();
     }
 }

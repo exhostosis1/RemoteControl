@@ -8,7 +8,7 @@ namespace ApiControllers;
 
 public class KeyboardController(IKeyboardControlProvider provider, ILogger logger) : BaseApiController
 {
-    public IActionResult Back(string? _)
+    public IActionResult Back()
     {
         logger.LogInformation("Pressing arrow left");
 
@@ -17,7 +17,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult Forth(string? _)
+    public IActionResult Forth()
     {
         logger.LogInformation("Pressing arrow right");
 
@@ -26,7 +26,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult Pause(string? _)
+    public IActionResult Pause()
     {
         logger.LogInformation("Pressing pause");
 
@@ -35,7 +35,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult MediaBack(string? _)
+    public IActionResult MediaBack()
     {
         logger.LogInformation("Pressing previous");
 
@@ -44,7 +44,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult MediaForth(string? _)
+    public IActionResult MediaForth()
     {
         logger.LogInformation("Pressing next");
 
@@ -53,7 +53,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult MediaVolumeUp(string? _)
+    public IActionResult MediaVolumeUp()
     {
         logger.LogInformation("Pressing volume up");
 
@@ -62,7 +62,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult MediaVolumeDown(string? _)
+    public IActionResult MediaVolumeDown()
     {
         logger.LogInformation("Pressing volume down");
 
@@ -71,7 +71,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult MediaMute(string? _)
+    public IActionResult MediaMute()
     {
         logger.LogInformation("Pressing mute");
 
@@ -80,7 +80,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult BrowserBack(string? _)
+    public IActionResult BrowserBack()
     {
         logger.LogInformation("Pressing browser back");
 
@@ -89,7 +89,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult BrowserForward(string? _)
+    public IActionResult BrowserForward()
     {
         logger.LogInformation("Pressing browser forward");
 
@@ -98,7 +98,7 @@ public class KeyboardController(IKeyboardControlProvider provider, ILogger logge
         return Ok();
     }
 
-    public IActionResult Text(string? param)
+    public IActionResult Text(string param)
     {
         string text;
 

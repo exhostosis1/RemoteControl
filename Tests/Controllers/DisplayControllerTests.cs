@@ -1,6 +1,7 @@
 ﻿using ApiControllers;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Servers.Middleware;
 using Shared;
 using Shared.ApiControllers.Results;
 using Shared.ControlProviders.Provider;
@@ -39,11 +40,9 @@ public class DisplayControllerTests : IDisposable
             "darken"
         };
 
-        var methods = _controller.GetMethods();
+        var methods = _controller.GetActions();
         Assert.True(methods.Count == methodNames.Length && methods.All(x => methodNames.Contains(x.Key)) && methods.All(
-            x => x.Value.Target == _controller && x.Value.Method.ReturnType == typeof(IActionResult) &&
-                 x.Value.Method.GetParameters().Length == 1 &&
-                 x.Value.Method.GetParameters()[0].ParameterType == typeof(string)));
+            x => x.Value.ReturnType == typeof(IActionResult)));
     }
 
     public void Dispose()
