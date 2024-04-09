@@ -1,9 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ControlProviders.Enums;
+using ControlProviders.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Servers.DataObjects.Bot;
 using Servers.Middleware;
-using Shared.ControlProviders.Provider;
-using Shared.Enums;
+using Servers.Middleware.Enums;
 
 namespace UnitTests.Middleware;
 

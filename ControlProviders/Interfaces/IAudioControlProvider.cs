@@ -1,8 +1,4 @@
-﻿using Shared.ControlProviders.Devices;
-using System;
-using System.Collections.Generic;
-
-namespace Shared.ControlProviders.Provider;
+﻿namespace ControlProviders.Interfaces;
 
 public interface IAudioControlProvider
 {

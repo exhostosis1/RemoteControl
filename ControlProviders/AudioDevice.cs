@@ -1,4 +1,4 @@
-﻿using Shared.ControlProviders.Devices;
+﻿using ControlProviders.Interfaces;
 
 namespace ControlProviders;
 

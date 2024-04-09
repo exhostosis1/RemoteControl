@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ControlProviders.Enums;
+using ControlProviders.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Servers.ApiControllers;
 using Servers.Middleware;
 using Servers.Results;
-using Shared.ControlProviders.Provider;
-using Shared.Enums;
 
 namespace UnitTests.Controllers;
 
@@ -12,13 +12,12 @@ public class KeyboardControllerTests : IDisposable
 {
     private readonly KeyboardController _keyboardController;
     private readonly Mock<IKeyboardControlProvider> _keyboardControlProvider;
-    private readonly ILogger _logger;
 
     public KeyboardControllerTests()
     {
-        _logger = Mock.Of<ILogger>();
+        var logger = Mock.Of<ILogger>();
         _keyboardControlProvider = new Mock<IKeyboardControlProvider>(MockBehavior.Strict);
-        _keyboardController = new KeyboardController(_keyboardControlProvider.Object, _logger);
+        _keyboardController = new KeyboardController(_keyboardControlProvider.Object, logger);
     }
 
     [Fact]

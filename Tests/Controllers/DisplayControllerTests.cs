@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ControlProviders.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Servers.ApiControllers;
 using Servers.Middleware;
 using Servers.Results;
-using Shared.ControlProviders.Provider;
 
 namespace UnitTests.Controllers;
 

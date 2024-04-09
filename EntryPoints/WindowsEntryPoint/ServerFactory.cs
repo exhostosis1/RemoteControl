@@ -1,10 +1,10 @@
 ﻿using ControlProviders;
+using MainApp.Config;
 using Microsoft.Extensions.Logging;
 using Servers;
 using Servers.ApiControllers;
 using Servers.Listeners;
 using Servers.Middleware;
-using Shared.Config;
 using User32Wrapper = ControlProviders.User32Wrapper;
 
 namespace MainApp;

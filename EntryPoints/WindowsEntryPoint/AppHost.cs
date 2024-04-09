@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MainApp.Config;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Servers;
-using Shared.Config;
 
 namespace MainApp;
 

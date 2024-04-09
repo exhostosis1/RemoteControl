@@ -2,9 +2,8 @@
 using Moq;
 using Servers.ApiControllers;
 using Servers.Middleware;
-using Shared.ControlProviders.Devices;
-using Shared.ControlProviders.Provider;
 using System.Text.Json;
+using ControlProviders.Interfaces;
 using Servers.Results;
 
 namespace UnitTests.Controllers;
@@ -13,13 +12,12 @@ public class AudioControllerTests : IDisposable
 {
     private readonly AudioController _audioController;
     private readonly Mock<IAudioControlProvider> _audioControlProvider;
-    private readonly ILogger _logger;
 
     public AudioControllerTests()
     {
-        _logger = Mock.Of<ILogger>();
+        var logger = Mock.Of<ILogger>();
         _audioControlProvider = new Mock<IAudioControlProvider>(MockBehavior.Strict);
-        _audioController = new AudioController(_audioControlProvider.Object, _logger);
+        _audioController = new AudioController(_audioControlProvider.Object, logger);
     }
 
     private class MockAudioDevice : IAudioDevice

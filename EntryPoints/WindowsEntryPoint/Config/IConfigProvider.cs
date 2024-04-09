@@ -1,4 +1,4 @@
-﻿namespace Shared.Config;
+﻿namespace MainApp.Config;
 
 public interface IConfigProvider
 {

@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Shared.Enums;
+﻿namespace ControlProviders.Enums;
 
 public enum User32KeyCodes
 {

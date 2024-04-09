@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using ControlProviders.Enums;
+using ControlProviders.Interfaces;
+using Microsoft.Extensions.Logging;
 using Moq;
 using Servers.ApiControllers;
 using Servers.Middleware;
 using Servers.Results;
-using Shared.ControlProviders.Provider;
-using Shared.Enums;
 
 namespace UnitTests.Controllers;
 
@@ -12,13 +12,12 @@ public class MouseControllerTests : IDisposable
 {
     private readonly MouseController _mouseController;
     private readonly Mock<IMouseControlProvider> _mouseControlProvider;
-    private readonly ILogger _logger;
 
     public MouseControllerTests()
     {
-        _logger = Mock.Of<ILogger>();
+        var logger = Mock.Of<ILogger>();
         _mouseControlProvider = new Mock<IMouseControlProvider>(MockBehavior.Strict);
-        _mouseController = new MouseController(_mouseControlProvider.Object, _logger);
+        _mouseController = new MouseController(_mouseControlProvider.Object, logger);
     }
 
     [Fact]

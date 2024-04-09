@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
+using MainApp.Config;
 using Microsoft.Extensions.Logging;
-using Shared.Config;
 
 namespace MainApp;
 

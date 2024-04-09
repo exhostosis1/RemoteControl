@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Shared.ControlProviders.Devices;
+﻿namespace ControlProviders.Interfaces;
 
 public interface IAudioDevice
 {

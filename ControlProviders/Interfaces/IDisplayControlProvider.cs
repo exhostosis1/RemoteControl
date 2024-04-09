@@ -1,4 +1,4 @@
-﻿namespace Shared.ControlProviders.Provider;
+﻿namespace ControlProviders.Interfaces;
 
 public interface IDisplayControlProvider
 {

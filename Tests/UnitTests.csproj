@@ -26,7 +26,6 @@
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\MainApp.csproj" />
     <ProjectReference Include="..\Servers\Servers.csproj" />
-    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,8 +1,8 @@
-﻿using System.Net;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Servers.Results;
-using Shared.ControlProviders.Provider;
-using Shared.Enums;
+using System.Net;
+using ControlProviders.Enums;
+using ControlProviders.Interfaces;
 
 namespace Servers.ApiControllers;
 

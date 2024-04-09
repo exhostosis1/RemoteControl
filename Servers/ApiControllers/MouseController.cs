@@ -1,9 +1,9 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Servers.Results;
-using Shared.ControlProviders.Provider;
-using Shared.Enums;
+using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
+using ControlProviders.Enums;
+using ControlProviders.Interfaces;
 
 [assembly: InternalsVisibleTo("UnitTests")]
 

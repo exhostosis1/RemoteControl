@@ -1,6 +1,6 @@
 ﻿using Servers;
-using Shared.Config;
 using System.ComponentModel;
+using MainApp.Config;
 
 namespace MainUI.CustomControls.Panels;
 

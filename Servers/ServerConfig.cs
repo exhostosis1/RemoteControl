@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
-namespace Shared.Config;
+namespace Servers;
 
 public class ServerConfig(ServerType type)
 {

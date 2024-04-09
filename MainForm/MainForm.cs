@@ -1,11 +1,7 @@
 ﻿using MainUI.CustomControls.MenuItems;
 using MainUI.CustomControls.Panels;
 using Servers;
-using Servers.Listeners;
-using Shared;
-using Shared.Config;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 using Windows.UI.ViewManagement;
 

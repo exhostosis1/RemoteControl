@@ -1,6 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MainApp.Config;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
-using Shared.Config;
+
 #if DEBUG
 
 #else

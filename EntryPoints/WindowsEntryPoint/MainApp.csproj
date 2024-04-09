@@ -25,7 +25,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\..\Servers\Servers.csproj" />
-    <ProjectReference Include="..\..\Shared\Shared.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,6 @@
-﻿using Shared.Enums;
+﻿using ControlProviders.Enums;
 
-namespace Shared.ControlProviders.Provider;
+namespace ControlProviders.Interfaces;
 
 public interface IMouseControlProvider
 {

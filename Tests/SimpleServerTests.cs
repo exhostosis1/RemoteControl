@@ -5,8 +5,8 @@ using Servers.DataObjects;
 using Servers.DataObjects.Web;
 using Servers.Listeners;
 using Servers.Middleware;
-using Shared.Config;
 using System.ComponentModel;
+using MainApp.Config;
 
 namespace UnitTests;
 

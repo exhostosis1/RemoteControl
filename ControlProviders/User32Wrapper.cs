@@ -1,6 +1,6 @@
-﻿using Shared.Enums;
-using System.Runtime.InteropServices;
-using Shared.ControlProviders.Provider;
+﻿using System.Runtime.InteropServices;
+using ControlProviders.Enums;
+using ControlProviders.Interfaces;
 
 namespace ControlProviders;
 

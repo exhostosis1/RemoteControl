@@ -1,4 +1,4 @@
-﻿namespace Shared.Enums;
+﻿namespace ControlProviders.Enums;
 
 public enum MouseButtons
 {

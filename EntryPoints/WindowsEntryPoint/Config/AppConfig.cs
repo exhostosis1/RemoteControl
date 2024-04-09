@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Servers;
 
-namespace Shared.Config;
+namespace MainApp.Config;
 
 public class AppConfig
 {

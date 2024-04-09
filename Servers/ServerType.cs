@@ -1,4 +1,4 @@
-﻿namespace Shared.Config;
+﻿namespace Servers;
 
 public enum ServerType
 {

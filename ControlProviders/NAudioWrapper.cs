@@ -1,9 +1,8 @@
 ﻿using NAudio.CoreAudioApi;
-using Shared.ControlProviders.Devices;
-using Shared.ControlProviders.Provider;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using ControlProviders.Interfaces;
 
 [assembly: InternalsVisibleTo("UnitTests")]
 

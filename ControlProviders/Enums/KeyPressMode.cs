@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Shared.Enums;
+﻿namespace ControlProviders.Enums;
 
 [Flags]
 public enum KeyPressMode

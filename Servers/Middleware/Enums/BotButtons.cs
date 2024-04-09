@@ -1,4 +1,4 @@
-﻿namespace Shared.Enums;
+﻿namespace Servers.Middleware.Enums;
 
 public static class BotButtons
 {

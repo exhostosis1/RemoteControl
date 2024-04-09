@@ -1,11 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using Servers.DataObjects;
 using Servers.DataObjects.Web;
-using Shared;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
 
 namespace Servers.Listeners;
 

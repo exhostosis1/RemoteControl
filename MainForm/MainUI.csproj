@@ -15,7 +15,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\MainApp.csproj" />
-    <ProjectReference Include="..\Shared\Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
