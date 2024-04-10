@@ -1,6 +1,6 @@
 ﻿using Servers;
 
-namespace MainApp.Config;
+namespace MainApp;
 
 public class AppConfig
 {

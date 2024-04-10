@@ -302,7 +302,11 @@ public sealed partial class MainForm : Form
         }
     }
 
-    private void SetAutoStartValue(object? _, bool value) => IsAutoStart = value;
+    private void SetAutoStartValue(object? _, bool value)
+    {
+        IsAutoStart = value;
+        AutostartStripMenuItem.Checked = IsAutoStart;
+    }
 
     private static void RunCommand(string command, bool elevated = false)
     {

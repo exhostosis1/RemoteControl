@@ -1,5 +1,4 @@
-﻿using MainApp.Config;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 
 #if DEBUG
@@ -15,7 +14,7 @@ public class AppHostBuilder
     private ILoggerProvider? _loggerProvider = null;
     private ServerFactory? _serverFactory = null;
     private RegistryAutoStartService? _autoStartService = null;
-    private IConfigProvider? _configProvider = null;
+    private JsonConfigurationProvider? _configProvider = null;
 
     public AppHostBuilder UseLogger(ILoggerProvider loggerProvider)
     {
@@ -23,7 +22,7 @@ public class AppHostBuilder
         return this;
     }
 
-    public AppHostBuilder UseConfiguration(IConfigProvider configProvider)
+    public AppHostBuilder UseConfiguration(JsonConfigurationProvider configProvider)
     {
         _configProvider = configProvider;
         return this;

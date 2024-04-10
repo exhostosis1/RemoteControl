@@ -1,5 +1,4 @@
-﻿using MainApp.Config;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Servers;
 
@@ -10,7 +9,7 @@ public  class AppHost
     private readonly ILogger _logger;
     private readonly ServerFactory _serverFactory;
     private readonly RegistryAutoStartService _autoStartService;
-    private readonly IConfigProvider _configProvider;
+    private readonly JsonConfigurationProvider _configProvider;
 
     private int _id = 0;
     private List<int> _ids = [];
@@ -22,7 +21,7 @@ public  class AppHost
 
     #region Constructor
     internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
-        RegistryAutoStartService autoStartService, IConfigProvider configProvider)
+        RegistryAutoStartService autoStartService, JsonConfigurationProvider configProvider)
     {
         _logger = loggerProvider.CreateLogger(nameof(AppHost));
         _serverFactory = serverFactory;

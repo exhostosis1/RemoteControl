@@ -1,5 +1,4 @@
-﻿using MainApp.Config;
-using Servers;
+﻿using Servers;
 
 namespace MainUI.CustomControls.Panels;
 

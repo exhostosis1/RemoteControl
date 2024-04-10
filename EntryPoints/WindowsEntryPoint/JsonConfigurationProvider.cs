@@ -1,11 +1,10 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
-using MainApp.Config;
 using Microsoft.Extensions.Logging;
 
 namespace MainApp;
 
-public class JsonConfigurationProvider(ILogger logger, string filePath) : IConfigProvider
+public class JsonConfigurationProvider(ILogger logger, string filePath)
 {
     private readonly JsonSerializerOptions _jsonOptions = new()
     {

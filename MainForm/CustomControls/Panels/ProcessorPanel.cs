@@ -1,6 +1,5 @@
 ﻿using Servers;
 using System.ComponentModel;
-using MainApp.Config;
 
 namespace MainUI.CustomControls.Panels;
 
@@ -27,7 +26,7 @@ internal abstract class ServerPanel : Panel
 
     protected readonly CheckBox AutoStartBox = new()
     {
-        Text = @"AutoStart",
+        Text = @"Autostart",
         Location = new Point(419, 34),
         Size = new Size(75, 19),
     };
