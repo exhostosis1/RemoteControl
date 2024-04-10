@@ -132,7 +132,7 @@ public class AudioControllerTests : IDisposable
         var expectedVolume = volume + 5;
         expectedVolume = expectedVolume > 100 ? 100 : expectedVolume < 0 ? 0 : expectedVolume;
 
-        var result = _audioController.IncreaseBy5();
+        var result = _audioController.IncreaseByFive();
         Assert.True(result is TextResult && result.Result == expectedVolume.ToString());
 
         _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
@@ -152,7 +152,7 @@ public class AudioControllerTests : IDisposable
         var expectedVolume = volume - 5;
         expectedVolume = expectedVolume > 100 ? 100 : expectedVolume < 0 ? 0 : expectedVolume;
 
-        var result = _audioController.DecreaseBy5();
+        var result = _audioController.DecreaseByFive();
         Assert.True(result is TextResult && result.Result == expectedVolume.ToString());
 
         _audioControlProvider.Verify(x => x.GetVolume(), Times.Once);
@@ -184,8 +184,8 @@ public class AudioControllerTests : IDisposable
             "setvolume",
             "getdevices",
             "setdevice",
-            "increaseby5",
-            "decreaseby5",
+            "increasebyfive",
+            "decreasebyfive",
             "mute"
         };
 
