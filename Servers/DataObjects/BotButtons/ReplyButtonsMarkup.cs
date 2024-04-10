@@ -1,6 +1,6 @@
-﻿namespace Servers.DataObjects.Bot;
+﻿namespace Servers.DataObjects.BotButtons;
 
-public class ReplyButtonsMarkup(IEnumerable<IEnumerable<SingleButton>> items) : ButtonsMarkup
+public class ReplyButtonsMarkup(IEnumerable<IEnumerable<SingleButton>> items) : IButtonsMarkup
 {
     public IEnumerable<IEnumerable<SingleButton>> Items { get; set; } = items;
 

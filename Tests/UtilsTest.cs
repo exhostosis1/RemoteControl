@@ -105,7 +105,7 @@ public class UtilsTest : IDisposable
         Assert.False(result);
     }
 
-    private class Api1Controller : IApiController
+    private class Api1Controller : BaseApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult Method1(string? _)
@@ -120,13 +120,13 @@ public class UtilsTest : IDisposable
         }
     }
 
-    private class Api2Controller : IApiController
+    private class Api2Controller : BaseApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult Method2(string? _) => new OkResult();
     }
 
-    private class Api3Controller : IApiController
+    private class Api3Controller : BaseApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public int Method3(string? _)
@@ -147,7 +147,7 @@ public class UtilsTest : IDisposable
     [Fact]
     public void GetControllersWithMethodsTest()
     {
-        var controllers = new IApiController[]
+        var controllers = new BaseApiController[]
         {
             new Api1Controller(),
             new Api2Controller(),

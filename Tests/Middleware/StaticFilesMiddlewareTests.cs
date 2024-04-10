@@ -1,9 +1,9 @@
-﻿using Moq;
+﻿using Microsoft.Extensions.Logging;
+using Moq;
 using Servers.Middleware;
 using System.Net;
 using System.Text;
-using Microsoft.Extensions.Logging;
-using Servers.DataObjects.Web;
+using Servers.DataObjects;
 
 namespace UnitTests.Middleware;
 
@@ -14,12 +14,14 @@ public class StaticFilesMiddlewareTests : IDisposable
     private const string Dir = "www";
     private readonly string _path = Path.Combine(AppContext.BaseDirectory, Dir);
 
-    private const string IndexContents = @"
-<html>
-<title>test</title>
-<body>test body</body>
-</html>
-";
+    private const string IndexContents = """
+
+                                         <html>
+                                         <title>test</title>
+                                         <body>test body</body>
+                                         </html>
+
+                                         """;
 
     private const string FileContents = "contents";
 
@@ -52,12 +54,19 @@ public class StaticFilesMiddlewareTests : IDisposable
     [InlineData("/unexdisting.file", HttpStatusCode.NotFound, "text/plain", "")]
     public async Task RequestTest(string path, HttpStatusCode code, string type, string response)
     {
-        var context = new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Path = path
+            },
+            Output = Mock.Of<OutputContext>()
+        };
         
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.True(context.WebResponse.StatusCode == code && context.WebResponse.ContentType == type &&
-                    Encoding.UTF8.GetString(context.WebResponse.Payload) ==
+        Assert.True(context.Output.StatusCode == code && context.Output.ContentType == type &&
+                    Encoding.UTF8.GetString(context.Output.Payload) ==
                     response);
     }
 

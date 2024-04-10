@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using Servers.DataObjects;
-using Servers.DataObjects.Web;
 using System.Net;
+using Servers.DataObjects;
 
 namespace Servers.Middleware;
 
@@ -19,17 +18,15 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
         { ".css", "text/css" }
     };
     
-    public async Task ProcessRequestAsync(IContext contextParam, RequestDelegate _)
+    public async Task ProcessRequestAsync(RequestContext context, RequestDelegate _)
     {
-        var context = (WebContext)contextParam;
-
-        var uriPath = context.WebRequest.Path;
+        var uriPath = context.Input.Path;
 
         logger.LogInformation("Processing file request {uriPath}", uriPath);
 
         if (uriPath.Contains(".."))
         {
-            context.WebResponse.StatusCode = HttpStatusCode.NotFound;
+            context.Output.StatusCode = HttpStatusCode.NotFound;
             return;
         }
 
@@ -42,16 +39,16 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
 
         var extension = Path.GetExtension(path);
 
-        context.WebResponse.ContentType = ContentTypes.GetValueOrDefault(extension, "text/plain");
+        context.Output.ContentType = ContentTypes.GetValueOrDefault(extension, "text/plain");
 
         if (File.Exists(path))
         {
-            context.WebResponse.Payload = await File.ReadAllBytesAsync(path);
+            context.Output.Payload = await File.ReadAllBytesAsync(path);
         }
         else
         {
             logger.LogError("File not found {path}", path);
-            context.WebResponse.StatusCode = HttpStatusCode.NotFound;
+            context.Output.StatusCode = HttpStatusCode.NotFound;
         }
     }
 }

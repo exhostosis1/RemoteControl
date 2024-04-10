@@ -2,7 +2,8 @@
 using ControlProviders.Interfaces;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Servers.DataObjects.Bot;
+using Servers.DataObjects;
+using Servers.DataObjects.BotButtons;
 using Servers.Middleware;
 using Servers.Middleware.Enums;
 
@@ -32,15 +33,23 @@ public class CommandExecutorTests : IDisposable
     public async Task ExecuteKeyboardKeyTest(string button, KeysEnum key)
     {
         _keyboard.Setup(x => x.KeyboardKeyPress(It.IsAny<KeysEnum>(), It.IsAny<KeyPressMode>()));
-
-        var context = new BotContext(new BotContextRequest("", "", 0, button, DateTime.Now),
-            Mock.Of<BotContextResponse>());
+        
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Id = 0,
+                Command = button,
+                Date = DateTime.Now
+            },
+            Output = Mock.Of<OutputContext>()
+        };
 
         await _executor.ProcessRequestAsync(context, null!);
 
         _keyboard.Verify(x => x.KeyboardKeyPress(key, KeyPressMode.Click), Times.Once);
-        Assert.Equal("done", context.BotResponse.Message);
-        Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
+        Assert.Equal("done", context.Output.Message);
+        Assert.True(context.Output.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
     }
 
     [Theory]
@@ -54,14 +63,22 @@ public class CommandExecutorTests : IDisposable
     {
         _audio.Setup(x => x.GetVolume()).Returns(actual);
         _audio.Setup(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)));
-        
-        var context = new BotContext(new BotContextRequest("", "", 0, button, DateTime.Now),
-            Mock.Of<BotContextResponse>());
+
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Id = 0,
+                Command = button,
+                Date = DateTime.Now
+            },
+            Output = Mock.Of<OutputContext>()
+        };
 
         await _executor.ProcessRequestAsync(context, null!);
 
-        Assert.True(context.BotResponse.Message == expected.ToString());
-        Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
+        Assert.True(context.Output.Message == expected.ToString());
+        Assert.True(context.Output.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
 
         _audio.Verify(x => x.GetVolume(), Times.Once);
         _audio.Verify(x => x.SetVolume(expected), Times.Once);
@@ -72,13 +89,21 @@ public class CommandExecutorTests : IDisposable
     {
         _display.Setup(x => x.DisplayOff());
 
-        var context = new BotContext(new BotContextRequest("", "", 0, BotButtons.Darken, DateTime.Now),
-            Mock.Of<BotContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Id = 0,
+                Command = BotButtons.Darken,
+                Date = DateTime.Now
+            },
+            Output = Mock.Of<OutputContext>()
+        };
 
         await _executor.ProcessRequestAsync(context, null!);
 
-        Assert.Equal("done", context.BotResponse.Message);
-        Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
+        Assert.Equal("done", context.Output.Message);
+        Assert.True(context.Output.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
 
         _display.Verify(x => x.DisplayOff(), Times.Once);
     }
@@ -93,13 +118,21 @@ public class CommandExecutorTests : IDisposable
     {
         _audio.Setup(x => x.SetVolume(It.IsInRange(0, 100, Moq.Range.Inclusive)));
 
-        var context = new BotContext(new BotContextRequest("", "", 0, value.ToString(), DateTime.Now),
-            Mock.Of<BotContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Id = 0,
+                Command = value.ToString(),
+                Date = DateTime.Now
+            },
+            Output = Mock.Of<OutputContext>()
+        };
 
         await _executor.ProcessRequestAsync(context, null!);
 
-        Assert.Equal("done", context.BotResponse.Message);
-        Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
+        Assert.Equal("done", context.Output.Message);
+        Assert.True(context.Output.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
 
         var actual = value > 100 ? 100 : value < 0 ? 0 : value;
 
@@ -109,13 +142,21 @@ public class CommandExecutorTests : IDisposable
     [Fact]
     public async Task ParsingErrorTest()
     {
-        var context = new BotContext(new BotContextRequest("", "", 0, "absdf", DateTime.Now),
-            Mock.Of<BotContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Id = 0,
+                Command = "abcdf",
+                Date = DateTime.Now
+            },
+            Output = Mock.Of<OutputContext>()
+        };
 
         await _executor.ProcessRequestAsync(context, null!);
 
-        Assert.Equal("done", context.BotResponse.Message);
-        Assert.True(context.BotResponse.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
+        Assert.Equal("done", context.Output.Message);
+        Assert.True(context.Output.Buttons is ReplyButtonsMarkup { OneTime: false, Persistent: true, Resize: true } s && s.Items.Count() == 2);
     }
 
     public void Dispose()

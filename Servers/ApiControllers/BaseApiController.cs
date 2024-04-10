@@ -2,7 +2,7 @@
 
 namespace Servers.ApiControllers;
 
-public abstract class BaseApiController : IApiController
+public abstract class BaseApiController
 {
     protected static IActionResult Ok() => new OkResult();
     protected static IActionResult Error(string? message) => new ErrorResult(message);

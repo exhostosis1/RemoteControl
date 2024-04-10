@@ -1,7 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Servers.ApiControllers;
-using Servers.DataObjects;
-using Servers.DataObjects.Web;
 using Servers.Results;
 using System.Linq.Expressions;
 using System.Net;
@@ -9,6 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
+using Servers.DataObjects;
 using ControllerActions = System.Collections.Generic.Dictionary<string, System.Collections.Generic.Dictionary<string, System.Delegate>>;
 
 [assembly: InternalsVisibleTo("UnitTests")]
@@ -58,14 +57,14 @@ internal static partial class ApiUtils
         return true;
     }
 
-    public static ControllerActions GetControllersWithActions(this IEnumerable<IApiController> controllers)
+    public static ControllerActions GetControllersWithActions(this IEnumerable<BaseApiController> controllers)
     {
         return controllers.ToDictionary(
             x => x.GetType().Name.Replace("controller", "", StringComparison.OrdinalIgnoreCase).ToLower(),
             x => x.GetActions());
     }
 
-    public static Dictionary<string, Delegate> GetActions(this IApiController controller)
+    public static Dictionary<string, Delegate> GetActions(this BaseApiController controller)
     {
         var methods = controller.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
             .Where(x => x.ReturnType == typeof(IActionResult));
@@ -83,31 +82,29 @@ internal static partial class ApiUtils
     }
 }
 
-public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger logger) : IMiddleware
+public class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogger logger) : IMiddleware
 {
     private readonly ControllerActions _controllers = controllers.GetControllersWithActions();
     public static string ApiVersion => "v1";
 
     private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
     
-    public async Task ProcessRequestAsync(IContext contextParam, RequestDelegate next)
+    public async Task ProcessRequestAsync(RequestContext context, RequestDelegate next)
     {
-        var context = (WebContext)contextParam;
-
-        if (!ApiUtils.TryGetApiVersion(context.WebRequest.Path, out var version) || version != ApiVersion)
+        if (!ApiUtils.TryGetApiVersion(context.Input.Path, out var version) || version != ApiVersion)
         {
-            await next(contextParam);
+            await next(context);
             return;
         }
 
-        logger.LogInformation("Processing api request {path}", context.WebRequest.Path);
+        logger.LogInformation("Processing api request {path}", context.Input.Path);
 
-        if (!ApiUtils.TryParsePath(context.WebRequest.Path, out var controllerName, out var actionName, out var param) 
+        if (!ApiUtils.TryParsePath(context.Input.Path, out var controllerName, out var actionName, out var param) 
             || !_controllers.TryGetValue(controllerName, out var controller) 
             || !controller.TryGetValue(actionName, out var action))
         {
 
-            context.WebResponse.StatusCode = HttpStatusCode.NotFound;
+            context.Output.StatusCode = HttpStatusCode.NotFound;
             logger.LogError("Api method not found");
             return;
         }
@@ -116,18 +113,18 @@ public class ApiV1Middleware(IEnumerable<IApiController> controllers, ILogger lo
         {
             var result = action.DynamicInvoke(string.IsNullOrEmpty(param) ? [] : [param]) as IActionResult ?? throw new NullReferenceException("Action must return IActionResult");
 
-            context.WebResponse.StatusCode = result.StatusCode;
-            context.WebResponse.Payload = GetBytes(result.Result);
+            context.Output.StatusCode = result.StatusCode;
+            context.Output.Payload = GetBytes(result.Result);
 
             if (result is JsonResult)
-                context.WebResponse.ContentType = "application/json";
+                context.Output.ContentType = "application/json";
         }
         catch (Exception e)
         {
             logger.LogError("{message}", e.InnerException?.Message);
 
-            context.WebResponse.StatusCode = HttpStatusCode.InternalServerError;
-            context.WebResponse.Payload = Encoding.UTF8.GetBytes(e.InnerException?.Message ?? "");
+            context.Output.StatusCode = HttpStatusCode.InternalServerError;
+            context.Output.Payload = Encoding.UTF8.GetBytes(e.InnerException?.Message ?? "");
         }
     }
 }

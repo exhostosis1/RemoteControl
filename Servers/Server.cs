@@ -2,6 +2,7 @@
 using Servers.Listeners;
 using Servers.Middleware;
 using System.ComponentModel;
+using System.Net;
 
 
 namespace Servers;
@@ -42,7 +43,8 @@ public class Server: INotifyPropertyChanged
         => next =>
             context => middleware.ProcessRequestAsync(context, next);
 
-    private static IEnumerable<Func<RequestDelegate, RequestDelegate>> GetFunctions(IEnumerable<IMiddleware> middlewares) => middlewares.Reverse().Select(GetFunction);
+    private static IEnumerable<Func<RequestDelegate, RequestDelegate>>
+        GetFunctions(IEnumerable<IMiddleware> middlewares) => middlewares.Reverse().Select(GetFunction);
 
     public Server(ServerType type, IListener listener, IEnumerable<IMiddleware> middlewares, ILogger logger)
     {
@@ -53,7 +55,15 @@ public class Server: INotifyPropertyChanged
         _logger = logger;
         _listener = listener;
 
-        RequestDelegate action = (_) => Task.FromException(new Exception("Should never be called"));
+        RequestDelegate action = (context) =>
+        {
+            context.Output.StatusCode = HttpStatusCode.NotFound;
+            context.Output.Payload = [];
+            context.Output.Message = "";
+            context.Output.Buttons = null;
+
+            return Task.CompletedTask;
+        };
         action = GetFunctions(middlewares).Aggregate(action, (current, func) => func(current));
 
         _middleware = action;
@@ -112,7 +122,7 @@ public class Server: INotifyPropertyChanged
             {
                 var context = await _listener.GetContextAsync(token);
                 await _middleware(context);
-                context.Response.Close();
+                _listener.CloseContext(context);
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)
             {

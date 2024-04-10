@@ -5,13 +5,13 @@ using Servers.Middleware;
 using Servers.Results;
 using System.Net;
 using System.Text;
-using Servers.DataObjects.Web;
+using Servers.DataObjects;
 
 namespace UnitTests.Middleware;
 
 public class ApiV1Tests : IDisposable
 {
-    private class FirstController : IApiController
+    private class FirstController : BaseApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ActionOne()
@@ -26,7 +26,7 @@ public class ApiV1Tests : IDisposable
         }
     }
 
-    private class SecondController : IApiController
+    private class SecondController : BaseApiController
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "<Pending>")]
         public IActionResult ActionThree()
@@ -51,7 +51,7 @@ public class ApiV1Tests : IDisposable
 
     public ApiV1Tests()
     {
-        var controllers = new List<IApiController>
+        var controllers = new List<BaseApiController>
         {
             new FirstController(),
             new SecondController()
@@ -70,12 +70,20 @@ public class ApiV1Tests : IDisposable
     [InlineData("/api/v1/second/actionfive", HttpStatusCode.NotFound, "text/plain", "")]
     public async Task RequestTest(string path, HttpStatusCode expectedCode, string expectedContentType, string expectedResult)
     {
-        var context = new WebContext(new WebContextRequest(path), Mock.Of<WebContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Path = path
+            }, 
+            Output = Mock.Of<OutputContext>()
+        };
+
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.True(context.WebResponse.StatusCode == expectedCode
-                    && context.WebResponse.ContentType == expectedContentType
-                    && Encoding.UTF8.GetString(context.WebResponse.Payload) == expectedResult);
+        Assert.True(context.Output.StatusCode == expectedCode
+                    && context.Output.ContentType == expectedContentType
+                    && Encoding.UTF8.GetString(context.Output.Payload) == expectedResult);
     }
 
     [Fact]
@@ -83,7 +91,14 @@ public class ApiV1Tests : IDisposable
     {
         var count = 0;
 
-        var context = new WebContext(new WebContextRequest("/api/v2/first/actionone"), Mock.Of<WebContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Path = "/api/v2/first/actionone"
+            }, 
+            Output = Mock.Of<OutputContext>()
+        };
         await _middleware.ProcessRequestAsync(context, _ =>
         {
             count++;
@@ -96,12 +111,19 @@ public class ApiV1Tests : IDisposable
     [Fact]
     public async Task ErrorTest()
     {
-        var context = new WebContext(new WebContextRequest("/api/v1/second/erroraction"), Mock.Of<WebContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Path = "/api/v1/second/erroraction"
+            },
+            Output = Mock.Of<OutputContext>()
+        };
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.Equal(HttpStatusCode.InternalServerError, context.WebResponse.StatusCode);
+        Assert.Equal(HttpStatusCode.InternalServerError, context.Output.StatusCode);
 
-        var res = Encoding.UTF8.GetString(context.WebResponse.Payload);
+        var res = Encoding.UTF8.GetString(context.Output.Payload);
         Assert.Equal("test exception", res);
     }
 

@@ -2,11 +2,9 @@
 using Moq;
 using Servers;
 using Servers.DataObjects;
-using Servers.DataObjects.Web;
 using Servers.Listeners;
 using Servers.Middleware;
 using System.ComponentModel;
-using MainApp.Config;
 
 namespace UnitTests;
 
@@ -46,7 +44,7 @@ public class SimpleServerTests : IDisposable
                 Thread.Sleep(TimeSpan.FromHours(1));
                 return null!;
             });
-        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<RequestDelegate>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<RequestContext>(), It.IsAny<RequestDelegate>()));
 
         var mre = new AutoResetEvent(false);
 
@@ -60,7 +58,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Start(config);
 
-        mre.WaitOne();
+        mre.WaitOne(TimeSpan.FromSeconds(15));
 
         Assert.True(_server.Status);
 
@@ -129,7 +127,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Start(config1);
 
-        mre.WaitOne();
+        mre.WaitOne(TimeSpan.FromSeconds(15));
 
         Assert.True(_server.Status);
         Assert.Equal(_server.Config, config1);
@@ -140,7 +138,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Restart(config2);
 
-        mre.WaitOne();
+        mre.WaitOne(TimeSpan.FromSeconds(15));
 
         _server.PropertyChanged -= Handler;
 
@@ -165,7 +163,14 @@ public class SimpleServerTests : IDisposable
     [Fact]
     public void ProcessRequestTest()
     {
-        var context = new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
+        var context = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Path = "path"
+            },
+            Output = Mock.Of<OutputContext>()
+        };
         var contextMre = new ManualResetEventSlim(false);
 
         _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
@@ -187,16 +192,14 @@ public class SimpleServerTests : IDisposable
             })
             .ReturnsAsync(() =>
             {
-                Thread.Sleep(100);
                 contextMre.Set();
+                Thread.Sleep(100);
                 return context;
             })
-            .ReturnsAsync(() =>
-            {
-                throw new Exception("Should not be called");
-                return context;
-            });
-        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<RequestDelegate>())).Returns(Task.CompletedTask);
+            .ReturnsAsync(() => throw new Exception("Should not be called"));
+        _listener.Setup(x => x.CloseContext(context));
+
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<RequestContext>(), It.IsAny<RequestDelegate>())).Returns(Task.CompletedTask);
 
         var startStopMre = new AutoResetEvent(false);
         _server.PropertyChanged += (_, args) =>
@@ -209,16 +212,17 @@ public class SimpleServerTests : IDisposable
 
         _server.Start();
 
-        startStopMre.WaitOne();
+        startStopMre.WaitOne(TimeSpan.FromSeconds(15));
 
         Assert.True(_server.Status);
 
-        contextMre.Wait();
+        contextMre.Wait(TimeSpan.FromSeconds(15));
 
         _server.Stop();
 
         _listener.Verify(x => x.StartListen(It.IsAny<StartParameters>()), Times.Once);
         _listener.Verify(x => x.GetContextAsync(It.IsAny<CancellationToken>()), Times.AtLeast(4));
+        _listener.Verify(x => x.CloseContext(context), Times.AtLeast(3));
         _middleware.Verify(x => x.ProcessRequestAsync(context, It.IsAny<RequestDelegate>()), Times.AtLeast(3));
     }
 
@@ -229,9 +233,16 @@ public class SimpleServerTests : IDisposable
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
         {
             Thread.Sleep(50);
-            return new WebContext(new WebContextRequest("path"), Mock.Of<WebContextResponse>());
+            return new RequestContext
+            {
+                Input = new InputContext
+                {
+                    Path = "path"
+                },
+                Output = Mock.Of<OutputContext>()
+            };
         });
-        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<IContext>(), It.IsAny<RequestDelegate>()));
+        _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<RequestContext>(), It.IsAny<RequestDelegate>()));
 
         var s = false;
         ServerConfig? c = null;
@@ -263,7 +274,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Start(config1);
 
-        mre.WaitOne();
+        mre.WaitOne(TimeSpan.FromSeconds(15));
 
         Assert.True(s);
         Assert.Equal(config1, c);
@@ -274,7 +285,7 @@ public class SimpleServerTests : IDisposable
 
         _server.Stop();
 
-        mre.WaitOne();
+        mre.WaitOne(TimeSpan.FromSeconds(15));
         
         Assert.False(s);
         return;

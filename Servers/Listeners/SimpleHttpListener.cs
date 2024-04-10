@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Servers.DataObjects;
-using Servers.DataObjects.Web;
 using System.Net;
 using System.Net.Sockets;
 
@@ -8,21 +7,8 @@ namespace Servers.Listeners;
 
 public class SimpleHttpListener(ILogger logger) : IListener
 {
-    private class LocalResponse(HttpListenerResponse response) : WebContextResponse
-    {
-        public override void Close()
-        {
-            response.StatusCode = (int)StatusCode;
-            response.ContentType = ContentType;
-
-            if (Payload.Length > 0)
-                response.OutputStream.Write(Payload);
-
-            response.Close();
-        }
-    }
-
     private HttpListener _listener = new();
+    private HttpListenerContext? _context;
 
     public bool IsListening => _listener.IsListening;
 
@@ -56,13 +42,10 @@ public class SimpleHttpListener(ILogger logger) : IListener
             var currentIps = GetCurrentIPs();
             var unavailableIps = _listener.Prefixes.Where(x => !currentIps.Contains(new Uri(x).Host)).ToList();
 
-            if (unavailableIps.Count > 0)
-            {
-                logger.LogError("{ip} is currently unavailable", string.Join(';', unavailableIps));
-                return;
-            }
+            if (unavailableIps.Count == 0) throw;
 
-            throw;
+            logger.LogError("{ip} is currently unavailable", string.Join(';', unavailableIps));
+            return;
         }
 
         logger.LogInformation("Http listener started listening on {uri}", param.Uri);
@@ -76,10 +59,31 @@ public class SimpleHttpListener(ILogger logger) : IListener
         logger.LogInformation("Http listener stopped");
     }
 
-    public async Task<IContext> GetContextAsync(CancellationToken token = default)
+    public void CloseContext(RequestContext context)
     {
-        var context = await _listener.GetContextAsync();
+        if (_context == null) return;
 
-        return new WebContext(new WebContextRequest(context.Request.RawUrl ?? ""), new LocalResponse(context.Response));
+        _context.Response.StatusCode = (int)context.Output.StatusCode;
+        _context.Response.ContentType = context.Output.ContentType;
+
+        if (context.Output.Payload.Length > 0)
+            _context.Response.OutputStream.Write(context.Output.Payload);
+
+        _context.Response.Close();
+    }
+
+    public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
+    {
+        _context = await _listener.GetContextAsync();
+
+        var result = new RequestContext
+        {
+            Input = new InputContext
+            {
+                Path = _context.Request.RawUrl ?? ""
+            }
+        };
+
+        return result;
     }
 }

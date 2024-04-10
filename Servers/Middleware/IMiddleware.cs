@@ -4,7 +4,7 @@ namespace Servers.Middleware;
 
 public interface IMiddleware
 {
-    public Task ProcessRequestAsync(IContext context, RequestDelegate next);
+    public Task ProcessRequestAsync(RequestContext context, RequestDelegate next);
 }
 
-public delegate Task RequestDelegate(IContext context);
+public delegate Task RequestDelegate(RequestContext context);

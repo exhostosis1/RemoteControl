@@ -1,4 +1,4 @@
-﻿using Servers.DataObjects.Bot;
+﻿using Servers.DataObjects.BotButtons;
 using Servers.Listeners.Telegram.ApiObjects.Request;
 using Servers.Listeners.Telegram.ApiObjects.Response;
 using Servers.Listeners.Telegram.ApiObjects.Response.Keyboard;
@@ -37,7 +37,7 @@ internal static class HttpClientExtensions
     }
 }
 
-public class TelegramBotApiProvider
+public class TelegramBotApiProvider(string apiUrl, string apiKey)
 {
     private int? _lastUpdateId = null;
 
@@ -51,21 +51,21 @@ public class TelegramBotApiProvider
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public async Task<T> SendBotApiRequestAsync<T>(string apiUrl, string apiKey, string method, object parameters, CancellationToken token = default)
+    public async Task<T> SendBotApiRequestAsync<T>(string method, object parameters, CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
 
         return await _client.PostAsJsonAndGetResultAsync<T>($"{apiUrl}{apiKey}/{method}", parameters, _jsonOptions, token);
     }
 
-    public async Task SendBotApiRequestAsync(string apiUrl, string apiKey, string method, object parameters, CancellationToken token = default)
+    public async Task SendBotApiRequestAsync(string method, object parameters, CancellationToken token = default)
     {
         token.ThrowIfCancellationRequested();
 
         await _client.PostAsJsonAsync($"{apiUrl}{apiKey}/{method}", parameters, _jsonOptions, token);
     }
 
-    public void SendBotApiRequest(string apiUrl, string apiKey, string method, object parameters)
+    public void SendBotApiRequest(string method, object parameters)
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {
@@ -75,7 +75,7 @@ public class TelegramBotApiProvider
         _client.Send(request);
     }
 
-    public T SendBotApiRequest<T>(string apiUrl, string apiKey, string method, object parameters) where T: class
+    public T SendBotApiRequest<T>(string method, object parameters) where T: class
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {
@@ -90,7 +90,7 @@ public class TelegramBotApiProvider
             : throw new Exception($"Server returned error with code {response.StatusCode}");
     }
 
-    private static KeyboardMarkup? GenerateKeyboardMarkup(ButtonsMarkup? buttons)
+    private static KeyboardMarkup? GenerateKeyboardMarkup(IButtonsMarkup? buttons)
     {
         return buttons switch
         {
@@ -107,25 +107,25 @@ public class TelegramBotApiProvider
         };
     }
 
-    public async Task<UpdateResponse> GetUpdatesAsync(string apiUrl, string apiKey, CancellationToken token = default)
+    public async Task<UpdateResponse> GetUpdatesAsync(CancellationToken token = default)
     {
-        var response = await SendBotApiRequestAsync<UpdateResponse>(apiUrl, apiKey, ApiMethods.GetUpdates, new GetUpdatesParameters(_lastUpdateId), token);
+        var response = await SendBotApiRequestAsync<UpdateResponse>(ApiMethods.GetUpdates, new GetUpdatesParameters(_lastUpdateId), token);
 
         _lastUpdateId = response.Result.LastOrDefault()?.UpdateId;
 
         return response;
     }
 
-    public UpdateResponse GetUpdates(string apiUrl, string apiKey)
+    public UpdateResponse GetUpdates()
     {
-        var response = SendBotApiRequest<UpdateResponse>(apiUrl, apiKey, ApiMethods.GetUpdates, new GetUpdatesParameters(_lastUpdateId));
+        var response = SendBotApiRequest<UpdateResponse>(ApiMethods.GetUpdates, new GetUpdatesParameters(_lastUpdateId));
 
         _lastUpdateId = response.Result.LastOrDefault()?.UpdateId;
 
         return response;
     }
 
-    private SendMessageParameters GetParameters(int chatId, string message, ButtonsMarkup? buttons)
+    private SendMessageParameters GetParameters(int chatId, string message, IButtonsMarkup? buttons)
     {
         if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentException("Message can not be empty", nameof(message));
@@ -140,9 +140,9 @@ public class TelegramBotApiProvider
         return parameters;
     }
 
-    public async Task SendResponseAsync(string apiUrl, string apiKey, int chatId, string message, ButtonsMarkup? buttons = null, CancellationToken token = default) =>
-        await SendBotApiRequestAsync(apiUrl, apiKey, ApiMethods.SendMessage, GetParameters(chatId, message, buttons), token);
+    public async Task SendResponseAsync(int chatId, string message, IButtonsMarkup? buttons = null, CancellationToken token = default) =>
+        await SendBotApiRequestAsync(ApiMethods.SendMessage, GetParameters(chatId, message, buttons), token);
 
-    public void SendResponse(string apiUrl, string apiKey, int chatId, string message, ButtonsMarkup? buttons = null) =>
-        SendBotApiRequest(apiUrl, apiKey, ApiMethods.SendMessage, GetParameters(chatId, message, buttons));
+    public void SendResponse(int chatId, string message, IButtonsMarkup? buttons = null) =>
+        SendBotApiRequest(ApiMethods.SendMessage, GetParameters(chatId, message, buttons));
 }

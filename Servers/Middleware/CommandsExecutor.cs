@@ -2,14 +2,14 @@
 using ControlProviders.Interfaces;
 using Microsoft.Extensions.Logging;
 using Servers.DataObjects;
-using Servers.DataObjects.Bot;
+using Servers.DataObjects.BotButtons;
 using Servers.Middleware.Enums;
 
 namespace Servers.Middleware;
 
 public class CommandsExecutor(IKeyboardControlProvider keyboard, IDisplayControlProvider display, IAudioControlProvider audio, ILogger logger) : IMiddleware
 {
-    private readonly ButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
+    private readonly IButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
     {
         new()
         {
@@ -29,15 +29,13 @@ public class CommandsExecutor(IKeyboardControlProvider keyboard, IDisplayControl
         Persistent = true
     };
 
-    public Task ProcessRequestAsync(IContext contextParam, RequestDelegate _)
+    public Task ProcessRequestAsync(RequestContext context, RequestDelegate _)
     {
-        var context = (BotContext)contextParam;
+        logger.LogInformation("Executing bot command {command}", context.Input.Command);
 
-        logger.LogInformation("Executing bot command {command}", context.BotRequest.Command);
+        context.Output.Buttons = _buttons;
 
-        context.BotResponse.Buttons = _buttons;
-
-        switch (context.BotRequest.Command)
+        switch (context.Input.Command)
         {
             case BotButtons.Pause:
                 keyboard.KeyboardKeyPress(KeysEnum.MediaPlayPause);
@@ -53,20 +51,20 @@ public class CommandsExecutor(IKeyboardControlProvider keyboard, IDisplayControl
                 volume += 5;
                 volume = volume > 100 ? 100 : volume;
                 audio.SetVolume(volume);
-                context.BotResponse.Message = volume.ToString();
+                context.Output.Message = volume.ToString();
                 return Task.CompletedTask;
             case BotButtons.VolumeDown:
                 volume = audio.GetVolume();
                 volume -= 5;
                 volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                 audio.SetVolume(volume);
-                context.BotResponse.Message = volume.ToString();
+                context.Output.Message = volume.ToString();
                 return Task.CompletedTask;
             case BotButtons.Darken:
                 display.DisplayOff();
                 break;
             default:
-                if (int.TryParse(context.BotRequest.Command, out volume))
+                if (int.TryParse(context.Input.Command, out volume))
                 {
                     volume = volume < 0 ? 0 : volume > 100 ? 100 : volume;
                     audio.SetVolume(volume);
@@ -74,7 +72,7 @@ public class CommandsExecutor(IKeyboardControlProvider keyboard, IDisplayControl
                 break;
         }
 
-        context.BotResponse.Message = "done";
+        context.Output.Message = "done";
 
         return Task.CompletedTask;
     }

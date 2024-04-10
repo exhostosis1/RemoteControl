@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Servers.DataObjects;
-using Servers.DataObjects.Bot;
 using Servers.Listeners.Telegram;
 using System.ComponentModel;
 using System.Net.Sockets;
@@ -9,19 +8,11 @@ namespace Servers.Listeners;
 
 public class TelegramListener : IListener
 {
-    private class LocalResponse(string apiUrl, string apiKey, int chatId, TelegramBotApiProvider apiProvider) : BotContextResponse
-    {
-        public override void Close()
-        {
-            apiProvider.SendResponse(apiUrl, apiKey, chatId, Message, Buttons);
-        }
-    }
-
     public bool IsListening { get; private set; }
     private List<string> _usernames = [];
 
     private readonly ILogger _logger;
-    private readonly TelegramBotApiProvider _apiProvider = new();
+    private TelegramBotApiProvider _apiProvider = new("", "");
 
     private CancellationTokenSource? _cst;
     private readonly IProgress<bool> _progress;
@@ -29,7 +20,7 @@ public class TelegramListener : IListener
     private const int Delay = 1_000;
     private readonly TaskFactory _factory = new();
 
-    private readonly Queue<BotContextRequest> _updates = new();
+    private readonly Queue<InputContext> _updates = new();
     private readonly SemaphoreSlim _semaphore = new(0);
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -40,7 +31,15 @@ public class TelegramListener : IListener
 
         _progress = new Progress<bool>(result =>
         {
-            _logger.LogInformation(result ? $"Telegram Bot starts responding to {string.Join(';', _usernames)}" : "Telegram bot stopped");
+            if (result)
+            {
+                _logger.LogInformation("Telegram Bot starts responding to {usernames}", string.Join(';', _usernames));
+            }
+            else
+            {
+                _logger.LogInformation("Telegram bot stopped");
+            }
+            
             IsListening = result;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
         });
@@ -50,13 +49,15 @@ public class TelegramListener : IListener
     {
         if (IsListening) return;
 
+        _apiProvider = new TelegramBotApiProvider(param.Uri, param.ApiKey!);
+
         _usernames = param.Usernames ?? [];
 
         _cst = new CancellationTokenSource();
-        _factory.StartNew(async () => await ListenAsync(param.Uri, param.ApiKey ?? "", _cst.Token), TaskCreationOptions.LongRunning);
+        _factory.StartNew(async () => await ListenAsync(_cst.Token), TaskCreationOptions.LongRunning);
     }
 
-    private async Task ListenAsync(string apiUrl, string apiKey, CancellationToken token)
+    private async Task ListenAsync(CancellationToken token)
     {
         var internetMessageShown = false;
 
@@ -65,7 +66,7 @@ public class TelegramListener : IListener
         {
             try
             {
-                var updates = await _apiProvider.GetUpdatesAsync(apiUrl, apiKey, token);
+                var updates = await _apiProvider.GetUpdatesAsync(token);
                 token.ThrowIfCancellationRequested();
 
                 if (!updates.Ok || updates.Result.Length == 0)
@@ -80,7 +81,12 @@ public class TelegramListener : IListener
                         update.Message?.Chat?.Id == null ||
                         string.IsNullOrWhiteSpace(update.Message.Text)) continue;
 
-                    _updates.Enqueue(new BotContextRequest(apiUrl, apiKey, update.Message.Chat.Id, update.Message.Text, update.Message.ParsedDate));
+                    _updates.Enqueue(new InputContext
+                    {
+                        Id = update.Message.Chat.Id,
+                        Command = update.Message.Text,
+                        Date = update.Message.ParsedDate
+                    });
                     _semaphore.Release();
                 }
 
@@ -128,9 +134,12 @@ public class TelegramListener : IListener
         _updates.Clear();
     }
 
-    private BotContext CreateContext(BotContextRequest request) => new(request, new LocalResponse(request.ApiUrl, request.ApiKey, request.Id, _apiProvider));
-
-    public async Task<IContext> GetContextAsync(CancellationToken token = default)
+    public void CloseContext(RequestContext context)
+    {
+        _apiProvider.SendResponse(context.Input.Id, context.Output.Message, context.Output.Buttons);
+    }
+    
+    public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
     {
         while (!token.IsCancellationRequested)
         {
@@ -140,7 +149,10 @@ public class TelegramListener : IListener
             if ((DateTime.Now - request.Date).Seconds > 15)
                 continue;
 
-            return CreateContext(request);
+            return new RequestContext
+            {
+                Input = request
+            };
         }
 
         throw new OperationCanceledException();
