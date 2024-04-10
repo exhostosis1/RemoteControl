@@ -22,8 +22,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ControlProviders\ControlProviders.csproj" />
-    <ProjectReference Include="..\..\Servers\Servers.csproj" />
+    <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
+    <ProjectReference Include="..\Servers\Servers.csproj" />
   </ItemGroup>
 
 </Project>

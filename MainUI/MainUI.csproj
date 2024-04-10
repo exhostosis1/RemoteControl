@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\MainApp.csproj" />
+    <ProjectReference Include="..\MainApp\MainApp.csproj" />
   </ItemGroup>
 
   <ItemGroup>

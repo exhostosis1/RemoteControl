@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
-    <ProjectReference Include="..\EntryPoints\WindowsEntryPoint\MainApp.csproj" />
+    <ProjectReference Include="..\MainApp\MainApp.csproj" />
     <ProjectReference Include="..\Servers\Servers.csproj" />
   </ItemGroup>
 
