@@ -8,17 +8,39 @@ using System.ComponentModel;
 
 namespace UnitTests;
 
-public class SimpleServerTests : IDisposable
+public partial class SimpleServerTests : IDisposable
 {
     private readonly Mock<IListener> _listener;
     private readonly Mock<IMiddleware> _middleware;
 
     private readonly Server _server;
 
+    private class TestLogger : ILogger
+    {
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
+        {
+            return null;
+        }
+
+        public bool IsEnabled(LogLevel logLevel)
+        {
+            return true;
+        }
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            if (logLevel >= LogLevel.Error)
+            {
+                throw exception ?? new Exception(state?.ToString());
+            }
+        }
+    }
+
     public SimpleServerTests()
     {
         _listener = new Mock<IListener>(MockBehavior.Strict);
-        var logger = Mock.Of<ILogger>();
+        var logger = new TestLogger();
+        
         _middleware = new Mock<IMiddleware>(MockBehavior.Strict);
 
         _server = new Server(ServerType.Web, _listener.Object, [_middleware.Object], logger);
