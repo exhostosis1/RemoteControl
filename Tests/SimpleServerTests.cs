@@ -15,31 +15,10 @@ public partial class SimpleServerTests : IDisposable
 
     private readonly Server _server;
 
-    private class TestLogger : ILogger
-    {
-        public IDisposable? BeginScope<TState>(TState state) where TState : notnull
-        {
-            return null;
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-        {
-            if (logLevel >= LogLevel.Error)
-            {
-                throw exception ?? new Exception(state?.ToString());
-            }
-        }
-    }
-
     public SimpleServerTests()
     {
         _listener = new Mock<IListener>(MockBehavior.Strict);
-        var logger = new TestLogger();
+        var logger = Mock.Of<ILogger>();
         
         _middleware = new Mock<IMiddleware>(MockBehavior.Strict);
 
@@ -187,11 +166,7 @@ public partial class SimpleServerTests : IDisposable
     {
         var context = new RequestContext
         {
-            Input = new InputContext
-            {
-                Path = "path"
-            },
-            Output = Mock.Of<OutputContext>()
+            Path = "path"
         };
         var contextMre = new ManualResetEventSlim(false);
 
@@ -257,11 +232,7 @@ public partial class SimpleServerTests : IDisposable
             Thread.Sleep(50);
             return new RequestContext
             {
-                Input = new InputContext
-                {
-                    Path = "path"
-                },
-                Output = Mock.Of<OutputContext>()
+                Path = "path"
             };
         });
         _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<RequestContext>(), It.IsAny<RequestDelegate>()));

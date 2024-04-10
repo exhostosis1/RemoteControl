@@ -1,9 +1,9 @@
-﻿using System.Net;
+﻿using Servers.DataObjects;
 
 namespace Servers.Results;
 
 public class ErrorResult(string? errorMessage) : IActionResult
 {
     public string? Result { get; set; } = errorMessage;
-    public HttpStatusCode StatusCode { get; set; } = HttpStatusCode.InternalServerError;
+    public RequestStatus StatusCode { get; set; } = RequestStatus.Error;
 }

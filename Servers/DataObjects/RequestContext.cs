@@ -1,7 +1,10 @@
 ﻿namespace Servers.DataObjects;
 
-public class RequestContext()
+public class RequestContext
 {
-    public InputContext Input { get; set; } = new();
-    public OutputContext Output { get; set; } = new();
+    public string Path { get; set; } = "";
+    public RequestStatus Status { get; set; } = RequestStatus.Ok;
+    public string Reply { get; set; } = "";
+
+    public object? OriginalRequest { get; set; }
 }

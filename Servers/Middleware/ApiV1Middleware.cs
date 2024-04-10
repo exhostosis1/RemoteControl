@@ -86,25 +86,23 @@ public class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogger
 {
     private readonly ControllerActions _controllers = controllers.GetControllersWithActions();
     public static string ApiVersion => "v1";
-
-    private static byte[] GetBytes(string? input) => Encoding.UTF8.GetBytes(input ?? string.Empty);
     
     public async Task ProcessRequestAsync(RequestContext context, RequestDelegate next)
     {
-        if (!ApiUtils.TryGetApiVersion(context.Input.Path, out var version) || version != ApiVersion)
+        if (!ApiUtils.TryGetApiVersion(context.Path, out var version) || version != ApiVersion)
         {
             await next(context);
             return;
         }
 
-        logger.LogInformation("Processing api request {path}", context.Input.Path);
+        logger.LogInformation("Processing api request {path}", context.Path);
 
-        if (!ApiUtils.TryParsePath(context.Input.Path, out var controllerName, out var actionName, out var param) 
+        if (!ApiUtils.TryParsePath(context.Path, out var controllerName, out var actionName, out var param) 
             || !_controllers.TryGetValue(controllerName, out var controller) 
             || !controller.TryGetValue(actionName, out var action))
         {
 
-            context.Output.StatusCode = HttpStatusCode.NotFound;
+            context.Status = RequestStatus.NotFound;
             logger.LogError("Api method not found");
             return;
         }
@@ -113,18 +111,15 @@ public class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogger
         {
             var result = action.DynamicInvoke(string.IsNullOrEmpty(param) ? [] : [param]) as IActionResult ?? throw new NullReferenceException("Action must return IActionResult");
 
-            context.Output.StatusCode = result.StatusCode;
-            context.Output.Payload = GetBytes(result.Result);
-
-            if (result is JsonResult)
-                context.Output.ContentType = "application/json";
+            context.Status = result.StatusCode;
+            context.Reply = result.Result ?? "";
         }
         catch (Exception e)
         {
             logger.LogError("{message}", e.InnerException?.Message);
 
-            context.Output.StatusCode = HttpStatusCode.InternalServerError;
-            context.Output.Payload = Encoding.UTF8.GetBytes(e.InnerException?.Message ?? "");
+            context.Status = RequestStatus.Error;
+            context.Reply = e.InnerException?.Message ?? "";
         }
     }
 }

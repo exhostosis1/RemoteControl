@@ -1,4 +1,4 @@
-﻿namespace Servers.DataObjects.BotButtons;
+﻿namespace Servers.Listeners.Telegram.BotButtons;
 
 public class SingleButton(string text)
 {

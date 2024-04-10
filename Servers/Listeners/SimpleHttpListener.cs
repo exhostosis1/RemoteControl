@@ -2,13 +2,13 @@
 using Servers.DataObjects;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 
 namespace Servers.Listeners;
 
 public class SimpleHttpListener(ILogger logger) : IListener
 {
     private HttpListener _listener = new();
-    private HttpListenerContext? _context;
 
     public bool IsListening => _listener.IsListening;
 
@@ -61,27 +61,45 @@ public class SimpleHttpListener(ILogger logger) : IListener
 
     public void CloseContext(RequestContext context)
     {
-        if (_context == null) return;
+        if (context.OriginalRequest is not HttpListenerContext original) return;
 
-        _context.Response.StatusCode = (int)context.Output.StatusCode;
-        _context.Response.ContentType = context.Output.ContentType;
+        switch (context.Status)
+        {
+            case RequestStatus.Ok:
+                original.Response.StatusCode = (int)HttpStatusCode.OK;
+                break;
+            case RequestStatus.Text:
+                original.Response.StatusCode = (int)HttpStatusCode.OK;
+                original.Response.ContentType = "text/plain";
+                original.Response.OutputStream.Write(Encoding.UTF8.GetBytes(context.Reply));
+                break;
+            case RequestStatus.Json:
+                original.Response.StatusCode = (int)HttpStatusCode.OK;
+                original.Response.ContentType = "application/json";
+                original.Response.OutputStream.Write(Encoding.UTF8.GetBytes(context.Reply));
+                break;
+            case RequestStatus.Error:
+                original.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                original.Response.OutputStream.Write(Encoding.UTF8.GetBytes(context.Reply));
+                break;
+            case RequestStatus.NotFound:
+                original.Response.StatusCode = (int)HttpStatusCode.NotFound;
+                break;
+            case RequestStatus.Custom:
+                break;
+        }
 
-        if (context.Output.Payload.Length > 0)
-            _context.Response.OutputStream.Write(context.Output.Payload);
-
-        _context.Response.Close();
+        original.Response.Close();
     }
 
     public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
     {
-        _context = await _listener.GetContextAsync();
+        var context = await _listener.GetContextAsync();
 
         var result = new RequestContext
         {
-            Input = new InputContext
-            {
-                Path = _context.Request.RawUrl ?? ""
-            }
+            Path = context.Request.RawUrl ?? "",
+            OriginalRequest = context
         };
 
         return result;

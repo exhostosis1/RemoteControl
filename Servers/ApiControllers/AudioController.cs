@@ -51,7 +51,7 @@ public class AudioController(IAudioControlProvider provider, ILogger logger) : B
         return Text(result);
     }
 
-    public IActionResult IncreaseBy5()
+    public IActionResult IncreaseByFive()
     {
         logger.LogInformation("Increasing volume by 5");
 
@@ -64,7 +64,7 @@ public class AudioController(IAudioControlProvider provider, ILogger logger) : B
         return Text(vol);
     }
 
-    public IActionResult DecreaseBy5()
+    public IActionResult DecreaseByFive()
     {
         logger.LogInformation("Decreasing volume by 5");
 

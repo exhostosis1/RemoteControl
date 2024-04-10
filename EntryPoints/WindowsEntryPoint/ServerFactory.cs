@@ -39,7 +39,7 @@ public class ServerFactory
         _webListener = new SimpleHttpListener(loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
 
         _botListener = new TelegramListener(loggingProvider.CreateLogger(nameof(TelegramListener)));
-        _botMiddlewareChain = [new CommandsExecutor(inputProvider, inputProvider, audioProvider, loggingProvider.CreateLogger(nameof(CommandsExecutor)))];
+        _botMiddlewareChain = [apiMiddleware];
     }
 
     public Server GetServer()

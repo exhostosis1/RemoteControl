@@ -1,10 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
 using Servers.DataObjects;
 using Servers.Listeners.Telegram;
+using Servers.Listeners.Telegram.BotButtons;
+using Servers.Middleware.Enums;
 using System.ComponentModel;
 using System.Net.Sockets;
 
 namespace Servers.Listeners;
+
+internal record UpdateObject(int Id, string Message, DateTime Date);
 
 public class TelegramListener : IListener
 {
@@ -20,10 +24,29 @@ public class TelegramListener : IListener
     private const int Delay = 1_000;
     private readonly TaskFactory _factory = new();
 
-    private readonly Queue<InputContext> _updates = new();
+    private readonly Queue<UpdateObject> _updates = new();
     private readonly SemaphoreSlim _semaphore = new(0);
-
     public event PropertyChangedEventHandler? PropertyChanged;
+
+    private readonly IButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
+    {
+        new()
+        {
+            new SingleButton(BotButtons.MediaBack),
+            new SingleButton(BotButtons.Pause),
+            new SingleButton(BotButtons.MediaForth)
+        },
+        new()
+        {
+            new SingleButton(BotButtons.VolumeDown),
+            new SingleButton(BotButtons.Darken),
+            new SingleButton(BotButtons.VolumeUp)
+        }
+    })
+    {
+        Resize = true,
+        Persistent = true
+    };
 
     public TelegramListener(ILogger logger)
     {
@@ -81,12 +104,7 @@ public class TelegramListener : IListener
                         update.Message?.Chat?.Id == null ||
                         string.IsNullOrWhiteSpace(update.Message.Text)) continue;
 
-                    _updates.Enqueue(new InputContext
-                    {
-                        Id = update.Message.Chat.Id,
-                        Command = update.Message.Text,
-                        Date = update.Message.ParsedDate
-                    });
+                    _updates.Enqueue(new UpdateObject(update.Message.Chat.Id, update.Message.Text, update.Message.ParsedDate));
                     _semaphore.Release();
                 }
 
@@ -136,7 +154,9 @@ public class TelegramListener : IListener
 
     public void CloseContext(RequestContext context)
     {
-        _apiProvider.SendResponse(context.Input.Id, context.Output.Message, context.Output.Buttons);
+        if (context.OriginalRequest is not UpdateObject original) return;
+
+        _apiProvider.SendResponse(original.Id, context.Reply == "" ? "done" : context.Reply, _buttons);
     }
     
     public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
@@ -149,9 +169,23 @@ public class TelegramListener : IListener
             if ((DateTime.Now - request.Date).Seconds > 15)
                 continue;
 
+            var path = "/api/v1/";
+
+            path += request.Message switch
+            {
+                BotButtons.Pause => "keyboard/pause",
+                BotButtons.MediaBack => "keyboard/mediaback",
+                BotButtons.MediaForth => "keyboard/mediaforth",
+                BotButtons.VolumeUp => "audio/increasebyfive",
+                BotButtons.VolumeDown => "audio/decreasebyfive",
+                BotButtons.Darken => "display/darken",
+                _ => throw new NotSupportedException(request.Message)
+            };
+
             return new RequestContext
             {
-                Input = request
+                Path = path,
+                OriginalRequest = request
             };
         }
 

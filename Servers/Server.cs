@@ -3,6 +3,7 @@ using Servers.Listeners;
 using Servers.Middleware;
 using System.ComponentModel;
 using System.Net;
+using Servers.DataObjects;
 
 
 namespace Servers;
@@ -57,10 +58,9 @@ public class Server: INotifyPropertyChanged
 
         RequestDelegate action = (context) =>
         {
-            context.Output.StatusCode = HttpStatusCode.NotFound;
-            context.Output.Payload = [];
-            context.Output.Message = "";
-            context.Output.Buttons = null;
+            context.Status = RequestStatus.NotFound;
+            context.Reply = "";
+            context.OriginalRequest = null;
 
             return Task.CompletedTask;
         };

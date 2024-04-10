@@ -1,15 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using Moq;
+using Servers.DataObjects;
 using Servers.Middleware;
 using System.Net;
-using System.Text;
-using Servers.DataObjects;
 
 namespace UnitTests.Middleware;
 
 public class StaticFilesMiddlewareTests : IDisposable
 {
-    private readonly ILogger _logger;
     private readonly StaticFilesMiddleware _middleware;
     private const string Dir = "www";
     private readonly string _path = Path.Combine(AppContext.BaseDirectory, Dir);
@@ -27,8 +25,8 @@ public class StaticFilesMiddlewareTests : IDisposable
 
     public StaticFilesMiddlewareTests()
     {
-        _logger = Mock.Of<ILogger>();
-        _middleware = new StaticFilesMiddleware(_logger, Dir);
+        var logger = Mock.Of<ILogger>();
+        _middleware = new StaticFilesMiddleware(logger, Dir);
 
         if (!Directory.Exists(_path))
             Directory.CreateDirectory(_path);
@@ -43,31 +41,25 @@ public class StaticFilesMiddlewareTests : IDisposable
     }
 
     [Theory]
-    [InlineData("/index.html", HttpStatusCode.OK, "text/html", IndexContents)]
-    [InlineData("/index.htm", HttpStatusCode.OK, "text/html", IndexContents)]
-    [InlineData("/file.txt", HttpStatusCode.OK, "text/plain", FileContents)]
-    [InlineData("/file.ico", HttpStatusCode.OK, "image/x-icon", FileContents)]
-    [InlineData("/file.js", HttpStatusCode.OK, "text/javascript", FileContents)]
-    [InlineData("/file.mjs", HttpStatusCode.OK, "text/javascript", FileContents)]
-    [InlineData("/file.css", HttpStatusCode.OK, "text/css", FileContents)]
-    [InlineData("..", HttpStatusCode.NotFound, "text/plain", "")]
-    [InlineData("/unexdisting.file", HttpStatusCode.NotFound, "text/plain", "")]
-    public async Task RequestTest(string path, HttpStatusCode code, string type, string response)
+    [InlineData("/index.html", RequestStatus.Custom, IndexContents)]
+    [InlineData("/index.htm", RequestStatus.Custom, IndexContents)]
+    [InlineData("/file.txt", RequestStatus.Custom, FileContents)]
+    [InlineData("/file.ico", RequestStatus.Custom, FileContents)]
+    [InlineData("/file.js", RequestStatus.Custom, FileContents)]
+    [InlineData("/file.mjs", RequestStatus.Custom, FileContents)]
+    [InlineData("/file.css", RequestStatus.Custom, FileContents)]
+    [InlineData("..", RequestStatus.NotFound, "")]
+    [InlineData("/unexisting.file", RequestStatus.Custom, "")]
+    public async Task RequestTest(string path, RequestStatus status, string response)
     {
         var context = new RequestContext
         {
-            Input = new InputContext
-            {
-                Path = path
-            },
-            Output = Mock.Of<OutputContext>()
+            Path = path
         };
         
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.True(context.Output.StatusCode == code && context.Output.ContentType == type &&
-                    Encoding.UTF8.GetString(context.Output.Payload) ==
-                    response);
+        Assert.Equal(status, context.Status);
     }
 
     public void Dispose()

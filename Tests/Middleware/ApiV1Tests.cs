@@ -63,27 +63,21 @@ public class ApiV1Tests : IDisposable
     }
 
     [Theory]
-    [InlineData("/api/v1/first/actionone", HttpStatusCode.OK, "text/plain", "")]
-    [InlineData("/api/v1/first/actiontwo", HttpStatusCode.InternalServerError, "text/plain", "test error")]
-    [InlineData("/api/v1/second/actionthree", HttpStatusCode.OK, "application/json", "\"new\"")]
-    [InlineData("/api/v1/second/actionfour", HttpStatusCode.OK, "text/plain", "text")]
-    [InlineData("/api/v1/second/actionfive", HttpStatusCode.NotFound, "text/plain", "")]
-    public async Task RequestTest(string path, HttpStatusCode expectedCode, string expectedContentType, string expectedResult)
+    [InlineData("/api/v1/first/actionone", RequestStatus.Ok, "")]
+    [InlineData("/api/v1/first/actiontwo", RequestStatus.Error, "test error")]
+    [InlineData("/api/v1/second/actionthree", RequestStatus.Json, "\"new\"")]
+    [InlineData("/api/v1/second/actionfour", RequestStatus.Text, "text")]
+    [InlineData("/api/v1/second/actionfive", RequestStatus.NotFound, "")]
+    public async Task RequestTest(string path, RequestStatus expectedCode, string expectedResult)
     {
         var context = new RequestContext
         {
-            Input = new InputContext
-            {
-                Path = path
-            }, 
-            Output = Mock.Of<OutputContext>()
+            Path = path
         };
 
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.True(context.Output.StatusCode == expectedCode
-                    && context.Output.ContentType == expectedContentType
-                    && Encoding.UTF8.GetString(context.Output.Payload) == expectedResult);
+        Assert.True(context.Status == expectedCode && context.Reply == expectedResult);
     }
 
     [Fact]
@@ -92,12 +86,8 @@ public class ApiV1Tests : IDisposable
         var count = 0;
 
         var context = new RequestContext
-        {
-            Input = new InputContext
-            {
-                Path = "/api/v2/first/actionone"
-            }, 
-            Output = Mock.Of<OutputContext>()
+        { 
+            Path = "/api/v2/first/actionone"
         };
         await _middleware.ProcessRequestAsync(context, _ =>
         {
@@ -113,17 +103,13 @@ public class ApiV1Tests : IDisposable
     {
         var context = new RequestContext
         {
-            Input = new InputContext
-            {
-                Path = "/api/v1/second/erroraction"
-            },
-            Output = Mock.Of<OutputContext>()
+            Path = "/api/v1/second/erroraction"
         };
         await _middleware.ProcessRequestAsync(context, null!);
 
-        Assert.Equal(HttpStatusCode.InternalServerError, context.Output.StatusCode);
+        Assert.Equal(RequestStatus.Error, context.Status);
 
-        var res = Encoding.UTF8.GetString(context.Output.Payload);
+        var res = context.Reply;
         Assert.Equal("test exception", res);
     }
 

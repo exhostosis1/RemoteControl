@@ -20,13 +20,13 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
     
     public async Task ProcessRequestAsync(RequestContext context, RequestDelegate _)
     {
-        var uriPath = context.Input.Path;
+        var uriPath = context.Path;
 
         logger.LogInformation("Processing file request {uriPath}", uriPath);
 
         if (uriPath.Contains(".."))
         {
-            context.Output.StatusCode = HttpStatusCode.NotFound;
+            context.Status = RequestStatus.NotFound;
             return;
         }
 
@@ -39,16 +39,21 @@ public class StaticFilesMiddleware(ILogger logger, string directory = "www") : I
 
         var extension = Path.GetExtension(path);
 
-        context.Output.ContentType = ContentTypes.GetValueOrDefault(extension, "text/plain");
+        context.Status = RequestStatus.Custom;
+
+        if (context.OriginalRequest is not HttpListenerContext original) return;
+
+        original.Response.ContentType = ContentTypes.GetValueOrDefault(extension, "text/plain");
 
         if (File.Exists(path))
         {
-            context.Output.Payload = await File.ReadAllBytesAsync(path);
+            await original.Response.OutputStream.WriteAsync(await File.ReadAllBytesAsync(path));
+            original.Response.StatusCode = (int)HttpStatusCode.OK;
         }
         else
         {
             logger.LogError("File not found {path}", path);
-            context.Output.StatusCode = HttpStatusCode.NotFound;
+            original.Response.StatusCode = (int)HttpStatusCode.NotFound;
         }
     }
 }
