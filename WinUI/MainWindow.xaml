@@ -6,9 +6,22 @@
     xmlns:local="using:WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:servers="using:Servers"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="myButton" Click="myButton_Click">Click Me</Button>
-    </StackPanel>
+    <ListView ItemsSource="{x:Bind _viewModel.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ListView.ItemTemplate>
+            <DataTemplate x:DataType="servers:Server">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="{x:Bind Config.Name}" Padding="5, 0, 5, 0"/>
+                    <TextBlock Text="{x:Bind Config.Type}" Padding="5, 0, 5, 0"/>
+                    <TextBlock Text="{x:Bind Config.Scheme}" Padding="5, 0, 5, 0"/>
+                    <TextBlock Text="{x:Bind Config.Host}" Padding="5, 0, 5, 0"/>
+                    <TextBlock Text="{x:Bind Config.Port}" Padding="5, 0, 5, 0"/>
+                    <TextBlock Text="{x:Bind Config.ApiUri}" Padding="5, 0, 5, 0"/>
+                    <TextBlock Text="{x:Bind Config.ApiKey}" Padding="5, 0, 5, 0"/>
+                </StackPanel>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
 </Window>

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 
 #if DEBUG
@@ -15,6 +16,7 @@ public class AppHostBuilder
     private ServerFactory? _serverFactory = null;
     private RegistryAutoStartService? _autoStartService = null;
     private JsonConfigurationProvider? _configProvider = null;
+    private static string CurrentDirectory => Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? Environment.CurrentDirectory;
 
     public AppHostBuilder UseLogger(ILoggerProvider loggerProvider)
     {
@@ -33,7 +35,7 @@ public class AppHostBuilder
 #if DEBUG
         _loggerProvider ??= new DebugLoggerProvider();
 #else
-        _loggerProvider ??= new FileLoggerProvider(Path.Combine(Environment.CurrentDirectory, "error.log"), new FileLoggerOptions
+        _loggerProvider ??= new FileLoggerProvider(CurrentDirectory, "error.log"), new FileLoggerOptions
         {
             Append = true,
             MinLevel = LogLevel.Error
@@ -44,7 +46,7 @@ public class AppHostBuilder
             new RegistryAutoStartService(_loggerProvider.CreateLogger(nameof(RegistryAutoStartService)));
         _configProvider ??= new JsonConfigurationProvider(
             _loggerProvider.CreateLogger(nameof(JsonConfigurationProvider)),
-            Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
+            Path.Combine(CurrentDirectory, "appsettings.json"));
 
         return new MainApp.AppHost(_loggerProvider, _serverFactory, _autoStartService, _configProvider);
     }
