@@ -32,14 +32,17 @@
             ToolTipText="Remote Control"
             IconSource="/Icons/Device.theme-dark.ico"
             MenuActivation="RightClick"
-            ContextMenuMode="SecondWindow">
+            ContextMenuMode="SecondWindow"
+            x:Name="TaskbarIcon">
             <notifyIcon:TaskbarIcon.ContextFlyout>
                 <MenuFlyout>
-                    <MenuFlyoutItem Text="Start all" Click="StartAll"/>
-                    <MenuFlyoutItem Text="Stop all" Click="StopAll"/>
-                    <ToggleMenuFlyoutItem Text="Autostart" Click="Autostart" IsChecked="{x:Bind _viewModel.IsAutostart}"/>
-                    <MenuFlyoutItem Text="Add firewall rule" Click="AddFirewallRule"/>
-                    <MenuFlyoutItem Text="Exit" Click="Exit"/>
+                    <MenuFlyoutSeparator></MenuFlyoutSeparator>
+                    <MenuFlyoutItem Text="Start all" Command="{x:Bind _startAllCommand}"/>
+                    <MenuFlyoutItem Text="Stop all" Command="{x:Bind _stopAllCommand}"/>
+                    <MenuFlyoutSeparator></MenuFlyoutSeparator>
+                    <ToggleMenuFlyoutItem Text="Autostart" Command="{x:Bind _autostartCommand}" IsChecked="{x:Bind _viewModel.IsAutostart}"/>
+                    <MenuFlyoutItem Text="Add firewall rule" Command="{x:Bind _addFirewallCommand}"/>
+                    <MenuFlyoutItem Text="Exit" Command="{x:Bind _exitCommand}"/>
                 </MenuFlyout>
             </notifyIcon:TaskbarIcon.ContextFlyout>
         </notifyIcon:TaskbarIcon>
