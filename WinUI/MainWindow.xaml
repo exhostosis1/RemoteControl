@@ -28,6 +28,8 @@
             </ListView.ItemTemplate>
         </ListView>
 
+        <Button Command="{x:Bind _addServerCommand}" Content="Add"></Button>
+
         <tb:TaskbarIcon
             ToolTipText="Remote Control"
             IconSource="/Icons/Device.theme-dark.ico"

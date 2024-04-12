@@ -37,6 +37,7 @@ namespace WinUI
         private readonly ICommand _autostartCommand;
         private readonly ICommand _addFirewallCommand;
         private readonly ICommand _openSiteCommand;
+        private readonly ICommand _addServerCommand;
 
         private readonly MenuFlyoutItemBase[] _baseItems;
         
@@ -50,6 +51,7 @@ namespace WinUI
             _autostartCommand = new RelayCommand<bool>(Autostart);
             _addFirewallCommand = new RelayCommand(AddFirewallRule);
             _openSiteCommand = new RelayCommand<string>(OpenSite);
+            _addServerCommand = new RelayCommand(() => _viewModel.AddServer(ServerType.Web));
 
             _baseItems =
             [

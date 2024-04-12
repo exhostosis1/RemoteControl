@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -15,7 +16,7 @@ internal class ViewModel: IDisposable
     private readonly AppHost _app;
     private bool _disposed = false;
 
-    internal List<Server> Servers { get; private set; } = [];
+    internal ObservableCollection<Server> Servers { get; private set; } = [];
     internal bool IsAutostart = false;
 
     internal ViewModel()
@@ -36,12 +37,12 @@ internal class ViewModel: IDisposable
 
     private void ServerAddedHandler(object sender, Server server)
     {
-        
+        Servers.Add(server);
     }
 
     private void ServersReadyHandler(object sender, List<Server> servers)
     {
-        Servers = servers;
+        Servers = new ObservableCollection<Server>(servers);
     }
 
     internal void SetAutostart(bool value)
@@ -57,6 +58,11 @@ internal class ViewModel: IDisposable
     internal void Stop(int? id = null)
     {
         _app.ServerStop(id);
+    }
+
+    internal void AddServer(ServerType mode)
+    {
+        _app.ServerAdd(mode);
     }
 
     public void Dispose()
