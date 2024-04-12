@@ -7,21 +7,41 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:servers="using:Servers"
+    xmlns:notifyIcon="using:H.NotifyIcon"
     mc:Ignorable="d">
 
-    <ListView ItemsSource="{x:Bind _viewModel.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ListView.ItemTemplate>
-            <DataTemplate x:DataType="servers:Server">
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="{x:Bind Config.Name}" Padding="5, 0, 5, 0"/>
-                    <TextBlock Text="{x:Bind Config.Type}" Padding="5, 0, 5, 0"/>
-                    <TextBlock Text="{x:Bind Config.Scheme}" Padding="5, 0, 5, 0"/>
-                    <TextBlock Text="{x:Bind Config.Host}" Padding="5, 0, 5, 0"/>
-                    <TextBlock Text="{x:Bind Config.Port}" Padding="5, 0, 5, 0"/>
-                    <TextBlock Text="{x:Bind Config.ApiUri}" Padding="5, 0, 5, 0"/>
-                    <TextBlock Text="{x:Bind Config.ApiKey}" Padding="5, 0, 5, 0"/>
-                </StackPanel>
-            </DataTemplate>
-        </ListView.ItemTemplate>
-    </ListView>
+    <StackPanel>
+        <ListView ItemsSource="{x:Bind _viewModel.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <ListView.ItemTemplate>
+                <DataTemplate x:DataType="servers:Server">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{x:Bind Status}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.Name}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.Type}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.Scheme}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.Host}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.Port}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.ApiUri}" Padding="5, 0, 5, 0"/>
+                        <TextBlock Text="{x:Bind Config.ApiKey}" Padding="5, 0, 5, 0"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <notifyIcon:TaskbarIcon
+            ToolTipText="Remote Control"
+            IconSource="/Icons/Device.theme-dark.ico"
+            MenuActivation="RightClick"
+            ContextMenuMode="SecondWindow">
+            <notifyIcon:TaskbarIcon.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Text="Start all" Click="StartAll"/>
+                    <MenuFlyoutItem Text="Stop all" Click="StopAll"/>
+                    <ToggleMenuFlyoutItem Text="Autostart" Click="Autostart" IsChecked="{x:Bind _viewModel.IsAutostart}"/>
+                    <MenuFlyoutItem Text="Add firewall rule" Click="AddFirewallRule"/>
+                    <MenuFlyoutItem Text="Exit" Click="Exit"/>
+                </MenuFlyout>
+            </notifyIcon:TaskbarIcon.ContextFlyout>
+        </notifyIcon:TaskbarIcon>
+    </StackPanel>
 </Window>

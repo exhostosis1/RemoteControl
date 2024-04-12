@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MainUI", "MainUI\MainUI.csp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "UnitTests\UnitTests.csproj", "{8A9E7DB1-722E-4F23-BF82-5F3A7CD9D312}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinUI", "WinUI\WinUI.csproj", "{EB41EFBB-A9EA-4A53-8EAC-9F68FC8BD6EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WinUI", "WinUI\WinUI.csproj", "{EB41EFBB-A9EA-4A53-8EAC-9F68FC8BD6EA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

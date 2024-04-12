@@ -16,8 +16,7 @@ internal class ViewModel: IDisposable
     private bool _disposed = false;
 
     internal List<Server> Servers { get; private set; } = [];
-
-    internal string FirstHost => Servers.FirstOrDefault()?.Config.Host ?? "no server";
+    internal bool IsAutostart = false;
 
     internal ViewModel()
     {
@@ -32,17 +31,32 @@ internal class ViewModel: IDisposable
 
     private void AutostartChangedHandler(object sender, bool status)
     {
-
+        IsAutostart = status;
     }
 
     private void ServerAddedHandler(object sender, Server server)
     {
-
+        
     }
 
     private void ServersReadyHandler(object sender, List<Server> servers)
     {
         Servers = servers;
+    }
+
+    internal void SetAutostart(bool value)
+    {
+        _app.AutoStartChange(value);
+    }
+
+    internal void StartAll()
+    {
+        _app.ServerStart(null);
+    }
+
+    internal void StopAll()
+    {
+        _app.ServerStop(null);
     }
 
     public void Dispose()

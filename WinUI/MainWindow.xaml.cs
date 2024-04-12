@@ -12,6 +12,7 @@ using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using ABI.System.Windows.Input;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -28,6 +29,31 @@ namespace WinUI
         public MainWindow()
         {
             this.InitializeComponent();
+        }
+
+        private void StartAll(object _, RoutedEventArgs __)
+        {
+            _viewModel.StartAll();
+        }
+
+        private void StopAll(object _, RoutedEventArgs __)
+        {
+            _viewModel.StopAll();
+        }
+
+        private void AddFirewallRule(object _, RoutedEventArgs __)
+        {
+
+        }
+
+        private void Autostart(object sender, RoutedEventArgs __)
+        {
+            _viewModel.SetAutostart((sender as ToggleMenuFlyoutItem)?.IsChecked ?? false);
+        }
+
+        private void Exit(object _, RoutedEventArgs __)
+        {
+            Environment.Exit(0);
         }
     }
 }
