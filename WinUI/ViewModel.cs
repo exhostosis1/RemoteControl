@@ -49,14 +49,14 @@ internal class ViewModel: IDisposable
         _app.AutoStartChange(value);
     }
 
-    internal void StartAll()
+    internal void Start(int? id = null)
     {
-        _app.ServerStart(null);
+        _app.ServerStart(id);
     }
 
-    internal void StopAll()
+    internal void Stop(int? id = null)
     {
-        _app.ServerStop(null);
+        _app.ServerStop(id);
     }
 
     public void Dispose()

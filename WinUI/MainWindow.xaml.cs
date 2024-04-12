@@ -10,10 +10,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Security.Principal;
 using System.Windows.Input;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.VisualBasic;
+using Servers;
+using System.Diagnostics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -28,79 +32,47 @@ namespace WinUI
         private readonly ViewModel _viewModel = new();
 
         private readonly ICommand _exitCommand;
-        private readonly ICommand _startAllCommand;
-        private readonly ICommand _stopAllCommand;
+        private readonly ICommand _startCommand;
+        private readonly ICommand _stopCommand;
         private readonly ICommand _autostartCommand;
         private readonly ICommand _addFirewallCommand;
+        private readonly ICommand _openSiteCommand;
 
-        private FlyoutBase Flyout = new MenuFlyout();
-
+        private readonly MenuFlyoutItemBase[] _baseItems;
+        
         public MainWindow()
         {
             this.InitializeComponent();
 
-            _exitCommand = new RelayCommand(Exit, () => true);
-            _startAllCommand = new RelayCommand(StartAll, () => true);
-            _stopAllCommand = new RelayCommand(StopAll, () => true);
-            _autostartCommand = new RelayCommand(Autostart, () => true);
-            _addFirewallCommand = new RelayCommand(AddFirewallRule, () => true);
-        }
+            _exitCommand = new RelayCommand(Exit);
+            _startCommand = new RelayCommand<int?>(Start);
+            _stopCommand = new RelayCommand<int?>(Stop);
+            _autostartCommand = new RelayCommand<bool>(Autostart);
+            _addFirewallCommand = new RelayCommand(AddFirewallRule);
+            _openSiteCommand = new RelayCommand<string>(OpenSite);
 
-        private void StartAll()
-        {
-            _viewModel.StartAll();
-        }
-
-        private void StopAll()
-        {
-            _viewModel.StopAll();
-        }
-
-        private void AddFirewallRule()
-        {
-
-        }
-
-        private void Autostart()
-        {
-            _viewModel.SetAutostart(!_viewModel.IsAutostart);
-        }
-
-        private void Exit()
-        {
-            Environment.Exit(0);
-        }
-
-        private IList<MenuFlyoutItemBase> GetFlyoutItems()
-        {
-
-            //< MenuFlyoutSeparator ></ MenuFlyoutSeparator >
-            //    < MenuFlyoutItem Text = "Start all" Click = "StartAll" />
-            //    < MenuFlyoutItem Text = "Stop all" Click = "StopAll" />
-            //    < MenuFlyoutSeparator ></ MenuFlyoutSeparator >
-            //    < ToggleMenuFlyoutItem Text = "Autostart" Click = "Autostart" IsChecked = "{x:Bind _viewModel.IsAutostart}" />
-            //    < MenuFlyoutItem Text = "Add firewall rule" Click = "AddFirewallRule" />
-            //    < MenuFlyoutItem Text = "Exit" Click = "Exit" />
-
-            return
+            _baseItems =
             [
-                new MenuFlyoutSeparator(),
                 new MenuFlyoutItem
                 {
                     Text = "Start all",
-                    Command = _startAllCommand
+                    Command = _startCommand,
+                    CommandParameter = null
                 },
                 new MenuFlyoutItem
                 {
                     Text = "Stop all",
-                    Command = _stopAllCommand
+                    Command = _stopCommand,
+                    CommandParameter = null
                 },
                 new MenuFlyoutSeparator(),
                 new ToggleMenuFlyoutItem
                 {
                     Text = "Autostart",
+                    IsChecked = _viewModel.IsAutostart,
+                    IsEnabled = true,
                     Command = _autostartCommand,
-                    IsChecked = _viewModel.IsAutostart
+                    CommandParameter = !_viewModel.IsAutostart
                 },
                 new MenuFlyoutItem
                 {
@@ -112,8 +84,122 @@ namespace WinUI
                     Text = "Exit",
                     Command = _exitCommand
                 }
-
             ];
+        }
+
+        private void Start(int? id)
+        {
+            _viewModel.Start(id);
+        }
+
+        private void Stop(int? id)
+        {
+            _viewModel.Stop(id);
+        }
+
+        static void RunCommand(string command, bool elevated = false)
+        {
+            var proc = new Process();
+
+            proc.StartInfo.FileName = "cmd";
+            proc.StartInfo.Arguments = $"/c \"{command}\"";
+            proc.StartInfo.CreateNoWindow = true;
+            proc.StartInfo.UseShellExecute = elevated;
+
+            if (elevated) proc.StartInfo.Verb = "runas";
+
+            proc.Start();
+
+            proc.WaitForExit();
+        }
+
+        private static void OpenSite(string input)
+        {
+            var address = input.Replace("&", "^&");
+
+            RunCommand($"start {address}");
+        }
+
+        private void AddFirewallRule()
+        {
+            var uris = _viewModel.Servers.Where(x => x is { Type: ServerType.Web })
+                .Select(x => x.Config.Uri);
+
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            var translatedValue = sid.Translate(typeof(NTAccount)).Value;
+
+            foreach (var uri in uris)
+            {
+                var command =
+                    $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
+
+                RunCommand(command, true);
+
+                command = $"netsh http add urlacl url={uri} user={translatedValue}";
+
+                RunCommand(command, true);
+            }
+        }
+
+        private void Autostart(bool value)
+        {
+            _viewModel.SetAutostart(value);
+        }
+
+        private static void Exit()
+        {
+            Environment.Exit(0);
+        }
+
+        private void OnOpening(object sender, object _)
+        {
+            if (sender is not MenuFlyout flyout) return;
+
+            flyout.Items.Clear();
+
+            foreach (var server in _viewModel.Servers)
+            {
+                flyout.Items.Add(new MenuFlyoutItem
+                {
+                    Text = server.Config.Name,
+                    IsEnabled = false
+                });
+
+                switch (server.Type)
+                {
+                    case ServerType.Web:
+                        flyout.Items.Add(new MenuFlyoutItem
+                        {
+                            Text = server.Config.Uri.ToString(),
+                            IsEnabled = server.Status,
+                            Command = _openSiteCommand,
+                            CommandParameter = server.Config.Uri.ToString()
+                        });
+                        break;
+                    case ServerType.Bot:
+                        flyout.Items.Add(new MenuFlyoutItem
+                        {
+                            Text = server.Config.UsernamesString,
+                            IsEnabled = server.Status
+                        });
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(server.Type));
+                }
+
+                flyout.Items.Add(new MenuFlyoutItem
+                {
+                    Text = server.Status ? "Stop" : "Start",
+                    Command = server.Status ? _stopCommand : _startCommand,
+                    CommandParameter = server.Id
+                });
+                flyout.Items.Add(new MenuFlyoutSeparator());
+            }
+
+            foreach (var item in _baseItems)
+            {
+                flyout.Items.Add(item);
+            }
         }
     }
 }

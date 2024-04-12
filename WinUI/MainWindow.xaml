@@ -7,10 +7,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:servers="using:Servers"
-    xmlns:notifyIcon="using:H.NotifyIcon"
+    xmlns:tb="using:H.NotifyIcon"
     mc:Ignorable="d">
 
-    <StackPanel>
+    <Grid>
         <ListView ItemsSource="{x:Bind _viewModel.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
             <ListView.ItemTemplate>
                 <DataTemplate x:DataType="servers:Server">
@@ -28,23 +28,15 @@
             </ListView.ItemTemplate>
         </ListView>
 
-        <notifyIcon:TaskbarIcon
+        <tb:TaskbarIcon
             ToolTipText="Remote Control"
             IconSource="/Icons/Device.theme-dark.ico"
             MenuActivation="RightClick"
-            ContextMenuMode="SecondWindow"
-            x:Name="TaskbarIcon">
-            <notifyIcon:TaskbarIcon.ContextFlyout>
-                <MenuFlyout>
-                    <MenuFlyoutSeparator></MenuFlyoutSeparator>
-                    <MenuFlyoutItem Text="Start all" Command="{x:Bind _startAllCommand}"/>
-                    <MenuFlyoutItem Text="Stop all" Command="{x:Bind _stopAllCommand}"/>
-                    <MenuFlyoutSeparator></MenuFlyoutSeparator>
-                    <ToggleMenuFlyoutItem Text="Autostart" Command="{x:Bind _autostartCommand}" IsChecked="{x:Bind _viewModel.IsAutostart}"/>
-                    <MenuFlyoutItem Text="Add firewall rule" Command="{x:Bind _addFirewallCommand}"/>
-                    <MenuFlyoutItem Text="Exit" Command="{x:Bind _exitCommand}"/>
-                </MenuFlyout>
-            </notifyIcon:TaskbarIcon.ContextFlyout>
-        </notifyIcon:TaskbarIcon>
-    </StackPanel>
+            ContextMenuMode="ActiveWindow"
+            >
+            <tb:TaskbarIcon.ContextFlyout>
+                <MenuFlyout Opening="OnOpening"/>
+            </tb:TaskbarIcon.ContextFlyout>
+        </tb:TaskbarIcon>
+    </Grid>
 </Window>
