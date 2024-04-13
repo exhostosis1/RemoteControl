@@ -10,35 +10,11 @@
     xmlns:tb="using:H.NotifyIcon"
     mc:Ignorable="d">
 
-    <Grid>
-        <ListView ItemsSource="{x:Bind _viewModel.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="servers:Server">
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="{x:Bind Status}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.Name}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.Type}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.Scheme}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.Host}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.Port}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.ApiUri}" Padding="5, 0, 5, 0"/>
-                        <TextBlock Text="{x:Bind Config.ApiKey}" Padding="5, 0, 5, 0"/>
-                    </StackPanel>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
+    <NavigationView>
+        <Grid>
+            <local:ServersPage ViewModel="{x:Bind _viewModel}"/>
+            <local:NotificationPage ViewModel="{x:Bind _viewModel}"/>
+        </Grid>
+    </NavigationView>
 
-        <Button Command="{x:Bind _addServerCommand}" Content="Add"></Button>
-
-        <tb:TaskbarIcon
-            ToolTipText="Remote Control"
-            IconSource="/Icons/Device.theme-dark.ico"
-            MenuActivation="RightClick"
-            ContextMenuMode="ActiveWindow"
-            >
-            <tb:TaskbarIcon.ContextFlyout>
-                <MenuFlyout Opening="OnOpening"/>
-            </tb:TaskbarIcon.ContextFlyout>
-        </tb:TaskbarIcon>
-    </Grid>
 </Window>

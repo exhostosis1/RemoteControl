@@ -5,22 +5,32 @@ using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using MainApp;
 using Servers;
+using CommunityToolkit.Mvvm;
+using CommunityToolkit;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace WinUI;
 
-internal class ViewModel: IDisposable
+public partial class ViewModel: ObservableObject, IDisposable
 {
     private readonly AppHost _app;
     private bool _disposed = false;
 
-    internal ObservableCollection<Server> Servers { get; private set; } = [];
-    internal bool IsAutostart = false;
+    internal ObservableCollection<ServerViewModel> Servers { get; private set; } = [];
+    private readonly SynchronizationContext _context;
+
+    [ObservableProperty] 
+    private bool _isAutostart;
 
     internal ViewModel()
     {
+        _context = SynchronizationContext.Current;
+
         _app = Task.Run(() => new AppHostBuilder().Build()).Result;
 
         _app.AutostartChanged += AutostartChangedHandler;
@@ -35,34 +45,46 @@ internal class ViewModel: IDisposable
         IsAutostart = status;
     }
 
-    private void ServerAddedHandler(object sender, Server server)
+    private void ServerAddedHandler(object _, Server server)
     {
-        Servers.Add(server);
+        Servers.Add(ServerViewModel.Create(server, _context));
     }
 
-    private void ServersReadyHandler(object sender, List<Server> servers)
+    private void ServersReadyHandler(object _, List<Server> servers)
     {
-        Servers = new ObservableCollection<Server>(servers);
+        Servers = new ObservableCollection<ServerViewModel>(servers.Select(x => ServerViewModel.Create(x, _context)));
     }
 
-    internal void SetAutostart(bool value)
+    [RelayCommand]
+    private void SetAutostart(bool value)
     {
         _app.AutoStartChange(value);
     }
 
-    internal void Start(int? id = null)
+    [RelayCommand]
+    private void Start(int? id = null)
     {
         _app.ServerStart(id);
     }
 
-    internal void Stop(int? id = null)
+    [RelayCommand]
+    private void Stop(int? id = null)
     {
         _app.ServerStop(id);
     }
 
-    internal void AddServer(ServerType mode)
+    [RelayCommand]
+    private void AddServer(ServerType mode)
     {
         _app.ServerAdd(mode);
+    }
+
+    [RelayCommand]
+    private void RemoveServer(int id)
+    {
+        _app.ServerRemove(id);
+
+        Servers.Remove(Servers.FirstOrDefault(x => x.Id == id));
     }
 
     public void Dispose()

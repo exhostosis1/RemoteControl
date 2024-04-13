@@ -14,6 +14,10 @@
     <SupportedOSPlatformVersion>10.0.22000.0</SupportedOSPlatformVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="NotificationPage.xaml" />
+    <None Remove="ServersPage.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <Page Remove="TrayIconView.xaml" />
   </ItemGroup>
 
@@ -50,6 +54,12 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="NotificationPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Update="ServersPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Update="Icons\Device.theme-dark.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

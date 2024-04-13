@@ -10,30 +10,24 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
-using System.Security.Principal;
-using System.Windows.Input;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
-using CommunityToolkit.Mvvm.Input;
-using Microsoft.VisualBasic;
-using Servers;
-using System.Diagnostics;
-using System.Runtime.Versioning;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace WinUI;
-
-/// <summary>
-/// An empty window that can be used on its own or navigated to within a Frame.
-/// </summary>
-public sealed partial class MainWindow : Window
+namespace WinUI
 {
-    private readonly ViewModel _viewModel = new();
-
-    public MainWindow()
+    /// <summary>
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// </summary>
+    public sealed partial class ServersPage : Page
     {
-        this.InitializeComponent();
+        public ViewModel ViewModel { get; set; }
+
+        public ServersPage()
+        {
+            this.InitializeComponent();
+        }
     }
 }
