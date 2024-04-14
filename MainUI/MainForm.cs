@@ -1,8 +1,8 @@
-﻿using MainUI.CustomControls.MenuItems;
+﻿using MainApp;
+using MainUI.CustomControls.MenuItems;
 using MainUI.CustomControls.Panels;
 using Servers;
-using System.Diagnostics;
-using System.Security.Principal;
+using System.Collections.ObjectModel;
 using Windows.UI.ViewManagement;
 
 namespace MainUI;
@@ -13,9 +13,8 @@ public sealed partial class MainForm : Form
     private readonly ToolStripItem[] _commonMenuItems;
 
     private const int GroupMargin = 6;
-    private bool IsAutoStart { get; set; }
 
-    private List<Server> _model = [];
+    private readonly ObservableCollection<Server> _servers;
     private readonly List<ServerMenuItemGroup> _toolStripGroups = [];
     private readonly List<ServerPanel> _windowPanels = [];
 
@@ -41,9 +40,9 @@ public sealed partial class MainForm : Form
     private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico"));
     private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico"));
 
-    private readonly MainApp.AppHost _viewModel;
+    private readonly AppHost _app;
 
-    public MainForm(MainApp.AppHost app)
+    public MainForm(AppHost app)
     {
         InitializeComponent();
 
@@ -60,25 +59,30 @@ public sealed partial class MainForm : Form
         Height = 40;
 
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
-        _viewModel = app;
+        _app = app;
 
-        app.ServersReady += (_, servers) => _model = servers;
-        app.ServerAdded += AddServer;
-        app.AutostartChanged += SetAutoStartValue;
+        app.RunAll();
 
-        app.Run();
+        _servers = app.Servers;
 
-        PopulateWindowPanels();
-        PopulateContextMenuGroups();
+        _servers.CollectionChanged += InitUI;
 
-        DrawWindow();
-        SetContextMenu();
+        InitUI();
 
         ApplyTheme();
     }
 
-    private void PopulateWindowPanels() => _windowPanels.AddRange(_model.Select(CreatePanel));
-    private void PopulateContextMenuGroups() => _toolStripGroups.AddRange(_model.Select(CreateMenuItemGroup));
+    private void InitUI(object? sender = null, EventArgs? args = null)
+    {
+        _windowPanels.Clear();
+        _windowPanels.AddRange(_servers.Select(CreatePanel).ToList());
+
+        _toolStripGroups.Clear();
+        _toolStripGroups.AddRange(_servers.Select(CreateMenuItemGroup).ToList());
+
+        DrawWindow();
+        SetContextMenu();
+    }
 
     private ServerPanel CreatePanel(Server server)
     {
@@ -89,17 +93,14 @@ public sealed partial class MainForm : Form
             _ => throw new NotSupportedException()
         };
 
-        panel.StartButtonClicked += (_, id) => _viewModel.ServerStart(id);
-        panel.StopButtonClicked += (_, id) => _viewModel.ServerStop(id);
-        panel.UpdateButtonClicked += (_, config) => _viewModel.ConfigChange(config);
-
         var menu = new ContextMenuStrip
         {
             RenderMode = ToolStripRenderMode.System
         };
-        menu.Items.Add(new ToolStripMenuItem("Remove", null, (_, _) => RemoveClicked(server.Id)));
+        menu.Items.Add(new ToolStripMenuItem("Remove", null, (_, _) => _servers.Remove(server)));
 
         panel.ContextMenuStrip = menu;
+        panel.UpdateButtonClicked += (_, _) => _app.SaveConfig();
 
         return panel;
     }
@@ -114,21 +115,8 @@ public sealed partial class MainForm : Form
         };
 
         group.OnDescriptionClick += IpToolStripMenuItem_Click;
-        group.OnStartClick += (_, id) => _viewModel.ServerStart(id);
-        group.OnStopClick += (_, id) => _viewModel.ServerStop(id);
 
         return group;
-    }
-
-    private void AddServer(object? _, Server server)
-    {
-        _windowPanels.Add(CreatePanel(server));
-        _toolStripGroups.Add(CreateMenuItemGroup(server));
-
-        DrawWindow();
-        SetContextMenu();
-
-        ApplyTheme();
     }
 
     private void DrawWindow()
@@ -165,52 +153,36 @@ public sealed partial class MainForm : Form
             MainContextMenuStrip.Items.AddRange(toolStripMenuItemGroup.ItemsArray);
         }
 
-        AutostartStripMenuItem.Checked = IsAutoStart;
+        AutostartStripMenuItem.Checked = _app.IsAutostart;
         MainContextMenuStrip.Items.AddRange(_commonMenuItems);
-    }
-
-    private void RemoveClicked(int id)
-    {
-        _viewModel.ServerRemove(id);
-
-        var p = _windowPanels.FirstOrDefault(x => x.Id == id);
-        if (p != null)
-        {
-            _windowPanels.Remove(p);
-            p.Dispose();
-        }
-
-        var t = _toolStripGroups.FirstOrDefault(x => x.Id == id);
-        if (t != null)
-        {
-            _toolStripGroups.Remove(t);
-            t.Dispose();
-        }
-
-        DrawWindow();
-        SetContextMenu();
     }
 
     private void CloseToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        MainApp.AppHost.AppClose(null);
+        Environment.Exit(0);
     }
 
     private static void IpToolStripMenuItem_Click(object? sender, string input)
     {
         var address = input.Replace("&", "^&");
 
-        RunCommand($"start {address}");
+        AppHost.RunCommand($"start {address}");
     }
 
     private void StartAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        _viewModel.ServerStart(null);
+        foreach (var server in _servers)
+        {
+            server.Start();
+        }
     }
 
     private void StopAllToolStripMenuItem_Click(object? sender, EventArgs e)
     {
-        _viewModel.ServerStop(null);
+        foreach (var server in _servers)
+        {
+            server.Stop();
+        }
     }
 
     private void ConfigForm_Shown(object sender, EventArgs e)
@@ -220,33 +192,17 @@ public sealed partial class MainForm : Form
 
     private void AutoStartStripMenuItem_Click(object sender, EventArgs e)
     {
-        _viewModel.AutoStartChange(!IsAutoStart);
+        _app.IsAutostart = !_app.IsAutostart;
     }
 
     private void AddFirewallRuleToolStripMenuItem_Click(object sender, EventArgs e)
     {
-        var uris = _model.Where(x => x is { Type: ServerType.Web })
-            .Select(x => x.Config.Uri);
-
-        var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
-        var translatedValue = sid.Translate(typeof(NTAccount)).Value;
-
-        foreach (var uri in uris)
-        {
-            var command =
-                $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
-
-            RunCommand(command, true);
-
-            command = $"netsh http add urlacl url={uri} user={translatedValue}";
-
-            RunCommand(command, true);
-        }
+        _app.AddFirewallRules();
     }
 
     private void TaskbarNotify_MouseDoubleClick(object sender, MouseEventArgs e)
     {
-        if (e.Button == System.Windows.Forms.MouseButtons.Left)
+        if (e.Button == MouseButtons.Left)
         {
             Show();
         }
@@ -260,12 +216,12 @@ public sealed partial class MainForm : Form
 
     private void AddServerButton_Click(object sender, EventArgs e)
     {
-        _viewModel.ServerAdd(ServerType.Web);
+        _servers.Add(_app.ServerFactory.GetServer());
     }
 
     private void AddBotButton_Click(object sender, EventArgs e)
     {
-        _viewModel.ServerAdd(ServerType.Bot);
+        _servers.Add(_app.ServerFactory.GetBot());
     }
 
     private void ApplyTheme()
@@ -300,27 +256,5 @@ public sealed partial class MainForm : Form
             Icon = darkMode ? _lightIcon : _darkIcon;
             MainUI.DarkTitleBar.UseImmersiveDarkMode(Handle, darkMode);
         }
-    }
-
-    private void SetAutoStartValue(object? _, bool value)
-    {
-        IsAutoStart = value;
-        AutostartStripMenuItem.Checked = IsAutoStart;
-    }
-
-    private static void RunCommand(string command, bool elevated = false)
-    {
-        var proc = new Process();
-
-        proc.StartInfo.FileName = "cmd";
-        proc.StartInfo.Arguments = $"/c \"{command}\"";
-        proc.StartInfo.CreateNoWindow = true;
-        proc.StartInfo.UseShellExecute = elevated;
-
-        if (elevated) proc.StartInfo.Verb = "runas";
-
-        proc.Start();
-
-        proc.WaitForExit();
     }
 }

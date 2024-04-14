@@ -1,63 +1,69 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Servers;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Security.Principal;
 
 namespace MainApp;
 
-public  class AppHost
+public sealed class AppHost: IDisposable
 {
     private readonly ILogger _logger;
-    private readonly ServerFactory _serverFactory;
     private readonly RegistryAutoStartService _autoStartService;
-    private readonly JsonConfigurationProvider _configProvider;
+    private readonly IConfigurationProvider _configProvider;
 
-    private int _id = 0;
-    private List<int> _ids = [];
-    private readonly List<Server> _servers;
+    public ServerFactory ServerFactory { get; init; }
+    public readonly ObservableCollection<Server> Servers = [];
 
-    public event EventHandler<Server>? ServerAdded;
-    public event EventHandler<bool>? AutostartChanged;
-    public event EventHandler<List<Server>>? ServersReady;
+
+    private bool? _isAutostartCached = null;
+    public bool IsAutostart
+    {
+        get => _isAutostartCached ??= _autoStartService.CheckAutoStart();
+        set
+        {
+            _autoStartService.SetAutoStart(value);
+            _isAutostartCached = null;
+        }
+    }
 
     #region Constructor
     internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
-        RegistryAutoStartService autoStartService, JsonConfigurationProvider configProvider)
+        RegistryAutoStartService autoStartService, IConfigurationProvider configProvider)
     {
         _logger = loggerProvider.CreateLogger(nameof(AppHost));
-        _serverFactory = serverFactory;
+        ServerFactory = serverFactory;
         _autoStartService = autoStartService;
         _configProvider = configProvider;
 
-        var config = _configProvider.GetConfig();
-
-        _servers = config.ServerConfigs.Select<ServerConfig, Server>(x =>
-        {
-            return x.Type switch
-            {
-                ServerType.Web => _serverFactory.GetServer(x, _id++),
-                ServerType.Bot => _serverFactory.GetBot(x, _id++),
-                _ => throw new NotSupportedException("Config not supported")
-            };
-        }).ToList();
-
+        ReloadServers();
         SetSystemEvents();
     }
     #endregion
 
+    private IEnumerable<Server> GenerateServers(IEnumerable<ServerConfig> configs)
+    {
+        foreach (var serverConfig in configs)
+        {
+            yield return serverConfig.Type switch
+            {
+                ServerType.Web => ServerFactory.GetServer(serverConfig),
+                ServerType.Bot => ServerFactory.GetBot(serverConfig),
+                _ => throw new NotSupportedException("Config not supported")
+            };
+        };
+    }
+
     #region Public methods
-    public void Run()
+    public void RunAll()
     {
         try
         {
-            _servers.ForEach(x =>
+            foreach (var server in Servers.Where(x => x.Config.AutoStart))
             {
-                if (x.Config.AutoStart)
-                    x.Start();
-            });
-
-            AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
-
-            ServersReady?.Invoke(this, _servers);
+                server.Start();
+            }
         }
         catch (Exception e)
         {
@@ -65,130 +71,118 @@ public  class AppHost
         }
     }
 
-    public void ServerStart(int? id)
+    public static void RunCommand(string command, bool elevated = false)
     {
-        if (!id.HasValue)
+        var proc = new Process();
+
+        proc.StartInfo.FileName = "cmd";
+        proc.StartInfo.Arguments = $"/c \"{command}\"";
+        proc.StartInfo.CreateNoWindow = true;
+        proc.StartInfo.UseShellExecute = elevated;
+
+        if (elevated) proc.StartInfo.Verb = "runas";
+
+        proc.Start();
+
+        proc.WaitForExit();
+    }
+
+    public void AddFirewallRules()
+    {
+        var uris = Servers.Where(x => x is { Type: ServerType.Web })
+            .Select(x => x.Config.Uri);
+
+        var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+        var translatedValue = sid.Translate(typeof(NTAccount)).Value;
+
+        foreach (var uri in uris)
         {
-            _servers.ForEach(x => x.Start());
-        }
-        else
-        {
-            _servers.FirstOrDefault(x => x.Id == id)?.Start();
+            var command =
+                $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
+
+            RunCommand(command, true);
+
+            command = $"netsh http add urlacl url={uri} user={translatedValue}";
+
+            RunCommand(command, true);
         }
     }
 
-    public void ServerStop(int? id)
+    public void SaveConfig()
     {
-        if (!id.HasValue)
-        {
-            _servers.ForEach(x => x.Stop());
-        }
-        else
-        {
-            _servers.FirstOrDefault(x => x.Id == id)?.Stop();
-        }
+        _configProvider.SetConfig(Servers.Select(x => x.Config));
     }
 
-    public void ServerAdd(ServerType mode)
+    public void ReloadServers()
     {
-        Server server = mode switch
+        if (Servers.Count > 0)
         {
-            ServerType.Web => _serverFactory.GetServer(),
-            ServerType.Bot => _serverFactory.GetBot(),
-            _ => throw new NotSupportedException()
-        };
+            foreach (var server in Servers.Where(x => x.Status))
+            {
+                server.Stop();
+            }
 
-        server.Id = _id++;
-
-        _servers.Add(server);
-        ServerAdded?.Invoke(this, server);
-    }
-
-    public void ServerRemove(int id)
-    {
-        var server = _servers.FirstOrDefault(x => x.Id == id);
-        if (server == null)
-            return;
-
-        server.Stop();
-        _servers.Remove(server);
-
-        _configProvider.SetConfig(GetConfig(_servers));
-    }
-
-    public void AutoStartChange(bool value)
-    {
-        _autoStartService.SetAutoStart(value);
-        AutostartChanged?.Invoke(this, _autoStartService.CheckAutoStart());
-    }
-
-    public void ConfigChange((int, ServerConfig) configTuple)
-    {
-        var server = _servers.FirstOrDefault(x => x.Id == configTuple.Item1);
-        if (server == null)
-            return;
-
-        if (server.Status)
-        {
-            server.Restart(configTuple.Item2);
-        }
-        else
-        {
-            server.Config = configTuple.Item2;
+            Servers.Clear();
         }
 
-        var config = GetConfig(_servers);
-        _configProvider.SetConfig(config);
-    }
-
-    public static void AppClose(object? _)
-    {
-        Environment.Exit(0);
+        foreach (var server in GenerateServers(_configProvider.GetConfig()))
+        {
+            Servers.Add(server);
+        }
     }
     #endregion
-
 
     #region Private methods
-    private static AppConfig GetConfig(IEnumerable<Server> servers) =>
-        new(servers.Select(x => x.Config).ToList());
-
     private void SetSystemEvents()
     {
-        SystemEvents.SessionSwitch += (_, args) =>
+
+        SystemEvents.SessionSwitch += SessionSwitchHandler;
+    }
+
+    private List<Server> _runningServers = [];
+
+    private void SessionSwitchHandler(object sender, SessionSwitchEventArgs args)
+    {
+        switch (args.Reason)
         {
-            switch (args.Reason)
+            case SessionSwitchReason.SessionLock:
             {
-                case SessionSwitchReason.SessionLock:
-                {
-                    _logger.LogInformation("Stopping servers due to logout");
+                _logger.LogInformation("Stopping servers due to logout");
 
+                _runningServers = Servers.Where(x => x.Status).ToList();
+                _runningServers.ForEach(x => x.Stop());
 
-                    _ids = _servers.Where(x => x.Status).Select(x =>
-                    {
-                        x.Stop();
-                        return x.Id;
-                    }).ToList();
-
-                    break;
-                }
-                case SessionSwitchReason.SessionUnlock:
-                {
-                    _logger.LogInformation("Restoring servers");
-
-                    _ids.ForEach(id => _servers.Single(s => s.Id == id).Start());
-                    break;
-                }
-                case SessionSwitchReason.ConsoleConnect:
-                case SessionSwitchReason.ConsoleDisconnect:
-                case SessionSwitchReason.RemoteConnect:
-                case SessionSwitchReason.RemoteDisconnect:
-                case SessionSwitchReason.SessionLogon:
-                case SessionSwitchReason.SessionLogoff:
-                case SessionSwitchReason.SessionRemoteControl:
-                default:
-                    break;
+                break;
             }
-        };
+            case SessionSwitchReason.SessionUnlock:
+            {
+                _logger.LogInformation("Restoring servers");
+
+                _runningServers.ForEach(x => x.Start());
+                break;
+            }
+            case SessionSwitchReason.ConsoleConnect:
+            case SessionSwitchReason.ConsoleDisconnect:
+            case SessionSwitchReason.RemoteConnect:
+            case SessionSwitchReason.RemoteDisconnect:
+            case SessionSwitchReason.SessionLogon:
+            case SessionSwitchReason.SessionLogoff:
+            case SessionSwitchReason.SessionRemoteControl:
+            default:
+                break;
+
+        }
     }
     #endregion
+
+    public void Dispose()
+    {
+        SystemEvents.SessionSwitch -= SessionSwitchHandler;
+        foreach (var server in Servers)
+        {
+            server.Stop();
+        }
+
+        Servers.Clear();
+    }
 }

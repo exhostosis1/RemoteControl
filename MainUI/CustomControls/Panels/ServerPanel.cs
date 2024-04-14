@@ -46,8 +46,6 @@ internal class HttpPanel : ServerPanel
         BorderStyle = BorderStyle.FixedSingle
     };
 
-    private readonly IDisposable _unsubscriber;
-
     public HttpPanel(Server server) : base(server)
     {
         _schemeTextBox.Text = server.Config.Scheme;
@@ -68,15 +66,15 @@ internal class HttpPanel : ServerPanel
             _portTextBox.SelectionLength = 0;
         };
 
-        Controls.AddRange(new Control[]
-        {
+        Controls.AddRange(
+        [
             _schemeLabel,
             _schemeTextBox,
             _hostLabel,
             _hostTextBox,
             _portLabel,
             _portTextBox
-        });
+        ]);
 
         server.PropertyChanged += (_, args) =>
         {
@@ -141,7 +139,5 @@ internal class HttpPanel : ServerPanel
         _portTextBox.TextChanged -= EnableUpdateButton;
 
         Disposed -= LocalDispose;
-
-        _unsubscriber.Dispose();
     }
 }

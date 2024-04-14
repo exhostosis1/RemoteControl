@@ -6,9 +6,11 @@ namespace MainUI.CustomControls.Panels;
 internal abstract class ServerPanel : Panel
 {
     public int Id { get; init; }
-    protected readonly Server Server;
-    protected readonly SynchronizationContext? SynchronizationContext;
-    protected Theme Theme { get; set; } = new();
+    private readonly Server _server;
+    private readonly SynchronizationContext _synchronizationContext;
+    protected Theme Theme { get; private set; } = new();
+
+    public event EventHandler? UpdateButtonClicked;
 
     protected readonly Label NameLabel = new()
     {
@@ -31,7 +33,7 @@ internal abstract class ServerPanel : Panel
         Size = new Size(75, 19),
     };
 
-    protected readonly Button StartButton = new()
+    private readonly Button _startButton = new()
     {
         Text = @"Start",
         Location = new Point(419, 5),
@@ -41,7 +43,7 @@ internal abstract class ServerPanel : Panel
 
     };
 
-    protected readonly Button StopButton = new()
+    private readonly Button _stopButton = new()
     {
         Text = @"Stop",
         Location = new Point(419, 5),
@@ -59,10 +61,6 @@ internal abstract class ServerPanel : Panel
         FlatStyle = FlatStyle.Flat
     };
 
-    public event EventHandler<int>? StartButtonClicked;
-    public event EventHandler<int>? StopButtonClicked;
-    public event EventHandler<(int, ServerConfig)>? UpdateButtonClicked;
-
     protected ServerPanel(Server server)
     {
         Width = 508;
@@ -70,23 +68,22 @@ internal abstract class ServerPanel : Panel
         Left = 12;
         BorderStyle = BorderStyle.FixedSingle;
 
-        Id = server.Id;
-        Server = server;
+        _server = server;
         NameTextBox.Text = server.Config.Name;
 
-        SynchronizationContext = SynchronizationContext.Current;
+        _synchronizationContext = SynchronizationContext.Current ?? throw new Exception("No synchronization context");
 
         if (server.Status)
         {
-            StopButton.Visible = true;
+            _stopButton.Visible = true;
         }
         else
         {
-            StartButton.Visible = true;
+            _startButton.Visible = true;
         }
 
-        StartButton.Click += StartButtonClick;
-        StopButton.Click += StopButtonClick;
+        _startButton.Click += StartButtonClick;
+        _stopButton.Click += StopButtonClick;
         UpdateButton.Click += UpdateButtonClick;
 
         AutoStartBox.Checked = server.Config.AutoStart;
@@ -99,13 +96,13 @@ internal abstract class ServerPanel : Panel
             NameLabel,
             NameTextBox,
             AutoStartBox,
-            StartButton,
-            StopButton,
+            _startButton,
+            _stopButton,
             UpdateButton
         ]);
 
-        Server.PropertyChanged += SetButtons;
-        Disposed += (_, _) => Server.PropertyChanged -= SetButtons;
+        _server.PropertyChanged += SetButtons;
+        Disposed += (_, _) => _server.PropertyChanged -= SetButtons;
     }
 
     public void ApplyTheme(Theme theme)
@@ -122,31 +119,37 @@ internal abstract class ServerPanel : Panel
 
     protected void EnableUpdateButton(object? sender, EventArgs e) => UpdateButton.Enabled = true;
 
-    protected void RaiseUpdateButtonClickedEvent(ServerConfig config) =>
-        UpdateButtonClicked?.Invoke(null, (Id, config));
+    protected void RaiseUpdateButtonClickedEvent(ServerConfig config)
+    {
+        _server.Config = config;
+        if(_server.Status)
+            _server.Restart();
+
+        UpdateButtonClicked?.Invoke(this, EventArgs.Empty);
+    }
 
     protected abstract void UpdateButtonClick(object? sender, EventArgs e);
 
-    protected void StartButtonClick(object? sender, EventArgs args)
+    private void StartButtonClick(object? sender, EventArgs args)
     {
-        StartButtonClicked?.Invoke(null, Id);
-        StartButton.Enabled = false;
+        _server.Start();
+        _startButton.Enabled = false;
     }
 
-    protected void StopButtonClick(object? sender, EventArgs args)
+    private void StopButtonClick(object? sender, EventArgs args)
     {
-        StopButtonClicked?.Invoke(null, Id);
-        StopButton.Enabled = false;
+        _server.Stop();
+        _stopButton.Enabled = false;
     }
 
     private void SetButtons(object? _, PropertyChangedEventArgs args)
     {
-        if(args.PropertyName != nameof(Server.Status)) return;
+        if(args.PropertyName != nameof(_server.Status)) return;
 
-        var buttonToDisable = Server.Status ? StartButton : StopButton;
-        var buttonToEnable = Server.Status ? StopButton : StartButton;
+        var buttonToDisable = _server.Status ? _startButton : _stopButton;
+        var buttonToEnable = _server.Status ? _stopButton : _startButton;
 
-        SynchronizationContext?.Post(_ =>
+        _synchronizationContext.Post(_ =>
         {
             buttonToDisable.Visible = false;
             buttonToEnable.Visible = true;
