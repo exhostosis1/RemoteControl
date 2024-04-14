@@ -1,25 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MainApp;
 using Servers;
-using CommunityToolkit.Mvvm;
-using CommunityToolkit;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace WinUI;
 
-public partial class ViewModel: ObservableObject, IDisposable
+public partial class ViewModel: ObservableObject
 {
     private readonly AppHost _app;
-    private bool _disposed = false;
 
     internal ObservableCollection<ServerViewModel> Servers { get; private set; } = [];
     private readonly SynchronizationContext _context;
@@ -33,68 +25,52 @@ public partial class ViewModel: ObservableObject, IDisposable
 
         _app = Task.Run(() => new AppHostBuilder().Build()).Result;
 
-        _app.AutostartChanged += AutostartChangedHandler;
-        _app.ServerAdded += ServerAddedHandler;
-        _app.ServersReady += ServersReadyHandler;
+        _isAutostart = _app.IsAutostart;
 
-        _app.Run();
-    }
-
-    private void AutostartChangedHandler(object sender, bool status)
-    {
-        IsAutostart = status;
-    }
-
-    private void ServerAddedHandler(object _, Server server)
-    {
-        Servers.Add(ServerViewModel.Create(server, _context));
-    }
-
-    private void ServersReadyHandler(object _, List<Server> servers)
-    {
-        Servers = new ObservableCollection<ServerViewModel>(servers.Select(x => ServerViewModel.Create(x, _context)));
+        _app.RunAll();
+        Servers = new ObservableCollection<ServerViewModel>(
+            _app.Servers.Select(x => new ServerViewModel(x, _context)));
     }
 
     [RelayCommand]
     private void SetAutostart(bool value)
     {
-        _app.AutoStartChange(value);
+        _app.IsAutostart = value;
     }
 
     [RelayCommand]
-    private void Start(int? id = null)
+    private void Start(ServerViewModel? model)
     {
-        _app.ServerStart(id);
+        if(model == null)
+            foreach (var server in Servers)
+            {
+                server.Start(null);
+            }
+        else
+            model.Start(null);
     }
 
     [RelayCommand]
-    private void Stop(int? id = null)
+    private void Stop(ServerViewModel? model)
     {
-        _app.ServerStop(id);
+        if (model == null)
+            foreach (var server in Servers)
+            {
+                server.Stop();
+            }
+        else
+            model.Stop();
     }
 
     [RelayCommand]
     private void AddServer(ServerType mode)
     {
-        _app.ServerAdd(mode);
+        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(mode), _context));
     }
 
     [RelayCommand]
-    private void RemoveServer(int id)
+    private void RemoveServer(ServerViewModel model)
     {
-        _app.ServerRemove(id);
-
-        Servers.Remove(Servers.FirstOrDefault(x => x.Id == id));
-    }
-
-    public void Dispose()
-    {
-        if (_disposed) return;
-
-        _app.AutostartChanged -= AutostartChangedHandler;
-        _app.ServerAdded -= ServerAddedHandler;
-        _app.ServersReady -= ServersReadyHandler;
-
-        _disposed = true;
+        Servers.Remove(model);
     }
 }

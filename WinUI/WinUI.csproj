@@ -12,6 +12,7 @@
     <UseWinUI>true</UseWinUI>
     <EnableMsixTooling>true</EnableMsixTooling>
     <SupportedOSPlatformVersion>10.0.22000.0</SupportedOSPlatformVersion>
+	  <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="NotificationPage.xaml" />

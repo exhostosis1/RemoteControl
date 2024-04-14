@@ -41,13 +41,10 @@ public sealed class ServerFactory
         _botMiddlewareChain = [apiMiddleware];
     }
 
-    public Server GetServer(ServerConfig? config = null)
+    public Server GetServer(ServerType type, ServerConfig? config = null)
     {
-        return new Server(ServerType.Web, _webListener, _webMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)), config);
-    }
-
-    public Server GetBot(ServerConfig? config = null)
-    {
-        return new Server(ServerType.Bot, _botListener, _botMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)), config);
+        return new Server(type, type == ServerType.Web ? _webListener : _botListener,
+            type == ServerType.Web ? _webMiddlewareChain : _botMiddlewareChain,
+            _loggerProvider.CreateLogger(nameof(Server)), config);
     }
 }

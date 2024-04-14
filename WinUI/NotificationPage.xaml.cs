@@ -114,7 +114,7 @@ public sealed partial class NotificationPage : Page
             {
                 Text = server.Status ? "Stop" : "Start",
                 Command = server.Status ? ViewModel.StopCommand : ViewModel.StartCommand,
-                CommandParameter = server.Id
+                CommandParameter = server
             });
             flyout.Items.Add(new MenuFlyoutSeparator());
         }

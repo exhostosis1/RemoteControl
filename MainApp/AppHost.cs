@@ -42,18 +42,8 @@ public sealed class AppHost: IDisposable
     }
     #endregion
 
-    private IEnumerable<Server> GenerateServers(IEnumerable<ServerConfig> configs)
-    {
-        foreach (var serverConfig in configs)
-        {
-            yield return serverConfig.Type switch
-            {
-                ServerType.Web => ServerFactory.GetServer(serverConfig),
-                ServerType.Bot => ServerFactory.GetBot(serverConfig),
-                _ => throw new NotSupportedException("Config not supported")
-            };
-        };
-    }
+    private IEnumerable<Server> GenerateServers(IEnumerable<ServerConfig> configs) =>
+        configs.Select(config => ServerFactory.GetServer(config.Type, config));
 
     #region Public methods
     public void RunAll()

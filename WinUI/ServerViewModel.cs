@@ -1,10 +1,11 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Servers;
 
 namespace WinUI;
 
-internal partial class ServerViewModel: ObservableObject
+public partial class ServerViewModel: ObservableObject
 {
     public ServerType Type { get; init; }
     public int Id { get; init; }
@@ -33,29 +34,29 @@ internal partial class ServerViewModel: ObservableObject
     [ObservableProperty]
     private string _usernames;
 
-    public static ServerViewModel Create(Server server, SynchronizationContext context)
+    public readonly Action<ServerConfig?> Start;
+    public readonly Action Stop;
+
+    public ServerViewModel(Server server, SynchronizationContext context)
     {
-        var vm = new ServerViewModel
-        {
-            Type = server.Type,
-            Id = server.Id,
-            Status = server.Status,
-            ApiKey = server.Type == ServerType.Bot ? server.Config.ApiKey : "",
-            ApiUrl = server.Type == ServerType.Bot ? server.Config.ApiUri : "",
-            Host = server.Type == ServerType.Web ? server.Config.Host : "",
-            Name = server.Config.Name,
-            Port = server.Type == ServerType.Web ? server.Config.Port : -1,
-            Schema = server.Type == ServerType.Web ? server.Config.Scheme : "",
-            Usernames = server.Type == ServerType.Bot ? server.Config.UsernamesString : ""
-        };
+        Type = server.Type;
+        _status = server.Status;
+        _apiKey = server.Type == ServerType.Bot ? server.Config.ApiKey : "";
+        _apiUrl = server.Type == ServerType.Bot ? server.Config.ApiUri : "";
+        _host = server.Type == ServerType.Web ? server.Config.Host : "";
+        _name = server.Config.Name;
+        _port = server.Type == ServerType.Web ? server.Config.Port : -1;
+        _schema = server.Type == ServerType.Web ? server.Config.Scheme : "";
+        _usernames = server.Type == ServerType.Bot ? server.Config.UsernamesString : "";
 
         server.PropertyChanged += (sender, args) =>
         {
             if (args.PropertyName != "Status" || sender is not Server s) return;
 
-            context.Post(_ => vm.Status = s.Status, null);
+            context.Post(_ => Status = s.Status, null);
         };
 
-        return vm;
+        Start = server.Start;
+        Stop = server.Stop;
     }
 }
