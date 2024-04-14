@@ -9,12 +9,12 @@ using NReco.Logging.File;
 
 namespace MainApp;
 
-public class AppHostBuilder
+public sealed class AppHostBuilder
 {
     private ILoggerProvider? _loggerProvider = null;
     private ServerFactory? _serverFactory = null;
     private RegistryAutoStartService? _autoStartService = null;
-    private JsonConfigurationProvider? _configProvider = null;
+    private IConfigurationProvider? _configProvider = null;
 
     public AppHostBuilder UseLogger(ILoggerProvider loggerProvider)
     {
@@ -22,7 +22,7 @@ public class AppHostBuilder
         return this;
     }
 
-    public AppHostBuilder UseConfiguration(JsonConfigurationProvider configProvider)
+    public AppHostBuilder UseConfiguration(IConfigurationProvider configProvider)
     {
         _configProvider = configProvider;
         return this;
@@ -46,6 +46,6 @@ public class AppHostBuilder
             _loggerProvider.CreateLogger(nameof(JsonConfigurationProvider)),
             Path.Combine(Environment.CurrentDirectory, "appsettings.json"));
 
-        return new MainApp.AppHost(_loggerProvider, _serverFactory, _autoStartService, _configProvider);
+        return new AppHost(_loggerProvider, _serverFactory, _autoStartService, _configProvider);
     }
 }

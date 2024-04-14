@@ -63,7 +63,7 @@ public partial class SimpleServerTests : IDisposable
 
         Assert.True(_server.Status);
 
-        config ??= _server.DefaultConfig;
+        config ??= new ServerConfig(ServerType.Web);
 
         Assert.Equal(_server.Config.Type, config.Type);
     }

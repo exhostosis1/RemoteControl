@@ -1,17 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
+using Servers.DataObjects;
 using Servers.Listeners;
 using Servers.Middleware;
 using System.ComponentModel;
-using System.Net;
-using Servers.DataObjects;
 
 
 namespace Servers;
 
 public class Server: INotifyPropertyChanged
 {
-    public ServerType Type { get; set;  }
-    public int Id { get; set; } = -1;
+    public ServerType Type { get; }
     public bool Status { get; private set; } = false;
 
     private readonly ILogger _logger;
@@ -23,9 +21,7 @@ public class Server: INotifyPropertyChanged
     private readonly IProgress<bool> _progress;
 
     private readonly TaskFactory _factory = new();
-
-    public ServerConfig DefaultConfig { get; init; }
-
+    
     private ServerConfig _currentConfig;
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -47,14 +43,13 @@ public class Server: INotifyPropertyChanged
     private static IEnumerable<Func<RequestDelegate, RequestDelegate>>
         GetFunctions(IEnumerable<IMiddleware> middlewares) => middlewares.Reverse().Select(GetFunction);
 
-    public Server(ServerType type, IListener listener, IEnumerable<IMiddleware> middlewares, ILogger logger)
+    public Server(ServerType type, IListener listener, IEnumerable<IMiddleware> middlewares, ILogger logger, ServerConfig? config = null)
     {
         Type = type;
-        DefaultConfig = new ServerConfig(type);
-        _currentConfig = DefaultConfig;
 
         _logger = logger;
         _listener = listener;
+        _currentConfig = config ?? new ServerConfig(type);
 
         RequestDelegate action = (context) =>
         {

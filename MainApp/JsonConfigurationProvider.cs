@@ -1,10 +1,11 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
+using Servers;
 
 namespace MainApp;
 
-public class JsonConfigurationProvider(ILogger logger, string filePath)
+internal class JsonConfigurationProvider(ILogger logger, string filePath) : IConfigurationProvider
 {
     private readonly JsonSerializerOptions _jsonOptions = new()
     {
@@ -12,31 +13,31 @@ public class JsonConfigurationProvider(ILogger logger, string filePath)
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public AppConfig GetConfig()
+    public List<ServerConfig> GetConfig()
     {
         logger.LogInformation("Getting config from file {filePath}", filePath);
+
+        List<ServerConfig> result = [];
 
         if (!File.Exists(filePath))
         {
             logger.LogWarning("No config file");
-            return new AppConfig();
+            return result;
         }
-
-        AppConfig? result = null;
 
         try
         {
-            result = JsonSerializer.Deserialize<AppConfig>(File.ReadAllText(filePath));
+            result = JsonSerializer.Deserialize<List<ServerConfig>>(File.ReadAllText(filePath)) ?? [];
         }
         catch (JsonException e)
         {
             logger.LogError("{message}", e.Message);
         }
 
-        return result ?? new AppConfig();
+        return result;
     }
 
-    public void SetConfig(AppConfig appConfig)
+    public void SetConfig(IEnumerable<ServerConfig> appConfig)
     {
         logger.LogInformation("Writing config to file {filePath}", filePath);
 

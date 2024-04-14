@@ -8,7 +8,7 @@ using User32Wrapper = ControlProviders.User32Wrapper;
 
 namespace MainApp;
 
-public class ServerFactory
+public sealed class ServerFactory
 {
     private readonly SimpleHttpListener _webListener;
     private readonly IMiddleware[] _webMiddlewareChain;
@@ -41,31 +41,13 @@ public class ServerFactory
         _botMiddlewareChain = [apiMiddleware];
     }
 
-    public Server GetServer()
+    public Server GetServer(ServerConfig? config = null)
     {
-        return new Server(ServerType.Web, _webListener, _webMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)));
+        return new Server(ServerType.Web, _webListener, _webMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)), config);
     }
 
-    public Server GetServer(ServerConfig config, int id = 0)
+    public Server GetBot(ServerConfig? config = null)
     {
-        var server = GetServer();
-        server.Config = config;
-        server.Id = id;
-
-        return server;
-    }
-
-    public Server GetBot()
-    {
-        return new Server(ServerType.Bot, _botListener, _botMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)));
-    }
-    
-    public Server GetBot(ServerConfig config, int id)
-    {
-        var bot = GetBot();
-        bot.Config = config;
-        bot.Id = id;
-
-        return bot;
+        return new Server(ServerType.Bot, _botListener, _botMiddlewareChain, _loggerProvider.CreateLogger(nameof(Server)), config);
     }
 }

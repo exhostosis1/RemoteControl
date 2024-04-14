@@ -20,12 +20,9 @@ internal abstract class ServerMenuItemGroup : IDisposable
     public ToolStripItem[] ItemsArray => [.. Items];
 
     public event EventHandler<string>? OnDescriptionClick;
-    public event EventHandler<int>? OnStartClick;
-    public event EventHandler<int>? OnStopClick;
 
     protected ServerMenuItemGroup(Server server)
     {
-        Id = server.Id;
         Server = server;
 
         NameItem.Text = server.Config.Name;
@@ -53,11 +50,11 @@ internal abstract class ServerMenuItemGroup : IDisposable
     {
         if (StartStopItem.Text == @"Start")
         {
-            OnStartClick?.Invoke(null, Id);
+            Server.Start();
         }
         else
         {
-            OnStopClick?.Invoke(null, Id);
+            Server.Stop();
         }
     }
 
@@ -66,8 +63,5 @@ internal abstract class ServerMenuItemGroup : IDisposable
     public void Dispose()
     {
         StartStopItem.Click -= StartStopClicked;
-
-        NameItem.Dispose();
-        DescriptionItem.Dispose();
     }
 }
