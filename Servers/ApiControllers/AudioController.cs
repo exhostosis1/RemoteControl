@@ -4,7 +4,7 @@ using Servers.Results;
 
 namespace Servers.ApiControllers;
 
-public class AudioController(IAudioControlProvider provider, ILogger logger) : BaseApiController
+public class AudioController(IAudioControl provider, ILogger logger) : BaseApiController
 {
     public IActionResult GetDevices()
     {

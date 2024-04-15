@@ -4,7 +4,7 @@ using ControlProviders.Interfaces;
 
 namespace ControlProviders;
 
-public partial class User32Wrapper : IKeyboardControlProvider, IDisplayControlProvider, IMouseControlProvider
+public partial class User32Wrapper : IKeyboardControl, IDisplayControl, IMouseControl
 {
     private const uint Length = 1;
     private readonly Input[] _buffer = new Input[Length];

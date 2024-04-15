@@ -6,7 +6,7 @@ using ControlProviders.Interfaces;
 
 namespace Servers.ApiControllers;
 
-public class KeyboardController(IKeyboardControlProvider provider, ILogger logger) : BaseApiController
+public class KeyboardController(IKeyboardControl provider, ILogger logger) : BaseApiController
 {
     public IActionResult Back()
     {

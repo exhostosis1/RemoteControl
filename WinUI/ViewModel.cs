@@ -2,75 +2,85 @@
 using CommunityToolkit.Mvvm.Input;
 using MainApp;
 using Servers;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading;
+using System;
 using System.Threading.Tasks;
 
 namespace WinUI;
 
 public partial class ViewModel: ObservableObject
 {
-    private readonly AppHost _app;
-
-    internal ObservableCollection<ServerViewModel> Servers { get; private set; } = [];
-    private readonly SynchronizationContext _context;
-
-    [ObservableProperty] 
-    private bool _isAutostart;
+    public readonly AppHost App;
 
     internal ViewModel()
     {
-        _context = SynchronizationContext.Current;
+        App = new AppHostBuilder().Build();
 
-        _app = Task.Run(() => new AppHostBuilder().Build()).Result;
-
-        _isAutostart = _app.IsAutostart;
-
-        _app.RunAll();
-        Servers = new ObservableCollection<ServerViewModel>(
-            _app.Servers.Select(x => new ServerViewModel(x, _context)));
+        App.RunAll();
     }
 
     [RelayCommand]
     private void SetAutostart(bool value)
     {
-        _app.IsAutostart = value;
+        App.IsAutostart = value;
     }
 
     [RelayCommand]
-    private void Start(ServerViewModel? model)
+    private void StartAll()
     {
-        if(model == null)
-            foreach (var server in Servers)
-            {
-                server.Start(null);
-            }
-        else
-            model.Start(null);
+        foreach (var server in App.Servers)
+        {
+            server.Start();
+        }
     }
 
     [RelayCommand]
-    private void Stop(ServerViewModel? model)
+    private void StopAll()
     {
-        if (model == null)
-            foreach (var server in Servers)
-            {
-                server.Stop();
-            }
-        else
-            model.Stop();
+        foreach (var server in App.Servers)
+        {
+            server.Stop();
+        }
+    }
+
+    [RelayCommand]
+    private void Start(Server server)
+    {
+        server.Start();
+    }
+
+    [RelayCommand]
+    private void Stop(Server server)
+    {
+        server.Stop();
     }
 
     [RelayCommand]
     private void AddServer(ServerType mode)
     {
-        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(mode), _context));
+        App.Servers.Add(App.ServerFactory.GetServer(mode));
     }
 
     [RelayCommand]
-    private void RemoveServer(ServerViewModel model)
+    private void RemoveServer(Server server)
     {
-        Servers.Remove(model);
+        App.Servers.Remove(server);
+    }
+
+    [RelayCommand]
+    private void AddFirewallRules()
+    {
+        App.AddFirewallRules();
+    }
+
+    [RelayCommand]
+    private void OpenSite(Server server)
+    {
+        App.OpenSite(server);
+    }
+
+    [RelayCommand]
+    private void Exit()
+    {
+        Environment.Exit(0);
     }
 }

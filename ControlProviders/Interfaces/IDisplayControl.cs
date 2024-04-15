@@ -1,6 +1,6 @@
 ﻿namespace ControlProviders.Interfaces;
 
-public interface IDisplayControlProvider
+public interface IDisplayControl
 {
     void DisplayOff();
 }

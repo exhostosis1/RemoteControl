@@ -29,7 +29,7 @@ internal static partial class CoordsHelper
     }
 }
 
-public class MouseController(IMouseControlProvider provider, ILogger logger) : BaseApiController
+public class MouseController(IMouseControl provider, ILogger logger) : BaseApiController
 {
     public IActionResult Left()
     {

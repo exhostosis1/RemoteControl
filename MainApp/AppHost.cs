@@ -120,6 +120,35 @@ public sealed class AppHost: IDisposable
             Servers.Add(server);
         }
     }
+
+    public void OpenSite(Uri uri)
+    {
+        var address = uri.ToString().Replace("&", "^&");
+
+        RunCommand($"start {address}");
+    }
+
+    public void OpenSite(string uri)
+    {
+        Uri url;
+        try
+        {
+            url = new Uri(uri);
+        }
+        catch
+        {
+            return;
+        }
+
+        OpenSite(url);
+    }
+
+    public void OpenSite(Server server)
+    {
+        if (server.Type != ServerType.Web) return;
+
+        OpenSite(server.Config.Uri);
+    }
     #endregion
 
     #region Private methods

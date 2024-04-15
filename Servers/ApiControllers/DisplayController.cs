@@ -4,7 +4,7 @@ using Servers.Results;
 
 namespace Servers.ApiControllers;
 
-public class DisplayController(IDisplayControlProvider provider, ILogger logger) : BaseApiController
+public class DisplayController(IDisplayControl provider, ILogger logger) : BaseApiController
 {
     public IActionResult Darken()
     {

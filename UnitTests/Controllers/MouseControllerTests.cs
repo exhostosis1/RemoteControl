@@ -11,12 +11,12 @@ namespace UnitTests.Controllers;
 public class MouseControllerTests : IDisposable
 {
     private readonly MouseController _mouseController;
-    private readonly Mock<IMouseControlProvider> _mouseControlProvider;
+    private readonly Mock<IMouseControl> _mouseControlProvider;
 
     public MouseControllerTests()
     {
         var logger = Mock.Of<ILogger>();
-        _mouseControlProvider = new Mock<IMouseControlProvider>(MockBehavior.Strict);
+        _mouseControlProvider = new Mock<IMouseControl>(MockBehavior.Strict);
         _mouseController = new MouseController(_mouseControlProvider.Object, logger);
     }
 

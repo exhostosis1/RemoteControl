@@ -6,18 +6,19 @@
     xmlns:local="using:WinUI"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:notifyIcon="using:H.NotifyIcon"
+    xmlns:n="using:H.NotifyIcon"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <notifyIcon:TaskbarIcon
+    <n:TaskbarIcon
+        x:Name="TaskbarIcon"
         ToolTipText="Remote Control"
         IconSource="/Icons/Device.theme-dark.ico"
         MenuActivation="RightClick"
-        ContextMenuMode="ActiveWindow"
-    >
-        <notifyIcon:TaskbarIcon.ContextFlyout>
-            <MenuFlyout Opening="OnOpening"/>
-        </notifyIcon:TaskbarIcon.ContextFlyout>
-    </notifyIcon:TaskbarIcon>
+        ContextMenuMode="SecondWindow"
+        >
+        <n:TaskbarIcon.ContextFlyout>
+            <local:CustomMenuFlyout/>
+        </n:TaskbarIcon.ContextFlyout>
+    </n:TaskbarIcon>
 </Page>

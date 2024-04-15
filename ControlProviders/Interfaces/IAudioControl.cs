@@ -1,6 +1,6 @@
 ﻿namespace ControlProviders.Interfaces;
 
-public interface IAudioControlProvider
+public interface IAudioControl
 {
     public int GetVolume();
     public void SetVolume(int volume);

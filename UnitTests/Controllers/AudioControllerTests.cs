@@ -11,12 +11,12 @@ namespace UnitTests.Controllers;
 public class AudioControllerTests : IDisposable
 {
     private readonly AudioController _audioController;
-    private readonly Mock<IAudioControlProvider> _audioControlProvider;
+    private readonly Mock<IAudioControl> _audioControlProvider;
 
     public AudioControllerTests()
     {
         var logger = Mock.Of<ILogger>();
-        _audioControlProvider = new Mock<IAudioControlProvider>(MockBehavior.Strict);
+        _audioControlProvider = new Mock<IAudioControl>(MockBehavior.Strict);
         _audioController = new AudioController(_audioControlProvider.Object, logger);
     }
 

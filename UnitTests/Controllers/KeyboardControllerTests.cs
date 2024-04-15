@@ -11,12 +11,12 @@ namespace UnitTests.Controllers;
 public class KeyboardControllerTests : IDisposable
 {
     private readonly KeyboardController _keyboardController;
-    private readonly Mock<IKeyboardControlProvider> _keyboardControlProvider;
+    private readonly Mock<IKeyboardControl> _keyboardControlProvider;
 
     public KeyboardControllerTests()
     {
         var logger = Mock.Of<ILogger>();
-        _keyboardControlProvider = new Mock<IKeyboardControlProvider>(MockBehavior.Strict);
+        _keyboardControlProvider = new Mock<IKeyboardControl>(MockBehavior.Strict);
         _keyboardController = new KeyboardController(_keyboardControlProvider.Object, logger);
     }
 

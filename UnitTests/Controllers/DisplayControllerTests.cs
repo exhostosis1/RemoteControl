@@ -10,12 +10,12 @@ namespace UnitTests.Controllers;
 public class DisplayControllerTests : IDisposable
 {
     private readonly DisplayController _controller;
-    private readonly Mock<IDisplayControlProvider> _provider;
+    private readonly Mock<IDisplayControl> _provider;
 
     public DisplayControllerTests()
     {
         var logger = Mock.Of<ILogger>();
-        _provider = new Mock<IDisplayControlProvider>(MockBehavior.Strict);
+        _provider = new Mock<IDisplayControl>(MockBehavior.Strict);
 
         _controller = new DisplayController(_provider.Object, logger);
     }

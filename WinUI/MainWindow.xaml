@@ -9,12 +9,8 @@
     xmlns:servers="using:Servers"
     xmlns:tb="using:H.NotifyIcon"
     mc:Ignorable="d">
-
-    <NavigationView>
-        <Grid>
-            <local:ServersPage ViewModel="{x:Bind _viewModel}"/>
-            <local:NotificationPage ViewModel="{x:Bind _viewModel}"/>
-        </Grid>
-    </NavigationView>
-
+        <StackPanel>
+            <local:ServersPage/>
+            <local:NotificationPage/>
+        </StackPanel>
 </Window>

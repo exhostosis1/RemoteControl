@@ -30,8 +30,6 @@ namespace WinUI;
 /// </summary>
 public sealed partial class MainWindow : Window
 {
-    private readonly ViewModel _viewModel = new();
-
     public MainWindow()
     {
         this.InitializeComponent();
