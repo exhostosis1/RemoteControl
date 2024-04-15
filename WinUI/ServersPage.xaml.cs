@@ -19,10 +19,22 @@ public sealed partial class ServersPage : Page
         this.InitializeComponent();
     }
 
-    private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+    private void ToggleButton_OnChecked(object sender, RoutedEventArgs _)
     {
         if (sender is not CheckBox { CommandParameter: Server server }) return;
 
         ViewModel.ToggleCommand.Execute(server);
+    }
+
+    private void ButtonRemove_OnClick(object sender, RoutedEventArgs _)
+    {
+        if (sender is not Button { CommandParameter: Server server }) return;
+
+        ViewModel.RemoveServerCommand.Execute(server);
+    }
+
+    private void ButtonUpdate_OnClick(object _, RoutedEventArgs __)
+    {
+        ViewModel.App.SaveConfig();
     }
 }

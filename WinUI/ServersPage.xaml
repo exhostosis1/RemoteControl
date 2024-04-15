@@ -1,67 +1,84 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Page
     x:Class="WinUI.ServersPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:WinUI"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    xmlns:servers="using:Servers"
     xmlns:converters="using:WinUI.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="using:WinUI"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:servers="using:Servers"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    
-    x:Name="RootPage">
+    mc:Ignorable="d">
 
     <Page.Resources>
-        <converters:ServerTypeToVisibilityConverter x:Key="ServerTypeToVisibilityConverter"/>
-        <converters:ServerStatusToCommandConverter x:Key="ServerStatusToCommandConverter"/>
+        <converters:ServerTypeToVisibilityConverter x:Key="ServerTypeToVisibilityConverter" />
     </Page.Resources>
 
-    <ItemsView ItemsSource="{x:Bind ViewModel.App.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ItemsView.ItemTemplate>
-            <DataTemplate x:DataType="servers:Server">
-                <ItemContainer>
-                <StackPanel Orientation="Horizontal">
-                        <CheckBox 
-                        IsChecked="{x:Bind Status, Mode=OneWay}"
-                        CommandParameter="{x:Bind}"
-                        Click="ToggleButton_OnChecked"
-                        />
-                        <TextBox 
-                        Text="{x:Bind Config.Name, Mode=OneWay}"/>
-                    <TextBlock 
-                        Text="{x:Bind Type, Mode=OneWay}"/>
-                    
-                    <TextBlock 
-                        Text="{x:Bind Config.Scheme, Mode=OneWay}" 
-                        Visibility="{x:Bind Type, 
-                        Converter={StaticResource ServerTypeToVisibilityConverter}, 
-                        ConverterParameter='Web'}"/>
-                    <TextBlock 
-                        Text="{x:Bind Config.Host, Mode=OneWay}" 
-                        Visibility="{x:Bind Type, 
-                        Converter={StaticResource ServerTypeToVisibilityConverter}, 
-                        ConverterParameter='Web'}"/>
-                    <TextBlock 
-                        Text="{x:Bind Config.Port, Mode=OneWay}" 
-                        Visibility="{x:Bind Type, 
-                        Converter={StaticResource ServerTypeToVisibilityConverter}, 
-                        ConverterParameter='Web'}"/>
+    <StackPanel>
+        <DropDownButton Content="Add server">
+            <DropDownButton.Flyout>
+                <MenuFlyout Placement="Bottom">
+                    <MenuFlyoutItem
+                        Command="{x:Bind ViewModel.AddServerCommand}"
+                        CommandParameter="{x:Bind servers:ServerType.Web}"
+                        Text="Web" />
+                    <MenuFlyoutItem
+                        Command="{x:Bind ViewModel.AddServerCommand}"
+                        CommandParameter="{x:Bind servers:ServerType.Bot}"
+                        Text="Bot" />
+                </MenuFlyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
 
-                    <TextBlock 
-                        Text="{x:Bind Config.ApiUri, Mode=OneWay}" 
-                        Visibility="{x:Bind Type, 
-                        Converter={StaticResource ServerTypeToVisibilityConverter}, 
-                        ConverterParameter='Bot'}"/>
-                    <TextBlock 
-                        Text="{x:Bind Config.ApiKey, Mode=OneWay}" 
-                        Visibility="{x:Bind Type, 
-                        Converter={StaticResource ServerTypeToVisibilityConverter}, 
-                        ConverterParameter='Bot'}"/>
-                </StackPanel>
-                </ItemContainer>
-            </DataTemplate>
-        </ItemsView.ItemTemplate>
-    </ItemsView>
+        <ItemsView
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            ItemsSource="{x:Bind ViewModel.App.Servers}">
+            <ItemsView.ItemTemplate>
+                <DataTemplate x:DataType="servers:Server">
+                    <ItemContainer>
+                        <Expander ExpandDirection="Down">
+                            <Expander.Header>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{x:Bind Config.Name}" />
+                                </StackPanel>
+                            </Expander.Header>
+                            <Expander.Content>
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox
+                                        Click="ToggleButton_OnChecked"
+                                        CommandParameter="{x:Bind}"
+                                        IsChecked="{x:Bind Status, Mode=OneWay}" />
+                                    <TextBox Text="{x:Bind Config.Name, Mode=OneWay}" />
+                                    <TextBlock Text="{x:Bind Type, Mode=OneWay}" />
+
+                                    <TextBlock Text="{x:Bind Config.Scheme, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+                                    <TextBlock Text="{x:Bind Config.Host, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+                                    <TextBlock Text="{x:Bind Config.Port, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+
+                                    <TextBlock Text="{x:Bind Config.ApiUri, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                                    <TextBlock Text="{x:Bind Config.ApiKey, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                                    <Button
+                                        HorizontalAlignment="Right"
+                                        Background="LightBlue"
+                                        Click="ButtonUpdate_OnClick"
+                                        CommandParameter="{x:Bind}"
+                                        Content="Update"
+                                        Foreground="Black" />
+                                    <Button
+                                        HorizontalAlignment="Right"
+                                        Background="DarkRed"
+                                        Click="ButtonRemove_OnClick"
+                                        CommandParameter="{x:Bind}"
+                                        Content="Remove"
+                                        Foreground="White" />
+                                </StackPanel>
+                            </Expander.Content>
+                        </Expander>
+                    </ItemContainer>
+                </DataTemplate>
+            </ItemsView.ItemTemplate>
+        </ItemsView>
+    </StackPanel>
 </Page>
