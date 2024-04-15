@@ -38,7 +38,7 @@
             <ItemsView.ItemTemplate>
                 <DataTemplate x:DataType="servers:Server">
                     <ItemContainer>
-                        <Expander ExpandDirection="Down">
+                        <Expander ExpandDirection="Down" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                             <Expander.Header>
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Text="{x:Bind Config.Name}" />
