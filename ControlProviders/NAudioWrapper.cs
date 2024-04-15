@@ -1,8 +1,7 @@
-﻿using NAudio.CoreAudioApi;
+﻿using ControlProviders.Interfaces;
+using NAudio.CoreAudioApi;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using ControlProviders.Interfaces;
 
 [assembly: InternalsVisibleTo("UnitTests")]
 
@@ -16,23 +15,14 @@ internal static partial class Utils
 
 public class NAudioWrapper : IAudioControl
 {
-    private MMDevice? _defaultDevice;
+    private readonly MMDeviceEnumerator _enumerator = new();
 
-    private MMDevice DefaultDevice
-    {
-        get => _defaultDevice ??= new MMDeviceEnumerator().GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-        set => _defaultDevice = value;
-    }
+    private MMDevice DefaultDevice => _defaultGuid == null
+        ? _enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia)
+        : Devices.First(x => GetGuid(x.ID) == _defaultGuid);
+    private IEnumerable<MMDevice> Devices => _enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
 
-    private IEnumerable<MMDevice>? _devices;
-
-    private IEnumerable<MMDevice> Devices => _devices ??= new MMDeviceEnumerator().EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
-
-    public NAudioWrapper()
-    {
-        if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            throw new Exception("OS not supported");
-    }
+    private Guid? _defaultGuid = null;
 
     private static Guid GetGuid(string input) => new(Utils.GuidRegex().Match(input).Value);
 
@@ -73,10 +63,7 @@ public class NAudioWrapper : IAudioControl
             });
     }
 
-    public void SetAudioDevice(Guid id)
-    {
-        DefaultDevice = Devices.First(x => GetGuid(x.ID) == id);
-    }
+    public void SetAudioDevice(Guid id) => _defaultGuid = id;
 
     public void SetAudioDevice(IAudioDevice device) => SetAudioDevice(device.Id);
 }
