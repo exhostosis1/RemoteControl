@@ -2,6 +2,9 @@
 using Servers;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
+using System.Threading;
 
 namespace WinUI;
 
@@ -10,14 +13,39 @@ public class CustomMenuFlyout: MenuFlyout
     private readonly ViewModel _viewModel = ViewModelProvider.GetViewModel();
     private MenuFlyoutItemBase[]? _baseItems = null;
 
+    private readonly SynchronizationContext _context;
+
     public CustomMenuFlyout()
     {
         PopulateContextMenu();
-
-        _viewModel.App.Servers.CollectionChanged += (_, _) =>
+        
+        _viewModel.App.Servers.CollectionChanged += (_, args) =>
         {
             PopulateContextMenu();
+
+            switch (args.Action)
+            {
+                case NotifyCollectionChangedAction.Add:
+                    foreach (Server argsNewItem in args.NewItems ?? Array.Empty<object>())
+                    {
+                        argsNewItem.PropertyChanged += ProcessServerStatusChanged;
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Remove:
+                    foreach (Server argsNewItem in args.OldItems ?? Array.Empty<object>())
+                    {
+                        argsNewItem.PropertyChanged -= ProcessServerStatusChanged;
+                    }
+                    break;
+                case NotifyCollectionChangedAction.Replace:
+                case NotifyCollectionChangedAction.Move:
+                case NotifyCollectionChangedAction.Reset:
+                default:
+                    break;
+            }
         };
+
+        _context = SynchronizationContext.Current ?? throw new Exception("No context found");
     }
 
     private void PopulateContextMenu()
@@ -102,11 +130,18 @@ public class CustomMenuFlyout: MenuFlyout
                 CommandParameter = server
             };
             yield return new MenuFlyoutSeparator();
+
+            server.PropertyChanged += ProcessServerStatusChanged;
         }
 
         foreach (var item in _baseItems ?? GenerateBaseItems())
         {
             yield return item;
         }
+    }
+
+    private void ProcessServerStatusChanged(object? sender, PropertyChangedEventArgs args)
+    {
+        _context.Post(_ => PopulateContextMenu(), null);
     }
 }

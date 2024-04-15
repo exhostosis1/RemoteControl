@@ -4,11 +4,16 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:WinUI"
+    xmlns:converters="using:WinUI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:n="using:H.NotifyIcon"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Page.Resources>
+        <converters:ToggleBoolConverter x:Name="ToggleBoolConverter"></converters:ToggleBoolConverter>
+    </Page.Resources>
 
     <n:TaskbarIcon
         x:Name="TaskbarIcon"
@@ -18,7 +23,32 @@
         ContextMenuMode="SecondWindow"
         >
         <n:TaskbarIcon.ContextFlyout>
-            <local:CustomMenuFlyout/>
+            <MenuFlyout>
+                <MenuFlyoutItem
+                    Command="{x:Bind _viewModel.StartAllCommand}">
+                    Start all
+                </MenuFlyoutItem>
+                <MenuFlyoutItem
+                    Command="{x:Bind _viewModel.StopAllCommand}">
+                    Stop all
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator/>
+                <ToggleMenuFlyoutItem 
+                    IsChecked="{x:Bind _viewModel.App.IsAutostart, Mode=OneWay}" 
+                    Command="{x:Bind _viewModel.ToggleAutostartCommand}"
+                    >
+                    Autostart
+                </ToggleMenuFlyoutItem>
+                <MenuFlyoutItem
+                    Command="{x:Bind _viewModel.AddFirewallRulesCommand}">
+                    Add firewall rule
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem
+                    Command="{x:Bind _viewModel.ExitCommand}">
+                    Exit
+                </MenuFlyoutItem>
+            </MenuFlyout>
         </n:TaskbarIcon.ContextFlyout>
     </n:TaskbarIcon>
 </Page>

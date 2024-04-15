@@ -1,4 +1,6 @@
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Servers;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
@@ -10,10 +12,17 @@ namespace WinUI;
 /// </summary>
 public sealed partial class ServersPage : Page
 {
-    private readonly ViewModel _viewModel = ViewModelProvider.GetViewModel();
+    public ViewModel ViewModel { get; set; } = ViewModelProvider.GetViewModel();
 
     public ServersPage()
     {
         this.InitializeComponent();
+    }
+
+    private void ToggleButton_OnChecked(object sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox { CommandParameter: Server server }) return;
+
+        ViewModel.ToggleCommand.Execute(server);
     }
 }

@@ -25,6 +25,12 @@ public partial class ViewModel: ObservableObject
     }
 
     [RelayCommand]
+    private void ToggleAutostart()
+    {
+        App.IsAutostart = !App.IsAutostart;
+    }
+
+    [RelayCommand]
     private void StartAll()
     {
         foreach (var server in App.Servers)
@@ -52,6 +58,15 @@ public partial class ViewModel: ObservableObject
     private void Stop(Server server)
     {
         server.Stop();
+    }
+
+    [RelayCommand]
+    private void Toggle(Server server)
+    {
+        if(server.Status)
+            server.Stop();
+        else
+            server.Start();
     }
 
     [RelayCommand]

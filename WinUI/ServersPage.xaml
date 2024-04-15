@@ -9,19 +9,29 @@
     mc:Ignorable="d"
     xmlns:servers="using:Servers"
     xmlns:converters="using:WinUI.Converters"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    
+    x:Name="RootPage">
 
     <Page.Resources>
         <converters:ServerTypeToVisibilityConverter x:Key="ServerTypeToVisibilityConverter"/>
+        <converters:ServerStatusToCommandConverter x:Key="ServerStatusToCommandConverter"/>
     </Page.Resources>
 
-    <ListView ItemsSource="{x:Bind _viewModel.App.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <ListView.ItemTemplate>
+    <ItemsView ItemsSource="{x:Bind ViewModel.App.Servers}" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <ItemsView.ItemTemplate>
             <DataTemplate x:DataType="servers:Server">
+                <ItemContainer>
                 <StackPanel Orientation="Horizontal">
-                    <CheckBox IsChecked="{x:Bind Status, Mode=OneWay}"/>
-                    <TextBox Text="{x:Bind Config.Name, Mode=OneWay}"/>
-                    <TextBlock Text="{x:Bind Type, Mode=OneWay}"/>
+                        <CheckBox 
+                        IsChecked="{x:Bind Status, Mode=OneWay}"
+                        CommandParameter="{x:Bind}"
+                        Click="ToggleButton_OnChecked"
+                        />
+                        <TextBox 
+                        Text="{x:Bind Config.Name, Mode=OneWay}"/>
+                    <TextBlock 
+                        Text="{x:Bind Type, Mode=OneWay}"/>
                     
                     <TextBlock 
                         Text="{x:Bind Config.Scheme, Mode=OneWay}" 
@@ -50,7 +60,8 @@
                         Converter={StaticResource ServerTypeToVisibilityConverter}, 
                         ConverterParameter='Bot'}"/>
                 </StackPanel>
+                </ItemContainer>
             </DataTemplate>
-        </ListView.ItemTemplate>
-    </ListView>
+        </ItemsView.ItemTemplate>
+    </ItemsView>
 </Page>

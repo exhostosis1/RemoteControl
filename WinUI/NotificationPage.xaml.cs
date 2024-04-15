@@ -10,6 +10,8 @@ namespace WinUI;
 /// </summary>
 public sealed partial class NotificationPage : Page
 {
+    private readonly ViewModel _viewModel = ViewModelProvider.GetViewModel();
+
     public NotificationPage()
     {
         this.InitializeComponent();
