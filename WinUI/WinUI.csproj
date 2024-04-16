@@ -15,7 +15,7 @@
 	  <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="NotificationPage.xaml" />
+    <None Remove="NotificationView.xaml" />
     <None Remove="ServersPage.xaml" />
   </ItemGroup>
   <ItemGroup>
@@ -55,7 +55,7 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <Page Update="NotificationPage.xaml">
+    <Page Update="NotificationView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Update="ServersPage.xaml">

@@ -19,6 +19,7 @@ using Microsoft.VisualBasic;
 using Servers;
 using System.Diagnostics;
 using System.Runtime.Versioning;
+using H.NotifyIcon;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.

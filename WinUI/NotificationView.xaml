@@ -1,26 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Page
+<UserControl
     x:Class="WinUI.NotificationPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:WinUI"
-    xmlns:converters="using:WinUI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:n="using:H.NotifyIcon"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <Page.Resources>
-        <converters:ToggleBoolConverter x:Name="ToggleBoolConverter"></converters:ToggleBoolConverter>
-    </Page.Resources>
+    mc:Ignorable="d">
 
     <n:TaskbarIcon
-        x:Name="TaskbarIcon"
+        x:Name="TrayIcon"
         ToolTipText="Remote Control"
         IconSource="/Icons/Device.theme-dark.ico"
         MenuActivation="RightClick"
         ContextMenuMode="SecondWindow"
+        LeftClickCommand="{x:Bind LeftClickCommand}"
         >
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
@@ -45,10 +39,10 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem
-                    Command="{x:Bind _viewModel.ExitCommand}">
+                    Command="{x:Bind ExitCommand}">
                     Exit
                 </MenuFlyoutItem>
             </MenuFlyout>
         </n:TaskbarIcon.ContextFlyout>
     </n:TaskbarIcon>
-</Page>
+</UserControl>

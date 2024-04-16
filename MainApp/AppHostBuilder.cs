@@ -35,7 +35,7 @@ public sealed class AppHostBuilder
 #if DEBUG
         _loggerProvider ??= new DebugLoggerProvider();
 #else
-        _loggerProvider ??= new FileLoggerProvider(CurrentDirectory, "error.log"), new FileLoggerOptions
+        _loggerProvider ??= new FileLoggerProvider(Path.Combine(CurrentDirectory, "error.log"), new FileLoggerOptions
         {
             Append = true,
             MinLevel = LogLevel.Error

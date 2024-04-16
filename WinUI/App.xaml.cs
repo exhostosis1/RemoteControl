@@ -1,5 +1,6 @@
-﻿using Microsoft.UI.Xaml;
-
+﻿using H.NotifyIcon;
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Media;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -16,6 +17,11 @@ namespace WinUI
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
+
+        public Window MainWindow { get; private set; }
+
+        public bool HandleClosedEvents { get; set; } = true;
+
         public App()
         {
             this.InitializeComponent();
@@ -25,13 +31,23 @@ namespace WinUI
         /// Invoked when the application is launched.
         /// </summary>
         /// <param name="args">Details about the launch request and process.</param>
-        protected override void OnLaunched(Microsoft.UI.Xaml.LaunchActivatedEventArgs args)
+        protected override void OnLaunched(LaunchActivatedEventArgs args)
         {
-            m_window = new MainWindow();
-            //m_window.ExtendsContentIntoTitleBar = true;
-            m_window.Activate();
-        }
+            MainWindow = new MainWindow
+            {
+                ExtendsContentIntoTitleBar = true,
+                SystemBackdrop = new MicaBackdrop()
+            };
 
-        private Window m_window;
+            MainWindow.Closed += (_, eventArgs) =>
+            {
+                if (!HandleClosedEvents) return;
+
+                eventArgs.Handled = true;
+                MainWindow.Hide();
+            };
+
+            MainWindow.Activate();
+        }
     }
 }
