@@ -18,7 +18,7 @@
     <Grid Margin="0,25,0,0">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
         <DropDownButton
@@ -42,14 +42,60 @@
 
         <ScrollViewer
             Grid.Row="1"
-            VerticalScrollBarVisibility="Visible"
-            VerticalScrollMode="Enabled">
-            <Grid Background="Red">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="700"></RowDefinition>
-                </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0">yo</TextBlock>
-            </Grid>
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <ItemsView
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                ItemsSource="{x:Bind ViewModel.App.Servers}">
+                <ItemsView.ItemTemplate>
+                    <DataTemplate x:DataType="servers:Server">
+                        <ItemContainer Margin="4,0,4,4">
+                            <Expander
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                ExpandDirection="Down">
+                                <Expander.Header>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{x:Bind Config.Name}" />
+                                    </StackPanel>
+                                </Expander.Header>
+                                <Expander.Content>
+                                    <StackPanel>
+                                        <CheckBox
+                                            Click="ToggleButton_OnChecked"
+                                            CommandParameter="{x:Bind}"
+                                            IsChecked="{x:Bind Status, Mode=OneWay}" />
+                                        <TextBox Text="{x:Bind Config.Name, Mode=OneWay}" />
+                                        <TextBlock Text="{x:Bind Type, Mode=OneWay}" />
+
+                                        <TextBlock Text="{x:Bind Config.Scheme, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+                                        <TextBlock Text="{x:Bind Config.Host, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+                                        <TextBlock Text="{x:Bind Config.Port, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+
+                                        <TextBlock Text="{x:Bind Config.ApiUri, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                                        <TextBlock Text="{x:Bind Config.ApiKey, Mode=OneWay}" Visibility="{x:Bind Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                                        <Button
+                                            HorizontalAlignment="Right"
+                                            Background="LightBlue"
+                                            Click="ButtonUpdate_OnClick"
+                                            CommandParameter="{x:Bind}"
+                                            Content="Update"
+                                            Foreground="Black" />
+                                        <Button
+                                            HorizontalAlignment="Right"
+                                            Background="DarkRed"
+                                            Click="ButtonRemove_OnClick"
+                                            CommandParameter="{x:Bind}"
+                                            Content="Remove"
+                                            Foreground="White" />
+                                    </StackPanel>
+                                </Expander.Content>
+                            </Expander>
+                        </ItemContainer>
+                    </DataTemplate>
+                </ItemsView.ItemTemplate>
+            </ItemsView>
         </ScrollViewer>
     </Grid>
 </Page>

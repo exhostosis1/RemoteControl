@@ -12,11 +12,11 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"></RowDefinition>
-            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="0"></RowDefinition>
         </Grid.RowDefinitions>
         <TextBlock Margin="40,15,0,0" Grid.Row="0">Remote Control</TextBlock>
         <local:ServersPage Margin="0, 0, 0, 0" Grid.Row="1"/>
-        <local:NotificationPage Grid.Row="2"/>
+        <local:Notification Grid.Row="2"/>
     </Grid>
 </Window>

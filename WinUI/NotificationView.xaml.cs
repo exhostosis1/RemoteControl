@@ -5,12 +5,12 @@ using System;
 
 namespace WinUI;
 
-public sealed partial class NotificationPage
+public sealed partial class Notification
 {
     private readonly ViewModel _viewModel = ViewModelProvider.GetViewModel();
     private readonly App _app;
 
-    public NotificationPage()
+    public Notification()
     {
         this.InitializeComponent();
 
