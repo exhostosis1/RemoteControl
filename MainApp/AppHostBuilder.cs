@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using MainApp.Interfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 

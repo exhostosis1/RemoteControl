@@ -16,7 +16,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="NotificationView.xaml" />
-    <None Remove="ServersPage.xaml" />
+    <None Remove="ServersView.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Page Remove="TrayIconView.xaml" />
@@ -58,7 +58,7 @@
     <Page Update="NotificationView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Update="ServersPage.xaml">
+    <Page Update="ServersView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <None Update="Icons\Device.theme-dark.ico">

@@ -1,14 +1,14 @@
-﻿using ControlProviders;
+﻿using System.ComponentModel;
+using MainApp.ControlProviders;
+using MainApp.Servers;
+using MainApp.Servers.ApiControllers;
+using MainApp.Servers.Listeners;
+using MainApp.Servers.Middleware;
 using Microsoft.Extensions.Logging;
-using Servers;
-using Servers.ApiControllers;
-using Servers.Listeners;
-using Servers.Middleware;
-using User32Wrapper = ControlProviders.User32Wrapper;
 
 namespace MainApp;
 
-public sealed class ServerFactory
+internal sealed class ServerFactory
 {
     private readonly SimpleHttpListener _webListener;
     private readonly IMiddleware[] _webMiddlewareChain;
@@ -41,10 +41,10 @@ public sealed class ServerFactory
         _botMiddlewareChain = [apiMiddleware];
     }
 
-    public Server GetServer(ServerType type, ServerConfig? config = null)
+    public Server GetServer(ServerConfig config)
     {
-        return new Server(type, type == ServerType.Web ? _webListener : _botListener,
-            type == ServerType.Web ? _webMiddlewareChain : _botMiddlewareChain,
-            _loggerProvider.CreateLogger(nameof(Server)), config);
+        return new Server(config, config.Type == ServerType.Web ? _webListener : _botListener,
+            config.Type == ServerType.Web ? _webMiddlewareChain : _botMiddlewareChain,
+            _loggerProvider.CreateLogger(nameof(Server)));
     }
 }

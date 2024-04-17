@@ -1,101 +1,117 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp;
-using Servers;
+using MainApp.Interfaces;
+using MainApp.Servers;
 using System;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
 
 namespace WinUI;
 
-public partial class ViewModel: ObservableObject
+internal partial class ViewModel: ObservableObject
 {
-    public readonly AppHost App;
+    private readonly AppHost _app = new AppHostBuilder().Build();
 
-    internal ViewModel()
+    public ViewModel()
     {
-        App = new AppHostBuilder().Build();
-
-        App.RunAll();
+        _app.StartAllServers();
+        PopulateServers();
     }
 
-    [RelayCommand]
-    private void SetAutostart(bool value)
+    public readonly ObservableCollection<ServerModel> Servers = [];
+
+    private void PopulateServers()
     {
-        App.IsAutostart = value;
+        Servers.Clear();
+
+        foreach (var server in _app.GetServers())
+        {
+            var model = new ServerModel
+            {
+                Id = server.Id,
+                IsAutostart = server.IsAutostart,
+                Name = server.Name,
+                Status = server.Status
+            };
+
+            switch (server)
+            {
+                case IWebServer web:
+                    model.ListeningUri = web.ListeningUri;
+                    break;
+                case IBotServer bot:
+                    model.ApiUri = bot.ApiUri;
+                    model.ApiKey = bot.ApiKey;
+                    model.Usernames = bot.Usernames;
+                    break;
+            }
+
+            Servers.Add(model);
+        }
     }
 
-    [RelayCommand]
-    private void ToggleAutostart()
+    public bool IsAutostart
     {
-        App.IsAutostart = !App.IsAutostart;
+        get => _app.GetAutostart();
+        set => _app.SetAutostart(value);
     }
 
     [RelayCommand]
     private void StartAll()
     {
-        foreach (var server in App.Servers)
-        {
-            server.Start();
-        }
+        _app.StartAllServers();
     }
 
     [RelayCommand]
     private void StopAll()
     {
-        foreach (var server in App.Servers)
-        {
-            server.Stop();
-        }
+        _app.StopAllServers();
     }
 
     [RelayCommand]
-    private void Start(Server server)
+    private void Start(Guid id)
     {
-        server.Start();
+        _app.StartServer(id);
     }
 
     [RelayCommand]
-    private void Stop(Server server)
+    private void Stop(Guid id)
     {
-        server.Stop();
+        _app.StopServer(id);
     }
 
     [RelayCommand]
-    private void Toggle(Server server)
+    private void Toggle(ServerModel server)
     {
-        if(server.Status)
-            server.Stop();
+        if (server.Status)
+            _app.StopServer(server.Id);
         else
-            server.Start();
+            _app.StartServer(server.Id);
     }
 
     [RelayCommand]
-    private void AddServer(ServerType mode)
+    private void AddServer(ServerType type)
     {
-        App.Servers.Add(App.ServerFactory.GetServer(mode));
+        _app.AddServer(type);
+        PopulateServers();
     }
 
     [RelayCommand]
-    private void RemoveServer(Server server)
+    private void RemoveServer(Guid id)
     {
-        App.Servers.Remove(server);
+        _app.RemoveServer(id);
+        PopulateServers();
     }
 
     [RelayCommand]
     private void AddFirewallRules()
     {
-        App.AddFirewallRules();
+        _app.AddFirewallRules();
     }
 
     [RelayCommand]
-    private void OpenSite(Server server)
+    private void OpenSite(ServerModel server)
     {
-        App.OpenSite(server);
-    }
-
-    [RelayCommand]
-    private void Exit()
-    {
-        Environment.Exit(0);
+        _app.OpenSite(server.ListeningUri);
     }
 }

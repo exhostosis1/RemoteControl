@@ -16,7 +16,7 @@
             <RowDefinition Height="0"></RowDefinition>
         </Grid.RowDefinitions>
         <TextBlock Margin="40,15,0,0" Grid.Row="0">Remote Control</TextBlock>
-        <local:ServersPage Margin="0, 0, 0, 0" Grid.Row="1"/>
+        <local:ServersView Margin="0, 0, 0, 0" Grid.Row="1"/>
         <local:Notification Grid.Row="2"/>
     </Grid>
 </Window>

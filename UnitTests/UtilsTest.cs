@@ -1,7 +1,7 @@
-﻿using Servers.ApiControllers;
-using Servers.Middleware;
-using Servers.Results;
-using ControlProviders;
+﻿using MainApp.ControlProviders;
+using MainApp.Servers.ApiControllers;
+using MainApp.Servers.Middleware;
+using MainApp.Servers.Results;
 
 namespace UnitTests;
 

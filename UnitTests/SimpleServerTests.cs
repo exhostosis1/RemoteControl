@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MainApp.Servers;
+using MainApp.Servers.DataObjects;
+using MainApp.Servers.Listeners;
+using MainApp.Servers.Middleware;
+using Microsoft.Extensions.Logging;
 using Moq;
-using Servers;
-using Servers.DataObjects;
-using Servers.Listeners;
-using Servers.Middleware;
 using System.ComponentModel;
 
 namespace UnitTests;
@@ -22,7 +22,7 @@ public partial class SimpleServerTests : IDisposable
         
         _middleware = new Mock<IMiddleware>(MockBehavior.Strict);
 
-        _server = new Server(ServerType.Web, _listener.Object, [_middleware.Object], logger);
+        _server = new Server(new ServerConfig(ServerType.Web), _listener.Object, [_middleware.Object], logger);
         
         _listener.Setup(x => x.StopListen());
     }
@@ -57,7 +57,8 @@ public partial class SimpleServerTests : IDisposable
                 mre.Set();
         };
 
-        _server.Start(config);
+        _server.Config = config ?? new ServerConfig(ServerType.Web);
+        _server.Start();
 
         mre.WaitOne(TimeSpan.FromSeconds(15));
 
@@ -126,7 +127,8 @@ public partial class SimpleServerTests : IDisposable
         var mre = new AutoResetEvent(false);
         _server.PropertyChanged += Handler;
 
-        _server.Start(config1);
+        _server.Config = config1;
+        _server.Start();
 
         mre.WaitOne(TimeSpan.FromSeconds(15));
 
@@ -137,7 +139,8 @@ public partial class SimpleServerTests : IDisposable
 
         _server.PropertyChanged += Handler;
 
-        _server.Restart(config2);
+        _server.Config = config2;
+        _server.Restart();
 
         mre.WaitOne(TimeSpan.FromSeconds(15));
 
@@ -265,7 +268,8 @@ public partial class SimpleServerTests : IDisposable
         var mre = new AutoResetEvent(false);
         _server.PropertyChanged += Handler;
 
-        _server.Start(config1);
+        _server.Config = config1;
+        _server.Start();
 
         mre.WaitOne(TimeSpan.FromSeconds(15));
 

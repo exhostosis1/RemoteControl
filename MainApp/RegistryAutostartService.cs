@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace MainApp;
 
-public class RegistryAutoStartService(ILogger logger)
+internal class RegistryAutoStartService(ILogger logger)
 {
     private readonly RegistryKey _regKey = Registry.CurrentUser.OpenSubKey("SOFTWARE")?.OpenSubKey("Microsoft")?.OpenSubKey("Windows")
         ?.OpenSubKey("CurrentVersion")?.OpenSubKey("Run", true) ?? throw new NullReferenceException("Cannot open autorun registry key");

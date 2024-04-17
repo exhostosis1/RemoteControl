@@ -6,7 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:n="using:H.NotifyIcon"
+    xmlns:local="using:WinUI"
     mc:Ignorable="d">
+
+    <UserControl.Resources>
+        <local:ViewModelProvider x:Name="vmp"/>
+    </UserControl.Resources>
 
     <n:TaskbarIcon
         x:Name="TrayIcon"
@@ -19,22 +24,21 @@
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem
-                    Command="{x:Bind _viewModel.StartAllCommand}">
+                    Command="{x:Bind vmp.ServersViewModel.StartAllCommand}">
                     Start all
                 </MenuFlyoutItem>
                 <MenuFlyoutItem
-                    Command="{x:Bind _viewModel.StopAllCommand}">
+                    Command="{x:Bind vmp.ServersViewModel.StopAllCommand}">
                     Stop all
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <ToggleMenuFlyoutItem 
-                    IsChecked="{x:Bind _viewModel.App.IsAutostart, Mode=OneWay}" 
-                    Command="{x:Bind _viewModel.ToggleAutostartCommand}"
+                    IsChecked="{x:Bind vmp.ServersViewModel.IsAutostart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     >
                     Autostart
                 </ToggleMenuFlyoutItem>
                 <MenuFlyoutItem
-                    Command="{x:Bind _viewModel.AddFirewallRulesCommand}">
+                    Command="{x:Bind vmp.ServersViewModel.AddFirewallRulesCommand}">
                     Add firewall rule
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>

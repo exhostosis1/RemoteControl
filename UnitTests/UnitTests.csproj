@@ -9,6 +9,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Listeners\**" />
+    <EmbeddedResource Remove="Listeners\**" />
+    <None Remove="Listeners\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
     <PackageReference Include="Moq" Version="4.20.70" />
     <PackageReference Include="xunit" Version="2.7.0" />
@@ -23,13 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ControlProviders\ControlProviders.csproj" />
     <ProjectReference Include="..\MainApp\MainApp.csproj" />
-    <ProjectReference Include="..\Servers\Servers.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Listeners\" />
   </ItemGroup>
 
 </Project>

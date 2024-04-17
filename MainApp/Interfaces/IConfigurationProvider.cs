@@ -1,6 +1,6 @@
-﻿using Servers;
+﻿using MainApp.Servers;
 
-namespace MainApp;
+namespace MainApp.Interfaces;
 
 public interface IConfigurationProvider
 {

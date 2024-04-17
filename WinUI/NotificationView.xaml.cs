@@ -7,7 +7,6 @@ namespace WinUI;
 
 public sealed partial class Notification
 {
-    private readonly ViewModel _viewModel = ViewModelProvider.GetViewModel();
     private readonly App _app;
 
     public Notification()

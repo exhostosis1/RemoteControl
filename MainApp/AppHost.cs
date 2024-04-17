@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MainApp.DTO;
+using MainApp.Interfaces;
+using MainApp.Servers;
+using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
-using Servers;
-using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Security.Principal;
 
@@ -13,55 +15,99 @@ public sealed class AppHost: IDisposable
     private readonly RegistryAutoStartService _autoStartService;
     private readonly IConfigurationProvider _configProvider;
 
-    public ServerFactory ServerFactory { get; init; }
-    public readonly ObservableCollection<Server> Servers = [];
+    private readonly ServerFactory _serverFactory;
+    private readonly List<Server> _servers = [];
 
-
-    private bool? _isAutostartCached = null;
-    public bool IsAutostart
+    private bool IsAutostart
     {
-        get => _isAutostartCached ??= _autoStartService.CheckAutoStart();
-        set
-        {
-            _autoStartService.SetAutoStart(value);
-            _isAutostartCached = null;
-        }
+        get => _autoStartService.CheckAutoStart();
+        set => _autoStartService.SetAutoStart(value);
     }
+
+    public event EventHandler<(Guid, bool)>? ServerStatusChanged; 
 
     #region Constructor
     internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
         RegistryAutoStartService autoStartService, IConfigurationProvider configProvider)
     {
         _logger = loggerProvider.CreateLogger(nameof(AppHost));
-        ServerFactory = serverFactory;
+        _serverFactory = serverFactory;
         _autoStartService = autoStartService;
         _configProvider = configProvider;
 
         ReloadServers();
         SetSystemEvents();
+
+        foreach (var server in _servers.Where(x => x.Config.AutoStart))
+        {
+            server.Start();
+        }
     }
     #endregion
 
-    private IEnumerable<Server> GenerateServers(IEnumerable<ServerConfig> configs) =>
-        configs.Select(config => ServerFactory.GetServer(config.Type, config));
-
     #region Public methods
-    public void RunAll()
+
+    public void StartAllServers()
     {
-        try
+        foreach (var server in _servers)
         {
-            foreach (var server in Servers.Where(x => x.Config.AutoStart))
-            {
-                server.Start();
-            }
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("{e.Message}", e.Message);
+            server.Start();
         }
     }
 
-    public static void RunCommand(string command, bool elevated = false)
+    public void StopAllServers()
+    {
+        foreach (var server in _servers)
+        {
+            server.Stop();
+        }
+    }
+
+    public bool StartServer(Guid id)
+    {
+        var s = _servers.First(x => x.Id == id);
+
+        s.Start();
+        return s.Status;
+    }
+
+    public bool StopServer(Guid id)
+    {
+        var s = _servers.First(x => x.Id == id);
+
+        s.Stop();
+        return s.Status;
+    }
+
+    public void SetConfig(Guid id, ServerConfig config)
+    {
+        var s = _servers.First(x => x.Id == id);
+
+        s.Config = config;
+    }
+
+    public Guid AddServer(ServerType type)
+    {
+        var s = CreateServer(new ServerConfig(type));
+        _servers.Add(s);
+
+        return s.Id;
+    }
+
+    public void RemoveServer(Guid id)
+    {
+        var s = _servers.First(x => x.Id == id);
+
+        s.PropertyChanged -= ServerStatusChangedHandler;
+        s.Stop();
+
+        _servers.Remove(s);
+    }
+
+    public bool GetAutostart() => IsAutostart;
+    public void SetAutostart(bool value) => IsAutostart = value;
+
+    public static void RunWindowsCommand(string command, bool elevated = false)
     {
         var proc = new Process();
 
@@ -79,7 +125,7 @@ public sealed class AppHost: IDisposable
 
     public void AddFirewallRules()
     {
-        var uris = Servers.Where(x => x is { Type: ServerType.Web })
+        var uris = _servers.Where(x => x is { Config.Type: ServerType.Web })
             .Select(x => x.Config.Uri);
 
         var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
@@ -90,34 +136,34 @@ public sealed class AppHost: IDisposable
             var command =
                 $"netsh advfirewall firewall add rule name=\"Remote Control\" dir=in action=allow profile=private localip={uri.Host} localport={uri.Port} protocol=tcp";
 
-            RunCommand(command, true);
+            RunWindowsCommand(command, true);
 
             command = $"netsh http add urlacl url={uri} user={translatedValue}";
 
-            RunCommand(command, true);
+            RunWindowsCommand(command, true);
         }
     }
 
     public void SaveConfig()
     {
-        _configProvider.SetConfig(Servers.Select(x => x.Config));
+        _configProvider.SetConfig(_servers.Select(x => x.Config));
     }
 
     public void ReloadServers()
     {
-        if (Servers.Count > 0)
+        if (_servers.Count > 0)
         {
-            foreach (var server in Servers.Where(x => x.Status))
+            foreach (var server in _servers.Where(x => x.Status))
             {
                 server.Stop();
             }
 
-            Servers.Clear();
+            _servers.Clear();
         }
 
-        foreach (var server in GenerateServers(_configProvider.GetConfig()))
+        foreach (var config in _configProvider.GetConfig())
         {
-            Servers.Add(server);
+            _servers.Add(CreateServer(config));
         }
     }
 
@@ -125,7 +171,7 @@ public sealed class AppHost: IDisposable
     {
         var address = uri.ToString().Replace("&", "^&");
 
-        RunCommand($"start {address}");
+        RunWindowsCommand($"start {address}");
     }
 
     public void OpenSite(string uri)
@@ -143,15 +189,46 @@ public sealed class AppHost: IDisposable
         OpenSite(url);
     }
 
-    public void OpenSite(Server server)
+    public IEnumerable<IServer> GetServers()
     {
-        if (server.Type != ServerType.Web) return;
-
-        OpenSite(server.Config.Uri);
+        return _servers.Select<Server, IServer>(server =>
+        {
+            return server.Config.Type switch
+            {
+                ServerType.Web => new WebServerDto
+                {
+                    Id = server.Id,
+                    Name = server.Config.Name,
+                    IsAutostart = server.Config.AutoStart,
+                    ListeningUri = server.Config.Uri,
+                    Status = server.Status
+                },
+                ServerType.Bot => new BotServerDto
+                {
+                    Id = server.Id,
+                    Name = server.Config.Name,
+                    IsAutostart = server.Config.AutoStart,
+                    ApiUri = new Uri(server.Config.ApiUri),
+                    ApiKey = server.Config.ApiKey,
+                    Status = server.Status,
+                    Usernames = [.. server.Config.Usernames]
+                },
+                _ => throw new ArgumentOutOfRangeException()
+            };
+        });
     }
     #endregion
 
     #region Private methods
+
+    private Server CreateServer(ServerConfig config)
+    {
+        var result = _serverFactory.GetServer(config);
+        result.PropertyChanged += ServerStatusChangedHandler;
+
+        return result;
+    }
+
     private void SetSystemEvents()
     {
 
@@ -168,7 +245,7 @@ public sealed class AppHost: IDisposable
             {
                 _logger.LogInformation("Stopping servers due to logout");
 
-                _runningServers = Servers.Where(x => x.Status).ToList();
+                _runningServers = _servers.Where(x => x.Status).ToList();
                 _runningServers.ForEach(x => x.Stop());
 
                 break;
@@ -192,16 +269,24 @@ public sealed class AppHost: IDisposable
 
         }
     }
+
+    private void ServerStatusChangedHandler(object? sender, PropertyChangedEventArgs args)
+    {
+        if (sender is not Server server || args.PropertyName != nameof(server.Status)) return;
+
+        ServerStatusChanged?.Invoke(this, (server.Id, server.Status));
+    }
     #endregion
 
     public void Dispose()
     {
         SystemEvents.SessionSwitch -= SessionSwitchHandler;
-        foreach (var server in Servers)
+        foreach (var server in _servers)
         {
             server.Stop();
+            server.PropertyChanged -= ServerStatusChangedHandler;
         }
 
-        Servers.Clear();
+        _servers.Clear();
     }
 }

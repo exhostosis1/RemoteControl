@@ -1,8 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MainApp.Servers.DataObjects;
+using MainApp.Servers.Middleware;
+using Microsoft.Extensions.Logging;
 using Moq;
-using Servers.DataObjects;
-using Servers.Middleware;
-using System.Net;
 
 namespace UnitTests.Middleware;
 

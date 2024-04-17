@@ -9,6 +9,8 @@ namespace Servers;
 
 public class Server: INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public ServerType Type { get; }
     public bool Status { get; private set; } = false;
 
@@ -21,20 +23,8 @@ public class Server: INotifyPropertyChanged
     private readonly IProgress<bool> _progress;
 
     private readonly TaskFactory _factory = new();
-    
-    private ServerConfig _currentConfig;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public ServerConfig Config
-    {
-        get => _currentConfig;
-        set
-        {
-            _currentConfig = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Config)));
-        }
-    }
+    public ServerConfig Config { get; set; }
 
     private static Func<RequestDelegate, RequestDelegate> GetFunction(IMiddleware middleware)
         => next =>
@@ -49,7 +39,7 @@ public class Server: INotifyPropertyChanged
 
         _logger = logger;
         _listener = listener;
-        _currentConfig = config ?? new ServerConfig(type);
+        Config = config ?? new ServerConfig(type);
 
         RequestDelegate action = (context) =>
         {
@@ -70,11 +60,8 @@ public class Server: INotifyPropertyChanged
         });
     }
 
-    public void Start(ServerConfig? config = null)
+    public void Start()
     {
-        if (config != null)
-            Config = config;
-
         if (Status)
         {
             Stop();
@@ -102,10 +89,10 @@ public class Server: INotifyPropertyChanged
         _factory.StartNew(async () => await ProcessRequestAsync(_cts.Token), TaskCreationOptions.LongRunning);
     }
 
-    public void Restart(ServerConfig? config = null)
+    public void Restart()
     {
         Stop();
-        Start(config);
+        Start();
     }
 
     private async Task ProcessRequestAsync(CancellationToken token)

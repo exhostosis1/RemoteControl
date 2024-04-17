@@ -1,11 +1,8 @@
 ﻿namespace WinUI;
 
-public static class ViewModelProvider
+internal class ViewModelProvider
 {
     private static ViewModel? _viewModel = null;
 
-    public static ViewModel GetViewModel()
-    {
-        return _viewModel ??= new ViewModel();
-    }
+    public ViewModel ServersViewModel => _viewModel ??= new ViewModel();
 }

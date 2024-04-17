@@ -1,10 +1,10 @@
-﻿using ControlProviders.Enums;
-using ControlProviders.Interfaces;
+﻿using MainApp.ControlProviders.Enums;
+using MainApp.ControlProviders.Interfaces;
+using MainApp.Servers.ApiControllers;
+using MainApp.Servers.Middleware;
+using MainApp.Servers.Results;
 using Microsoft.Extensions.Logging;
 using Moq;
-using Servers.ApiControllers;
-using Servers.Middleware;
-using Servers.Results;
 
 namespace UnitTests.Controllers;
 

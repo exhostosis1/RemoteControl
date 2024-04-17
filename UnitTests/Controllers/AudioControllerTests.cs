@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MainApp.ControlProviders.Interfaces;
+using MainApp.Servers.ApiControllers;
+using MainApp.Servers.Middleware;
+using MainApp.Servers.Results;
+using Microsoft.Extensions.Logging;
 using Moq;
-using Servers.ApiControllers;
-using Servers.Middleware;
 using System.Text.Json;
-using ControlProviders.Interfaces;
-using Servers.Results;
 
 namespace UnitTests.Controllers;
 

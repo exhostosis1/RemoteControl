@@ -5,7 +5,7 @@ namespace Servers;
 public class ServerConfig(ServerType type)
 {
     public ServerType Type => type;
-    public string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = $"New {(type == ServerType.Web ? "web server" : "bot")}";
     public bool AutoStart { get; set; }
 
     #region Web
