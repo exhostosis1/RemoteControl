@@ -17,6 +17,7 @@
   <ItemGroup>
     <None Remove="NotificationView.xaml" />
     <None Remove="ServersView.xaml" />
+    <None Remove="Views\ServerView.xaml" />
   </ItemGroup>
   <ItemGroup>
     <Page Remove="TrayIconView.xaml" />
@@ -55,6 +56,9 @@
     <None Update="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <Page Update="Views\ServerView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Update="NotificationView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -75,7 +79,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Views\" />
     <Folder Include="Windows\" />
   </ItemGroup>
 

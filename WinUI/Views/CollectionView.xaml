@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="WinUI.Views.CollectionView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:servers="using:MainApp.Servers"
+    xmlns:viewmodels="using:WinUI.ViewModels"
+    xmlns:views="using:WinUI.Views"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    mc:Ignorable="d">
+
+    <Grid Margin="0,25,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DropDownButton
+            Grid.Row="0"
+            Margin="0,4,4,4"
+            HorizontalAlignment="Right"
+            Content="Add server">
+            <DropDownButton.Flyout>
+                <MenuFlyout Placement="Bottom">
+                    <MenuFlyoutItem
+                        Command="{x:Bind AddServerCommand}"
+                        CommandParameter="{x:Bind servers:ServerType.Web}"
+                        Text="Web" />
+                    <MenuFlyoutItem
+                        Command="{x:Bind AddServerCommand}"
+                        CommandParameter="{x:Bind servers:ServerType.Bot}"
+                        Text="Bot" />
+                </MenuFlyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
+
+        <ScrollViewer
+            Grid.Row="1"
+            VerticalScrollBarVisibility="Auto"
+            VerticalScrollMode="Auto">
+            <ItemsView
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                ItemsSource="{x:Bind Servers}">
+                <ItemsView.ItemTemplate>
+                    <DataTemplate x:DataType="viewmodels:ServerViewModel">
+                        <ItemContainer Margin="4,0,4,4">
+                            <views:ServerView ViewModel="{x:Bind}" />
+                        </ItemContainer>
+                    </DataTemplate>
+                </ItemsView.ItemTemplate>
+            </ItemsView>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
