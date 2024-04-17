@@ -1,23 +1,15 @@
-using System;
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
-using H.NotifyIcon.Core;
 using MainApp;
 using Microsoft.UI.Xaml;
+using System;
 
 namespace WinUI.Views;
 
 public sealed partial class NotificationView
 {
     private readonly App _app;
-    private readonly AppHost _appHost = ApphostProvider.AppHost;
-
-    public bool IsAutostart
-    {
-        get => _appHost.GetAutostart();
-        set => _appHost.SetAutostart(value);
-    }
+    public readonly AppHost AppHost = ApphostProvider.AppHost;
 
     public NotificationView()
     {
@@ -40,19 +32,19 @@ public sealed partial class NotificationView
     [RelayCommand]
     private void StartAll()
     {
-        _appHost.StartAllServers();
+        AppHost.StartAllServers();
     }
 
     [RelayCommand]
     private void StopAll()
     {
-        _appHost.StopAllServers();
+        AppHost.StopAllServers();
     }
 
     [RelayCommand]
     private void AddFirewallRules()
     {
-        _appHost.AddFirewallRules();
+        AppHost.AddFirewallRules();
     }
 
     [RelayCommand]

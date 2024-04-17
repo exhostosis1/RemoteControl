@@ -5,9 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="using:WinUI.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="using:WinUI.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:viewmodels="using:WinUI.ViewModels"
     mc:Ignorable="d">
 
     <UserControl.Resources>
@@ -21,19 +19,20 @@
         ExpandDirection="Down">
         <Expander.Header>
             <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{x:Bind ViewModel.Status, Mode=OneWay}" />
+                <CheckBox 
+                    IsChecked="{x:Bind ViewModel.Status, Mode=OneWay}"/>
                 <TextBlock
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     HorizontalTextAlignment="Left"
-                    Text="{x:Bind ViewModel.Type}" />
+                    Text="{x:Bind ViewModel.Config.Type}" />
                 <TextBlock
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     HorizontalTextAlignment="Left"
-                    Text="{x:Bind ViewModel.Name}" />
+                    Text="{x:Bind ViewModel.Config.Name}" />
             </StackPanel>
         </Expander.Header>
         <Expander.Content>
@@ -55,29 +54,29 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="3"
                     Margin="4"
-                    Text="{x:Bind ViewModel.Name, Mode=OneWay}" />
+                    Text="{x:Bind ViewModel.Config.Name, Mode=OneWay}" />
 
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="0"
                     Grid.ColumnSpan="3"
                     Margin="4"
-                    Text="{x:Bind ViewModel.ListeningUri, Mode=OneWay, Converter={StaticResource UriToStringConverter}}"
-                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+                    Text="{x:Bind ViewModel.Config.Uri, Mode=OneWay, Converter={StaticResource UriToStringConverter}}"
+                    Visibility="{x:Bind ViewModel.Config.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
 
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="0"
                     Margin="4"
-                    Text="{x:Bind ViewModel.ApiUri, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                    Text="{x:Bind ViewModel.Config.ApiUri, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.Config.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="1"
                     Grid.ColumnSpan="2"
                     Margin="4"
-                    Text="{x:Bind ViewModel.ApiKey, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                    Text="{x:Bind ViewModel.Config.ApiKey, Mode=OneWay}"
+                    Visibility="{x:Bind ViewModel.Config.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
 
                 <Button
                     Grid.Row="0"
@@ -86,7 +85,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Background="LightBlue"
-                    Command="{x:Bind ViewModel.UpdateCommand}"
+                    Command="{x:Bind UpdateCommand}"
                     Content="Update"
                     Foreground="Black" />
                 <Button
@@ -96,7 +95,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Background="DarkRed"
-                    Command="{x:Bind ViewModel.RemoveCommand}"
+                    Command="{x:Bind RemoveCommand}"
                     Content="Remove"
                     Foreground="White" />
             </Grid>

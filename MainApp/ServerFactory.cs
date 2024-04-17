@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using MainApp.ControlProviders;
+﻿using MainApp.ControlProviders;
 using MainApp.Servers;
 using MainApp.Servers.ApiControllers;
 using MainApp.Servers.Listeners;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MainApp;
 
-internal sealed class ServerFactory
+public sealed class ServerFactory
 {
     private readonly SimpleHttpListener _webListener;
     private readonly IMiddleware[] _webMiddlewareChain;

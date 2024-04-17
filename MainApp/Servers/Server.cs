@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MainApp.Servers;
 
-internal class Server: INotifyPropertyChanged
+public class Server: INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 

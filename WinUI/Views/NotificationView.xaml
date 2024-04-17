@@ -28,7 +28,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <ToggleMenuFlyoutItem 
-                    IsChecked="{x:Bind IsAutostart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsChecked="{x:Bind AppHost.IsAutostart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     >
                     Autostart
                 </ToggleMenuFlyoutItem>
