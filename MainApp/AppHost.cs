@@ -5,7 +5,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Security.Principal;
+
+[assembly: InternalsVisibleTo("UnitTests")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 namespace MainApp;
 

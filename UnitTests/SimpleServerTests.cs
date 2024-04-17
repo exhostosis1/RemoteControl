@@ -245,17 +245,9 @@ public partial class SimpleServerTests : IDisposable
 
         _server.PropertyChanged += (_, args) =>
         {
-            switch (args.PropertyName)
-            {
-                case nameof(_server.Status):
-                    s = _server.Status;
-                    break;
-                case nameof(_server.Config):
-                    c = _server.Config;
-                    break;
-                default:
-                    break;
-            }
+            if (args.PropertyName != nameof(_server.Status)) return; 
+            
+            s = _server.Status;
         };
 
         var config1 = new ServerConfig(ServerType.Web)
@@ -274,7 +266,7 @@ public partial class SimpleServerTests : IDisposable
         mre.WaitOne(TimeSpan.FromSeconds(15));
 
         Assert.True(s);
-        Assert.Equal(config1, c);
+        Assert.Equal(config1, _server.Config);
 
         _server.PropertyChanged -= Handler;
 

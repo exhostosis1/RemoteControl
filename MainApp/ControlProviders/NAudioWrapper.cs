@@ -1,9 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using MainApp.ControlProviders.Interfaces;
+﻿using MainApp.ControlProviders.Interfaces;
 using NAudio.CoreAudioApi;
-
-[assembly: InternalsVisibleTo("UnitTests")]
+using System.Text.RegularExpressions;
 
 namespace MainApp.ControlProviders;
 

@@ -11,11 +11,10 @@ namespace WinUI.ViewModels;
 
 internal partial class ServersViewModel: ObservableObject
 {
-    private readonly AppHost _app = new AppHostBuilder().Build();
+    private readonly AppHost _app = ApphostProvider.AppHost;
 
     public ServersViewModel()
     {
-        _app.StartAllServers();
         PopulateServers();
 
         _app.ServerStatusChanged += (_, value) =>

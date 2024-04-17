@@ -1,11 +1,8 @@
-﻿using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using MainApp.ControlProviders.Enums;
+﻿using MainApp.ControlProviders.Enums;
 using MainApp.ControlProviders.Interfaces;
 using MainApp.Servers.Results;
 using Microsoft.Extensions.Logging;
-
-[assembly: InternalsVisibleTo("UnitTests")]
+using System.Text.RegularExpressions;
 
 namespace MainApp.Servers.ApiControllers;
 
