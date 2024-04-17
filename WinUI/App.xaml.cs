@@ -2,6 +2,7 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using WinUI.Windows;
 
 
 // To learn more about WinUI, the WinUI project structure,

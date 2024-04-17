@@ -1,4 +1,4 @@
-namespace WinUI;
+namespace WinUI.Views;
 
 public sealed partial class ServersView
 {

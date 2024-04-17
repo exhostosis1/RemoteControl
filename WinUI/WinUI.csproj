@@ -74,6 +74,10 @@
       <Generator>MSBuild:Compile</Generator>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\" />
+    <Folder Include="Windows\" />
+  </ItemGroup>
 
   <!-- 
     Defining the "HasPackageAndPublishMenuAddedByProject" property here allows the Solution 

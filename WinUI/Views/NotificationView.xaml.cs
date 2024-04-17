@@ -1,15 +1,16 @@
+using System;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
+using H.NotifyIcon.Core;
 using Microsoft.UI.Xaml;
-using System;
 
-namespace WinUI;
+namespace WinUI.Views;
 
-public sealed partial class Notification
+public sealed partial class NotificationView
 {
     private readonly App _app;
 
-    public Notification()
+    public NotificationView()
     {
         this.InitializeComponent();
 

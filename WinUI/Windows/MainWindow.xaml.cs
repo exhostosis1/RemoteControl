@@ -1,20 +1,19 @@
+using Windows.Graphics;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using System;
-using Windows.Graphics;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace WinUI;
+namespace WinUI.Windows;
 
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
 public sealed partial class MainWindow : Window
 {
-    private const int Width = 640;
+    private const int Width = 860;
     private const int Height = 480;
 
     public MainWindow()

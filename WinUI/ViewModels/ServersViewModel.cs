@@ -1,21 +1,27 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp;
 using MainApp.Interfaces;
 using MainApp.Servers;
-using System;
-using System.Collections.ObjectModel;
 
-namespace WinUI;
+namespace WinUI.ViewModels;
 
-internal partial class ViewModel: ObservableObject
+internal partial class ServersViewModel: ObservableObject
 {
     private readonly AppHost _app = new AppHostBuilder().Build();
 
-    public ViewModel()
+    public ServersViewModel()
     {
         _app.StartAllServers();
         PopulateServers();
+
+        _app.ServerStatusChanged += (_, value) =>
+        {
+            Servers.First(x => x.Id == value.Item1).Status = value.Item2;
+        };
     }
 
     public readonly ObservableCollection<ServerModel> Servers = [];
@@ -37,9 +43,11 @@ internal partial class ViewModel: ObservableObject
             switch (server)
             {
                 case IWebServer web:
+                    model.Type = ServerType.Web;
                     model.ListeningUri = web.ListeningUri;
                     break;
                 case IBotServer bot:
+                    model.Type = ServerType.Bot;
                     model.ApiUri = bot.ApiUri;
                     model.ApiKey = bot.ApiKey;
                     model.Usernames = bot.Usernames;

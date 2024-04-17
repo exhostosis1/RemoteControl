@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <UserControl
-    x:Class="WinUI.Notification"
+    x:Class="WinUI.Views.NotificationView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:n="using:H.NotifyIcon"
     xmlns:local="using:WinUI"
+    xmlns:viewModels="using:WinUI.ViewModels"
     mc:Ignorable="d">
 
     <UserControl.Resources>
-        <local:ViewModelProvider x:Name="vmp"/>
+        <viewModels:ServersViewModel x:Name="ViewModel"/>
     </UserControl.Resources>
 
     <n:TaskbarIcon
@@ -24,21 +25,21 @@
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem
-                    Command="{x:Bind vmp.ServersViewModel.StartAllCommand}">
+                    Command="{x:Bind ViewModel.StartAllCommand}">
                     Start all
                 </MenuFlyoutItem>
                 <MenuFlyoutItem
-                    Command="{x:Bind vmp.ServersViewModel.StopAllCommand}">
+                    Command="{x:Bind ViewModel.StopAllCommand}">
                     Stop all
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <ToggleMenuFlyoutItem 
-                    IsChecked="{x:Bind vmp.ServersViewModel.IsAutostart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsChecked="{x:Bind ViewModel.IsAutostart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     >
                     Autostart
                 </ToggleMenuFlyoutItem>
                 <MenuFlyoutItem
-                    Command="{x:Bind vmp.ServersViewModel.AddFirewallRulesCommand}">
+                    Command="{x:Bind ViewModel.AddFirewallRulesCommand}">
                     Add firewall rule
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
