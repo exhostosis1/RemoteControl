@@ -28,7 +28,7 @@
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     HorizontalTextAlignment="Left"
-                    Text="{x:Bind ViewModel.Type}" />
+                    Text="{x:Bind ViewModel.Type, Mode=OneWay}" />
                 <TextBlock
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"
