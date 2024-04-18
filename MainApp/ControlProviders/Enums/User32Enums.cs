@@ -117,21 +117,21 @@ internal enum User32KeyCodes
     Mail = 0xB4,
     MediaSelect = 0xB5,
 }
-public enum MonitorState
+internal enum MonitorState
 {
     MonitorStateOn = -1,
     MonitorStateOff = 2,
     MonitorStateStandBy = 1
 }
 
-public enum InputType : uint
+internal enum InputType : uint
 {
     Mouse = 0,
     Keyboard = 1
 }
 
 [Flags]
-public enum KeyboardFlag : uint
+internal enum KeyboardFlag : uint
 {
     KeyDown = 0x0000,
     ExtendedKey = 0x0001,
@@ -140,7 +140,7 @@ public enum KeyboardFlag : uint
 }
 
 [Flags]
-public enum MouseFlag : uint
+internal enum MouseFlag : uint
 {
     Move = 0x0001,
     LeftDown = 0x0002,

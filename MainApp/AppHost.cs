@@ -17,11 +17,11 @@ public sealed class AppHost: IDisposable
     private readonly ILogger _logger;
     private readonly RegistryAutoStartService _autoStartService;
     private readonly IConfigurationProvider _configProvider;
+    private readonly ServerFactory _serverFactory;
 
-    public readonly ServerFactory ServerFactory;
-    public readonly ObservableCollection<Server> Servers = [];
+    public readonly ObservableCollection<IServer> Servers = [];
 
-    public bool IsAutostart
+    public bool IsAutorun
     {
         get => _autoStartService.CheckAutoStart();
         set => _autoStartService.SetAutoStart(value);
@@ -32,7 +32,7 @@ public sealed class AppHost: IDisposable
         RegistryAutoStartService autoStartService, IConfigurationProvider configProvider)
     {
         _logger = loggerProvider.CreateLogger(nameof(AppHost));
-        ServerFactory = serverFactory;
+        _serverFactory = serverFactory;
         _autoStartService = autoStartService;
         _configProvider = configProvider;
 
@@ -47,49 +47,9 @@ public sealed class AppHost: IDisposable
     #endregion
 
     #region Public methods
-
-    public void StartAllServers()
-    {
-        foreach (var server in Servers)
-        {
-            server.Start();
-        }
-    }
-
-    public void StopAllServers()
-    {
-        foreach (var server in Servers)
-        {
-            server.Stop();
-        }
-    }
-
-    public bool StartServer(Guid id)
-    {
-        var s = Servers.First(x => x.Id == id);
-
-        s.Start();
-        return s.Status;
-    }
-
-    public bool StopServer(Guid id)
-    {
-        var s = Servers.First(x => x.Id == id);
-
-        s.Stop();
-        return s.Status;
-    }
-
-    public void SetConfig(Guid id, ServerConfig config)
-    {
-        var s = Servers.First(x => x.Id == id);
-
-        s.Config = config;
-    }
-
     public Guid AddServer(ServerType type)
     {
-        var s = ServerFactory.GetServer(new ServerConfig(type));
+        var s = _serverFactory.GetServer(new ServerConfig(type));
         Servers.Add(s);
 
         return s.Id;
@@ -103,10 +63,7 @@ public sealed class AppHost: IDisposable
         Servers.Remove(s);
     }
 
-    public bool GetAutostart() => IsAutostart;
-    public void SetAutostart(bool value) => IsAutostart = value;
-
-    public static void RunWindowsCommand(string command, bool elevated = false)
+    private static void RunWindowsCommand(string command, bool elevated = false)
     {
         var proc = new Process();
 
@@ -162,7 +119,7 @@ public sealed class AppHost: IDisposable
 
         foreach (var config in _configProvider.GetConfig())
         {
-            Servers.Add(ServerFactory.GetServer(config));
+            Servers.Add(_serverFactory.GetServer(config));
         }
     }
 
@@ -196,7 +153,7 @@ public sealed class AppHost: IDisposable
         SystemEvents.SessionSwitch += SessionSwitchHandler;
     }
 
-    private List<Server> _runningServers = [];
+    private List<IServer> _runningServers = [];
 
     private void SessionSwitchHandler(object sender, SessionSwitchEventArgs args)
     {

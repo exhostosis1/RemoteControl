@@ -49,7 +49,7 @@ public class StaticFilesMiddlewareTests : IDisposable
     [InlineData("/file.css", RequestStatus.Custom, FileContents)]
     [InlineData("..", RequestStatus.NotFound, "")]
     [InlineData("/unexisting.file", RequestStatus.Custom, "")]
-    public async Task RequestTest(string path, RequestStatus status, string response)
+    internal async Task RequestTest(string path, RequestStatus status, string response)
     {
         var context = new RequestContext
         {

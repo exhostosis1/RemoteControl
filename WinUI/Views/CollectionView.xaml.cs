@@ -1,27 +1,13 @@
-using CommunityToolkit.Mvvm.Input;
-using MainApp;
-using MainApp.Servers;
+using WinUI.ViewModels;
 
 namespace WinUI.Views;
 
 internal sealed partial class CollectionView
 {
-    public readonly AppHost AppHost = ApphostProvider.AppHost;
+    public ServersCollectionViewModel ViewModel { get; set; } = new();
 
     public CollectionView()
     {
         this.InitializeComponent();
-    }
-
-    [RelayCommand]
-    private void ReloadServers()
-    {
-        AppHost.ReloadServers();
-    }
-
-    [RelayCommand]
-    private void AddServer(ServerType type)
-    {
-        AppHost.AddServer(type);
     }
 }

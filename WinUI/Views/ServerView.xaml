@@ -11,6 +11,7 @@
     <UserControl.Resources>
         <converters:ServerTypeToVisibilityConverter x:Name="ServerTypeToVisibilityConverter" />
         <converters:UriToStringConverter x:Name="UriToStringConverter" />
+        <converters:ListToStringConverter x:Name="ListToStringConverter"/>
     </UserControl.Resources>
 
     <Expander
@@ -19,20 +20,21 @@
         ExpandDirection="Down">
         <Expander.Header>
             <StackPanel Orientation="Horizontal">
-                <CheckBox 
-                    IsChecked="{x:Bind ViewModel.Status, Mode=OneWay}"/>
+                <ToggleSwitch
+                    IsOn="{x:Bind ViewModel.Status, Mode=OneWay}"
+                    PointerReleased="{x:Bind ViewModel.ToggleSwitch_OnPointerReleased}"/>
                 <TextBlock
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     HorizontalTextAlignment="Left"
-                    Text="{x:Bind ViewModel.Config.Type}" />
+                    Text="{x:Bind ViewModel.Type}" />
                 <TextBlock
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
                     HorizontalTextAlignment="Left"
-                    Text="{x:Bind ViewModel.Config.Name}" />
+                    Text="{x:Bind ViewModel.Name, Mode=OneWay}" />
             </StackPanel>
         </Expander.Header>
         <Expander.Content>
@@ -52,31 +54,47 @@
                 <TextBox
                     Grid.Row="0"
                     Grid.Column="0"
-                    Grid.ColumnSpan="3"
                     Margin="4"
-                    Text="{x:Bind ViewModel.Config.Name, Mode=OneWay}" />
+                    Text="{x:Bind ViewModel.Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                    PlaceholderText="Name"/>
+                <CheckBox
+                    Grid.Row="0"
+                    Grid.Column="2"
+                    Margin="4"
+                    IsChecked="{x:Bind ViewModel.StartAutomatically, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Content="Start automatically"/>
 
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="0"
                     Grid.ColumnSpan="3"
                     Margin="4"
-                    Text="{x:Bind ViewModel.Config.Uri, Mode=OneWay, Converter={StaticResource UriToStringConverter}}"
-                    Visibility="{x:Bind ViewModel.Config.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" />
+                    Text="{x:Bind ViewModel.ListeningUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UriToStringConverter}}"
+                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" 
+                    PlaceholderText="Listening Uri"/>
 
+                <TextBox
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Margin="4"
+                    Text="{x:Bind ViewModel.Usernames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ListToStringConverter}}"
+                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" 
+                    PlaceholderText="Usernames"/>
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="0"
                     Margin="4"
-                    Text="{x:Bind ViewModel.Config.ApiUri, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.Config.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                    Text="{x:Bind ViewModel.ApiUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" 
+                    PlaceholderText="Api Uri"/>
                 <TextBox
                     Grid.Row="1"
                     Grid.Column="1"
                     Grid.ColumnSpan="2"
                     Margin="4"
-                    Text="{x:Bind ViewModel.Config.ApiKey, Mode=OneWay}"
-                    Visibility="{x:Bind ViewModel.Config.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" />
+                    Text="{x:Bind ViewModel.ApiKey, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" 
+                    PlaceholderText="Api Key"/>
 
                 <Button
                     Grid.Row="0"
@@ -85,7 +103,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Background="LightBlue"
-                    Command="{x:Bind UpdateCommand}"
+                    Command="{x:Bind ViewModel.UpdateCommand}"
                     Content="Update"
                     Foreground="Black" />
                 <Button
@@ -95,7 +113,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Background="DarkRed"
-                    Command="{x:Bind RemoveCommand}"
+                    Command="{x:Bind ViewModel.RemoveCommand}"
                     Content="Remove"
                     Foreground="White" />
             </Grid>

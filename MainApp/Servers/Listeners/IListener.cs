@@ -2,7 +2,7 @@
 
 namespace MainApp.Servers.Listeners;
 
-public interface IListener
+internal interface IListener
 {
     public bool IsListening { get; }
     public void StartListen(StartParameters param);

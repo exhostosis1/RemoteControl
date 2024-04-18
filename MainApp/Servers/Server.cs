@@ -6,11 +6,11 @@ using Microsoft.Extensions.Logging;
 
 namespace MainApp.Servers;
 
-public class Server: INotifyPropertyChanged
+internal class Server: IServer
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    public Guid Id = Guid.NewGuid();
+    public Guid Id { get; } = Guid.NewGuid();
     
     public bool Status { get; private set; } = false;
 

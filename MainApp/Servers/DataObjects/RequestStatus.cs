@@ -1,6 +1,6 @@
 ﻿namespace MainApp.Servers.DataObjects;
 
-public enum RequestStatus
+internal enum RequestStatus
 {
     Ok,
     Text,

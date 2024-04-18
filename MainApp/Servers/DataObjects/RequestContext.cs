@@ -1,6 +1,6 @@
 ﻿namespace MainApp.Servers.DataObjects;
 
-public class RequestContext
+internal class RequestContext
 {
     public string Path { get; set; } = "";
     public RequestStatus Status { get; set; } = RequestStatus.Ok;

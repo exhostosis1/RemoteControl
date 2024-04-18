@@ -53,9 +53,6 @@
     <ProjectReference Include="..\MainApp\MainApp.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="appsettings.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <Page Update="Views\ServerView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>

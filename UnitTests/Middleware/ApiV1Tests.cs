@@ -66,7 +66,7 @@ public class ApiV1Tests : IDisposable
     [InlineData("/api/v1/second/actionthree", RequestStatus.Json, "\"new\"")]
     [InlineData("/api/v1/second/actionfour", RequestStatus.Text, "text")]
     [InlineData("/api/v1/second/actionfive", RequestStatus.NotFound, "")]
-    public async Task RequestTest(string path, RequestStatus expectedCode, string expectedResult)
+    internal async Task RequestTest(string path, RequestStatus expectedCode, string expectedResult)
     {
         var context = new RequestContext
         {
