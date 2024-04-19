@@ -10,7 +10,6 @@
 
     <UserControl.Resources>
         <converters:ServerTypeToVisibilityConverter x:Name="ServerTypeToVisibilityConverter" />
-        <converters:UriToStringConverter x:Name="UriToStringConverter" />
         <converters:ListToStringConverter x:Name="ListToStringConverter"/>
     </UserControl.Resources>
 
@@ -69,7 +68,7 @@
                     Grid.Column="0"
                     Grid.ColumnSpan="3"
                     Margin="4"
-                    Text="{x:Bind ViewModel.ListeningUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UriToStringConverter}}"
+                    Text="{x:Bind ViewModel.ListeningUri, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Visibility="{x:Bind ViewModel.Type, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}" 
                     PlaceholderText="Listening Uri"/>
 

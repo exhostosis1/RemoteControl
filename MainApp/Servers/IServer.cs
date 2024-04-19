@@ -10,4 +10,6 @@ public interface IServer: INotifyPropertyChanged
     void Start();
     void Restart();
     void Stop();
+
+    event EventHandler<string> Error;
 }

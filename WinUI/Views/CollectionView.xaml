@@ -50,7 +50,7 @@
                 <ItemsView.ItemTemplate>
                     <DataTemplate x:DataType="servers:IServer">
                         <ItemContainer Margin="4,0,4,4">
-                            <views:ServerView Server="{x:Bind}"/>
+                            <views:ServerView Server="{x:Bind}" Error="OnError"/>
                         </ItemContainer>
                     </DataTemplate>
                 </ItemsView.ItemTemplate>

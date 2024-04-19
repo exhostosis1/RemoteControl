@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
-using MainApp.Servers.DataObjects;
+﻿using MainApp.Servers.DataObjects;
 using MainApp.Servers.Listeners;
 using MainApp.Servers.Middleware;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace MainApp.Servers;
 
@@ -25,6 +25,8 @@ internal class Server: IServer
     private readonly TaskFactory _factory = new();
 
     public ServerConfig Config { get; set; }
+
+    public event EventHandler<string>? Error; 
 
     private static Func<RequestDelegate, RequestDelegate> GetFunction(IMiddleware middleware)
         => next =>
@@ -62,7 +64,7 @@ internal class Server: IServer
     {
         if (Status)
         {
-            Stop();
+            return;
         }
 
         var param = Config.Type switch
@@ -79,6 +81,7 @@ internal class Server: IServer
         catch (Exception e)
         {
             _logger.LogError("{e.Message}", e.Message);
+            FireErrorEvent(e.Message);
             return;
         }
 
@@ -111,6 +114,7 @@ internal class Server: IServer
             catch (Exception e)
             {
                 _logger.LogError("{e.Message}", e.Message);
+                FireErrorEvent(e.Message);
                 break;
             }
         }
@@ -131,4 +135,6 @@ internal class Server: IServer
 
         _listener.StopListen();
     }
+
+    private void FireErrorEvent(string message) => Error?.Invoke(this, message);
 }

@@ -2,11 +2,11 @@
 using CommunityToolkit.Mvvm.Input;
 using MainApp;
 using MainApp.Servers;
+using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.UI.Xaml.Controls;
 
 namespace WinUI.ViewModels;
 
@@ -21,9 +21,9 @@ internal partial class ServerViewModel : ObservableObject
             Type = value.Config.Type;
             Name = value.Config.Name;
             ApiKey = value.Config.ApiKey;
-            Usernames = value.Config.Usernames.ToList();
+            Usernames = [.. value.Config.Usernames];
             Status = value.Status;
-            ListeningUri = value.Config.Uri;
+            ListeningUri = value.Config.Uri.ToString();
             ApiUri = value.Config.ApiUri;
             StartAutomatically = value.Config.AutoStart;
 
@@ -44,7 +44,7 @@ internal partial class ServerViewModel : ObservableObject
     [ObservableProperty] private bool _status;
     [ObservableProperty] private ServerType _type;
     [ObservableProperty] private string _name;
-    [ObservableProperty] private Uri _listeningUri;
+    [ObservableProperty] private string _listeningUri;
     [ObservableProperty] private string _apiUri;
     [ObservableProperty] private string _apiKey;
     [ObservableProperty] private List<string> _usernames;
@@ -75,7 +75,13 @@ internal partial class ServerViewModel : ObservableObject
     [RelayCommand]
     private void Update()
     {
-        Server.Stop();
+        var shouldStart = false;
+
+        if (Server.Status)
+        {
+            Server.Stop();
+            shouldStart = true;
+        }
 
         var config = new ServerConfig(Server.Config.Type)
         {
@@ -85,7 +91,15 @@ internal partial class ServerViewModel : ObservableObject
         switch (config.Type)
         {
             case ServerType.Web:
-                config.Uri = ListeningUri;
+                try
+                {
+                    config.Uri = new Uri(ListeningUri);
+                }
+                catch (Exception e)
+                {
+                    _appHost.FireErrorEvent(e.Message);
+                    return;
+                }
                 break;
             case ServerType.Bot:
                 config.ApiUri = ApiUri;
@@ -98,7 +112,8 @@ internal partial class ServerViewModel : ObservableObject
 
         Server.Config = config;
 
-        Server.Start();
+        if(shouldStart)
+            Server.Start();
 
         _appHost.SaveConfig();
     }
@@ -109,11 +124,18 @@ internal partial class ServerViewModel : ObservableObject
 
         e.Handled = true;
 
-        ts.IsOn = Status;
+        ts.IsEnabled = false;
+        ts.IsOn = !ts.IsOn;
 
         if (Status)
+        {
             Server.Stop();
+        }
         else
+        {
             Server.Start();
+        }
+
+        ts.IsEnabled = true;
     }
 }

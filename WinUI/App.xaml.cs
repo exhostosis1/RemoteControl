@@ -46,10 +46,10 @@ namespace WinUI
                 if (!HandleClosedEvents) return;
 
                 eventArgs.Handled = true;
-                MainWindow.Hide();
+                MainWindow.Hide(true);
             };
 
-            MainWindow.Activate();
+            MainWindow.Hide(true);
         }
     }
 }

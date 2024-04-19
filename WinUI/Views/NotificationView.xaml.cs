@@ -42,9 +42,12 @@ public sealed partial class NotificationView
         var window = _app.MainWindow;
 
         if(window.Visible)
-            window.Hide();
+            window.Hide(true);
         else
+        {
             window.Show();
+            window.Activate();
+        }
     }
 
     [RelayCommand]
@@ -68,7 +71,7 @@ public sealed partial class NotificationView
     [RelayCommand]
     private void StartAll()
     {
-        foreach (var appHostServer in AppHost.Servers)
+        foreach (var appHostServer in AppHost.Servers.Where(x => !x.Status))
         {
             appHostServer.Start();
         }
@@ -77,7 +80,7 @@ public sealed partial class NotificationView
     [RelayCommand]
     private void StopAll()
     {
-        foreach (var appHostServer in AppHost.Servers)
+        foreach (var appHostServer in AppHost.Servers.Where(x => x.Status))
         {
             appHostServer.Stop();
         }

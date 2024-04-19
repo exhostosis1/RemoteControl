@@ -10,7 +10,6 @@
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:NullToVisibilityConverter x:Name="NullToVisibilityConverter"/>
-        <converters:UriToStringConverter x:Name="UriToStringConverter"/>
         <converters:BoolToVisibilityConverter x:Name="BoolToVisibilityConverter"/>
         <converters:BoolToVisibilityReversed x:Name="BoolToVisibilityReversed"/>
     </UserControl.Resources>
@@ -31,7 +30,7 @@
                     IsEnabled="False"
                     />
                 <MenuFlyoutItem
-                    Text="{x:Bind FirstServer.Config.Uri, Mode=OneWay, Converter={StaticResource UriToStringConverter}, FallbackValue=''}"
+                    Text="{x:Bind FirstServer.Config.Uri.ToString(), Mode=OneWay, FallbackValue=''}"
                     Command="{x:Bind OpenUriCommand}"
                     CommandParameter="{x:Bind FirstServer.Config.Uri.ToString(), FallbackValue='', Mode=OneWay}"
                     Visibility="{x:Bind FirstServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Web'}"
@@ -62,7 +61,7 @@
                     IsEnabled="False"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind SecondServer.Config.Uri, Mode=OneWay, Converter={StaticResource UriToStringConverter}, FallbackValue=''}"
+                    Text="{x:Bind SecondServer.Config.Uri.ToString(), Mode=OneWay, FallbackValue=''}"
                     Command="{x:Bind OpenUriCommand}"
                     CommandParameter="{x:Bind SecondServer.Config.Uri.ToString(), FallbackValue='', Mode=OneWay}"
                     Visibility="{x:Bind SecondServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Web'}"

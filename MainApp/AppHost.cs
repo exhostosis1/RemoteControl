@@ -21,6 +21,8 @@ public sealed class AppHost: IDisposable
 
     public readonly ObservableCollection<IServer> Servers = [];
 
+    public event EventHandler<string>? Error;
+
     public bool IsAutorun
     {
         get => _autoStartService.CheckAutoStart();
@@ -39,9 +41,17 @@ public sealed class AppHost: IDisposable
         ReloadServers();
         SetSystemEvents();
 
-        foreach (var server in Servers.Where(x => x.Config.AutoStart))
+        try
         {
-            server.Start();
+            foreach (var server in Servers.Where(x => x.Config.AutoStart))
+            {
+                server.Start();
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{message}", e.Message);
+            FireErrorEvent(e.Message);
         }
     }
     #endregion
@@ -57,13 +67,22 @@ public sealed class AppHost: IDisposable
 
     public void RemoveServer(Guid id)
     {
-        var s = Servers.First(x => x.Id == id);
-        s.Stop();
+        try
+        {
+            var s = Servers.First(x => x.Id == id);
+            s.Stop();
 
-        Servers.Remove(s);
+            Servers.Remove(s);
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{message}", e.Message);
+            FireErrorEvent(e.Message);
+        }
+        
     }
 
-    private static void RunWindowsCommand(string command, bool elevated = false)
+    private void RunWindowsCommand(string command, bool elevated = false)
     {
         var proc = new Process();
 
@@ -74,9 +93,17 @@ public sealed class AppHost: IDisposable
 
         if (elevated) proc.StartInfo.Verb = "runas";
 
-        proc.Start();
+        try
+        {
+            proc.Start();
 
-        proc.WaitForExit();
+            proc.WaitForExit();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{message}", e.Message);
+            FireErrorEvent(e.Message);
+        }
     }
 
     public void AddFirewallRules()
@@ -102,24 +129,40 @@ public sealed class AppHost: IDisposable
 
     public void SaveConfig()
     {
-        _configProvider.SetConfig(Servers.Select(x => x.Config));
+        try
+        {
+            _configProvider.SetConfig(Servers.Select(x => x.Config));
+        }
+        catch (Exception e)
+        {
+            _logger.LogError("{message}", e.Message);
+            FireErrorEvent(e.Message);
+        }
     }
 
     public void ReloadServers()
     {
-        if (Servers.Count > 0)
+        try
         {
-            foreach (var server in Servers.Where(x => x.Status))
+            if (Servers.Count > 0)
             {
-                server.Stop();
+                foreach (var server in Servers.Where(x => x.Status))
+                {
+                    server.Stop();
+                }
+
+                Servers.Clear();
             }
 
-            Servers.Clear();
+            foreach (var config in _configProvider.GetConfig())
+            {
+                Servers.Add(_serverFactory.GetServer(config));
+            }
         }
-
-        foreach (var config in _configProvider.GetConfig())
+        catch (Exception e)
         {
-            Servers.Add(_serverFactory.GetServer(config));
+            _logger.LogError("{message}", e.Message);
+            FireErrorEvent(e.Message);
         }
     }
 
@@ -144,6 +187,8 @@ public sealed class AppHost: IDisposable
 
         OpenSite(url);
     }
+
+    public void FireErrorEvent(string message) => Error?.Invoke(this, message);
     #endregion
 
     #region Private methods
