@@ -2,17 +2,14 @@
 using MainApp.Servers.Listeners;
 using MainApp.Servers.Middleware;
 using Microsoft.Extensions.Logging;
-using System.ComponentModel;
 
 namespace MainApp.Servers;
 
 internal class Server: IServer
 {
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public Guid Id { get; } = Guid.NewGuid();
     
-    public bool Status { get; private set; } = false;
+    public bool Status => _listener.IsListening;
 
     private readonly ILogger _logger;
 
@@ -20,13 +17,12 @@ internal class Server: IServer
     private readonly RequestDelegate _middleware;
 
     private CancellationTokenSource? _cts;
-    private readonly IProgress<bool> _progress;
 
     private readonly TaskFactory _factory = new();
 
     public ServerConfig Config { get; set; }
 
-    public event EventHandler<string>? Error; 
+    public event EventHandler<string>? Error;
 
     private static Func<RequestDelegate, RequestDelegate> GetFunction(IMiddleware middleware)
         => next =>
@@ -52,19 +48,13 @@ internal class Server: IServer
         action = GetFunctions(middlewares).Aggregate(action, (current, func) => func(current));
 
         _middleware = action;
-
-        _progress = new Progress<bool>(status =>
-        {
-            Status = status;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
-        });
     }
 
-    public void Start()
+    public bool Start()
     {
         if (Status)
         {
-            return;
+            return true;
         }
 
         var param = Config.Type switch
@@ -82,23 +72,26 @@ internal class Server: IServer
         {
             _logger.LogError("{e.Message}", e.Message);
             FireErrorEvent(e.Message);
-            return;
+            return false;
         }
 
         _cts = new CancellationTokenSource();
 
         _factory.StartNew(async () => await ProcessRequestAsync(_cts.Token), TaskCreationOptions.LongRunning);
+
+        return Status;
     }
 
-    public void Restart()
+    public bool Restart()
     {
         Stop();
         Start();
+
+        return Status;
     }
 
     private async Task ProcessRequestAsync(CancellationToken token)
     {
-        _progress.Report(true);
         while (!token.IsCancellationRequested)
         {
             try
@@ -118,13 +111,11 @@ internal class Server: IServer
                 break;
             }
         }
-
-        _progress.Report(false);
     }
 
-    public void Stop()
+    public bool Stop()
     {
-        if (!Status) return;
+        if (!Status) return false;
 
         try
         {
@@ -134,6 +125,8 @@ internal class Server: IServer
         catch (ObjectDisposedException) { }
 
         _listener.StopListen();
+
+        return Status;
     }
 
     private void FireErrorEvent(string message) => Error?.Invoke(this, message);

@@ -9,9 +9,10 @@
     xmlns:converters="using:WinUI.Converters"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:NullToVisibilityConverter x:Name="NullToVisibilityConverter"/>
         <converters:BoolToVisibilityConverter x:Name="BoolToVisibilityConverter"/>
         <converters:BoolToVisibilityReversed x:Name="BoolToVisibilityReversed"/>
+        <converters:ServerTypeToVisibilityConverter x:Name="ServerTypeToVisibilityConverter"/>
+        <converters:ListToStringConverter x:Name="ListToStringConverter"/>
     </UserControl.Resources>
 
     <n:TaskbarIcon
@@ -25,66 +26,66 @@
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
                 <MenuFlyoutItem
-                    Text="{x:Bind FirstServer.Config.Name, FallbackValue='', Mode=OneWay}"
-                    Visibility="{x:Bind FirstServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"
+                    Text="{x:Bind FirstServerViewModel.Name, Mode=OneWay}"
+                    Visibility="{x:Bind FirstServerExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                     IsEnabled="False"
                     />
                 <MenuFlyoutItem
-                    Text="{x:Bind FirstServer.Config.Uri.ToString(), Mode=OneWay, FallbackValue=''}"
+                    Text="{x:Bind FirstServerViewModel.ListeningUri, Mode=OneWay}"
                     Command="{x:Bind OpenUriCommand}"
-                    CommandParameter="{x:Bind FirstServer.Config.Uri.ToString(), FallbackValue='', Mode=OneWay}"
-                    Visibility="{x:Bind FirstServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Web'}"
-                    IsEnabled="{x:Bind FirstServer.Status, Mode=OneWay, FallbackValue=False}"
+                    CommandParameter="{x:Bind FirstServerViewModel.ListeningUri, Mode=OneWay}"
+                    Visibility="{x:Bind FirstServerViewModel.Type, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}"
+                    IsEnabled="{x:Bind FirstServerViewModel.Status, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind FirstServer.Config.UsernamesString, Mode=OneWay, FallbackValue=''}"
-                    Visibility="{x:Bind FirstServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Bot'}"
+                    Text="{x:Bind FirstServerViewModel.Usernames, Mode=OneWay, Converter={StaticResource ListToStringConverter}}"
+                    Visibility="{x:Bind FirstServerViewModel.Type, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}"
                 />
                 <MenuFlyoutItem
                     Text="Start"
                     Command="{x:Bind StartCommand}"
-                    CommandParameter="{x:Bind FirstServer, Mode=OneWay}"
-                    Visibility="{x:Bind FirstServer.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityReversed}}"
+                    CommandParameter="{x:Bind FirstServerViewModel.Server, Mode=OneWay}"
+                    Visibility="{x:Bind FirstServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityReversed}}"
                     />
                 <MenuFlyoutItem
                     Text="Stop"
                     Command="{x:Bind StopCommand}"
-                    CommandParameter="{x:Bind FirstServer, Mode=OneWay}"
-                    Visibility="{x:Bind FirstServer.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}"
+                    CommandParameter="{x:Bind FirstServerViewModel.Server, Mode=OneWay}"
+                    Visibility="{x:Bind FirstServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
                 <MenuFlyoutSeparator
-                    Visibility="{x:Bind FirstServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    Visibility="{x:Bind FirstServerExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                 <MenuFlyoutItem
-                    Text="{x:Bind SecondServer.Config.Name, FallbackValue='', Mode=OneWay}"
-                    Visibility="{x:Bind SecondServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"
+                    Text="{x:Bind SecondServerViewModel.Name, Mode=OneWay}"
+                    Visibility="{x:Bind SecondServerExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                     IsEnabled="False"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind SecondServer.Config.Uri.ToString(), Mode=OneWay, FallbackValue=''}"
+                    Text="{x:Bind SecondServerViewModel.ListeningUri, Mode=OneWay}"
                     Command="{x:Bind OpenUriCommand}"
-                    CommandParameter="{x:Bind SecondServer.Config.Uri.ToString(), FallbackValue='', Mode=OneWay}"
-                    Visibility="{x:Bind SecondServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Web'}"
+                    CommandParameter="{x:Bind SecondServerViewModel.ListeningUri, Mode=OneWay}"
+                    Visibility="{x:Bind SecondServerViewModel.Type, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}"
+                    IsEnabled="{x:Bind SecondServerViewModel.Status, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind SecondServer.Config.UsernamesString, Mode=OneWay, FallbackValue=''}"
-                    Visibility="{x:Bind SecondServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter='Bot'}"
-                    IsEnabled="{x:Bind SecondServer.Status, Mode=OneWay, FallbackValue=False}"
+                    Text="{x:Bind SecondServerViewModel.Usernames, Mode=OneWay, Converter={StaticResource ListToStringConverter}}"
+                    Visibility="{x:Bind SecondServerViewModel.Type, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}"
                 />
                 <MenuFlyoutItem
                     Text="Start"
                     Command="{x:Bind StartCommand}"
-                    CommandParameter="{x:Bind SecondServer, Mode=OneWay}"
-                    Visibility="{x:Bind SecondServer.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityReversed}}"
+                    CommandParameter="{x:Bind SecondServerViewModel.Server, Mode=OneWay}"
+                    Visibility="{x:Bind SecondServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityReversed}}"
                 />
                 <MenuFlyoutItem
                     Text="Stop"
                     Command="{x:Bind StopCommand}"
-                    CommandParameter="{x:Bind SecondServer, Mode=OneWay}"
-                    Visibility="{x:Bind SecondServer.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}"
+                    CommandParameter="{x:Bind SecondServerViewModel.Server, Mode=OneWay}"
+                    Visibility="{x:Bind SecondServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
                 <MenuFlyoutSeparator
-                    Visibility="{x:Bind SecondServer, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"/>
+                    Visibility="{x:Bind SecondServerExists, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"/>
 
                 <MenuFlyoutItem
                     Command="{x:Bind StartAllCommand}">

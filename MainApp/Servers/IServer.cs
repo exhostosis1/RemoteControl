@@ -2,14 +2,14 @@
 
 namespace MainApp.Servers;
 
-public interface IServer: INotifyPropertyChanged
+public interface IServer
 {
     Guid Id { get; }
     bool Status { get; }
     ServerConfig Config { get; set; }
-    void Start();
-    void Restart();
-    void Stop();
+    bool Start();
+    bool Restart();
+    bool Stop();
 
     event EventHandler<string> Error;
 }

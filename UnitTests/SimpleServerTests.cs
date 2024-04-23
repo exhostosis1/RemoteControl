@@ -15,6 +15,8 @@ public partial class SimpleServerTests : IDisposable
 
     private readonly Server _server;
 
+    private bool _isListening = false;
+
     public SimpleServerTests()
     {
         _listener = new Mock<IListener>(MockBehavior.Strict);
@@ -24,13 +26,14 @@ public partial class SimpleServerTests : IDisposable
 
         _server = new Server(new ServerConfig(ServerType.Web), _listener.Object, [_middleware.Object], logger);
         
-        _listener.Setup(x => x.StopListen());
+        _listener.Setup(x => x.StopListen()).Callback(() => _isListening = false);
+        _listener.SetupGet(x => x.IsListening).Returns(() => _isListening);
     }
 
     [Fact]
     public void StartWithoutConfigTest()
     {
-        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>())).Callback(() => _isListening = true);
 
         StartTestLocal();
 
@@ -44,7 +47,7 @@ public partial class SimpleServerTests : IDisposable
             {
                 Thread.Sleep(TimeSpan.FromHours(1));
                 return null!;
-            });
+            }).Callback(() => _isListening = true);
         _middleware.Setup(x => x.ProcessRequestAsync(It.IsAny<RequestContext>(), It.IsAny<RequestDelegate>()));
 
         var mre = new AutoResetEvent(false);
@@ -81,7 +84,7 @@ public partial class SimpleServerTests : IDisposable
         var config = uri == null ? null : new ServerConfig(ServerType.Web) { Uri = new Uri(uri) };
         var parameters = new StartParameters(config?.Uri.ToString() ?? _server.Config.Uri.ToString());
 
-        _listener.Setup(x => x.StartListen(parameters));
+        _listener.Setup(x => x.StartListen(parameters)).Callback(() => _isListening = true);
 
         StartTestLocal(config);
 
@@ -117,7 +120,7 @@ public partial class SimpleServerTests : IDisposable
             Port = 451
         };
 
-        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>())).Callback(() => _isListening = true);
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
         {
             Thread.Sleep(TimeSpan.FromHours(1));
@@ -173,7 +176,7 @@ public partial class SimpleServerTests : IDisposable
         };
         var contextMre = new ManualResetEventSlim(false);
 
-        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>())).Callback(() => _isListening = true);
         _listener.SetupSequence(x => x.GetContextAsync(It.IsAny<CancellationToken>()))
             .ReturnsAsync(() =>
             {
@@ -229,7 +232,7 @@ public partial class SimpleServerTests : IDisposable
     [Fact]
     public void SubscriptionTest()
     {
-        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>()));
+        _listener.Setup(x => x.StartListen(It.IsAny<StartParameters>())).Callback(() => _isListening = true);
         _listener.Setup(x => x.GetContextAsync(It.IsAny<CancellationToken>())).ReturnsAsync(() =>
         {
             Thread.Sleep(50);

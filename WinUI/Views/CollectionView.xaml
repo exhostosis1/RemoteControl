@@ -20,7 +20,7 @@
             HorizontalAlignment="Right"
             Orientation="Horizontal">
             <Button
-                Command="{x:Bind ViewModel.ReloadCommand}"
+                Command="{x:Bind ReloadCommand}"
                 Content="Reload Servers" />
             <DropDownButton
                 Margin="4,4,4,4"
@@ -28,11 +28,11 @@
                 <DropDownButton.Flyout>
                     <MenuFlyout Placement="Bottom">
                         <MenuFlyoutItem
-                            Command="{x:Bind ViewModel.AddCommand}"
+                            Command="{x:Bind AddCommand}"
                             CommandParameter="{x:Bind servers:ServerType.Web}"
                             Text="Web" />
                         <MenuFlyoutItem
-                            Command="{x:Bind ViewModel.AddCommand}"
+                            Command="{x:Bind AddCommand}"
                             CommandParameter="{x:Bind servers:ServerType.Bot}"
                             Text="Bot" />
                     </MenuFlyout>
@@ -46,7 +46,7 @@
             <ItemsView
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
-                ItemsSource="{x:Bind ViewModel.Servers}">
+                ItemsSource="{x:Bind Servers}">
                 <ItemsView.ItemTemplate>
                     <DataTemplate x:DataType="servers:IServer">
                         <ItemContainer Margin="4,0,4,4">

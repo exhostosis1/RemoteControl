@@ -19,9 +19,10 @@
         ExpandDirection="Down">
         <Expander.Header>
             <StackPanel Orientation="Horizontal">
-                <ToggleSwitch
+                <ToggleSwitch 
                     IsOn="{x:Bind ViewModel.Status, Mode=OneWay}"
-                    PointerReleased="{x:Bind ViewModel.ToggleSwitch_OnPointerReleased}"/>
+                    IsEnabled="{x:Bind ViewModel.SwitchIsEnabled, Mode=OneWay}"
+                    PointerReleased="{x:Bind ViewModel.Switch_OnPointerReleased}"/>
                 <TextBlock
                     Margin="10,0,0,0"
                     HorizontalAlignment="Left"

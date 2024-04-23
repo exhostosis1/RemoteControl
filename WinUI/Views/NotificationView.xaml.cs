@@ -4,8 +4,10 @@ using MainApp;
 using MainApp.Servers;
 using Microsoft.UI.Xaml;
 using System;
+using System.Collections.Specialized;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
+using WinUI.ViewModels;
 
 namespace WinUI.Views;
 
@@ -16,9 +18,12 @@ public sealed partial class NotificationView
     public readonly AppHost AppHost = ApphostProvider.AppHost;
 
     [ObservableProperty]
-    private IServer? _firstServer;
+    private bool _firstServerExists;
     [ObservableProperty]
-    private IServer? _secondServer;
+    private bool _secondServerExists;
+
+    internal ServerViewModel FirstServerViewModel;
+    internal ServerViewModel SecondServerViewModel;
 
     public NotificationView()
     {
@@ -26,14 +31,20 @@ public sealed partial class NotificationView
 
         _app = Application.Current as App ?? throw new NullReferenceException();
 
-        FirstServer = AppHost.Servers.FirstOrDefault();
-        SecondServer = AppHost.Servers.Skip(1).FirstOrDefault();
+        AppHost.Servers.CollectionChanged += InitModels;
 
-        AppHost.Servers.CollectionChanged += (_, _) =>
-        {
-            FirstServer = AppHost.Servers.FirstOrDefault();
-            SecondServer = AppHost.Servers.Skip(1).FirstOrDefault();
-        };
+        InitModels(null, null!);
+    }
+
+    private void InitModels(object? _, NotifyCollectionChangedEventArgs __)
+    {
+        (FirstServerExists, FirstServerViewModel) = InitModel(AppHost.Servers.FirstOrDefault());
+        (SecondServerExists, SecondServerViewModel) = InitModel(AppHost.Servers.Skip(1).FirstOrDefault());
+    }
+
+    private (bool, ServerViewModel?) InitModel(IServer? server)
+    {
+        return server == null ? (false, null) : (true, new ServerViewModel(server));
     }
 
     [RelayCommand]

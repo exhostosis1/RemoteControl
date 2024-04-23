@@ -9,9 +9,7 @@ namespace MainApp;
 
 internal sealed class ServerFactory
 {
-    private readonly SimpleHttpListener _webListener;
     private readonly IMiddleware[] _webMiddlewareChain;
-    private readonly TelegramListener _botListener;
     private readonly IMiddleware[] _botMiddlewareChain;
     private readonly ILoggerProvider _loggerProvider;
 
@@ -34,15 +32,15 @@ internal sealed class ServerFactory
                 loggingProvider.CreateLogger(nameof(ApiV1Middleware)));
 
         _webMiddlewareChain = [apiMiddleware, staticMiddleware];
-        _webListener = new SimpleHttpListener(loggingProvider.CreateLogger(nameof(SimpleHttpListener)));
-
-        _botListener = new TelegramListener(loggingProvider.CreateLogger(nameof(TelegramListener)));
         _botMiddlewareChain = [apiMiddleware];
     }
 
     public IServer GetServer(ServerConfig config)
     {
-        return new Server(config, config.Type == ServerType.Web ? _webListener : _botListener,
+        return new Server(config,
+            config.Type == ServerType.Web
+                ? new SimpleHttpListener(_loggerProvider.CreateLogger(nameof(SimpleHttpListener)))
+                : new TelegramListener(_loggerProvider.CreateLogger(nameof(TelegramListener))),
             config.Type == ServerType.Web ? _webMiddlewareChain : _botMiddlewareChain,
             _loggerProvider.CreateLogger(nameof(Server)));
     }
