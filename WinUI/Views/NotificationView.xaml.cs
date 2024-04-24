@@ -14,37 +14,42 @@ namespace WinUI.Views;
 [ObservableObject]
 public sealed partial class NotificationView
 {
-    private readonly App _app;
-    public readonly AppHost AppHost = ApphostProvider.AppHost;
+    private readonly ServerCollectionViewModel _viewModel = ServerCollectionViewModelProvider.Get();
+    private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
 
     [ObservableProperty]
-    private bool _firstServerExists;
+    private ServerViewModel? _firstServerViewModel;
     [ObservableProperty]
-    private bool _secondServerExists;
+    private ServerViewModel? _secondServerViewModel;
 
-    internal ServerViewModel FirstServerViewModel;
-    internal ServerViewModel SecondServerViewModel;
+    public bool IsAutorun
+    {
+        get => _app.Host.GetAutorun();
+        set
+        {
+            _app.Host.SetAutorun(value);
+            OnPropertyChanged(nameof(IsAutorun));
+        }
+    }
 
     public NotificationView()
     {
         this.InitializeComponent();
 
-        _app = Application.Current as App ?? throw new NullReferenceException();
-
-        AppHost.Servers.CollectionChanged += InitModels;
+        _viewModel.Servers.CollectionChanged += InitModels;
 
         InitModels(null, null!);
     }
 
     private void InitModels(object? _, NotifyCollectionChangedEventArgs __)
     {
-        (FirstServerExists, FirstServerViewModel) = InitModel(AppHost.Servers.FirstOrDefault());
-        (SecondServerExists, SecondServerViewModel) = InitModel(AppHost.Servers.Skip(1).FirstOrDefault());
+        FirstServerViewModel = InitModel(_viewModel.Servers.FirstOrDefault());
+        SecondServerViewModel = InitModel(_viewModel.Servers.Skip(1).FirstOrDefault());
     }
 
-    private (bool, ServerViewModel?) InitModel(IServer? server)
+    private ServerViewModel? InitModel(IServer? server)
     {
-        return server == null ? (false, null) : (true, new ServerViewModel(server));
+        return server == null ? null : new ServerViewModel(server);
     }
 
     [RelayCommand]
@@ -68,21 +73,33 @@ public sealed partial class NotificationView
     }
 
     [RelayCommand]
-    private void Start(IServer server)
+    private void FirstStart()
     {
-        server.Start();
+        FirstServerViewModel?.Server?.Start();
     }
 
     [RelayCommand]
-    private void Stop(IServer server)
+    private void FirstStop()
     {
-        server.Stop();
+        FirstServerViewModel?.Server?.Stop();
+    }
+
+    [RelayCommand]
+    private void SecondStart()
+    {
+        SecondServerViewModel?.Server?.Start();
+    }
+
+    [RelayCommand]
+    private void SecondStop()
+    {
+        SecondServerViewModel?.Server?.Stop();
     }
 
     [RelayCommand]
     private void StartAll()
     {
-        foreach (var appHostServer in AppHost.Servers.Where(x => !x.Status))
+        foreach (var appHostServer in _viewModel.Servers.Where(x => !x.Status))
         {
             appHostServer.Start();
         }
@@ -91,7 +108,7 @@ public sealed partial class NotificationView
     [RelayCommand]
     private void StopAll()
     {
-        foreach (var appHostServer in AppHost.Servers.Where(x => x.Status))
+        foreach (var appHostServer in _viewModel.Servers.Where(x => x.Status))
         {
             appHostServer.Stop();
         }
@@ -100,7 +117,7 @@ public sealed partial class NotificationView
     [RelayCommand]
     private void AddFirewallRules()
     {
-        AppHost.AddFirewallRules();
+        AppHost.AddFirewallRules(_viewModel.Servers.Where(x => x.Status).Select(x => x.Config.Uri));
     }
 
     [RelayCommand]

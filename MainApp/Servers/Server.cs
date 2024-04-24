@@ -22,8 +22,6 @@ internal class Server: IServer
 
     public ServerConfig Config { get; set; }
 
-    public event EventHandler<string>? Error;
-
     private static Func<RequestDelegate, RequestDelegate> GetFunction(IMiddleware middleware)
         => next =>
             context => middleware.ProcessRequestAsync(context, next);
@@ -71,8 +69,7 @@ internal class Server: IServer
         catch (Exception e)
         {
             _logger.LogError("{e.Message}", e.Message);
-            FireErrorEvent(e.Message);
-            return false;
+            throw;
         }
 
         _cts = new CancellationTokenSource();
@@ -107,7 +104,6 @@ internal class Server: IServer
             catch (Exception e)
             {
                 _logger.LogError("{e.Message}", e.Message);
-                FireErrorEvent(e.Message);
                 break;
             }
         }
@@ -128,6 +124,4 @@ internal class Server: IServer
 
         return Status;
     }
-
-    private void FireErrorEvent(string message) => Error?.Invoke(this, message);
 }

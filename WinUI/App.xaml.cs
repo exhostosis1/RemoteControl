@@ -1,5 +1,5 @@
 ﻿using H.NotifyIcon;
-using Microsoft.UI.Windowing;
+using MainApp;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 using WinUI.Windows;
@@ -24,9 +24,13 @@ namespace WinUI
 
         public bool HandleClosedEvents { get; set; } = true;
 
+        public AppHost Host { get; init; }
+
         public App()
         {
             this.InitializeComponent();
+
+            Host = new AppHostBuilder().Build();
         }
 
         /// <summary>

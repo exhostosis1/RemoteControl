@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MainApp;
 
-internal sealed class ServerFactory
+internal sealed class ServerFactory : IServerFactory
 {
     private readonly IMiddleware[] _webMiddlewareChain;
     private readonly IMiddleware[] _botMiddlewareChain;

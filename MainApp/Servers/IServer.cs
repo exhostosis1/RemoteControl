@@ -10,6 +10,4 @@ public interface IServer
     bool Start();
     bool Restart();
     bool Stop();
-
-    event EventHandler<string> Error;
 }

@@ -10,22 +10,9 @@ internal class BoolToVisibilityConverter: IValueConverter
     {
         if (value is not bool b) return Visibility.Collapsed;
 
-        return b ? Visibility.Visible : Visibility.Collapsed;
-    }
+        var inverse = parameter is "Inverse";
 
-    public object ConvertBack(object value, Type targetType, object parameter, string language)
-    {
-        throw new NotImplementedException();
-    }
-}
-
-internal class BoolToVisibilityReversed : IValueConverter
-{
-    public object Convert(object value, Type targetType, object parameter, string language)
-    {
-        if (value is not bool b) return Visibility.Collapsed;
-
-        return b ? Visibility.Collapsed : Visibility.Visible;
+        return b ? (inverse ? Visibility.Collapsed : Visibility.Visible) : (inverse ? Visibility.Visible : Visibility.Collapsed);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, string language)

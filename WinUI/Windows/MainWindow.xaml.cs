@@ -25,7 +25,6 @@ public sealed partial class MainWindow : Window
     [ObservableProperty] private bool _showError;
     [ObservableProperty] private string _errorMessage;
 
-    private readonly AppHost _appHost = ApphostProvider.AppHost;
     private readonly SynchronizationContext _context;
 
     public MainWindow()
@@ -45,7 +44,6 @@ public sealed partial class MainWindow : Window
         appWindow.MoveAndResize(rect);
 
         _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
-        _appHost.Error += OnError;
     }
 
     private void OnError(object? _, string message)

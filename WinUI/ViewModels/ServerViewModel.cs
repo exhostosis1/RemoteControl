@@ -1,22 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading;
-using ABI.Microsoft.UI.Xaml.Controls.Primitives;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using MainApp;
 using MainApp.Servers;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace WinUI.ViewModels;
 
-internal sealed partial class ServerViewModel: ObservableObject
+public sealed partial class ServerViewModel: ObservableObject
 {
-    private readonly AppHost _appHost = ApphostProvider.AppHost;
+    private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
+
     private IServer? _server;
 
     public IServer? Server
@@ -37,7 +36,6 @@ internal sealed partial class ServerViewModel: ObservableObject
             Usernames = _server.Config.Usernames;
             StartAutomatically = _server.Config.AutoStart;
 
-            _server.Error += (sender, message) => Error?.Invoke(sender, message);
             InitializeTimer();
         }
     }
@@ -57,13 +55,14 @@ internal sealed partial class ServerViewModel: ObservableObject
     [ObservableProperty] private bool _switchIsEnabled;
 
     public event EventHandler<string>? Error;
+    public event EventHandler<IServer>? RemoveServer;
+    public event EventHandler? UpdateConfig;
 
     public ServerViewModel(IServer server)
     {
         _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
 
         Server = server;
-        server.Error += (sender, message) => Error?.Invoke(sender, message);
     }
 
     private void InitializeTimer()
@@ -86,7 +85,14 @@ internal sealed partial class ServerViewModel: ObservableObject
     [RelayCommand]
     private void Start()
     {
-        _server?.Start();
+        try
+        {
+            _server?.Start();
+        }
+        catch (Exception e)
+        {
+            Error?.Invoke(this, e.Message);
+        }
     }
 
     [RelayCommand]
@@ -102,7 +108,7 @@ internal sealed partial class ServerViewModel: ObservableObject
 
         _server.Stop();
         _timer.Dispose();
-        _appHost.RemoveServer(_server.Id);
+        RemoveServer?.Invoke(this, _server);
     }
 
     [RelayCommand]
@@ -132,7 +138,7 @@ internal sealed partial class ServerViewModel: ObservableObject
                 }
                 catch (Exception e)
                 {
-                    _appHost.FireErrorEvent(e.Message);
+                    Error?.Invoke(this, e.Message);
                     return;
                 }
                 break;
@@ -151,7 +157,7 @@ internal sealed partial class ServerViewModel: ObservableObject
             _server.Start();
 
 
-        _appHost.SaveConfig();
+        UpdateConfig?.Invoke(this, EventArgs.Empty);
     }
 
     private bool _ignoreEvent = false;

@@ -17,20 +17,22 @@ internal class RegistryAutoStartService(ILogger logger)
         return _regKey.GetValue(RegName, "") as string == _regValue;
     }
 
-    public void SetAutoStart(bool value)
+    public bool SetAutoStart(bool value)
     {
         logger.LogInformation("Setting win registry autorun");
 
         _regKey.DeleteValue(RegName, false);
 
-        if (!value) return;
+        if (!value) return false;
         try
         {
             _regKey.SetValue(RegName, _regValue, RegistryValueKind.String);
+            return true;
         }
         catch (Exception e)
         {
             logger.LogError("{message}", e.Message);
+            return false;
         }
     }
 }
