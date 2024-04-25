@@ -14,12 +14,6 @@ public sealed class AppHost
     private readonly RegistryAutoStartService _autoStartService;
     private readonly IConfigurationProvider _configProvider;
 
-    public bool IsAutorun
-    {
-        get => _autoStartService.CheckAutoStart();
-        set => _autoStartService.SetAutoStart(value);
-    }
-
     #region Constructor
     internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
         RegistryAutoStartService autoStartService, IConfigurationProvider configProvider)

@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using MainApp;
@@ -6,7 +7,6 @@ using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
 using WinUI.ViewModels;
 
 namespace WinUI.Views;
@@ -21,28 +21,22 @@ public sealed partial class NotificationView
     private ServerViewModel? _firstServerViewModel;
     [ObservableProperty]
     private ServerViewModel? _secondServerViewModel;
-
-    public bool IsAutorun
-    {
-        get => _app.Host.GetAutorun();
-        set
-        {
-            _app.Host.SetAutorun(value);
-            OnPropertyChanged(nameof(IsAutorun));
-        }
-    }
+    [ObservableProperty]
+    private bool _isAutorun;
 
     public NotificationView()
     {
         this.InitializeComponent();
 
         _viewModel.Servers.CollectionChanged += InitModels;
-
-        InitModels(null, null!);
+        InitModels(null, null);
     }
 
-    private void InitModels(object? _, NotifyCollectionChangedEventArgs __)
+    private void InitModels(object? _, NotifyCollectionChangedEventArgs? __)
     {
+        FirstServerViewModel?.Dispose();
+        SecondServerViewModel?.Dispose();
+
         FirstServerViewModel = InitModel(_viewModel.Servers.FirstOrDefault());
         SecondServerViewModel = InitModel(_viewModel.Servers.Skip(1).FirstOrDefault());
     }
@@ -53,7 +47,7 @@ public sealed partial class NotificationView
     }
 
     [RelayCommand]
-    void LeftClick()
+    private void LeftClick()
     {
         var window = _app.MainWindow;
 
@@ -70,30 +64,6 @@ public sealed partial class NotificationView
     private void OpenUri(string uri)
     {
         AppHost.OpenSite(uri);
-    }
-
-    [RelayCommand]
-    private void FirstStart()
-    {
-        FirstServerViewModel?.Server?.Start();
-    }
-
-    [RelayCommand]
-    private void FirstStop()
-    {
-        FirstServerViewModel?.Server?.Stop();
-    }
-
-    [RelayCommand]
-    private void SecondStart()
-    {
-        SecondServerViewModel?.Server?.Start();
-    }
-
-    [RelayCommand]
-    private void SecondStop()
-    {
-        SecondServerViewModel?.Server?.Stop();
     }
 
     [RelayCommand]
@@ -121,10 +91,22 @@ public sealed partial class NotificationView
     }
 
     [RelayCommand]
-    void Exit()
+    private void Exit()
     {
         _app.HandleClosedEvents = false;
         TrayIcon.Dispose();
         _app.MainWindow?.Close();
+    }
+
+    [RelayCommand]
+    private void Opening()
+    {
+        IsAutorun = _app.Host.GetAutorun();
+    }
+
+    [RelayCommand]
+    private void SetAutorun()
+    {
+        _app.Host.SetAutorun(!IsAutorun);
     }
 }

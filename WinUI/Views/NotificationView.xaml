@@ -11,8 +11,8 @@
     <UserControl.Resources>
         <converters:BoolToVisibilityConverter x:Name="BoolToVisibilityConverter"/>
         <converters:ServerTypeToVisibilityConverter x:Name="ServerTypeToVisibilityConverter"/>
-        <converters:ListToStringConverter x:Name="ListToStringConverter"/>
         <converters:NullToVisibilityConverter x:Name="NullToVisibilityConverter"/>
+        <converters:ListToStringConverter x:Name="ListToStringConverter"/>
     </UserControl.Resources>
 
     <n:TaskbarIcon
@@ -22,6 +22,7 @@
         MenuActivation="RightClick"
         ContextMenuMode="SecondWindow"
         LeftClickCommand="{x:Bind LeftClickCommand}"
+        RightClickCommand="{x:Bind OpeningCommand}"
         >
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
@@ -38,18 +39,18 @@
                     IsEnabled="{x:Bind FirstServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind FirstServerViewModel.Usernames, Mode=OneWay, Converter={StaticResource ListToStringConverter}, FallbackValue=''}"
+                    Text="{x:Bind FirstServerViewModel.Usernames, Mode=OneWay, FallbackValue='', Converter={StaticResource ListToStringConverter}}"
                     Visibility="{x:Bind FirstServerViewModel.Type, FallbackValue=Collapsed, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}"
                     IsEnabled="{x:Bind FirstServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
                     Text="Start"
-                    Command="{x:Bind FirstStartCommand}"
+                    Command="{x:Bind FirstServerViewModel.StartCommand, FallbackValue={x:Null}, Mode=OneWay}"
                     Visibility="{x:Bind FirstServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter='Inverse'}"
                     />
                 <MenuFlyoutItem
                     Text="Stop"
-                    Command="{x:Bind FirstStopCommand}"
+                    Command="{x:Bind FirstServerViewModel.StopCommand, FallbackValue={x:Null}, Mode=OneWay}"
                     Visibility="{x:Bind FirstServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
                 <MenuFlyoutSeparator
@@ -68,18 +69,18 @@
                     IsEnabled="{x:Bind SecondServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind SecondServerViewModel.Usernames, Mode=OneWay, Converter={StaticResource ListToStringConverter}, FallbackValue=''}"
+                    Text="{x:Bind SecondServerViewModel.Usernames, Mode=OneWay, FallbackValue='', Converter={StaticResource ListToStringConverter}}"
                     Visibility="{x:Bind SecondServerViewModel.Type, FallbackValue=Collapsed, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}"
                     IsEnabled="{x:Bind SecondServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
                     Text="Start"
-                    Command="{x:Bind SecondStartCommand}"
+                    Command="{x:Bind SecondServerViewModel.StartCommand, FallbackValue={x:Null}, Mode=OneWay}"
                     Visibility="{x:Bind SecondServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter='Inverse'}"
                     />
-                <MenuFlyoutItem
+                    <MenuFlyoutItem
                     Text="Stop"
-                    Command="{x:Bind SecondStopCommand}"
+                    Command="{x:Bind SecondServerViewModel.StopCommand, FallbackValue={x:Null}, Mode=OneWay}"
                     Visibility="{x:Bind SecondServerViewModel.Status, Mode=OneWay, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}"
                 />
                 <MenuFlyoutSeparator
@@ -95,7 +96,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <ToggleMenuFlyoutItem 
-                    IsChecked="{x:Bind IsAutorun, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    IsChecked="{x:Bind IsAutorun, Mode=OneWay}"
                     >
                     Autostart
                 </ToggleMenuFlyoutItem>

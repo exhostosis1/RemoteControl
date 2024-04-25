@@ -6,16 +6,15 @@ using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace WinUI.ViewModels;
 
-public sealed partial class ServerViewModel: ObservableObject
+public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDisposable
 {
-    private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
-
     private IServer? _server;
 
     public IServer? Server
@@ -107,8 +106,8 @@ public sealed partial class ServerViewModel: ObservableObject
         if (_server is null) return;
 
         _server.Stop();
-        _timer.Dispose();
         RemoveServer?.Invoke(this, _server);
+        Dispose();
     }
 
     [RelayCommand]
@@ -177,5 +176,15 @@ public sealed partial class ServerViewModel: ObservableObject
             _server.Start();
 
         _pending = false;
+    }
+
+    public void Dispose()
+    {
+        _timer.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _timer.DisposeAsync();
     }
 }
