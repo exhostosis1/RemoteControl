@@ -102,7 +102,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Background="LightBlue"
-                    Command="{x:Bind ViewModel.UpdateCommand}"
+                    Command="{x:Bind ViewModel.UpdateCommand, Mode=OneWay}"
                     Content="Update"
                     Foreground="Black" />
                 <Button
@@ -112,7 +112,7 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Background="DarkRed"
-                    Command="{x:Bind ViewModel.RemoveCommand}"
+                    Command="{x:Bind ViewModel.RemoveCommand, Mode=OneWay}"
                     Content="Remove"
                     Foreground="White" />
             </Grid>

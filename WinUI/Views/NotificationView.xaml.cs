@@ -29,14 +29,22 @@ public sealed partial class NotificationView
     {
         this.InitializeComponent();
 
-        CollectionViewModel.Servers.CollectionChanged += InitModels;
         InitModels(null, null);
     }
 
     private void InitModels(object? _, NotifyCollectionChangedEventArgs? __)
     {
+        FirstServerViewModel = null;
+        SecondServerViewModel = null;
+
         FirstServerViewModel = CollectionViewModel.Servers.FirstOrDefault();
         SecondServerViewModel = CollectionViewModel.Servers.Skip(1).FirstOrDefault();
+    }
+
+    [RelayCommand]
+    private void Init()
+    {
+        InitModels(null, null);
     }
 
     [RelayCommand]

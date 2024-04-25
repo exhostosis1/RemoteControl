@@ -14,8 +14,10 @@ public partial class ServerCollectionViewModel: ObservableObject
     private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
 
     public ObservableCollection<ServerViewModel> Servers { get; } = [];
-
     private readonly RelayCommand<ServerViewModel> _removeCommand;
+
+    [ObservableProperty] private bool _errorShow;
+    [ObservableProperty] private string _errorMessage;
 
     public bool HostAutostart
     {
@@ -56,7 +58,8 @@ public partial class ServerCollectionViewModel: ObservableObject
                 }
                 catch (Exception e)
                 {
-                    //Error?.Invoke(this, e.Message);
+                    ErrorMessage = e.Message;
+                    ErrorShow = true;
                 }
             }
         }

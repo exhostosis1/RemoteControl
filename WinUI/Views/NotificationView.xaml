@@ -22,6 +22,7 @@
         MenuActivation="RightClick"
         ContextMenuMode="SecondWindow"
         LeftClickCommand="{x:Bind LeftClickCommand}"
+        RightClickCommand="{x:Bind InitCommand}"
         >
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>

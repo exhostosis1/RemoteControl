@@ -27,6 +27,9 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     [ObservableProperty] private bool _startAutomatically;
     [ObservableProperty] private bool _isSwitchEnabled = true;
 
+    [ObservableProperty] private bool _errorShow;
+    [ObservableProperty] private string _errorMessage;
+
     private bool _status;
 
     public bool Status
@@ -87,7 +90,8 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
         }
         catch (Exception e)
         {
-            //Error?.Invoke(this, e.Message);
+            ErrorMessage = e.Message;
+            ErrorShow = true;
         }
     }
 
@@ -131,7 +135,8 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
                 }
                 catch (Exception e)
                 {
-                    //Error?.Invoke(this, e.Message);
+                    ErrorMessage = e.Message;
+                    ErrorShow = true;
                     return;
                 }
                 break;
