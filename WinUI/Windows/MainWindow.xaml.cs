@@ -18,9 +18,6 @@ public sealed partial class MainWindow : Window
     private const int Width = 860;
     private const int Height = 480;
 
-    [ObservableProperty] private bool _showError;
-    [ObservableProperty] private string _errorMessage;
-
     public MainWindow()
     {
         this.InitializeComponent();

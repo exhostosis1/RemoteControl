@@ -60,6 +60,8 @@ namespace WinUI
 
             _vm = ServerCollectionViewModelProvider.Get();
             SetSystemEvents();
+
+            MainWindow.Hide(true);
         }
 
         private void SetSystemEvents()

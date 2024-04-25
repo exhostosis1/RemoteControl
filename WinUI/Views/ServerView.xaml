@@ -18,23 +18,40 @@
         HorizontalContentAlignment="Stretch"
         ExpandDirection="Down">
         <Expander.Header>
-            <StackPanel Orientation="Horizontal">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="4*"/>
+                </Grid.ColumnDefinitions>
                 <ToggleSwitch 
+                    Grid.Column="0"
+                    HorizontalAlignment="Left"
                     IsOn="{x:Bind ViewModel.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     IsEnabled="{x:Bind ViewModel.IsSwitchEnabled, Mode=OneWay}"/>
                 <TextBlock
-                    Margin="10,0,0,0"
+                    Grid.Column="1"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    HorizontalTextAlignment="Left"
+                    HorizontalTextAlignment="Center"
                     Text="{x:Bind ViewModel.Type, Mode=OneWay}" />
                 <TextBlock
-                    Margin="10,0,0,0"
+                    Grid.Column="2"
                     HorizontalAlignment="Left"
                     VerticalAlignment="Center"
-                    HorizontalTextAlignment="Left"
+                    HorizontalTextAlignment="Center"
                     Text="{x:Bind ViewModel.Name, Mode=OneWay}" />
-            </StackPanel>
+                <InfoBar
+                    Grid.Column="0"
+                    Grid.ColumnSpan="3"
+                    Width="Auto"
+                    HorizontalAlignment="Stretch"
+                    VerticalAlignment="Center"
+                    Content="{x:Bind ViewModel.ErrorMessage, Mode=OneWay}"
+                    IsOpen="{x:Bind ViewModel.ErrorShow, Mode=OneWay}"
+                    Severity="Error" 
+                    CloseButtonCommand="{x:Bind ViewModel.ErrorCloseCommand}"/>
+            </Grid>
         </Expander.Header>
         <Expander.Content>
             <Grid>

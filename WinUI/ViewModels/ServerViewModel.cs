@@ -31,20 +31,28 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     [ObservableProperty] private string _errorMessage;
 
     private bool _status;
-
     public bool Status
     {
         get => _status = _server.Status;
         set
         {
+            _status = value;
             IsSwitchEnabled = false;
             if (value)
             {
-                _server?.Start();
+                try
+                {
+                    _server.Start();
+                }
+                catch (Exception e)
+                {
+                    ErrorMessage = e.Message;
+                    ErrorShow = true;
+                }
             }
             else
             {
-                _server?.Stop();
+                _server.Stop();
             }
         }
     }
@@ -75,9 +83,8 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
         {
             IsSwitchEnabled = true;
 
-            if (_server.Status == _status) return;
-
-            OnPropertyChanged(nameof(Status));
+            if(_server.Status != _status)
+                OnPropertyChanged(nameof(Status));
         }, null);
     }
 
@@ -165,5 +172,11 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     public async ValueTask DisposeAsync()
     {
         await _timer.DisposeAsync();
+    }
+
+    [RelayCommand]
+    private void ErrorClose()
+    {
+        ErrorShow = false;
     }
 }

@@ -15,15 +15,6 @@
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Margin="40,15,0,0">Remote Control</TextBlock>
         <views:CollectionView Grid.Row="1" Margin="0,0,0,0"/>
-        <InfoBar
-            Grid.Row="1"
-            Width="Auto"
-            Margin="30,30,30,30"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
-            Content="{x:Bind ErrorMessage, Mode=OneWay}"
-            IsOpen="{x:Bind ShowError, Mode=OneWay}"
-            Severity="Error" />
         <views:NotificationView Grid.Row="2"/>
     </Grid>
 </Window>

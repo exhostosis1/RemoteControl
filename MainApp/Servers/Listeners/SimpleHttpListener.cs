@@ -40,6 +40,8 @@ internal class SimpleHttpListener(ILogger logger) : IListener
             }
 
             var currentIps = GetCurrentIPs();
+
+            
             var unavailableIps = _listener.Prefixes.Where(x => !currentIps.Contains(new Uri(x).Host)).ToList();
 
             if (unavailableIps.Count == 0) throw;

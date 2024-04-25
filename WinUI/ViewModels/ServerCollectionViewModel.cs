@@ -16,9 +16,6 @@ public partial class ServerCollectionViewModel: ObservableObject
     public ObservableCollection<ServerViewModel> Servers { get; } = [];
     private readonly RelayCommand<ServerViewModel> _removeCommand;
 
-    [ObservableProperty] private bool _errorShow;
-    [ObservableProperty] private string _errorMessage;
-
     public bool HostAutostart
     {
         get => _app.Host.GetAutorun();
@@ -48,19 +45,13 @@ public partial class ServerCollectionViewModel: ObservableObject
 
         foreach (var server in _app.Host.GetServers())
         {
-            Servers.Add(new ServerViewModel(server, _removeCommand));
 
-            if (server.Config.AutoStart)
+            var vm = new ServerViewModel(server, _removeCommand);
+            Servers.Add(vm);
+
+            if (vm.StartAutomatically)
             {
-                try
-                {
-                    server.Start();
-                }
-                catch (Exception e)
-                {
-                    ErrorMessage = e.Message;
-                    ErrorShow = true;
-                }
+                vm.StartCommand.Execute(null);
             }
         }
     }

@@ -6,8 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:servers="using:MainApp.Servers"
-    xmlns:views="using:WinUI.Views"
     xmlns:viewModels="using:WinUI.ViewModels"
+    xmlns:views="using:WinUI.Views"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
 
@@ -16,38 +16,52 @@
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <StackPanel
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="4*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Button
             Grid.Row="0"
-            HorizontalAlignment="Right"
-            Orientation="Horizontal">
-            <Button
-                Margin="4,4,4,4"
-                Command="{x:Bind ViewModel.UpdateConfigCommand}"
-                Content="Save Config"
-                />
-            <Button
-                Margin="4,4,4,4"
-                Command="{x:Bind ViewModel.ReloadCommand}"
-                Content="Reload Servers" />
-            <DropDownButton
-                Margin="4,4,4,4"
-                Content="Add server">
-                <DropDownButton.Flyout>
-                    <MenuFlyout Placement="Bottom">
-                        <MenuFlyoutItem
-                            Command="{x:Bind ViewModel.AddCommand}"
-                            CommandParameter="{x:Bind servers:ServerType.Web}"
-                            Text="Web" />
-                        <MenuFlyoutItem
-                            Command="{x:Bind ViewModel.AddCommand}"
-                            CommandParameter="{x:Bind servers:ServerType.Bot}"
-                            Text="Bot" />
-                    </MenuFlyout>
-                </DropDownButton.Flyout>
-            </DropDownButton>
-        </StackPanel>
+            Grid.Column="1"
+            Command="{x:Bind ViewModel.UpdateConfigCommand}"
+            Content="Save Config" 
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Margin="4, 4, 4, 4"/>
+        <Button
+            Grid.Row="0"
+            Grid.Column="2"
+            Command="{x:Bind ViewModel.ReloadCommand}"
+            Content="Reload Servers" 
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Margin="4, 4, 4, 4"/>
+        <DropDownButton
+            Grid.Row="0"
+            Grid.Column="3"
+            Content="Add server"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Center"
+            Margin="4, 4, 4, 4">
+            <DropDownButton.Flyout>
+                <MenuFlyout Placement="Bottom">
+                    <MenuFlyoutItem
+                        Command="{x:Bind ViewModel.AddCommand}"
+                        CommandParameter="{x:Bind servers:ServerType.Web}"
+                        Text="Web" />
+                    <MenuFlyoutItem
+                        Command="{x:Bind ViewModel.AddCommand}"
+                        CommandParameter="{x:Bind servers:ServerType.Bot}"
+                        Text="Bot" />
+                </MenuFlyout>
+            </DropDownButton.Flyout>
+        </DropDownButton>
         <ScrollViewer
             Grid.Row="1"
+            Grid.Column="0"
+            Grid.ColumnSpan="4"
             VerticalScrollBarVisibility="Auto"
             VerticalScrollMode="Auto">
             <ItemsView
@@ -57,7 +71,7 @@
                 <ItemsView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:ServerViewModel">
                         <ItemContainer Margin="4,0,4,4">
-                            <views:ServerView ViewModel="{x:Bind}"/>
+                            <views:ServerView ViewModel="{x:Bind}" />
                         </ItemContainer>
                     </DataTemplate>
                 </ItemsView.ItemTemplate>
