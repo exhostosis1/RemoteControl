@@ -5,30 +5,59 @@ using Microsoft.UI.Xaml;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace WinUI.ViewModels;
 
-public partial class ServerCollectionViewModel
+public partial class ServerCollectionViewModel: ObservableObject
 {
     private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
 
-    public ObservableCollection<IServer> Servers { get; }
+    public ObservableCollection<ServerViewModel> Servers { get; } = [];
 
-    public event EventHandler<string>? Error; 
+    private readonly RelayCommand<ServerViewModel> _removeCommand;
+
+    public bool HostAutostart
+    {
+        get => _app.Host.GetAutorun();
+        set
+        {
+            _app.Host.SetAutorun(value);
+            OnPropertyChanged(nameof(HostAutostart));
+        }
+    }
 
     public ServerCollectionViewModel()
     {
-        Servers = new ObservableCollection<IServer>(_app.Host.GetServers());
+        _removeCommand = new (vm => Servers.Remove(vm ?? throw new NullReferenceException()));
 
-        foreach (var server in Servers.Where(x => x.Config.AutoStart))
+        ReloadServers();
+    }
+
+    private void ReloadServers()
+    {
+        foreach (var serverViewModel in Servers)
         {
-            try
+            serverViewModel.StopCommand.Execute(true);
+            serverViewModel.Dispose();
+        }
+
+        Servers.Clear();
+
+        foreach (var server in _app.Host.GetServers())
+        {
+            Servers.Add(new ServerViewModel(server, _removeCommand));
+
+            if (server.Config.AutoStart)
             {
-                server.Start();
-            }
-            catch (Exception e)
-            {
-                Error?.Invoke(this, e.Message);
+                try
+                {
+                    server.Start();
+                }
+                catch (Exception e)
+                {
+                    //Error?.Invoke(this, e.Message);
+                }
             }
         }
     }
@@ -36,41 +65,42 @@ public partial class ServerCollectionViewModel
     [RelayCommand]
     private void Reload()
     {
-        Servers.Clear();
-
-        try
-        {
-            foreach (var server in _app.Host.GetServers())
-            {
-                Servers.Add(server);
-            }
-        }
-        catch (Exception e)
-        {
-            Error?.Invoke(this, e.Message);
-        }
+        ReloadServers();
     }
 
     [RelayCommand]
     private void Add(ServerType type)
     {
-        Servers.Add(_app.Host.ServerFactory.GetServer(new ServerConfig(type)));
+        Servers.Add(new ServerViewModel(_app.Host.ServerFactory.GetServer(new ServerConfig(type)), _removeCommand));
     }
 
     [RelayCommand]
     private void AddFirewallRules()
     {
-        AppHost.AddFirewallRules(Servers.Where(x => x.Status).Select(x => x.Config.Uri));
-    }
-
-    public void RemoveServer(IServer server)
-    {
-        Servers.Remove(server);
+        AppHost.AddFirewallRules(Servers.Where(x => x.Status).Select(x => new Uri(x.ListeningUri)));
     }
 
     [RelayCommand]
     private void UpdateConfig()
     {
-        _app.Host.SaveConfig(Servers.Select(x => x.Config));
+        _app.Host.SaveConfig(Servers.Select(x => x.GetConfig()));
+    }
+
+    [RelayCommand]
+    private void StartAll()
+    {
+        foreach (var serverViewModel in Servers)
+        {
+            serverViewModel.StartCommand.Execute(null);
+        }
+    }
+
+    [RelayCommand]
+    private void StopAll()
+    {
+        foreach (var serverViewModel in Servers)
+        {
+            serverViewModel.StopCommand.Execute(null);
+        }
     }
 }

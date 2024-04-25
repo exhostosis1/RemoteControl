@@ -22,7 +22,6 @@
         MenuActivation="RightClick"
         ContextMenuMode="SecondWindow"
         LeftClickCommand="{x:Bind LeftClickCommand}"
-        RightClickCommand="{x:Bind OpeningCommand}"
         >
         <n:TaskbarIcon.ContextFlyout>
             <MenuFlyout>
@@ -87,21 +86,21 @@
                     Visibility="{x:Bind SecondServerViewModel, Mode=OneWay, Converter={StaticResource NullToVisibilityConverter}}"/>
 
                 <MenuFlyoutItem
-                    Command="{x:Bind StartAllCommand}">
+                    Command="{x:Bind CollectionViewModel.StartAllCommand}">
                     Start all
                 </MenuFlyoutItem>
                 <MenuFlyoutItem
-                    Command="{x:Bind StopAllCommand}">
+                    Command="{x:Bind CollectionViewModel.StopAllCommand}">
                     Stop all
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <ToggleMenuFlyoutItem 
-                    IsChecked="{x:Bind IsAutorun, Mode=OneWay}"
+                    IsChecked="{x:Bind CollectionViewModel.HostAutostart, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     >
                     Autostart
                 </ToggleMenuFlyoutItem>
                 <MenuFlyoutItem
-                    Command="{x:Bind AddFirewallRulesCommand}">
+                    Command="{x:Bind CollectionViewModel.AddFirewallRulesCommand}">
                     Add firewall rule
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>

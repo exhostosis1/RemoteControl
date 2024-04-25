@@ -1,8 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp.Servers;
-using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -15,31 +13,9 @@ namespace WinUI.ViewModels;
 
 public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDisposable
 {
-    private IServer? _server;
+    private readonly IServer _server;
 
-    public IServer? Server
-    {
-        get => _server;
-        set
-        {
-            _server = value;
-
-            if (_server == null) return;
-
-            Status = _server.Status;
-            Type = _server.Config.Type;
-            Name = _server.Config.Name;
-            ListeningUri = _server.Config.Uri.ToString();
-            ApiUri = _server.Config.ApiUri;
-            ApiKey = _server.Config.ApiKey;
-            Usernames = _server.Config.Usernames;
-            StartAutomatically = _server.Config.AutoStart;
-
-            InitializeTimer();
-        }
-    }
-
-    private Timer _timer;
+    private readonly Timer _timer;
     private readonly SynchronizationContext _context;
 
     [ObservableProperty] private ServerType _type;
@@ -49,35 +25,56 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     [ObservableProperty] private string _apiKey;
     [ObservableProperty] private List<string> _usernames;
     [ObservableProperty] private bool _startAutomatically;
+    [ObservableProperty] private bool _isSwitchEnabled = true;
 
-    [ObservableProperty] private bool _status;
-    [ObservableProperty] private bool _switchIsEnabled;
+    private bool _status;
 
-    public event EventHandler<string>? Error;
-    public event EventHandler<IServer>? RemoveServer;
-    public event EventHandler? UpdateConfig;
-
-    public ServerViewModel(IServer server)
+    public bool Status
     {
-        _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
-
-        Server = server;
+        get => _status = _server.Status;
+        set
+        {
+            IsSwitchEnabled = false;
+            if (value)
+            {
+                _server?.Start();
+            }
+            else
+            {
+                _server?.Stop();
+            }
+        }
     }
 
-    private void InitializeTimer()
+    private readonly RelayCommand<ServerViewModel> _removeCommand;
+
+    public ServerViewModel(IServer server, RelayCommand<ServerViewModel> removeCommand)
     {
+        _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
+        _removeCommand = removeCommand;
+
+        _server = server;
+
+        Type = _server.Config.Type;
+        Name = _server.Config.Name;
+        ListeningUri = _server.Config.Uri.ToString();
+        ApiUri = _server.Config.ApiUri;
+        ApiKey = _server.Config.ApiKey;
+        Usernames = _server.Config.Usernames;
+        StartAutomatically = _server.Config.AutoStart;
+
         _timer = new Timer(DoWork, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     private void DoWork(object? state)
     {
-        if (_pending || _server is null) return;
-
         _context.Post((_) =>
         {
-            Status = _server.Status;
-            SwitchIsEnabled = true;
-            _ignoreEvent = false;
+            IsSwitchEnabled = true;
+
+            if (_server.Status == _status) return;
+
+            OnPropertyChanged(nameof(Status));
         }, null);
     }
 
@@ -90,7 +87,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
         }
         catch (Exception e)
         {
-            Error?.Invoke(this, e.Message);
+            //Error?.Invoke(this, e.Message);
         }
     }
 
@@ -103,10 +100,8 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     [RelayCommand]
     private void Remove()
     {
-        if (_server is null) return;
-
         _server.Stop();
-        RemoveServer?.Invoke(this, _server);
+        _removeCommand.Execute(this);
         Dispose();
     }
 
@@ -114,7 +109,6 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     private void Update()
     {
         var shouldStart = false;
-        if (_server == null) return;
 
         if (_server.Status)
         {
@@ -137,7 +131,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
                 }
                 catch (Exception e)
                 {
-                    Error?.Invoke(this, e.Message);
+                    //Error?.Invoke(this, e.Message);
                     return;
                 }
                 break;
@@ -154,29 +148,9 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
 
         if (shouldStart)
             _server.Start();
-
-
-        UpdateConfig?.Invoke(this, EventArgs.Empty);
     }
 
-    private bool _ignoreEvent = false;
-    private bool _pending = false;
-
-    public void Switch_OnPointerReleased(object sender, RoutedEventArgs _)
-    {
-        if (_ignoreEvent || _server is null || sender is not ToggleSwitch) return;
-        _ignoreEvent = true;
-        _pending = true;
-
-        SwitchIsEnabled = false;
-
-        if (_server.Status)
-            _server.Stop();
-        else
-            _server.Start();
-
-        _pending = false;
-    }
+    public ServerConfig GetConfig() => _server.Config;
 
     public void Dispose()
     {

@@ -14,7 +14,7 @@
             <RowDefinition Height="0" />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Margin="40,15,0,0">Remote Control</TextBlock>
-        <views:CollectionView Grid.Row="1" Margin="0,0,0,0" Error="OnError"/>
+        <views:CollectionView Grid.Row="1" Margin="0,0,0,0"/>
         <InfoBar
             Grid.Row="1"
             Width="Auto"

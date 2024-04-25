@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:servers="using:MainApp.Servers"
     xmlns:views="using:WinUI.Views"
+    xmlns:viewModels="using:WinUI.ViewModels"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
 
@@ -20,6 +21,12 @@
             HorizontalAlignment="Right"
             Orientation="Horizontal">
             <Button
+                Margin="4,4,4,4"
+                Command="{x:Bind ViewModel.UpdateConfigCommand}"
+                Content="Save Config"
+                />
+            <Button
+                Margin="4,4,4,4"
                 Command="{x:Bind ViewModel.ReloadCommand}"
                 Content="Reload Servers" />
             <DropDownButton
@@ -48,9 +55,9 @@
                 VerticalAlignment="Top"
                 ItemsSource="{x:Bind ViewModel.Servers}">
                 <ItemsView.ItemTemplate>
-                    <DataTemplate x:DataType="servers:IServer">
+                    <DataTemplate x:DataType="viewModels:ServerViewModel">
                         <ItemContainer Margin="4,0,4,4">
-                            <views:ServerView Server="{x:Bind}" Error="OnError" RemoveServer="ServerView_OnRemoveServer"  UpdateConfig="ServerView_OnUpdateConfig"/>
+                            <views:ServerView ViewModel="{x:Bind}"/>
                         </ItemContainer>
                     </DataTemplate>
                 </ItemsView.ItemTemplate>

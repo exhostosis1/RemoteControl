@@ -1,7 +1,12 @@
-﻿using H.NotifyIcon;
+﻿using System.Collections.Generic;
+using System.Linq;
+using H.NotifyIcon;
 using MainApp;
+using Microsoft.Extensions.Logging;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.Win32;
+using WinUI.ViewModels;
 using WinUI.Windows;
 
 
@@ -53,7 +58,49 @@ namespace WinUI
                 MainWindow.Hide(true);
             };
 
-            MainWindow.Hide(true);
+            _vm = ServerCollectionViewModelProvider.Get();
+            SetSystemEvents();
+        }
+
+        private void SetSystemEvents()
+        {
+            SystemEvents.SessionSwitch += SessionSwitchHandler;
+        }
+
+        private List<ServerViewModel> _runningServers = [];
+        private ServerCollectionViewModel _vm;
+
+        private void SessionSwitchHandler(object sender, SessionSwitchEventArgs args)
+        {
+            switch (args.Reason)
+            {
+                case SessionSwitchReason.SessionLock:
+                {
+                    Host.Logger.LogInformation("Stopping servers due to logout");
+
+                    _runningServers = _vm.Servers.Where(x => x.Status).ToList();
+                    _runningServers.ForEach(x => x.StopCommand.Execute(null));
+
+                    break;
+                }
+                case SessionSwitchReason.SessionUnlock:
+                {
+                    Host.Logger.LogInformation("Restoring servers");
+
+                    _runningServers.ForEach(x => x.StartCommand.Execute(null));
+                    break;
+                }
+                case SessionSwitchReason.ConsoleConnect:
+                case SessionSwitchReason.ConsoleDisconnect:
+                case SessionSwitchReason.RemoteConnect:
+                case SessionSwitchReason.RemoteDisconnect:
+                case SessionSwitchReason.SessionLogon:
+                case SessionSwitchReason.SessionLogoff:
+                case SessionSwitchReason.SessionRemoteControl:
+                default:
+                    break;
+
+            }
         }
     }
 }
