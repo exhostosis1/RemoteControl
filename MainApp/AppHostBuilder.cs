@@ -16,7 +16,6 @@ public sealed class AppHostBuilder
     private ServerFactory? _serverFactory = null;
     private RegistryAutoStartService? _autoStartService = null;
     private IConfigurationProvider? _configProvider = null;
-    private static string CurrentDirectory => Path.GetDirectoryName(Process.GetCurrentProcess().MainModule?.FileName) ?? Environment.CurrentDirectory;
 
     public AppHostBuilder UseLogger(ILoggerProvider loggerProvider)
     {
@@ -46,7 +45,7 @@ public sealed class AppHostBuilder
             new RegistryAutoStartService(_loggerProvider.CreateLogger(nameof(RegistryAutoStartService)));
         _configProvider ??= new JsonConfigurationProvider(
             _loggerProvider.CreateLogger(nameof(JsonConfigurationProvider)),
-            Path.Combine(CurrentDirectory, "appsettings.json"));
+            Path.Combine(AppContext.BaseDirectory, "appsettings.json"));
 
         return new AppHost(_loggerProvider, _serverFactory, _autoStartService, _configProvider);
     }

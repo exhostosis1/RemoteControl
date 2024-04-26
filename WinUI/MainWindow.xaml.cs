@@ -18,13 +18,20 @@ public sealed partial class MainWindow : Window
     private const int Width = 860;
     private const int Height = 480;
 
+    private readonly AppWindow _appWindow;
+
+    public void SetIcon(string icon)
+    {
+        _appWindow.SetIcon(icon);
+    }
+
     public MainWindow()
     {
         this.InitializeComponent();
 
         var hWnd = WinRT.Interop.WindowNative.GetWindowHandle(this);
         var windowId = Win32Interop.GetWindowIdFromWindow(hWnd);
-        var appWindow = AppWindow.GetFromWindowId(windowId);
+        _appWindow = AppWindow.GetFromWindowId(windowId);
 
         var clientSize = DisplayArea.GetFromWindowId(windowId, DisplayAreaFallback.Nearest);
         var x = clientSize.WorkArea.Width / 2 - Width / 2;
@@ -32,6 +39,6 @@ public sealed partial class MainWindow : Window
 
         var rect = new RectInt32(x, y, Width, Height);
 
-        appWindow.MoveAndResize(rect);
+        _appWindow.MoveAndResize(rect);
     }
 }
