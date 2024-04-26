@@ -15,7 +15,8 @@
     <Expander
         HorizontalAlignment="Stretch"
         HorizontalContentAlignment="Stretch"
-        ExpandDirection="Down">
+        ExpandDirection="Down"
+        IsExpanded="{x:Bind ViewModel.Expanded, Mode=OneWay}">
         <Expander.Header>
             <Grid>
                 <Grid.ColumnDefinitions>

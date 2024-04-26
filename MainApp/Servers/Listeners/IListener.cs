@@ -1,8 +1,9 @@
-﻿using MainApp.Servers.DataObjects;
+﻿using System.ComponentModel;
+using MainApp.Servers.DataObjects;
 
 namespace MainApp.Servers.Listeners;
 
-internal interface IListener
+internal interface IListener: INotifyPropertyChanged
 {
     public bool IsListening { get; }
     public void StartListen(StartParameters param);

@@ -62,7 +62,7 @@ public partial class ServerCollectionViewModel: ObservableObject
     [RelayCommand]
     private void Add(ServerType type)
     {
-        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(new ServerConfig(type)), _removeCommand));
+        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(new ServerConfig(type)), _removeCommand, true));
     }
 
     [RelayCommand]
@@ -88,7 +88,7 @@ public partial class ServerCollectionViewModel: ObservableObject
     {
         foreach (var serverViewModel in Servers)
         {
-            serverViewModel.StartCommand.Execute(null);
+            serverViewModel.Status = true;
         }
     }
 
@@ -97,7 +97,7 @@ public partial class ServerCollectionViewModel: ObservableObject
     {
         foreach (var serverViewModel in Servers)
         {
-            serverViewModel.StopCommand.Execute(null);
+            serverViewModel.Status = false;
         }
     }
 }

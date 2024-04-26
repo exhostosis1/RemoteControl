@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp.Servers;
 
@@ -7,11 +8,10 @@ using MainApp.Servers;
 
 namespace MainApp.ViewModels;
 
-public partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDisposable
+public partial class ServerViewModel: ObservableObject, IDisposable
 {
     private readonly Server _server;
 
-    private readonly Timer _timer;
     private readonly SynchronizationContext _context;
 
     [ObservableProperty] private ServerType _type;
@@ -25,37 +25,36 @@ public partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDispo
 
     [ObservableProperty] private bool _errorShow;
     [ObservableProperty] private string _errorMessage;
+    [ObservableProperty] private bool _expanded;
 
     private bool _status;
+
     public bool Status
     {
         get => _status = _server.Status;
         set
         {
-            _status = value;
+            if (value == _status) return;
+            
             IsSwitchEnabled = false;
             if (value)
             {
-                try
-                {
-                    _server.Start();
-                }
-                catch (Exception e)
-                {
-                    ErrorMessage = e.Message;
-                    ErrorShow = true;
-                }
+                _status = StartPrivate();
+                IsSwitchEnabled = true;
             }
             else
             {
-                _server.Stop();
+                _status = StopPrivate();
+                IsSwitchEnabled = true;
             }
+
+            OnPropertyChanged(nameof(Status));
         }
     }
 
     private readonly RelayCommand<ServerViewModel> _removeCommand;
 
-    internal ServerViewModel(Server server, RelayCommand<ServerViewModel> removeCommand)
+    internal ServerViewModel(Server server, RelayCommand<ServerViewModel> removeCommand, bool expanded = false)
     {
         _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
         _removeCommand = removeCommand;
@@ -70,38 +69,49 @@ public partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDispo
         Usernames = _server.Config.UsernamesString;
         StartAutomatically = _server.Config.AutoStart;
 
-        _timer = new Timer(DoWork, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
+        Expanded = expanded;
+
+        _server.PropertyChanged += PropertyChangedHandler;
     }
 
-    private void DoWork(object? state)
+    private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs args)
     {
-        _context.Post((_) =>
-        {
-            IsSwitchEnabled = true;
+        if (args.PropertyName != "Status") return;
 
-            if(_server.Status != _status)
-                OnPropertyChanged(nameof(Status));
-        }, null);
+        OnPropertyChanged(nameof(Status));
     }
 
-    [RelayCommand]
-    private void Start()
+    private bool StartPrivate()
     {
+        var val = false;
         try
         {
-            _server?.Start();
+            val = _server.Start();
         }
         catch (Exception e)
         {
             ErrorMessage = e.Message;
             ErrorShow = true;
         }
+
+        return val;
+    }
+
+    private bool StopPrivate()
+    {
+        return _server.Stop();
+    }
+
+    [RelayCommand]
+    private void Start()
+    {
+        StartPrivate();
     }
 
     [RelayCommand]
     private void Stop()
     {
-        _server?.Stop();
+        StopPrivate();
     }
 
     [RelayCommand]
@@ -162,12 +172,7 @@ public partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDispo
 
     public void Dispose()
     {
-        _timer.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _timer.DisposeAsync();
+        _server.PropertyChanged -= PropertyChangedHandler;
     }
 
     [RelayCommand]

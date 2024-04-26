@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.ComponentModel;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using MainApp.Servers.DataObjects;
@@ -11,7 +12,8 @@ internal class SimpleHttpListener(ILogger logger) : IListener
     private HttpListener _listener = new();
 
     public bool IsListening => _listener.IsListening;
-
+    public event PropertyChangedEventHandler? PropertyChanged;
+    
     private static IEnumerable<string> GetCurrentIPs() =>
         Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
 
@@ -40,7 +42,6 @@ internal class SimpleHttpListener(ILogger logger) : IListener
             }
 
             var currentIps = GetCurrentIPs();
-
             
             var unavailableIps = _listener.Prefixes.Where(x => !currentIps.Contains(new Uri(x).Host)).ToList();
 
@@ -51,6 +52,7 @@ internal class SimpleHttpListener(ILogger logger) : IListener
         }
 
         logger.LogInformation("Http listener started listening on {uri}", param.Uri);
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
     }
 
     public void StopListen()
@@ -59,6 +61,7 @@ internal class SimpleHttpListener(ILogger logger) : IListener
             _listener.Stop();
 
         logger.LogInformation("Http listener stopped");
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
     }
 
     public void CloseContext(RequestContext context)

@@ -2,11 +2,14 @@
 using MainApp.Servers.Listeners;
 using MainApp.Servers.Middleware;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 
 namespace MainApp.Servers;
 
-internal class Server
+internal class Server: INotifyPropertyChanged
 {
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public bool Status => _listener.IsListening;
 
     private readonly ILogger _logger;
@@ -44,6 +47,14 @@ internal class Server
         action = GetFunctions(middlewares).Aggregate(action, (current, func) => func(current));
 
         _middleware = action;
+        var context = SynchronizationContext.Current ?? throw new NullReferenceException();
+
+        _listener.PropertyChanged += (object? sender, PropertyChangedEventArgs args) =>
+        {
+            if (args.PropertyName != "IsListening") return;
+
+            context.Post((_) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status))), null);
+        };
     }
 
     public bool Start()
