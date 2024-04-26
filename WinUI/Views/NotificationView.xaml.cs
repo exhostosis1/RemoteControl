@@ -3,9 +3,16 @@ using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using MainApp.ViewModels;
 using Microsoft.UI.Xaml;
+using Windows.UI.ViewManagement;
 using System;
 using System.Collections.Specialized;
+using System.Drawing;
+using System.IO;
 using System.Linq;
+using Microsoft.UI.Xaml.Controls;
+using System.Reflection.Metadata;
+using System.Drawing.Drawing2D;
+using System.Threading;
 
 namespace WinUI.Views;
 
@@ -24,13 +31,33 @@ public sealed partial class NotificationView
     [ObservableProperty]
     private bool _isAutorun;
 
+    private readonly Windows.UI.Color _colorBlack = Windows.UI.Color.FromArgb(255, 0, 0, 0);
+
+    private readonly UISettings _settings = new();
+    private bool IsDarkMode => _settings.GetColorValue(UIColorType.Background) == _colorBlack;
+
+    private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico"));
+    private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico"));
+
+    private readonly SynchronizationContext _context;
+
     public NotificationView()
     {
         this.InitializeComponent();
 
+        _context = SynchronizationContext.Current ?? throw new NullReferenceException();
+
         CollectionViewModel = _app.Host.ServerCollectionViewModel;
 
         InitModels(null, null);
+
+        _settings.ColorValuesChanged += (_, _) => ApplyTheme();
+        ApplyTheme();
+    }
+
+    private void ApplyTheme()
+    {
+        _context.Post((_) => TrayIcon.UpdateIcon(IsDarkMode ? _lightIcon : _darkIcon), null);
     }
 
     private void InitModels(object? _, NotifyCollectionChangedEventArgs? __)

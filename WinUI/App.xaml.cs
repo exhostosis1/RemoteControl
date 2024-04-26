@@ -2,7 +2,6 @@
 using MainApp;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
-using WinUI.Windows;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -42,7 +41,8 @@ namespace WinUI
             MainWindow = new MainWindow
             {
                 ExtendsContentIntoTitleBar = true,
-                SystemBackdrop = new MicaBackdrop()
+                SystemBackdrop = new MicaBackdrop(),
+                Title = "Remote Control"
             };
 
             MainWindow.Closed += (_, eventArgs) =>

@@ -4,7 +4,6 @@
     <TargetFramework>net8.0-windows10.0.22000.0</TargetFramework>
     <TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
     <RootNamespace>WinUI</RootNamespace>
-    <ApplicationManifest>app.manifest</ApplicationManifest>
     <Platforms>x86;x64;ARM64</Platforms>
     <RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
 	<UseRidGraph>true</UseRidGraph>
@@ -15,6 +14,8 @@
 	<AssemblyName>RemoteControl</AssemblyName>
 	<WindowsPackageType>None</WindowsPackageType>
 	<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+	<ApplicationManifest>app.manifest</ApplicationManifest>
+	<ApplicationIcon>Icons\grey.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="NotificationView.xaml" />
@@ -33,12 +34,14 @@
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
+    <Content Include="Icons\grey.ico" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon.WinUI" Version="2.0.128" />
     <PackageReference Include="Microsoft.WindowsAppSDK" Version="1.5.240404000" />
     <PackageReference Include="Microsoft.Windows.SDK.BuildTools" Version="10.0.22621.3233" />
+    <PackageReference Include="System.Windows.Extensions" Version="8.0.0" />
     <Manifest Include="$(ApplicationManifest)" />
   </ItemGroup>
 
@@ -77,7 +80,17 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Windows\" />
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
   <!-- 

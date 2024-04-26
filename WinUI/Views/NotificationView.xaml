@@ -17,7 +17,6 @@
     <n:TaskbarIcon
         x:Name="TrayIcon"
         ToolTipText="Remote Control"
-        IconSource="/Icons/Device.theme-dark.ico"
         MenuActivation="RightClick"
         ContextMenuMode="SecondWindow"
         LeftClickCommand="{x:Bind LeftClickCommand}"
