@@ -1,19 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
-using MainApp;
+using MainApp.ViewModels;
 using Microsoft.UI.Xaml;
 using System;
 using System.Collections.Specialized;
 using System.Linq;
-using WinUI.ViewModels;
 
 namespace WinUI.Views;
 
 [ObservableObject]
 public sealed partial class NotificationView
 {
-    public readonly ServerCollectionViewModel CollectionViewModel = ServerCollectionViewModelProvider.Get();
+    public ServerCollectionViewModel CollectionViewModel { get; }
     private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
 
     [ObservableProperty]
@@ -28,6 +27,8 @@ public sealed partial class NotificationView
     public NotificationView()
     {
         this.InitializeComponent();
+
+        CollectionViewModel = _app.Host.ServerCollectionViewModel;
 
         InitModels(null, null);
     }
@@ -59,12 +60,6 @@ public sealed partial class NotificationView
             window.Show();
             window.Activate();
         }
-    }
-
-    [RelayCommand]
-    private void OpenUri(string uri)
-    {
-        AppHost.OpenSite(uri);
     }
 
     [RelayCommand]

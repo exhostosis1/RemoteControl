@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:servers="using:MainApp.Servers"
-    xmlns:viewModels="using:WinUI.ViewModels"
+    xmlns:viewModels="using:MainApp.ViewModels"
     xmlns:views="using:WinUI.Views"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">

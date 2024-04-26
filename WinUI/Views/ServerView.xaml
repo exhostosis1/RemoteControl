@@ -10,7 +10,6 @@
 
     <UserControl.Resources>
         <converters:ServerTypeToVisibilityConverter x:Name="ServerTypeToVisibilityConverter" />
-        <converters:ListToStringConverter x:Name="ListToStringConverter"/>
     </UserControl.Resources>
 
     <Expander
@@ -93,7 +92,7 @@
                     Grid.Row="0"
                     Grid.Column="1"
                     Margin="4"
-                    Text="{x:Bind ViewModel.Usernames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource ListToStringConverter}}"
+                    Text="{x:Bind ViewModel.Usernames, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     Visibility="{x:Bind ViewModel.Type, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}" 
                     PlaceholderText="Usernames"/>
                 <TextBox

@@ -1,6 +1,8 @@
 ﻿using MainApp.Interfaces;
 using MainApp.Servers;
+using MainApp.ViewModels;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using System.Diagnostics;
 using System.Security.Principal;
 
@@ -8,27 +10,29 @@ namespace MainApp;
 
 public sealed class AppHost
 {
-    public readonly ILogger Logger;
-    public readonly IServerFactory ServerFactory;
+    private readonly ILogger _logger;
+    public ServerCollectionViewModel ServerCollectionViewModel { get; init; }
+
+    internal readonly ServerFactory ServerFactory;
 
     private readonly RegistryAutoStartService _autoStartService;
     private readonly IConfigurationProvider _configProvider;
 
-    #region Constructor
     internal AppHost(ILoggerProvider loggerProvider, ServerFactory serverFactory,
         RegistryAutoStartService autoStartService, IConfigurationProvider configProvider)
     {
-        Logger = loggerProvider.CreateLogger(nameof(AppHost));
+        _logger = loggerProvider.CreateLogger(nameof(AppHost));
         ServerFactory = serverFactory;
         _autoStartService = autoStartService;
         _configProvider = configProvider;
+
+        ServerCollectionViewModel = new(this);
+
+        SetSystemEvents();
     }
-    #endregion
 
-    #region Public methods
-
-    public bool GetAutorun() => _autoStartService.CheckAutoStart();
-    public bool SetAutorun(bool value) => _autoStartService.SetAutoStart(value);
+    internal bool GetAutorun() => _autoStartService.CheckAutoStart();
+    internal bool SetAutorun(bool value) => _autoStartService.SetAutoStart(value);
 
     private static void RunWindowsCommand(string command, bool elevated = false)
     {
@@ -46,7 +50,7 @@ public sealed class AppHost
         proc.WaitForExit();
     }
 
-    public static void AddFirewallRules(IEnumerable<Uri> uris)
+    internal static void AddFirewallRules(IEnumerable<Uri> uris)
     {
         var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
         var translatedValue = sid.Translate(typeof(NTAccount)).Value;
@@ -64,24 +68,24 @@ public sealed class AppHost
         }
     }
 
-    public void SaveConfig(IEnumerable<ServerConfig> configs)
+    internal void SaveConfig(IEnumerable<ServerConfig> configs)
     {
         _configProvider.SetConfig(configs);
     }
 
-    public IEnumerable<IServer> GetServers()
+    internal IEnumerable<Server> GetServers()
     {
         return _configProvider.GetConfig().Select(x => ServerFactory.GetServer(x));
     }
 
-    public static void OpenSite(Uri uri)
+    internal static void OpenSite(Uri uri)
     {
         var address = uri.ToString().Replace("&", "^&");
 
         RunWindowsCommand($"start {address}");
     }
 
-    public static void OpenSite(string uri)
+    internal static void OpenSite(string uri)
     {
         Uri url;
         try
@@ -95,5 +99,44 @@ public sealed class AppHost
 
         OpenSite(url);
     }
-    #endregion
+
+    private void SetSystemEvents()
+    {
+        SystemEvents.SessionSwitch += SessionSwitchHandler;
+    }
+
+    private List<ServerViewModel> _runningServers = [];
+
+    private void SessionSwitchHandler(object sender, SessionSwitchEventArgs args)
+    {
+        switch (args.Reason)
+        {
+            case SessionSwitchReason.SessionLock:
+            {
+                _logger.LogInformation("Stopping servers due to logout");
+
+                _runningServers = ServerCollectionViewModel.Servers.Where(x => x.Status).ToList();
+                _runningServers.ForEach(x => x.Status = false);
+
+                break;
+            }
+            case SessionSwitchReason.SessionUnlock:
+            {
+                _logger.LogInformation("Restoring servers");
+
+                _runningServers.ForEach(x => x.Status = true);
+                break;
+            }
+            case SessionSwitchReason.ConsoleConnect:
+            case SessionSwitchReason.ConsoleDisconnect:
+            case SessionSwitchReason.RemoteConnect:
+            case SessionSwitchReason.RemoteDisconnect:
+            case SessionSwitchReason.SessionLogon:
+            case SessionSwitchReason.SessionLogoff:
+            case SessionSwitchReason.SessionRemoteControl:
+            default:
+                break;
+
+        }
+    }
 }

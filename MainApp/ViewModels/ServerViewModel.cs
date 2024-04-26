@@ -1,19 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp.Servers;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace WinUI.ViewModels;
+namespace MainApp.ViewModels;
 
-public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDisposable
+public partial class ServerViewModel: ObservableObject, IDisposable, IAsyncDisposable
 {
-    private readonly IServer _server;
+    private readonly Server _server;
 
     private readonly Timer _timer;
     private readonly SynchronizationContext _context;
@@ -23,7 +19,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
     [ObservableProperty] private string _listeningUri;
     [ObservableProperty] private string _apiUri;
     [ObservableProperty] private string _apiKey;
-    [ObservableProperty] private List<string> _usernames;
+    [ObservableProperty] private string _usernames;
     [ObservableProperty] private bool _startAutomatically;
     [ObservableProperty] private bool _isSwitchEnabled = true;
 
@@ -59,7 +55,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
 
     private readonly RelayCommand<ServerViewModel> _removeCommand;
 
-    public ServerViewModel(IServer server, RelayCommand<ServerViewModel> removeCommand)
+    internal ServerViewModel(Server server, RelayCommand<ServerViewModel> removeCommand)
     {
         _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
         _removeCommand = removeCommand;
@@ -71,7 +67,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
         ListeningUri = _server.Config.Uri.ToString();
         ApiUri = _server.Config.ApiUri;
         ApiKey = _server.Config.ApiKey;
-        Usernames = _server.Config.Usernames;
+        Usernames = _server.Config.UsernamesString;
         StartAutomatically = _server.Config.AutoStart;
 
         _timer = new Timer(DoWork, null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
@@ -150,7 +146,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
             case ServerType.Bot:
                 config.ApiUri = ApiUri;
                 config.ApiKey = ApiKey;
-                config.Usernames = Usernames;
+                config.UsernamesString = Usernames;
                 break;
             default:
                 break;
@@ -162,7 +158,7 @@ public sealed partial class ServerViewModel: ObservableObject, IDisposable, IAsy
             _server.Start();
     }
 
-    public ServerConfig GetConfig() => _server.Config;
+    internal ServerConfig GetConfig() => _server.Config;
 
     public void Dispose()
     {

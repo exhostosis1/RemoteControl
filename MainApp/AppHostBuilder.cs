@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
 using MainApp.Interfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Debug;
 
 #if DEBUG
-
+using Microsoft.Extensions.Logging.Debug;
 #else
 using NReco.Logging.File;
 #endif

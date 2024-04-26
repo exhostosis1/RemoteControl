@@ -5,10 +5,8 @@ using Microsoft.Extensions.Logging;
 
 namespace MainApp.Servers;
 
-internal class Server: IServer
+internal class Server
 {
-    public Guid Id { get; } = Guid.NewGuid();
-    
     public bool Status => _listener.IsListening;
 
     private readonly ILogger _logger;

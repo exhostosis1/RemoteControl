@@ -12,7 +12,6 @@
         <converters:BoolToVisibilityConverter x:Name="BoolToVisibilityConverter"/>
         <converters:ServerTypeToVisibilityConverter x:Name="ServerTypeToVisibilityConverter"/>
         <converters:NullToVisibilityConverter x:Name="NullToVisibilityConverter"/>
-        <converters:ListToStringConverter x:Name="ListToStringConverter"/>
     </UserControl.Resources>
 
     <n:TaskbarIcon
@@ -33,13 +32,13 @@
                     />
                 <MenuFlyoutItem
                     Text="{x:Bind FirstServerViewModel.ListeningUri, Mode=OneWay, FallbackValue=''}"
-                    Command="{x:Bind OpenUriCommand}"
+                    Command="{x:Bind CollectionViewModel.OpenSiteCommand}"
                     CommandParameter="{x:Bind FirstServerViewModel.ListeningUri, FallbackValue='', Mode=OneWay}"
                     Visibility="{x:Bind FirstServerViewModel.Type, FallbackValue=Collapsed, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}"
                     IsEnabled="{x:Bind FirstServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind FirstServerViewModel.Usernames, Mode=OneWay, FallbackValue='', Converter={StaticResource ListToStringConverter}}"
+                    Text="{x:Bind FirstServerViewModel.Usernames, Mode=OneWay, FallbackValue=''}"
                     Visibility="{x:Bind FirstServerViewModel.Type, FallbackValue=Collapsed, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}"
                     IsEnabled="{x:Bind FirstServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
@@ -63,13 +62,13 @@
                     />
                 <MenuFlyoutItem
                     Text="{x:Bind SecondServerViewModel.ListeningUri, Mode=OneWay, FallbackValue=''}"
-                    Command="{x:Bind OpenUriCommand}"
+                    Command="{x:Bind CollectionViewModel.OpenSiteCommand}"
                     CommandParameter="{x:Bind SecondServerViewModel.ListeningUri, FallbackValue='', Mode=OneWay}"
                     Visibility="{x:Bind SecondServerViewModel.Type, FallbackValue=Collapsed, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Web'}"
                     IsEnabled="{x:Bind SecondServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />
                 <MenuFlyoutItem
-                    Text="{x:Bind SecondServerViewModel.Usernames, Mode=OneWay, FallbackValue='', Converter={StaticResource ListToStringConverter}}"
+                    Text="{x:Bind SecondServerViewModel.Usernames, Mode=OneWay, FallbackValue=''}"
                     Visibility="{x:Bind SecondServerViewModel.Type, FallbackValue=Collapsed, Mode=OneWay, Converter={StaticResource ServerTypeToVisibilityConverter}, ConverterParameter='Bot'}"
                     IsEnabled="{x:Bind SecondServerViewModel.Status, FallbackValue=False, Mode=OneWay}"
                 />

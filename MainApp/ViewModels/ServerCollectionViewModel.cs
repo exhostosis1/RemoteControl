@@ -1,33 +1,30 @@
-﻿using CommunityToolkit.Mvvm.Input;
-using MainApp;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MainApp.Servers;
-using Microsoft.UI.Xaml;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
-using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace WinUI.ViewModels;
+namespace MainApp.ViewModels;
 
 public partial class ServerCollectionViewModel: ObservableObject
 {
-    private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
+    private readonly AppHost _app;
 
     public ObservableCollection<ServerViewModel> Servers { get; } = [];
     private readonly RelayCommand<ServerViewModel> _removeCommand;
 
     public bool HostAutostart
     {
-        get => _app.Host.GetAutorun();
+        get => _app.GetAutorun();
         set
         {
-            _app.Host.SetAutorun(value);
+            _app.SetAutorun(value);
             OnPropertyChanged(nameof(HostAutostart));
         }
     }
 
-    public ServerCollectionViewModel()
+    public ServerCollectionViewModel(AppHost app)
     {
+        _app = app;
         _removeCommand = new (vm => Servers.Remove(vm ?? throw new NullReferenceException()));
 
         ReloadServers();
@@ -43,7 +40,7 @@ public partial class ServerCollectionViewModel: ObservableObject
 
         Servers.Clear();
 
-        foreach (var server in _app.Host.GetServers())
+        foreach (var server in _app.GetServers())
         {
 
             var vm = new ServerViewModel(server, _removeCommand);
@@ -65,7 +62,7 @@ public partial class ServerCollectionViewModel: ObservableObject
     [RelayCommand]
     private void Add(ServerType type)
     {
-        Servers.Add(new ServerViewModel(_app.Host.ServerFactory.GetServer(new ServerConfig(type)), _removeCommand));
+        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(new ServerConfig(type)), _removeCommand));
     }
 
     [RelayCommand]
@@ -75,9 +72,15 @@ public partial class ServerCollectionViewModel: ObservableObject
     }
 
     [RelayCommand]
+    private void OpenSite(string uri)
+    {
+        AppHost.OpenSite(uri);
+    }
+
+    [RelayCommand]
     private void UpdateConfig()
     {
-        _app.Host.SaveConfig(Servers.Select(x => x.GetConfig()));
+        _app.SaveConfig(Servers.Select(x => x.GetConfig()));
     }
 
     [RelayCommand]
