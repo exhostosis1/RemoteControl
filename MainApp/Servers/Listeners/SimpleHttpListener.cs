@@ -1,11 +1,10 @@
-﻿using System.ComponentModel;
+﻿using MainApp.Servers.DataObjects;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Principal;
 using System.Text;
-using MainApp.ControlProviders;
-using MainApp.Servers.DataObjects;
-using Microsoft.Extensions.Logging;
 
 namespace MainApp.Servers.Listeners;
 
@@ -56,11 +55,16 @@ internal class SimpleHttpListener(ILogger logger) : IListener
 
             var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
             var translatedValue = sid.Translate(typeof(NTAccount)).Value;
-            
+
             var command = $"netsh http add urlacl url={param.Uri} user={translatedValue}";
 
             AppHost.RunWindowsCommand(command, true);
 
+            StartListen(param);
+        }
+        catch (ObjectDisposedException)
+        {
+            _listener = new();
             StartListen(param);
         }
 
