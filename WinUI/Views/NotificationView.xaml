@@ -102,6 +102,10 @@
                     Command="{x:Bind CollectionViewModel.AddFirewallRulesCommand}">
                     Add firewall rule
                 </MenuFlyoutItem>
+                <MenuFlyoutItem
+                    Command="{x:Bind CollectionViewModel.AddPermissionsToUserCommand}">
+                    Add permissions
+                </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem
                     Command="{x:Bind ExitCommand}">

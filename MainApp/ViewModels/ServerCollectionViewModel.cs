@@ -68,7 +68,13 @@ public partial class ServerCollectionViewModel: ObservableObject
     [RelayCommand]
     private void AddFirewallRules()
     {
-        AppHost.AddFirewallRules(Servers.Where(x => x.Status).Select(x => new Uri(x.ListeningUri)));
+        _app.AddFirewallRules(Servers.Where(x => x.Status).Select(x => new Uri(x.ListeningUri)));
+    }
+
+    [RelayCommand]
+    private void AddPermissionsToUser()
+    {
+        _app.AddListeningPermissionsToUser(Servers.Where(x => x.Type == ServerType.Web && !x.Status).Select(x => x.ListeningUri));
     }
 
     [RelayCommand]

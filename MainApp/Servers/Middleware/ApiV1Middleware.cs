@@ -84,15 +84,15 @@ internal class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogg
     
     public async Task ProcessRequestAsync(RequestContext context, RequestDelegate next)
     {
-        if (!ApiUtils.TryGetApiVersion(context.Path, out var version) || version != ApiVersion)
+        if (!ApiUtils.TryGetApiVersion(context.Request, out var version) || version != ApiVersion)
         {
             await next(context);
             return;
         }
 
-        logger.LogInformation("Processing api request {path}", context.Path);
+        logger.LogInformation("Processing api request {path}", context.Request);
 
-        if (!ApiUtils.TryParsePath(context.Path, out var controllerName, out var actionName, out var param) 
+        if (!ApiUtils.TryParsePath(context.Request, out var controllerName, out var actionName, out var param) 
             || !_controllers.TryGetValue(controllerName, out var controller) 
             || !controller.TryGetValue(actionName, out var action))
         {

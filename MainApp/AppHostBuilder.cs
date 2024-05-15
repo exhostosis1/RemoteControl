@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using MainApp.Interfaces;
+﻿using MainApp.Interfaces;
 using Microsoft.Extensions.Logging;
 
 #if DEBUG
@@ -29,7 +28,7 @@ public sealed class AppHostBuilder
         return this;
     }
 
-    public MainApp.AppHost Build()
+    public AppHost Build()
     {
 #if DEBUG
         _loggerProvider ??= new DebugLoggerProvider();

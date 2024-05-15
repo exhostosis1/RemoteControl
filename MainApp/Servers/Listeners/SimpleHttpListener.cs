@@ -2,33 +2,47 @@
 using Microsoft.Extensions.Logging;
 using System.ComponentModel;
 using System.Net;
-using System.Net.Sockets;
-using System.Security.Principal;
 using System.Text;
 
 namespace MainApp.Servers.Listeners;
 
 internal class SimpleHttpListener(ILogger logger) : IListener
 {
-    private HttpListener _listener = new();
+    private HttpListener? _listener = null;
 
-    public bool IsListening => _listener.IsListening;
+    public bool IsListening
+    {
+        get
+        {
+            try
+            {
+                return _listener?.IsListening ?? false;
+            }
+            catch (ObjectDisposedException)
+            {
+                return false;
+            }
+        }
+    }
+
     public event PropertyChangedEventHandler? PropertyChanged;
-    
-    private static IEnumerable<string> GetCurrentIPs() =>
-        Dns.GetHostAddresses(Dns.GetHostName(), AddressFamily.InterNetwork).Select(x => x.ToString());
 
     public void StartListen(StartParameters param)
     {
-        if (_listener.IsListening)
+        try
         {
-            _listener.Stop();
+            if (_listener?.IsListening ?? false)
+            {
+                _listener.Stop();
+            }
+        }
+        catch
+        {
+            // ignored
         }
 
         _listener = new HttpListener();
         _listener.Prefixes.Add(param.Uri);
-
-        if (_listener.IsListening) return;
 
         try
         {
@@ -36,36 +50,8 @@ internal class SimpleHttpListener(ILogger logger) : IListener
         }
         catch (HttpListenerException e)
         {
-            if (e.Message.Contains("Failed to listen"))
-            {
-                logger.LogError("{message}", e.Message);
-                return;
-            }
-
-            var currentIps = GetCurrentIPs();
-            var available = currentIps.Contains(new Uri(param.Uri).Host);
-
-            if (!available)
-            {
-                logger.LogError("{ip} is currently unavailable", param.Uri);
-                return;
-            }
-
-            logger.LogWarning("Trying to add listening permissions to user");
-
-            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
-            var translatedValue = sid.Translate(typeof(NTAccount)).Value;
-
-            var command = $"netsh http add urlacl url={param.Uri} user={translatedValue}";
-
-            AppHost.RunWindowsCommand(command, true);
-
-            StartListen(param);
-        }
-        catch (ObjectDisposedException)
-        {
-            _listener = new();
-            StartListen(param);
+            logger.LogError("{message}", e.Message);
+            throw;
         }
 
         logger.LogInformation("Http listener started listening on {uri}", param.Uri);
@@ -74,58 +60,92 @@ internal class SimpleHttpListener(ILogger logger) : IListener
 
     public void StopListen()
     {
-        if (_listener.IsListening)
-            _listener.Stop();
-
-        logger.LogInformation("Http listener stopped");
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
-    }
-
-    public void CloseContext(RequestContext context)
-    {
-        if (context.OriginalRequest is not HttpListenerContext original) return;
-
-        switch (context.Status)
+        try
         {
-            case RequestStatus.Ok:
-                original.Response.StatusCode = (int)HttpStatusCode.OK;
-                break;
-            case RequestStatus.Text:
-                original.Response.StatusCode = (int)HttpStatusCode.OK;
-                original.Response.ContentType = "text/plain";
-                original.Response.OutputStream.Write(Encoding.UTF8.GetBytes(context.Reply));
-                break;
-            case RequestStatus.Json:
-                original.Response.StatusCode = (int)HttpStatusCode.OK;
-                original.Response.ContentType = "application/json";
-                original.Response.OutputStream.Write(Encoding.UTF8.GetBytes(context.Reply));
-                break;
-            case RequestStatus.Error:
-                original.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                original.Response.OutputStream.Write(Encoding.UTF8.GetBytes(context.Reply));
-                break;
-            case RequestStatus.NotFound:
-                original.Response.StatusCode = (int)HttpStatusCode.NotFound;
-                break;
-            case RequestStatus.Custom:
-                break;
-            default:
-                break;
-        }
+            if (!(_listener?.IsListening ?? false)) return;
 
-        original.Response.Close();
+            _listener.Stop();
+            _listener = null;
+
+            logger.LogInformation("Http listener stopped");
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
+        }
+        catch
+        {
+            // ignored
+        }
     }
 
     public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
     {
-        var context = await _listener.GetContextAsync();
+        HttpListenerContext context;
 
-        var result = new RequestContext
+        try
         {
-            Path = context.Request.RawUrl ?? "",
-            OriginalRequest = context
+            context = await (_listener?.GetContextAsync() ?? throw new NullReferenceException("HttpListener is stopped"));
+
+            token.ThrowIfCancellationRequested();
+        }
+        catch (Exception e)
+        {
+            logger.LogError("{message}", e.Message);
+            throw;
+        }
+
+        var result = new HttpRequestContext(context.Response)
+        {
+            Request = context.Request.RawUrl ?? "",
         };
 
         return result;
+    }
+
+    private class HttpRequestContext(HttpListenerResponse response) : RequestContext
+    {
+        private static readonly Dictionary<string, string> ContentTypes = new()
+        {
+            { ".html", "text/html" },
+            { ".htm", "text/html" },
+            { ".ico", "image/x-icon" },
+            { ".js", "text/javascript" },
+            { ".mjs", "text/javascript" },
+            { ".css", "text/css" }
+        };
+
+        public override void Close()
+        {
+            switch (Status)
+            {
+                case RequestStatus.Ok:
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    break;
+                case RequestStatus.Text:
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.ContentType = "text/plain";
+                    response.OutputStream.Write(Encoding.UTF8.GetBytes(Reply));
+                    break;
+                case RequestStatus.Json:
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    response.ContentType = "application/json";
+                    response.OutputStream.Write(Encoding.UTF8.GetBytes(Reply));
+                    break;
+                case RequestStatus.Error:
+                    response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    response.OutputStream.Write(Encoding.UTF8.GetBytes(Reply));
+                    break;
+                case RequestStatus.NotFound:
+                    response.StatusCode = (int)HttpStatusCode.NotFound;
+                    break;
+                case RequestStatus.File:
+                    response.ContentType = ContentTypes.GetValueOrDefault(Path.GetExtension(Reply), "text/plain");
+                    response.OutputStream.Write(File.ReadAllBytes(Reply));
+                    response.StatusCode = (int)HttpStatusCode.OK;
+                    break;
+                default:
+                    break;
+            }
+
+            response.Close();
+        }
     }
 }

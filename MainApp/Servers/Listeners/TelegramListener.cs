@@ -28,26 +28,6 @@ internal class TelegramListener : IListener
     private readonly SemaphoreSlim _semaphore = new(0);
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    private readonly IButtonsMarkup _buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
-    {
-        new()
-        {
-            new SingleButton(BotButtons.MediaBack),
-            new SingleButton(BotButtons.Pause),
-            new SingleButton(BotButtons.MediaForth)
-        },
-        new()
-        {
-            new SingleButton(BotButtons.VolumeDown),
-            new SingleButton(BotButtons.Darken),
-            new SingleButton(BotButtons.VolumeUp)
-        }
-    })
-    {
-        Resize = true,
-        Persistent = true
-    };
-
     public TelegramListener(ILogger logger)
     {
         _logger = logger;
@@ -151,13 +131,6 @@ internal class TelegramListener : IListener
 
         _updates.Clear();
     }
-
-    public void CloseContext(RequestContext context)
-    {
-        if (context.OriginalRequest is not UpdateObject original) return;
-
-        _apiProvider.SendResponse(original.Id, context.Reply == "" ? "done" : context.Reply, _buttons);
-    }
     
     public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
     {
@@ -182,13 +155,40 @@ internal class TelegramListener : IListener
                 _ => throw new NotSupportedException(request.Message)
             };
 
-            return new RequestContext
+            return new BotRequestContext(_apiProvider, request.Id)
             {
-                Path = path,
-                OriginalRequest = request
+                Request = path
             };
         }
 
         throw new OperationCanceledException();
+    }
+
+    private class BotRequestContext(TelegramBotApiProvider provider, int id) : RequestContext
+    {
+        private static readonly IButtonsMarkup Buttons = new ReplyButtonsMarkup(new List<List<SingleButton>>
+        {
+            new()
+            {
+                new SingleButton(BotButtons.MediaBack),
+                new SingleButton(BotButtons.Pause),
+                new SingleButton(BotButtons.MediaForth)
+            },
+            new()
+            {
+                new SingleButton(BotButtons.VolumeDown),
+                new SingleButton(BotButtons.Darken),
+                new SingleButton(BotButtons.VolumeUp)
+            }
+        })
+        {
+            Resize = true,
+            Persistent = true
+        };
+
+        public override void Close()
+        {
+            provider.SendResponse(id, string.IsNullOrWhiteSpace(Reply) ? "done" : Reply, Buttons);
+        }
     }
 }

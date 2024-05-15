@@ -7,5 +7,5 @@ internal enum RequestStatus
     Json,
     NotFound,
     Error,
-    Custom
+    File
 }

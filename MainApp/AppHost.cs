@@ -50,8 +50,10 @@ public sealed class AppHost
         proc.WaitForExit();
     }
 
-    internal static void AddFirewallRules(IEnumerable<Uri> uris)
+    internal void AddFirewallRules(IEnumerable<Uri> uris)
     {
+        _logger.LogWarning("Adding firewall rules");
+
         var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
         var translatedValue = sid.Translate(typeof(NTAccount)).Value;
 
@@ -63,6 +65,21 @@ public sealed class AppHost
             RunWindowsCommand(command, true);
 
             command = $"netsh http add urlacl url={uri} user={translatedValue}";
+
+            RunWindowsCommand(command, true);
+        }
+    }
+
+    internal void AddListeningPermissionsToUser(IEnumerable<string> uris)
+    {
+        _logger.LogWarning("Trying to add listening permissions to user");
+
+        var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+        var translatedValue = sid.Translate(typeof(NTAccount)).Value;
+
+        foreach (var uri in uris)
+        {
+            var command = $"netsh http add urlacl url={uri} user={translatedValue}";
 
             RunWindowsCommand(command, true);
         }

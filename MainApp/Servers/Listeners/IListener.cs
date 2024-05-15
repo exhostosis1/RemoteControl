@@ -9,5 +9,4 @@ internal interface IListener: INotifyPropertyChanged
     public void StartListen(StartParameters param);
     public void StopListen();
     public Task<RequestContext> GetContextAsync(CancellationToken token = default);
-    public void CloseContext(RequestContext context);
 }

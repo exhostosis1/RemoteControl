@@ -40,20 +40,19 @@ internal class Server: INotifyPropertyChanged
         {
             context.Status = RequestStatus.NotFound;
             context.Reply = "";
-            context.OriginalRequest = null;
 
             return Task.CompletedTask;
         };
         action = GetFunctions(middlewares).Aggregate(action, (current, func) => func(current));
 
         _middleware = action;
-        var context = SynchronizationContext.Current ?? throw new NullReferenceException();
+ //       var context = SynchronizationContext.Current ?? throw new NullReferenceException();
 
         _listener.PropertyChanged += (object? sender, PropertyChangedEventArgs args) =>
         {
             if (args.PropertyName != "IsListening") return;
 
-            context.Post((_) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status))), null);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
         };
     }
 
@@ -71,15 +70,7 @@ internal class Server: INotifyPropertyChanged
             _ => throw new NotSupportedException("Config type not supported")
         };
         
-        try
-        {
-            _listener.StartListen(param);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError("{e.Message}", e.Message);
-            throw;
-        }
+        _listener.StartListen(param);
 
         _cts = new CancellationTokenSource();
 
@@ -104,7 +95,8 @@ internal class Server: INotifyPropertyChanged
             {
                 var context = await _listener.GetContextAsync(token);
                 await _middleware(context);
-                _listener.CloseContext(context);
+                
+                context.Close();
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)
             {
@@ -113,6 +105,7 @@ internal class Server: INotifyPropertyChanged
             catch (Exception e)
             {
                 _logger.LogError("{e.Message}", e.Message);
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
                 break;
             }
         }
