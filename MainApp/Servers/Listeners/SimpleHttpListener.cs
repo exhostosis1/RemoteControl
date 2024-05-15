@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Net;
 using System.Net.Sockets;
+using System.Security.Principal;
 using System.Text;
+using MainApp.ControlProviders;
 using MainApp.Servers.DataObjects;
 using Microsoft.Extensions.Logging;
 
@@ -42,13 +44,24 @@ internal class SimpleHttpListener(ILogger logger) : IListener
             }
 
             var currentIps = GetCurrentIPs();
+            var available = currentIps.Contains(new Uri(param.Uri).Host);
+
+            if (!available)
+            {
+                logger.LogError("{ip} is currently unavailable", param.Uri);
+                return;
+            }
+
+            logger.LogWarning("Trying to add listening permissions to user");
+
+            var sid = new SecurityIdentifier(WellKnownSidType.BuiltinUsersSid, null);
+            var translatedValue = sid.Translate(typeof(NTAccount)).Value;
             
-            var unavailableIps = _listener.Prefixes.Where(x => !currentIps.Contains(new Uri(x).Host)).ToList();
+            var command = $"netsh http add urlacl url={param.Uri} user={translatedValue}";
 
-            if (unavailableIps.Count == 0) throw;
+            AppHost.RunWindowsCommand(command, true);
 
-            logger.LogError("{ip} is currently unavailable", string.Join(';', unavailableIps));
-            return;
+            StartListen(param);
         }
 
         logger.LogInformation("Http listener started listening on {uri}", param.Uri);

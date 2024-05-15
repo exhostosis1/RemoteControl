@@ -34,7 +34,7 @@ public sealed class AppHost
     internal bool GetAutorun() => _autoStartService.CheckAutoStart();
     internal bool SetAutorun(bool value) => _autoStartService.SetAutoStart(value);
 
-    private static void RunWindowsCommand(string command, bool elevated = false)
+    internal static void RunWindowsCommand(string command, bool elevated = false)
     {
         var proc = new Process();
 
