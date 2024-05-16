@@ -11,7 +11,7 @@ internal class StaticFilesMiddleware(ILogger logger, string directory = "www") :
     
     public Task ProcessRequestAsync(RequestContext context, RequestDelegate _)
     {
-        var uriPath = context.Request;
+        var uriPath = context.Request[1..];
 
         logger.LogInformation("Processing file request {uriPath}", uriPath);
 
@@ -21,12 +21,7 @@ internal class StaticFilesMiddleware(ILogger logger, string directory = "www") :
             return Task.CompletedTask;
         }
 
-        var path = Path.Combine(_contentFolder, uriPath.Replace("/", "").Replace("\\", ""));
-
-        if (string.IsNullOrEmpty(uriPath) || uriPath == "/")
-        {
-            path = Path.Combine(path, "index.html");
-        }
+        var path = Path.Combine(_contentFolder, string.IsNullOrWhiteSpace(uriPath) ? "index.html" : uriPath);
 
         if (File.Exists(path))
         {
