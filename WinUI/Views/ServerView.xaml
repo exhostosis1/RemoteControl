@@ -28,7 +28,9 @@
                     Grid.Column="0"
                     HorizontalAlignment="Left"
                     IsOn="{x:Bind ViewModel.Status, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                    IsEnabled="{x:Bind ViewModel.IsSwitchEnabled, Mode=OneWay}"/>
+                    IsEnabled="{x:Bind ViewModel.IsSwitchEnabled, Mode=OneWay}"
+                    OnContent=""
+                    OffContent=""/>
                 <TextBlock
                     Grid.Column="1"
                     HorizontalAlignment="Left"
