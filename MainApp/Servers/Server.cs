@@ -46,7 +46,6 @@ internal class Server: INotifyPropertyChanged
         action = GetFunctions(middlewares).Aggregate(action, (current, func) => func(current));
 
         _middleware = action;
- //       var context = SynchronizationContext.Current ?? throw new NullReferenceException();
 
         _listener.PropertyChanged += (object? sender, PropertyChangedEventArgs args) =>
         {

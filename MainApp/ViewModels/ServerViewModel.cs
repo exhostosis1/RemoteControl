@@ -12,8 +12,6 @@ public partial class ServerViewModel: ObservableObject, IDisposable
 {
     private readonly Server _server;
 
-    private readonly SynchronizationContext _context;
-
     [ObservableProperty] private ServerType _type;
     [ObservableProperty] private string _name;
     [ObservableProperty] private string _listeningUri;
@@ -56,7 +54,6 @@ public partial class ServerViewModel: ObservableObject, IDisposable
 
     internal ServerViewModel(Server server, RelayCommand<ServerViewModel> removeCommand, bool expanded = false)
     {
-        _context = SynchronizationContext.Current ?? throw new Exception("No synchronization context found");
         _removeCommand = removeCommand;
 
         _server = server;
