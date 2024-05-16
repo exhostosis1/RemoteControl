@@ -49,7 +49,7 @@ internal class Server: INotifyPropertyChanged
 
         _listener.PropertyChanged += (object? sender, PropertyChangedEventArgs args) =>
         {
-            if (args.PropertyName != "IsListening") return;
+            if (args.PropertyName != nameof(_listener.IsListening)) return;
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
         };

@@ -73,7 +73,7 @@ public partial class ServerViewModel: ObservableObject, IDisposable
 
     private void PropertyChangedHandler(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName != "Status") return;
+        if (args.PropertyName != nameof(_server.Status)) return;
 
         OnPropertyChanged(nameof(Status));
     }
