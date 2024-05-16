@@ -22,7 +22,7 @@ public partial class ServerViewModel: ObservableObject, IDisposable
     [ObservableProperty] private bool _isSwitchEnabled = true;
 
     [ObservableProperty] private bool _errorShow;
-    [ObservableProperty] private string _errorMessage;
+    [ObservableProperty] private string _errorMessage = "";
     [ObservableProperty] private bool _expanded;
 
     private bool _status;
@@ -46,7 +46,7 @@ public partial class ServerViewModel: ObservableObject, IDisposable
                 IsSwitchEnabled = true;
             }
 
-            OnPropertyChanged(nameof(Status));
+            OnPropertyChanged();
         }
     }
 
@@ -154,8 +154,6 @@ public partial class ServerViewModel: ObservableObject, IDisposable
                 config.ApiUri = ApiUri;
                 config.ApiKey = ApiKey;
                 config.UsernamesString = Usernames;
-                break;
-            default:
                 break;
         }
 

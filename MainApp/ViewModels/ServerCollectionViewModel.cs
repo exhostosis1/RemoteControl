@@ -18,7 +18,7 @@ public partial class ServerCollectionViewModel: ObservableObject
         set
         {
             _app.SetAutorun(value);
-            OnPropertyChanged(nameof(HostAutostart));
+            OnPropertyChanged();
         }
     }
 

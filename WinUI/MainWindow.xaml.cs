@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
-using Microsoft.UI.Xaml;
 using Windows.Graphics;
 
 // To learn more about WinUI, the WinUI project structure,
@@ -13,7 +12,7 @@ namespace WinUI;
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
 [ObservableObject]
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow
 {
     private const int Width = 860;
     private const int Height = 480;

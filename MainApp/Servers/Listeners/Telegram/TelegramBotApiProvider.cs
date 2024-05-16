@@ -39,7 +39,7 @@ internal static class HttpClientExtensions
 
 internal class TelegramBotApiProvider(string apiUrl, string apiKey)
 {
-    private int? _lastUpdateId = null;
+    private int? _lastUpdateId;
 
     private readonly HttpClient _client = new()
     {
@@ -85,7 +85,7 @@ internal class TelegramBotApiProvider(string apiUrl, string apiKey)
         var response = _client.Send(request);
 
         return response.IsSuccessStatusCode
-            ? response.Content?.ReadFromJsonAsync<T>().GetAwaiter().GetResult() ??
+            ? response.Content.ReadFromJsonAsync<T>().GetAwaiter().GetResult() ??
               throw new JsonException("Cannot parse response")
             : throw new Exception($"Server returned error with code {response.StatusCode}");
     }
@@ -102,7 +102,7 @@ internal class TelegramBotApiProvider(string apiUrl, string apiKey)
                 OneTimeKeyboard = reply.OneTime,
                 Persistent = reply.Persistent
             },
-            RemoveButtonsMarkup remove => new ReplyKeyboardRemove(),
+            RemoveButtonsMarkup => new ReplyKeyboardRemove(),
             _ => null
         };
     }

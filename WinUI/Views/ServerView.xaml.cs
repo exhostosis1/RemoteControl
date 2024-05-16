@@ -10,7 +10,7 @@ namespace WinUI.Views;
 internal sealed partial class ServerView
 {
     [ObservableProperty]
-    private ServerViewModel _viewModel;
+    private ServerViewModel _viewModel = null!;
 
     public ServerView()
     {

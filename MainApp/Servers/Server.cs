@@ -47,7 +47,7 @@ internal class Server: INotifyPropertyChanged
 
         _middleware = action;
 
-        _listener.PropertyChanged += (object? sender, PropertyChangedEventArgs args) =>
+        _listener.PropertyChanged += (_, args) =>
         {
             if (args.PropertyName != nameof(_listener.IsListening)) return;
 

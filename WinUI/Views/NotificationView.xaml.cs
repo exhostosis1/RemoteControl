@@ -4,7 +4,6 @@ using H.NotifyIcon;
 using MainApp.ViewModels;
 using Microsoft.UI.Xaml;
 using System;
-using System.Collections.Specialized;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -48,7 +47,7 @@ public sealed partial class NotificationView
 
         CollectionViewModel = _app.Host.ServerCollectionViewModel;
 
-        InitModels(null, null);
+        InitModels();
 
         _settings.ColorValuesChanged += (_, _) => ApplyTheme();
         ApplyTheme();
@@ -63,7 +62,7 @@ public sealed partial class NotificationView
         }, null);
     }
 
-    private void InitModels(object? _, NotifyCollectionChangedEventArgs? __)
+    private void InitModels()
     {
         FirstServerViewModel = null;
         SecondServerViewModel = null;
@@ -75,7 +74,7 @@ public sealed partial class NotificationView
     [RelayCommand]
     private void Init()
     {
-        InitModels(null, null);
+        InitModels();
     }
 
     [RelayCommand]
@@ -84,7 +83,7 @@ public sealed partial class NotificationView
         var window = _app.MainWindow;
 
         if(window.Visible)
-            window.Hide(true);
+            window.Hide();
         else
         {
             window.Show();
@@ -97,6 +96,6 @@ public sealed partial class NotificationView
     {
         _app.HandleClosedEvents = false;
         TrayIcon.Dispose();
-        _app.MainWindow?.Close();
+        _app.MainWindow.Close();
     }
 }

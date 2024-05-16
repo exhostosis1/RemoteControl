@@ -19,7 +19,7 @@ internal class NAudioWrapper : IAudioControl
         : Devices.First(x => GetGuid(x.ID) == _defaultGuid);
     private IEnumerable<MMDevice> Devices => _enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active);
 
-    private Guid? _defaultGuid = null;
+    private Guid? _defaultGuid;
 
     private static Guid GetGuid(string input) => new(Utils.GuidRegex().Match(input).Value);
 

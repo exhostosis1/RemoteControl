@@ -11,10 +11,10 @@ namespace MainApp;
 
 public sealed class AppHostBuilder
 {
-    private ILoggerProvider? _loggerProvider = null;
-    private ServerFactory? _serverFactory = null;
-    private RegistryAutoStartService? _autoStartService = null;
-    private IConfigurationProvider? _configProvider = null;
+    private ILoggerProvider? _loggerProvider;
+    private ServerFactory? _serverFactory;
+    private RegistryAutoStartService? _autoStartService;
+    private IConfigurationProvider? _configProvider;
 
     public AppHostBuilder UseLogger(ILoggerProvider loggerProvider)
     {

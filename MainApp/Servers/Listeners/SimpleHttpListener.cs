@@ -8,7 +8,7 @@ namespace MainApp.Servers.Listeners;
 
 internal class SimpleHttpListener(ILogger logger) : IListener
 {
-    private HttpListener? _listener = null;
+    private HttpListener? _listener;
 
     public bool IsListening
     {
@@ -140,8 +140,6 @@ internal class SimpleHttpListener(ILogger logger) : IListener
                     response.ContentType = ContentTypes.GetValueOrDefault(Path.GetExtension(Reply), "text/plain");
                     response.OutputStream.Write(File.ReadAllBytes(Reply));
                     response.StatusCode = (int)HttpStatusCode.OK;
-                    break;
-                default:
                     break;
             }
 

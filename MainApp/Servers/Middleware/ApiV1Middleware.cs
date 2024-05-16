@@ -59,7 +59,7 @@ internal static partial class ApiUtils
             x => x.GetActions());
     }
 
-    public static Dictionary<string, Delegate> GetActions(this BaseApiController controller)
+    private static Dictionary<string, Delegate> GetActions(this BaseApiController controller)
     {
         var methods = controller.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Public)
             .Where(x => x.ReturnType == typeof(IActionResult));
