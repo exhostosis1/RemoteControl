@@ -19,7 +19,7 @@
     <PackageReference Include="Microsoft.Win32.SystemEvents" Version="8.0.0" />
     <PackageReference Include="NAudio.Core" Version="2.2.1" />
     <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
-    <PackageReference Include="NReco.Logging.File" Version="1.2.0">
+    <PackageReference Include="NReco.Logging.File" Version="1.2.1">
       <TreatAsUsed>true</TreatAsUsed>
     </PackageReference>
   </ItemGroup>
