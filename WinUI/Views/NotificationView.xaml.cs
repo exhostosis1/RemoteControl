@@ -32,10 +32,10 @@ public sealed partial class NotificationView
     private readonly UISettings _settings = new();
     private bool IsDarkMode => _settings.GetColorValue(UIColorType.Background) == _colorBlack;
 
-    private const string DarkIconPath = "Icons\\Device.theme-light.ico";
-    private const string LightIconPath = "Icons\\Device.theme-dark.ico";
-    private readonly Icon _darkIcon = new(Path.Combine(AppContext.BaseDirectory, DarkIconPath));
-    private readonly Icon _lightIcon = new(Path.Combine(AppContext.BaseDirectory, LightIconPath));
+    private static readonly string DarkIconPath = Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-light.ico");
+    private static readonly string LightIconPath = Path.Combine(AppContext.BaseDirectory, "Icons\\Device.theme-dark.ico");
+    private readonly Icon _darkIcon = new(DarkIconPath);
+    private readonly Icon _lightIcon = new(LightIconPath);
 
     private readonly SynchronizationContext _context;
 
