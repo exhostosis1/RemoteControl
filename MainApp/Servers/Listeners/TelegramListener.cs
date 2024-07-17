@@ -52,7 +52,7 @@ internal class TelegramListener : IListener
     {
         if (IsListening) return;
 
-        _apiProvider = new TelegramBotApiProvider(param.Uri, param.ApiKey!);
+        _apiProvider = new TelegramBotApiProvider(param.Uri.EndsWith('/') ? param.Uri : $"{param.Uri}/", param.ApiKey!);
 
         _usernames = param.Usernames ?? [];
 
