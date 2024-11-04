@@ -74,7 +74,7 @@ public partial class ServerCollectionViewModel: ObservableObject
     [RelayCommand]
     private void AddPermissionsToUser()
     {
-        _app.AddListeningPermissionsToUser(Servers.Where(x => x.Type == ServerType.Web && !x.Status).Select(x => x.ListeningUri));
+        _app.AddListeningPermissionsToUser(Servers.Where(x => x is { Type: ServerType.Web, Status: false }).Select(x => x.ListeningUri));
     }
 
     [RelayCommand]
