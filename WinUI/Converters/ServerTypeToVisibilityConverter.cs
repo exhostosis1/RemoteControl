@@ -5,7 +5,7 @@ using System;
 
 namespace WinUI.Converters;
 
-internal class ServerTypeToVisibilityConverter: IValueConverter
+internal partial class ServerTypeToVisibilityConverter: IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {

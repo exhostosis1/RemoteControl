@@ -8,7 +8,7 @@ internal partial class User32Wrapper : IKeyboardControl, IDisplayControl, IMouse
 {
     private const uint Length = 1;
     private readonly Input[] _buffer = new Input[Length];
-    private readonly int _size = Marshal.SizeOf(typeof(Input));
+    private readonly int _size = Marshal.SizeOf<Input>();
     private const string User32LibraryName = "user32.dll";
 
     private record struct Input

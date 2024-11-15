@@ -7,8 +7,6 @@ internal class StaticFilesMiddleware(ILogger logger, string directory = "www") :
 {
     private readonly string _contentFolder = Path.Combine(AppContext.BaseDirectory, directory);
 
-
-    
     public Task ProcessRequestAsync(RequestContext context, RequestDelegate _)
     {
         var uriPath = context.Request[1..];

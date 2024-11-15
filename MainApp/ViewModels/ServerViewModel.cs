@@ -35,16 +35,9 @@ public partial class ServerViewModel: ObservableObject, IDisposable
             if (value == _status) return;
             
             IsSwitchEnabled = false;
-            if (value)
-            {
-                _status = StartPrivate();
-                IsSwitchEnabled = true;
-            }
-            else
-            {
-                _status = StopPrivate();
-                IsSwitchEnabled = true;
-            }
+            _status = value ? StartPrivate() : StopPrivate();
+
+            IsSwitchEnabled = true;
 
             OnPropertyChanged();
         }

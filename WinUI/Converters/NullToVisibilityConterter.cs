@@ -4,7 +4,7 @@ using System;
 
 namespace WinUI.Converters;
 
-internal class NullToVisibilityConverter: IValueConverter
+internal partial class NullToVisibilityConverter: IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, string language)
     {
