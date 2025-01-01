@@ -129,21 +129,21 @@ public sealed class AppHost
         switch (args.Reason)
         {
             case SessionSwitchReason.SessionLock:
-            {
-                _logger.LogInformation("Stopping servers due to logout");
+                {
+                    _logger.LogInformation("Stopping servers due to logout");
 
-                _runningServers = ServerCollectionViewModel.Servers.Where(x => x.Status).ToList();
-                _runningServers.ForEach(x => x.Status = false);
+                    _runningServers = ServerCollectionViewModel.Servers.Where(x => x.Status).ToList();
+                    _runningServers.ForEach(x => x.Status = false);
 
-                break;
-            }
+                    break;
+                }
             case SessionSwitchReason.SessionUnlock:
-            {
-                _logger.LogInformation("Restoring servers");
+                {
+                    _logger.LogInformation("Restoring servers");
 
-                _runningServers.ForEach(x => x.Status = true);
-                break;
-            }
+                    _runningServers.ForEach(x => x.Status = true);
+                    break;
+                }
             case SessionSwitchReason.ConsoleConnect:
             case SessionSwitchReason.ConsoleDisconnect:
             case SessionSwitchReason.RemoteConnect:

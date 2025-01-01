@@ -10,8 +10,8 @@ public class ServerConfig(ServerType type)
 
     #region Web
     public string Scheme { get; set; } = "http";
-    public string Host { get; set;  } = "localhost";
-    public int Port { get; set;  } = 80;
+    public string Host { get; set; } = "localhost";
+    public int Port { get; set; } = 80;
 
     [JsonIgnore]
     public Uri Uri

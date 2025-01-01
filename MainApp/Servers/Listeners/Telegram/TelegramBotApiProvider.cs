@@ -1,11 +1,11 @@
-﻿using System.Net.Http.Json;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using MainApp.Servers.Listeners.Telegram.ApiObjects.Request;
+﻿using MainApp.Servers.Listeners.Telegram.ApiObjects.Request;
 using MainApp.Servers.Listeners.Telegram.ApiObjects.Response;
 using MainApp.Servers.Listeners.Telegram.ApiObjects.Response.Keyboard;
 using MainApp.Servers.Listeners.Telegram.BotButtons;
+using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MainApp.Servers.Listeners.Telegram;
 
@@ -75,7 +75,7 @@ internal class TelegramBotApiProvider(string apiUrl, string apiKey)
         _client.Send(request);
     }
 
-    private T SendBotApiRequest<T>(string method, object parameters) where T: class
+    private T SendBotApiRequest<T>(string method, object parameters) where T : class
     {
         var request = new HttpRequestMessage(HttpMethod.Post, $"{apiUrl}{apiKey}/{method}")
         {

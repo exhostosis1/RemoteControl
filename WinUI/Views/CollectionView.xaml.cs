@@ -1,6 +1,6 @@
 using MainApp.ViewModels;
-using System;
 using Microsoft.UI.Xaml;
+using System;
 
 namespace WinUI.Views;
 

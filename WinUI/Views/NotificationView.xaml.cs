@@ -82,7 +82,7 @@ public sealed partial class NotificationView
     {
         var window = _app.MainWindow;
 
-        if(window.Visible)
+        if (window.Visible)
             window.Hide();
         else
         {

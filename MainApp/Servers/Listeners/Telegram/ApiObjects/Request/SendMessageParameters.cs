@@ -1,6 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using MainApp.Servers.Listeners.Telegram.ApiObjects.Response;
+﻿using MainApp.Servers.Listeners.Telegram.ApiObjects.Response;
 using MainApp.Servers.Listeners.Telegram.ApiObjects.Response.Keyboard;
+using System.Text.Json.Serialization;
 
 namespace MainApp.Servers.Listeners.Telegram.ApiObjects.Request;
 

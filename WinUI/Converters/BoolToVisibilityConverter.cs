@@ -4,7 +4,7 @@ using System;
 
 namespace WinUI.Converters;
 
-internal partial class BoolToVisibilityConverter: IValueConverter
+internal partial class BoolToVisibilityConverter : IValueConverter
 {
     public object Convert(object value, Type targetType, object parameter, string language)
     {

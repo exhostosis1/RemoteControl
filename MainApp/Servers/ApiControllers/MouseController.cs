@@ -107,7 +107,7 @@ internal class MouseController(IMouseControl provider, ILogger logger) : BaseApi
         }
 
         logger.LogInformation("Moving mouse by {param}", param);
-        
+
         provider.MouseMove(x, y);
 
         return Ok();

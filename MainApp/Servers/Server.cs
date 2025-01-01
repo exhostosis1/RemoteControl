@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace MainApp.Servers;
 
-internal class Server: INotifyPropertyChanged
+internal class Server : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -68,7 +68,7 @@ internal class Server: INotifyPropertyChanged
             ServerType.Bot => new StartParameters(Config.ApiUri, Config.ApiKey, Config.Usernames),
             _ => throw new NotSupportedException("Config type not supported")
         };
-        
+
         _listener.StartListen(param);
 
         _cts = new CancellationTokenSource();
@@ -94,7 +94,7 @@ internal class Server: INotifyPropertyChanged
             {
                 var context = await _listener.GetContextAsync(token);
                 await _middleware(context);
-                
+
                 context.Close();
             }
             catch (Exception e) when (e is OperationCanceledException or TaskCanceledException or ObjectDisposedException)

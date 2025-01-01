@@ -1,8 +1,8 @@
-﻿using System.Net;
-using MainApp.ControlProviders.Enums;
+﻿using MainApp.ControlProviders.Enums;
 using MainApp.ControlProviders.Interfaces;
 using MainApp.Servers.Results;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace MainApp.Servers.ApiControllers;
 

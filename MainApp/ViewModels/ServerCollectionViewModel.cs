@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 namespace MainApp.ViewModels;
 
-public partial class ServerCollectionViewModel: ObservableObject
+public partial class ServerCollectionViewModel : ObservableObject
 {
     private readonly AppHost _app;
 
@@ -25,7 +25,7 @@ public partial class ServerCollectionViewModel: ObservableObject
     public ServerCollectionViewModel(AppHost app)
     {
         _app = app;
-        _removeCommand = new (vm => Servers.Remove(vm ?? throw new NullReferenceException()));
+        _removeCommand = new(vm => Servers.Remove(vm ?? throw new NullReferenceException()));
 
         ReloadServers();
     }

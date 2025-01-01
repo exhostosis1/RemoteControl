@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp.Servers;
+using System.ComponentModel;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace MainApp.ViewModels;
 
-public partial class ServerViewModel: ObservableObject, IDisposable
+public partial class ServerViewModel : ObservableObject, IDisposable
 {
     private readonly Server _server;
 
@@ -33,7 +33,7 @@ public partial class ServerViewModel: ObservableObject, IDisposable
         set
         {
             if (value == _status) return;
-            
+
             IsSwitchEnabled = false;
             _status = value ? StartPrivate() : StopPrivate();
 

@@ -81,7 +81,7 @@ internal class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogg
 {
     private readonly ControllerActions _controllers = controllers.GetControllersWithActions();
     private static string ApiVersion => "v1";
-    
+
     public async Task ProcessRequestAsync(RequestContext context, RequestDelegate next)
     {
         if (!ApiUtils.TryGetApiVersion(context.Request, out var version) || version != ApiVersion)
@@ -92,8 +92,8 @@ internal class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogg
 
         logger.LogInformation("Processing api request {path}", context.Request);
 
-        if (!ApiUtils.TryParsePath(context.Request, out var controllerName, out var actionName, out var param) 
-            || !_controllers.TryGetValue(controllerName, out var controller) 
+        if (!ApiUtils.TryParsePath(context.Request, out var controllerName, out var actionName, out var param)
+            || !_controllers.TryGetValue(controllerName, out var controller)
             || !controller.TryGetValue(actionName, out var action))
         {
 

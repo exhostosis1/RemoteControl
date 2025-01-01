@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
-using System.Net.Sockets;
-using MainApp.Servers.DataObjects;
+﻿using MainApp.Servers.DataObjects;
 using MainApp.Servers.Listeners.Telegram;
 using MainApp.Servers.Listeners.Telegram.BotButtons;
 using MainApp.Servers.Middleware.Enums;
 using Microsoft.Extensions.Logging;
+using System.ComponentModel;
+using System.Net.Sockets;
 
 namespace MainApp.Servers.Listeners;
 
@@ -42,7 +42,7 @@ internal class TelegramListener : IListener
             {
                 _logger.LogInformation("Telegram bot stopped");
             }
-            
+
             IsListening = result;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
         });
@@ -131,7 +131,7 @@ internal class TelegramListener : IListener
 
         _updates.Clear();
     }
-    
+
     public async Task<RequestContext> GetContextAsync(CancellationToken token = default)
     {
         while (!token.IsCancellationRequested)

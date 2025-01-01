@@ -1,6 +1,6 @@
-﻿using System.Runtime.InteropServices;
-using MainApp.ControlProviders.Enums;
+﻿using MainApp.ControlProviders.Enums;
 using MainApp.ControlProviders.Interfaces;
+using System.Runtime.InteropServices;
 
 namespace MainApp.ControlProviders;
 
