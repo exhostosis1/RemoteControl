@@ -58,6 +58,9 @@
     <Page Update="ServersView.xaml">
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Icons\Device.theme-dark.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
