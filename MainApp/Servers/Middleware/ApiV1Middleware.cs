@@ -90,7 +90,10 @@ internal class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogg
             return;
         }
 
-        logger.LogInformation("Processing api request {path}", context.Request);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Processing api request {path}", context.Request);
+        }
 
         if (!ApiUtils.TryParsePath(context.Request, out var controllerName, out var actionName, out var param)
             || !_controllers.TryGetValue(controllerName, out var controller)
@@ -111,7 +114,10 @@ internal class ApiV1Middleware(IEnumerable<BaseApiController> controllers, ILogg
         }
         catch (Exception e)
         {
-            logger.LogError("{message}", e.InnerException?.Message);
+            if (logger.IsEnabled(LogLevel.Error))
+            {
+                logger.LogError("{message}", e.InnerException?.Message);
+            }
 
             context.Status = RequestStatus.Error;
             context.Reply = e.InnerException?.Message ?? "";

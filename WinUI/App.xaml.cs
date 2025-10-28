@@ -2,6 +2,7 @@
 using MainApp;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
+using System.Runtime.Versioning;
 
 
 // To learn more about WinUI, the WinUI project structure,
@@ -12,6 +13,7 @@ namespace WinUI
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
+    [SupportedOSPlatform("windows10.0.26100.0")]
     public partial class App
     {
         /// <summary>

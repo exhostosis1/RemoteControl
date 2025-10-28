@@ -8,14 +8,16 @@ internal class AudioController(IAudioControl provider, ILogger logger) : BaseApi
 {
     public IActionResult GetDevices()
     {
-        logger.LogInformation("Getting devices");
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Getting devices");
 
         return Json(provider.GetAudioDevices());
     }
 
     public IActionResult SetDevice(string param)
     {
-        logger.LogInformation("Setting device to {param}", param);
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Setting device to {param}", param);
 
         if (Guid.TryParse(param, out var guid))
         {
@@ -23,24 +25,28 @@ internal class AudioController(IAudioControl provider, ILogger logger) : BaseApi
             return Ok();
         }
 
-        logger.LogError("Cannot set device to {param}", param);
+        if (logger.IsEnabled(LogLevel.Error))
+            logger.LogError("Cannot set device to {param}", param);
         return Error("No such device");
     }
 
     public IActionResult GetVolume()
     {
-        logger.LogInformation("Getting volume");
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Getting volume");
 
         return Text(provider.GetVolume());
     }
 
     public IActionResult SetVolume(string param)
     {
-        logger.LogInformation("Setting volume to {param}", param);
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Setting volume to {param}", param);
 
         if (!int.TryParse(param, out var result))
         {
-            logger.LogError("Cannot set volume to {param}", param);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError("Cannot set volume to {param}", param);
             return Error("Wrong volume format");
         }
 
@@ -53,7 +59,8 @@ internal class AudioController(IAudioControl provider, ILogger logger) : BaseApi
 
     public IActionResult IncreaseByFive()
     {
-        logger.LogInformation("Increasing volume by 5");
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Increasing volume by 5");
 
         var vol = provider.GetVolume();
         vol += 5;
@@ -66,7 +73,8 @@ internal class AudioController(IAudioControl provider, ILogger logger) : BaseApi
 
     public IActionResult DecreaseByFive()
     {
-        logger.LogInformation("Decreasing volume by 5");
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Decreasing volume by 5");
 
         var vol = provider.GetVolume();
         vol -= 5;
@@ -79,7 +87,8 @@ internal class AudioController(IAudioControl provider, ILogger logger) : BaseApi
 
     public IActionResult Mute()
     {
-        logger.LogInformation("Toggling mute status");
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Toggling mute status");
 
         if (provider.IsMuted)
             provider.Unmute();

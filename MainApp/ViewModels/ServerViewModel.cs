@@ -160,6 +160,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
         _server.PropertyChanged -= PropertyChangedHandler;
     }
 

@@ -13,13 +13,17 @@ internal class RegistryAutoStartService(ILogger logger)
 
     public bool CheckAutoStart()
     {
+        if (!logger.IsEnabled(LogLevel.Information))
+            return _regKey.GetValue(RegName, "") as string == _regValue;
+
         logger.LogInformation("Checking win registry autorun");
         return _regKey.GetValue(RegName, "") as string == _regValue;
     }
 
     public bool SetAutoStart(bool value)
     {
-        logger.LogInformation("Setting win registry autorun");
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Setting win registry autorun");
 
         _regKey.DeleteValue(RegName, false);
 
@@ -31,7 +35,8 @@ internal class RegistryAutoStartService(ILogger logger)
         }
         catch (Exception e)
         {
-            logger.LogError("{message}", e.Message);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError("{message}", e.Message);
             return false;
         }
     }

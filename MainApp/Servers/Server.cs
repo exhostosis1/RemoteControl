@@ -103,7 +103,10 @@ internal class Server : INotifyPropertyChanged
             }
             catch (Exception e)
             {
-                _logger.LogError("{e.Message}", e.Message);
+                if (_logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.LogError("{e.Message}", e.Message);
+                }
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Status)));
                 break;
             }

@@ -1,5 +1,6 @@
 ﻿using MainApp.ControlProviders.Enums;
 using MainApp.ControlProviders.Interfaces;
+using Microsoft.Extensions.Logging;
 using System.Runtime.InteropServices;
 
 namespace MainApp.ControlProviders;
@@ -49,7 +50,7 @@ internal partial class User32Wrapper : IKeyboardControl, IDisplayControl, IMouse
     private record struct MouseFlags(MouseFlag Up, MouseFlag Down);
 
     [LibraryImport(User32LibraryName, SetLastError = true)]
-    private static partial uint SendInput(uint numberOfInputs, Input[] inputs, int sizeOfInputStructure);
+    private static partial uint SendInput(uint numberOfInputs, in Input[] inputs, int sizeOfInputStructure);
 
     [LibraryImport(User32LibraryName, EntryPoint = "MapVirtualKeyW")]
     private static partial uint MapVirtualKey(uint uCode, uint uMapType);
@@ -140,9 +141,13 @@ internal partial class User32Wrapper : IKeyboardControl, IDisplayControl, IMouse
         SendInput(Length, _buffer, _size);
     }
 
-    public void SetState(MonitorState state)
+    public static void SetState(MonitorState state)
     {
-        SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
+        var result = SendMessage(0xFFFF, 0x112, 0xF170, (int)state);
+
+        //todo: handle result
+        if (result == 0)
+            return;
     }
 
     public void SendKey(KeysEnum key, KeyPressMode mode)

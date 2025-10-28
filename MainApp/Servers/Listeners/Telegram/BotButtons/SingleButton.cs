@@ -1,6 +1,6 @@
 ﻿namespace MainApp.Servers.Listeners.Telegram.BotButtons;
 
-internal class SingleButton(string text)
+internal class SingleButton(string Text = "")
 {
-    public string Text { get; set; } = "";
+    public string Text { get; set; } = Text;
 }

@@ -11,7 +11,6 @@ namespace WinUI;
 /// <summary>
 /// An empty window that can be used on its own or navigated to within a Frame.
 /// </summary>
-[ObservableObject]
 public sealed partial class MainWindow
 {
     private const int Width = 860;

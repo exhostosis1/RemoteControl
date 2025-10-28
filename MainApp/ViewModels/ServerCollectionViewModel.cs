@@ -78,7 +78,7 @@ public partial class ServerCollectionViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenSite(string uri)
+    private static void OpenSite(string uri)
     {
         AppHost.OpenSite(uri);
     }

@@ -36,11 +36,17 @@ internal class TelegramListener : IListener
         {
             if (result)
             {
-                _logger.LogInformation("Telegram Bot starts responding to {usernames}", string.Join(';', _usernames));
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("Telegram Bot starts responding to {usernames}", string.Join(';', _usernames));
+                }
             }
             else
             {
-                _logger.LogInformation("Telegram bot stopped");
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("Telegram bot stopped");
+                }
             }
 
             IsListening = result;
@@ -96,7 +102,10 @@ internal class TelegramListener : IListener
             {
                 if (!internetMessageShown)
                 {
-                    _logger.LogError("Internet seems off");
+                    if (_logger.IsEnabled(LogLevel.Error))
+                    {
+                        _logger.LogError("Internet seems off");
+                    }
                     internetMessageShown = true;
                 }
 
@@ -108,7 +117,10 @@ internal class TelegramListener : IListener
             }
             catch (Exception e)
             {
-                _logger.LogError("{error}", e.Message);
+                if (_logger.IsEnabled(LogLevel.Error))
+                {
+                    _logger.LogError("{error}", e.Message);
+                }
                 break;
             }
         }

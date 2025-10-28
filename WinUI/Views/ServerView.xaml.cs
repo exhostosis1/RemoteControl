@@ -6,11 +6,9 @@ using MainApp.ViewModels;
 
 namespace WinUI.Views;
 
-[ObservableObject]
 internal sealed partial class ServerView
 {
-    [ObservableProperty]
-    private ServerViewModel _viewModel = null!;
+    public ServerViewModel ViewModel { get; set; } = null!;
 
     public ServerView()
     {

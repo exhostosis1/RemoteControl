@@ -132,7 +132,7 @@ public sealed class AppHost
                 {
                     _logger.LogInformation("Stopping servers due to logout");
 
-                    _runningServers = ServerCollectionViewModel.Servers.Where(x => x.Status).ToList();
+                    _runningServers = [.. ServerCollectionViewModel.Servers.Where(x => x.Status)];
                     _runningServers.ForEach(x => x.Status = false);
 
                     break;

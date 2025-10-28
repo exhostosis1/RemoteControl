@@ -16,13 +16,15 @@ internal class JsonConfigurationProvider(ILogger logger, string filePath) : ICon
 
     public List<ServerConfig> GetConfig()
     {
-        logger.LogInformation("Getting config from file {filePath}", filePath);
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Getting config from file {filePath}", filePath);
 
         List<ServerConfig> result = [];
 
         if (!File.Exists(filePath))
         {
-            logger.LogWarning("No config file");
+            if (logger.IsEnabled(LogLevel.Warning))
+                logger.LogWarning("No config file");
             return result;
         }
 
@@ -32,7 +34,8 @@ internal class JsonConfigurationProvider(ILogger logger, string filePath) : ICon
         }
         catch (JsonException e)
         {
-            logger.LogError("{message}", e.Message);
+            if (logger.IsEnabled(LogLevel.Error))
+                logger.LogError("{message}", e.Message);
         }
 
         return result;
@@ -40,7 +43,8 @@ internal class JsonConfigurationProvider(ILogger logger, string filePath) : ICon
 
     public void SetConfig(IEnumerable<ServerConfig> appConfig)
     {
-        logger.LogInformation("Writing config to file {filePath}", filePath);
+        if (logger.IsEnabled(LogLevel.Information))
+            logger.LogInformation("Writing config to file {filePath}", filePath);
 
         File.WriteAllText(filePath,
             JsonSerializer.Serialize(appConfig, _jsonOptions));

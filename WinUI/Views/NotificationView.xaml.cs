@@ -1,4 +1,3 @@
-using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
 using MainApp.ViewModels;
@@ -7,25 +6,18 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Threading;
 using Windows.UI.ViewManagement;
 
 namespace WinUI.Views;
 
-[ObservableObject]
+[SupportedOSPlatform("windows10.0.26100.0")]
 public sealed partial class NotificationView
 {
     public ServerCollectionViewModel CollectionViewModel { get; }
+    public NotificationViewModel Model { get; } = new();
     private readonly App _app = Application.Current as App ?? throw new NullReferenceException();
-
-    [ObservableProperty]
-    private ServerViewModel? _firstServerViewModel;
-
-    [ObservableProperty]
-    private ServerViewModel? _secondServerViewModel;
-
-    [ObservableProperty]
-    private bool _isAutorun;
 
     private readonly Windows.UI.Color _colorBlack = Windows.UI.Color.FromArgb(255, 0, 0, 0);
 
@@ -64,11 +56,11 @@ public sealed partial class NotificationView
 
     private void InitModels()
     {
-        FirstServerViewModel = null;
-        SecondServerViewModel = null;
+        Model.FirstServerViewModel = null;
+        Model.SecondServerViewModel = null;
 
-        FirstServerViewModel = CollectionViewModel.Servers.FirstOrDefault();
-        SecondServerViewModel = CollectionViewModel.Servers.Skip(1).FirstOrDefault();
+        Model.FirstServerViewModel = CollectionViewModel.Servers.FirstOrDefault();
+        Model.SecondServerViewModel = CollectionViewModel.Servers.Skip(1).FirstOrDefault();
     }
 
     [RelayCommand]

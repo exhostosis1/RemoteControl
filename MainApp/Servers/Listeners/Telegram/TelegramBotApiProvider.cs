@@ -96,8 +96,7 @@ internal class TelegramBotApiProvider(string apiUrl, string apiKey)
         {
             ReplyButtonsMarkup reply => new ReplyKeyboardMarkup
             {
-                Keyboard = reply.Items.Select(x => x.Select(y => new KeyboardButton { Text = y.Text }).ToArray())
-                    .ToArray(),
+                Keyboard = [.. reply.Items.Select(x => x.Select(y => new KeyboardButton { Text = y.Text }).ToArray())],
                 ResizeKeyboard = reply.Resize,
                 OneTimeKeyboard = reply.OneTime,
                 Persistent = reply.Persistent
@@ -125,7 +124,7 @@ internal class TelegramBotApiProvider(string apiUrl, string apiKey)
         return response;
     }
 
-    private SendMessageParameters GetParameters(int chatId, string message, IButtonsMarkup? buttons)
+    private static SendMessageParameters GetParameters(int chatId, string message, IButtonsMarkup? buttons)
     {
         if (string.IsNullOrWhiteSpace(message))
             throw new ArgumentException("Message can not be empty", nameof(message));

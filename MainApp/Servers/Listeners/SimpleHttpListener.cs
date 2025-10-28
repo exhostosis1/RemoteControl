@@ -50,11 +50,17 @@ internal class SimpleHttpListener(ILogger logger) : IListener
         }
         catch (HttpListenerException e)
         {
-            logger.LogError("{message}", e.Message);
+            if (logger.IsEnabled(LogLevel.Error))
+            {
+                logger.LogError("{message}", e.Message);
+            }
             throw;
         }
 
-        logger.LogInformation("Http listener started listening on {uri}", param.Uri);
+        if (logger.IsEnabled(LogLevel.Information))
+        {
+            logger.LogInformation("Http listener started listening on {uri}", param.Uri);
+        }
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
     }
 
@@ -67,7 +73,10 @@ internal class SimpleHttpListener(ILogger logger) : IListener
             _listener.Stop();
             _listener = null;
 
-            logger.LogInformation("Http listener stopped");
+            if (logger.IsEnabled(LogLevel.Information))
+            {
+                logger.LogInformation("Http listener stopped");
+            }
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsListening)));
         }
         catch
@@ -88,7 +97,10 @@ internal class SimpleHttpListener(ILogger logger) : IListener
         }
         catch (Exception e)
         {
-            logger.LogError("{message}", e.Message);
+            if (logger.IsEnabled(LogLevel.Error))
+            {
+                logger.LogError("{message}", e.Message);
+            }
             throw;
         }
 
