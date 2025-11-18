@@ -16,6 +16,7 @@
 	<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 	<ApplicationIcon>Icons\grey.ico</ApplicationIcon>
 	<ApplicationManifest>app.manifest</ApplicationManifest>
+	<LangVersion>preview</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="NotificationView.xaml" />

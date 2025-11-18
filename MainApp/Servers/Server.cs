@@ -6,7 +6,7 @@ using System.ComponentModel;
 
 namespace MainApp.Servers;
 
-internal class Server : INotifyPropertyChanged
+public class Server : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -30,7 +30,7 @@ internal class Server : INotifyPropertyChanged
     private static IEnumerable<Func<RequestDelegate, RequestDelegate>>
         GetFunctions(IEnumerable<IMiddleware> middlewares) => middlewares.Reverse().Select(GetFunction);
 
-    public Server(ServerConfig config, IListener listener, IEnumerable<IMiddleware> middlewares, ILogger logger)
+    internal Server(ServerConfig config, IListener listener, IEnumerable<IMiddleware> middlewares, ILogger logger)
     {
         _logger = logger;
         _listener = listener;

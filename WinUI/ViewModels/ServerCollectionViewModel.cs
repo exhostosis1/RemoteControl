@@ -1,9 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MainApp;
 using MainApp.Servers;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using Microsoft.Extensions.Logging;
 
-namespace MainApp.ViewModels;
+namespace WinUI.ViewModels;
 
 public partial class ServerCollectionViewModel : ObservableObject
 {
@@ -28,6 +34,7 @@ public partial class ServerCollectionViewModel : ObservableObject
         _removeCommand = new(vm => Servers.Remove(vm ?? throw new NullReferenceException()));
 
         ReloadServers();
+        SetSystemEvents();
     }
 
     private void ReloadServers()
@@ -104,6 +111,46 @@ public partial class ServerCollectionViewModel : ObservableObject
         foreach (var serverViewModel in Servers)
         {
             serverViewModel.Status = false;
+        }
+    }
+
+    private void SetSystemEvents()
+    {
+        SystemEvents.SessionSwitch += SessionSwitchHandler;
+    }
+
+    private List<ServerViewModel> _runningServers = [];
+
+    private void SessionSwitchHandler(object sender, SessionSwitchEventArgs args)
+    {
+        switch (args.Reason)
+        {
+            case SessionSwitchReason.SessionLock:
+                {
+                    _app.GetLogger().LogInformation("Stopping servers due to logout");
+
+                    _runningServers = [.. Servers.Where(x => x.Status)];
+                    _runningServers.ForEach(x => x.Status = false);
+
+                    break;
+                }
+            case SessionSwitchReason.SessionUnlock:
+                {
+                    _app.GetLogger().LogInformation("Restoring servers");
+
+                    _runningServers.ForEach(x => x.Status = true);
+                    break;
+                }
+            case SessionSwitchReason.ConsoleConnect:
+            case SessionSwitchReason.ConsoleDisconnect:
+            case SessionSwitchReason.RemoteConnect:
+            case SessionSwitchReason.RemoteDisconnect:
+            case SessionSwitchReason.SessionLogon:
+            case SessionSwitchReason.SessionLogoff:
+            case SessionSwitchReason.SessionRemoteControl:
+            default:
+                break;
+
         }
     }
 }

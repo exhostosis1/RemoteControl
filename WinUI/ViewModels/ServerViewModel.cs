@@ -1,29 +1,30 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp.Servers;
+using System;
 using System.ComponentModel;
 
 // To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
-namespace MainApp.ViewModels;
+namespace WinUI.ViewModels;
 
 public partial class ServerViewModel : ObservableObject, IDisposable
 {
     private readonly Server _server;
 
-    [ObservableProperty] private ServerType _type;
-    [ObservableProperty] private string _name;
-    [ObservableProperty] private string _listeningUri;
-    [ObservableProperty] private string _apiUri;
-    [ObservableProperty] private string _apiKey;
-    [ObservableProperty] private string _usernames;
-    [ObservableProperty] private bool _startAutomatically;
-    [ObservableProperty] private bool _isSwitchEnabled = true;
-
-    [ObservableProperty] private bool _errorShow;
-    [ObservableProperty] private string _errorMessage = "";
-    [ObservableProperty] private bool _expanded;
+    [ObservableProperty] public partial ServerType Type { get; set; }
+    [ObservableProperty] public partial string Name { get; set; }
+    [ObservableProperty] public partial string ListeningUri  {get; set; }
+    [ObservableProperty] public partial string ApiUri  {get; set; }
+    [ObservableProperty] public partial string ApiKey  {get; set; }
+    [ObservableProperty] public partial string Usernames  {get; set; }
+    [ObservableProperty] public partial bool StartAutomatically  {get; set; }
+    [ObservableProperty] public partial bool IsSwitchEnabled  {get; set; } = true;
+                                 
+    [ObservableProperty] public partial bool ErrorShow  {get; set; }
+    [ObservableProperty] public partial string ErrorMessage  {get; set; } = "";
+    [ObservableProperty] public partial bool Expanded  {get; set; }
 
     private bool _status;
 

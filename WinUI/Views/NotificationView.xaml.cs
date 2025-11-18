@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using H.NotifyIcon;
-using MainApp.ViewModels;
+using WinUI.ViewModels;
 using Microsoft.UI.Xaml;
 using System;
 using System.Drawing;
@@ -37,7 +37,7 @@ public sealed partial class NotificationView
 
         _context = SynchronizationContext.Current ?? throw new NullReferenceException();
 
-        CollectionViewModel = _app.Host.ServerCollectionViewModel;
+        CollectionViewModel = new ServerCollectionViewModel(_app.Host);
 
         InitModels();
 
