@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp;
-using MainApp.Servers;
+using MainApp.Workers;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -67,9 +67,9 @@ public partial class ServerCollectionViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void Add(ServerType type)
+    private void Add(WorkerType type)
     {
-        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(new ServerConfig(type)), _removeCommand, true));
+        Servers.Add(new ServerViewModel(_app.ServerFactory.GetServer(new WorkerConfig(type)), _removeCommand, true));
     }
 
     [RelayCommand]
@@ -81,7 +81,7 @@ public partial class ServerCollectionViewModel : ObservableObject
     [RelayCommand]
     private void AddPermissionsToUser()
     {
-        _app.AddListeningPermissionsToUser(Servers.Where(x => x is { Type: ServerType.Web, Status: false }).Select(x => x.ListeningUri));
+        _app.AddListeningPermissionsToUser(Servers.Where(x => x is { Type: WorkerType.Web, Status: false }).Select(x => x.ListeningUri));
     }
 
     [RelayCommand]

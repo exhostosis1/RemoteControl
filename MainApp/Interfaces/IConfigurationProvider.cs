@@ -1,9 +1,9 @@
-﻿using MainApp.Servers;
+﻿using MainApp.Workers;
 
 namespace MainApp.Interfaces;
 
 public interface IConfigurationProvider
 {
-    List<ServerConfig> GetConfig();
-    void SetConfig(IEnumerable<ServerConfig> config);
+    List<WorkerConfig> GetConfig();
+    void SetConfig(IEnumerable<WorkerConfig> config);
 }

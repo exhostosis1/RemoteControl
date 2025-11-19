@@ -1,5 +1,5 @@
 ﻿using MainApp.Interfaces;
-using MainApp.Servers;
+using MainApp.Workers;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -14,12 +14,12 @@ internal class JsonConfigurationProvider(ILogger logger, string filePath) : ICon
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
     };
 
-    public List<ServerConfig> GetConfig()
+    public List<WorkerConfig> GetConfig()
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Getting config from file {filePath}", filePath);
 
-        List<ServerConfig> result = [];
+        List<WorkerConfig> result = [];
 
         if (!File.Exists(filePath))
         {
@@ -30,7 +30,7 @@ internal class JsonConfigurationProvider(ILogger logger, string filePath) : ICon
 
         try
         {
-            result = JsonSerializer.Deserialize<List<ServerConfig>>(File.ReadAllText(filePath)) ?? [];
+            result = JsonSerializer.Deserialize<List<WorkerConfig>>(File.ReadAllText(filePath)) ?? [];
         }
         catch (JsonException e)
         {
@@ -41,7 +41,7 @@ internal class JsonConfigurationProvider(ILogger logger, string filePath) : ICon
         return result;
     }
 
-    public void SetConfig(IEnumerable<ServerConfig> appConfig)
+    public void SetConfig(IEnumerable<WorkerConfig> appConfig)
     {
         if (logger.IsEnabled(LogLevel.Information))
             logger.LogInformation("Writing config to file {filePath}", filePath);

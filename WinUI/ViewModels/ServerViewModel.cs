@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MainApp.Interfaces;
-using MainApp.Servers;
+using MainApp.Workers;
 using System;
 using System.ComponentModel;
 
@@ -14,7 +14,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
 {
     private readonly IWorker _server;
 
-    [ObservableProperty] public partial ServerType Type { get; set; }
+    [ObservableProperty] public partial WorkerType Type { get; set; }
     [ObservableProperty] public partial string Name { get; set; }
     [ObservableProperty] public partial string ListeningUri  {get; set; }
     [ObservableProperty] public partial string ApiUri  {get; set; }
@@ -53,13 +53,13 @@ public partial class ServerViewModel : ObservableObject, IDisposable
 
         _server = server;
 
-        Type = _server.Config.Type;
-        Name = _server.Config.Name;
-        ListeningUri = _server.Config.Uri.ToString();
-        ApiUri = _server.Config.ApiUri;
-        ApiKey = _server.Config.ApiKey;
-        Usernames = _server.Config.UsernamesString;
-        StartAutomatically = _server.Config.AutoStart;
+        Type = _server.Type;
+        Name = _server.Name;
+        ListeningUri = _server.Uri;
+        ApiUri = _server.ApiUri;
+        ApiKey = _server.ApiKey;
+        Usernames = _server.UsernamesString;
+        StartAutomatically = _server.AutoStart;
 
         Expanded = expanded;
 
@@ -125,7 +125,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
             shouldStart = true;
         }
 
-        var config = new ServerConfig(_server.Config.Type)
+        var config = new WorkerConfig(_server.Type)
         {
             Name = Name,
             AutoStart = StartAutomatically
@@ -133,7 +133,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
 
         switch (config.Type)
         {
-            case ServerType.Web:
+            case WorkerType.Web:
                 try
                 {
                     config.Uri = new Uri(ListeningUri);
@@ -145,7 +145,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
                     return;
                 }
                 break;
-            case ServerType.Bot:
+            case WorkerType.Bot:
                 config.ApiUri = ApiUri;
                 config.ApiKey = ApiKey;
                 config.UsernamesString = Usernames;
@@ -158,7 +158,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
             _server.Start();
     }
 
-    internal ServerConfig GetConfig() => _server.Config;
+    internal WorkerConfig GetConfig() => _server.Config;
 
     public void Dispose()
     {

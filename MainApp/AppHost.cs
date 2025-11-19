@@ -1,5 +1,5 @@
 ﻿using MainApp.Interfaces;
-using MainApp.Servers;
+using MainApp.Workers;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
 using System.Security.Principal;
@@ -78,7 +78,7 @@ public sealed class AppHost
         }
     }
 
-    public void SaveConfig(IEnumerable<ServerConfig> configs)
+    public void SaveConfig(IEnumerable<WorkerConfig> configs)
     {
         _configProvider.SetConfig(configs);
     }

@@ -1,9 +1,9 @@
 ﻿using MainApp.ControlProviders;
 using MainApp.Interfaces;
-using MainApp.Servers;
-using MainApp.Servers.ApiControllers;
-using MainApp.Servers.Listeners;
-using MainApp.Servers.Middleware;
+using MainApp.Workers;
+using MainApp.Workers.ApiControllers;
+using MainApp.Workers.Listeners;
+using MainApp.Workers.Middleware;
 using Microsoft.Extensions.Logging;
 
 namespace MainApp;
@@ -36,13 +36,13 @@ public sealed class ServerFactory
         _botMiddlewareChain = [apiMiddleware];
     }
 
-    public IWorker GetServer(ServerConfig config)
+    public IWorker GetServer(WorkerConfig config)
     {
-        return new Server(config,
-            config.Type == ServerType.Web
+        return new Worker(config,
+            config.Type == WorkerType.Web
                 ? new SimpleHttpListener(_loggerProvider.CreateLogger(nameof(SimpleHttpListener)))
                 : new TelegramListener(_loggerProvider.CreateLogger(nameof(TelegramListener))),
-            config.Type == ServerType.Web ? _webMiddlewareChain : _botMiddlewareChain,
-            _loggerProvider.CreateLogger(nameof(Server)));
+            config.Type == WorkerType.Web ? _webMiddlewareChain : _botMiddlewareChain,
+            _loggerProvider.CreateLogger(nameof(Worker)));
     }
 }

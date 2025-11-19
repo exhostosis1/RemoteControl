@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:servers="using:MainApp.Servers"
+    xmlns:servers="using:MainApp.Workers"
     xmlns:viewModels="using:WinUI.ViewModels"
     xmlns:views="using:WinUI.Views"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
@@ -49,11 +49,11 @@
                 <MenuFlyout Placement="Bottom">
                     <MenuFlyoutItem
                         Command="{x:Bind ViewModel.AddCommand}"
-                        CommandParameter="{x:Bind servers:ServerType.Web}"
+                        CommandParameter="{x:Bind servers:WorkerType.Web}"
                         Text="Web" />
                     <MenuFlyoutItem
                         Command="{x:Bind ViewModel.AddCommand}"
-                        CommandParameter="{x:Bind servers:ServerType.Bot}"
+                        CommandParameter="{x:Bind servers:WorkerType.Bot}"
                         Text="Bot" />
                 </MenuFlyout>
             </DropDownButton.Flyout>
