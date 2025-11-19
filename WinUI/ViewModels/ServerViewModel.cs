@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MainApp.Interfaces;
 using MainApp.Servers;
 using System;
 using System.ComponentModel;
@@ -11,7 +12,7 @@ namespace WinUI.ViewModels;
 
 public partial class ServerViewModel : ObservableObject, IDisposable
 {
-    private readonly Server _server;
+    private readonly IWorker _server;
 
     [ObservableProperty] public partial ServerType Type { get; set; }
     [ObservableProperty] public partial string Name { get; set; }
@@ -46,7 +47,7 @@ public partial class ServerViewModel : ObservableObject, IDisposable
 
     private readonly RelayCommand<ServerViewModel> _removeCommand;
 
-    internal ServerViewModel(Server server, RelayCommand<ServerViewModel> removeCommand, bool expanded = false)
+    internal ServerViewModel(IWorker server, RelayCommand<ServerViewModel> removeCommand, bool expanded = false)
     {
         _removeCommand = removeCommand;
 

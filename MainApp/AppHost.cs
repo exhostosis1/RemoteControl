@@ -83,7 +83,7 @@ public sealed class AppHost
         _configProvider.SetConfig(configs);
     }
 
-    public IEnumerable<Server> GetServers()
+    public IEnumerable<IWorker> GetWorkers()
     {
         return _configProvider.GetConfig().Select(x => ServerFactory.GetServer(x));
     }

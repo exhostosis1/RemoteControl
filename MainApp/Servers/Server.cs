@@ -1,4 +1,5 @@
-﻿using MainApp.Servers.DataObjects;
+﻿using MainApp.Interfaces;
+using MainApp.Servers.DataObjects;
 using MainApp.Servers.Listeners;
 using MainApp.Servers.Middleware;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,7 @@ using System.ComponentModel;
 
 namespace MainApp.Servers;
 
-public class Server : INotifyPropertyChanged
+internal class Server : IWorker
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 

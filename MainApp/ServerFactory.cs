@@ -1,4 +1,5 @@
 ﻿using MainApp.ControlProviders;
+using MainApp.Interfaces;
 using MainApp.Servers;
 using MainApp.Servers.ApiControllers;
 using MainApp.Servers.Listeners;
@@ -35,7 +36,7 @@ public sealed class ServerFactory
         _botMiddlewareChain = [apiMiddleware];
     }
 
-    public Server GetServer(ServerConfig config)
+    public IWorker GetServer(ServerConfig config)
     {
         return new Server(config,
             config.Type == ServerType.Web

@@ -47,7 +47,7 @@ public partial class ServerCollectionViewModel : ObservableObject
 
         Servers.Clear();
 
-        foreach (var server in _app.GetServers())
+        foreach (var server in _app.GetWorkers())
         {
 
             var vm = new ServerViewModel(server, _removeCommand);
